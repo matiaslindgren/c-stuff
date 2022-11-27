@@ -5,7 +5,8 @@ CFLAGS := \
 	-Wall \
 	-Werror \
 	-O3 \
-	-g
+	-g \
+	-fsanitize=undefined
 LFLAGS := -lm
 
 OUT_DIR   := out
