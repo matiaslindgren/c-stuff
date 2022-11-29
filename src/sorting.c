@@ -43,7 +43,7 @@ void _copy(size_t n, double src[n], double dst[n]) {
 }
 
 double* merge_sort(size_t n, double src[n]) {
-  double* tmp = malloc(n * sizeof(double));
+  double* tmp = malloc(n * sizeof(*src));
   if (!tmp) {
     return NULL;
   }
@@ -60,30 +60,35 @@ void _swap(double a[static 1], double b[static 1]) {
   *b = tmp;
 }
 
-size_t _qsort_partition(size_t n, double src[n], size_t lo, size_t hi) {
-  while (lo < hi) {
-    if (src[lo] < src[hi]) {
-      ++lo;
-    } else {
-      _swap(&src[hi - 1], &src[hi]);
-      _swap(&src[lo], &src[hi]);
-      --hi;
+size_t _hoare_partition(size_t n, double src[n], size_t lo, size_t hi) {
+  double pivot = src[(lo + hi) / 2];
+  size_t lhs = lo - 1;
+  size_t rhs = hi + 1;
+  while (1) {
+    do {
+      ++lhs;
+    } while (src[lhs] < pivot);
+    do {
+      --rhs;
+    } while (src[rhs] > pivot);
+    if (lhs >= rhs) {
+      return rhs;
     }
+    _swap(&src[lhs], &src[rhs]);
   }
-  return hi;
 }
 
 void _quick_sort(size_t n, double src[n], size_t lo, size_t hi) {
-  if (lo > hi || lo >= n || hi >= n) {
+  if (lo >= hi || lo >= n || hi >= n) {
     return;
   }
-  size_t pivot = _qsort_partition(n, src, lo, hi);
-  _quick_sort(n, src, lo, pivot - 1);
-  _quick_sort(n, src, pivot + 1, hi);
+  size_t pivot_idx = _hoare_partition(n, src, lo, hi);
+  _quick_sort(n, src, lo, pivot_idx);
+  _quick_sort(n, src, pivot_idx + 1, hi);
 }
 
 double* quick_sort(size_t n, double src[n]) {
-  double* tmp = malloc(n * sizeof(double));
+  double* tmp = malloc(n * sizeof(*src));
   if (!tmp) {
     return NULL;
   }
@@ -112,7 +117,7 @@ void _fill_rand(size_t n, double x[n]) {
 typedef double* (*sort_function_t)(size_t, double[]);
 
 int main() {
-  size_t num_tests_per_size = 10;
+  size_t num_tests_per_size = 4;
   size_t array_sizes[] = {
       1, 2, 10, 1000, 10000, 100000, 1000000,
   };
@@ -125,8 +130,8 @@ int main() {
       quick_sort,
   };
   printf("%7s %5s %8s\n", "func_t", "test", "n");
-  for (size_t f = 0; f < sizeof(sort_types) / sizeof(const char*); ++f) {
-    for (size_t s = 0; s < sizeof(array_sizes) / sizeof(size_t); ++s) {
+  for (size_t f = 0; f < sizeof(sort_types) / sizeof(*sort_types); ++f) {
+    for (size_t s = 0; s < sizeof(array_sizes) / sizeof(*array_sizes); ++s) {
       size_t n = array_sizes[s];
       double* x = malloc(n * sizeof(double));
       if (!x) {
