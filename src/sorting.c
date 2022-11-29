@@ -43,6 +43,7 @@ void _copy(size_t n, double src[n], double dst[n]) {
 }
 
 double* merge_sort(size_t n, double src[n]) {
+  assert(n);
   double* tmp = malloc(n * sizeof(*src));
   if (!tmp) {
     return NULL;
@@ -88,6 +89,7 @@ void _quick_sort(size_t n, double src[n], size_t lo, size_t hi) {
 }
 
 double* quick_sort(size_t n, double src[n]) {
+  assert(n);
   double* tmp = malloc(n * sizeof(*src));
   if (!tmp) {
     return NULL;
@@ -99,7 +101,7 @@ double* quick_sort(size_t n, double src[n]) {
   return src;
 }
 
-int is_sorted(size_t n, double x[n]) {
+int _is_sorted(size_t n, double x[n]) {
   for (size_t i = 1; i < n; ++i) {
     if (x[i - 1] > x[i]) {
       return 0;
@@ -146,7 +148,7 @@ int main() {
           free(x);
           goto error;
         }
-        if (!is_sorted(n, x)) {
+        if (!_is_sorted(n, x)) {
           fprintf(stderr, "result is not sorted\n");
           free(x);
           goto error;
