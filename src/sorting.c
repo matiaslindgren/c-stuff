@@ -118,46 +118,57 @@ void _fill_rand(size_t n, double x[n]) {
 
 typedef double* (*sort_function_t)(size_t, double[]);
 
+enum sort_type { quick, merge, num_sort_types };
+
 int main() {
-  size_t num_tests_per_size = 4;
-  size_t array_sizes[] = {
+  const size_t num_tests_per_size = 4;
+  const size_t array_sizes[] = {
       1, 2, 10, 1000, 10000, 100000, 1000000,
   };
-  const char* sort_types[] = {
-      "merge",
-      "quick",
+  const char* const sort_types[num_sort_types] = {
+      [quick] = "quick",
+      [merge] = "merge",
   };
-  sort_function_t sort_funcs[] = {
-      merge_sort,
-      quick_sort,
+  const sort_function_t sort_funcs[num_sort_types] = {
+      [quick] = quick_sort,
+      [merge] = merge_sort,
   };
+
   printf("%7s %5s %8s\n", "func_t", "test", "n");
   for (size_t f = 0; f < sizeof(sort_types) / sizeof(*sort_types); ++f) {
     for (size_t s = 0; s < sizeof(array_sizes) / sizeof(*array_sizes); ++s) {
-      size_t n = array_sizes[s];
+      const size_t n = array_sizes[s];
+
       double* x = malloc(n * sizeof(double));
       if (!x) {
         fprintf(stderr, "failed allocating memory for test data\n");
         goto error;
       }
+
       for (size_t test = 0; test < num_tests_per_size; ++test) {
         printf("%7s %5zu %8zu\n", sort_types[f], test + 1, n);
+
         _fill_rand(n, x);
+
         if (!sort_funcs[f](n, x)) {
           fprintf(stderr, "failed allocating working memory\n");
           free(x);
           goto error;
         }
+
         if (!_is_sorted(n, x)) {
           fprintf(stderr, "result is not sorted\n");
           free(x);
           goto error;
         }
       }
+
       free(x);
     }
   }
+
   return 0;
+
 error:
   return 1;
 }
