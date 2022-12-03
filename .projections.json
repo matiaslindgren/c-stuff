@@ -1,4 +1,11 @@
 {
+  "*.c": {
+    "template": [
+      "int main(int argc, char* const argv[argc + 1]) {",
+      "  return 0;",
+      "}"
+    ]
+  },
   "*.h": {
     "template": [
       "#ifndef _{basename|uppercase}_H_INCLUDED",
