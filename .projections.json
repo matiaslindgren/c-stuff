@@ -1,0 +1,10 @@
+{
+  "*.h": {
+    "template": [
+      "#ifndef _{basename|uppercase}_H_INCLUDED",
+      "#define _{basename|uppercase}_H_INCLUDED",
+      "",
+      "#endif  // _{basename|uppercase}_H_INCLUDED"
+    ]
+  }
+}
