@@ -1,7 +1,7 @@
 SHELL  := /bin/sh
 CLANG  := clang
 CFLAGS := \
-	-std=c2x \
+	-std=c17 \
 	-Wall \
 	-Werror \
 	-O3 \
