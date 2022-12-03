@@ -1,7 +1,0 @@
-#!/usr/bin/env sh
-set -ue
-
-for f in $(find ./out -type f); do
-	echo $f
-	$f
-done

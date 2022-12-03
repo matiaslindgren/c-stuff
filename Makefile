@@ -26,3 +26,12 @@ $(BIN_PATHS): $(OUT_DIR)/%: src/%.c ./include/stufflib.h | $(OUT_DIR)
 
 $(OUT_DIR):
 	mkdir $@
+
+TESTS := $(addprefix test_,$(BIN_FILES))
+
+.PHONY: test
+test: $(TESTS)
+
+.PHONY: $(TESTS)
+$(TESTS): test_%: $(OUT_DIR)/%
+	./$<
