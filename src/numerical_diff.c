@@ -15,7 +15,8 @@ int main(int argc, char* const argv[argc + 1]) {
 
   const size_t n = 10000;
   double x[n];
-  stufflib_fill_rand(n, x, 10);
+  stufflib_fill_random(n, x, 10);
+  stufflib_set_zero_random(n, x, 0.001);
 
   if (verbose) {
     printf("%4s %8s %8s %8s %9s %9s %9s %9s\n", "i", "x[i]", "cos(x)", "sin(x)", "2x", "cos'(x)",
