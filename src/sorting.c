@@ -112,7 +112,7 @@ int _is_sorted(size_t n, double x[n]) {
   return 1;
 }
 
-typedef double* (*sort_function_t)(size_t, double[]);
+typedef double* (*sort_function)(size_t, double[]);
 
 enum sort_type { quick, merge, num_sort_types };
 
@@ -125,7 +125,7 @@ int main(int argc, char* const argv[argc + 1]) {
       [quick] = "quick",
       [merge] = "merge",
   };
-  const sort_function_t sort_funcs[num_sort_types] = {
+  const sort_function sort_funcs[num_sort_types] = {
       [quick] = quick_sort,
       [merge] = merge_sort,
   };
