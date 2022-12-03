@@ -116,11 +116,11 @@ typedef double* (*sort_function_t)(size_t, double[]);
 
 enum sort_type { quick, merge, num_sort_types };
 
-int main() {
+int main(int argc, char* const argv[argc + 1]) {
+  int verbose = stufflib_parse_argv_flag(argc, argv, "-v");
+
   const size_t num_tests_per_size = 4;
-  const size_t array_sizes[] = {
-      1, 2, 10, 1000, 10000, 100000, 1000000,
-  };
+  const size_t array_sizes[] = {1, 2, 10, 1000, 10000, 100000};
   const char* const sort_types[num_sort_types] = {
       [quick] = "quick",
       [merge] = "merge",
@@ -130,7 +130,9 @@ int main() {
       [merge] = merge_sort,
   };
 
-  printf("%7s %5s %8s\n", "func_t", "test", "n");
+  if (verbose) {
+    printf("%7s %5s %8s\n", "func_t", "test", "n");
+  }
   for (size_t f = 0; f < sizeof(sort_types) / sizeof(*sort_types); ++f) {
     for (size_t s = 0; s < sizeof(array_sizes) / sizeof(*array_sizes); ++s) {
       const size_t n = array_sizes[s];
@@ -142,7 +144,9 @@ int main() {
       }
 
       for (size_t test = 0; test < num_tests_per_size; ++test) {
-        printf("%7s %5zu %8zu\n", sort_types[f], test + 1, n);
+        if (verbose) {
+          printf("%7s %5zu %8zu\n", sort_types[f], test + 1, n);
+        }
 
         stufflib_fill_rand(n, x);
 
