@@ -1,6 +1,7 @@
 #ifndef _STUFFLIB_H_INCLUDED
 #define _STUFFLIB_H_INCLUDED
 #include <math.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
