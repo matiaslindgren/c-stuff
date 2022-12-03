@@ -4,9 +4,10 @@
 
 #include "stufflib.h"
 
+typedef double (*math_func_t)(double);
 const double h = 0.0001;
 
-double diff(double (*f)(double), double x) { return (f(x + h) - f(x)) / h; }
+double diff(math_func_t f, double x) { return (f(x + h) - f(x)) / h; }
 
 double pow2(double x) { return pow(x, 2); }
 
