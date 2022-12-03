@@ -1,6 +1,9 @@
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "stufflib.h"
 
 typedef unsigned long long ull;
 
@@ -38,19 +41,9 @@ double ramanujan(int num_digits) {
   return pi;
 }
 
-int main(int argc, char *argv[argc + 1]) {
-  if (argc != 2) {
-    goto error;
-  }
-  int num_digits = atoi(argv[1]);
-  if (num_digits < 0) {
-    goto error;
-  }
+int main() {
+  int num_digits = 16;
   double pi = ramanujan(num_digits);
-  printf("%.24f\n", pi);
+  assert(stufflib_double_almost(pi, pi_approx, 1e-15));
   return 0;
-
-error:
-  fprintf(stderr, "usage: %s num_digits\n", argv[0]);
-  return 2;
 }

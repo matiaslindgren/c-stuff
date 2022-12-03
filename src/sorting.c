@@ -148,7 +148,7 @@ int main(int argc, char* const argv[argc + 1]) {
           printf("%7s %5zu %8zu\n", sort_types[f], test + 1, n);
         }
 
-        stufflib_fill_rand(n, x);
+        stufflib_fill_rand(n, x, 1e6);
 
         if (!sort_funcs[f](n, x)) {
           fprintf(stderr, "failed allocating working memory\n");

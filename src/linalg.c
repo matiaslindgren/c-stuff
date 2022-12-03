@@ -1,6 +1,7 @@
 #include <assert.h>
-#include <math.h>
 #include <stdlib.h>
+
+#include "stufflib.h"
 
 double linalg_dot(const size_t n, const double v1[n], const double v2[n]) {
   double dot = 0;
@@ -17,16 +18,13 @@ void linalg_matmul(const size_t nrows, const size_t ncols, const double m[nrows]
   }
 }
 
-int _almost(const double lhs, const double rhs) {
-  const double tolerance = 1e-16;
-  return fabs(lhs - rhs) < tolerance;
-}
-
 int main() {
+  const double cmp_tolerance = 1e-16;
+
   const double v1[] = {1, 2, 3, 4};
   const double v2[] = {0, -2, 4, -6};
   const size_t n = sizeof(v1) / sizeof(v1[0]);
-  assert(_almost(linalg_dot(n, v1, v2), -16));
+  assert(stufflib_double_almost(linalg_dot(n, v1, v2), -16, cmp_tolerance));
 
   double m[3][4] = {
       {1, 2, 3, 4},
@@ -35,8 +33,8 @@ int main() {
   };
   double res[3] = {0};
   linalg_matmul(3, 4, m, v2, res);
-  assert(_almost(res[0], -16));
-  assert(_almost(res[1], 0));
-  assert(_almost(res[2], -48));
+  assert(stufflib_double_almost(res[0], -16, cmp_tolerance));
+  assert(stufflib_double_almost(res[1], 0, cmp_tolerance));
+  assert(stufflib_double_almost(res[2], -48, cmp_tolerance));
   return 0;
 }
