@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "stufflib.h"
+
 void _merge(size_t n, double src[n], double dst[n], size_t begin, size_t mid, size_t end) {
   size_t lhs = begin;
   size_t rhs = mid;
@@ -110,12 +112,6 @@ int _is_sorted(size_t n, double x[n]) {
   return 1;
 }
 
-void _fill_rand(size_t n, double x[n]) {
-  for (size_t i = 0; i < n; ++i) {
-    x[i] = 1.0 * (rand() - RAND_MAX / 2);
-  }
-}
-
 typedef double* (*sort_function_t)(size_t, double[]);
 
 enum sort_type { quick, merge, num_sort_types };
@@ -148,7 +144,7 @@ int main() {
       for (size_t test = 0; test < num_tests_per_size; ++test) {
         printf("%7s %5zu %8zu\n", sort_types[f], test + 1, n);
 
-        _fill_rand(n, x);
+        stufflib_fill_rand(n, x);
 
         if (!sort_funcs[f](n, x)) {
           fprintf(stderr, "failed allocating working memory\n");

@@ -22,7 +22,7 @@ clean:
 	rm -rf $(OUT_DIR)
 
 $(BIN_PATHS): $(OUT_DIR)/%: src/%.c | $(OUT_DIR)
-	$(CLANG) $(CFLAGS) -o $@ $< $(LFLAGS)
+	$(CLANG) $(CFLAGS) -I./include -o $@ $< $(LFLAGS)
 
 $(OUT_DIR):
 	mkdir $@
