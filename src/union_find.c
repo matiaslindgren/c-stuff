@@ -48,12 +48,12 @@ size_t UnionFind_union(size_t n, size_t parents[static n], size_t lhs, size_t rh
   return root;
 }
 
-int main() {
+int main(void) {
   const size_t num_sets = 10;
   size_t* parents = UnionFind_init(num_sets);
   if (!parents) {
     fprintf(stderr, "error: unable to allocate 'parents' array of size %zu\n", num_sets);
-    return 1;
+    return EXIT_FAILURE;
   }
 
   for (size_t i = 0; i < num_sets; ++i) {
@@ -162,5 +162,5 @@ int main() {
   }
 
   free(parents);
-  return 0;
+  return EXIT_SUCCESS;
 }

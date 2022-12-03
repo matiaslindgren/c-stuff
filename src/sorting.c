@@ -168,8 +168,8 @@ int main(int argc, char* const argv[argc + 1]) {
     }
   }
 
-  return 0;
+  return EXIT_SUCCESS;
 
 error:
-  return 1;
+  return EXIT_FAILURE;
 }

@@ -18,7 +18,7 @@ void linalg_matmul(const size_t nrows, const size_t ncols, const double m[nrows]
   }
 }
 
-int main() {
+int main(void) {
   const double cmp_tolerance = 1e-16;
 
   const double v1[] = {1, 2, 3, 4};
@@ -36,5 +36,6 @@ int main() {
   assert(stufflib_double_almost(res[0], -16, cmp_tolerance));
   assert(stufflib_double_almost(res[1], 0, cmp_tolerance));
   assert(stufflib_double_almost(res[2], -48, cmp_tolerance));
-  return 0;
+
+  return EXIT_SUCCESS;
 }

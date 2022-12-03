@@ -41,9 +41,9 @@ double ramanujan(int num_digits) {
   return pi;
 }
 
-int main() {
+int main(void) {
   int num_digits = 16;
   double pi = ramanujan(num_digits);
   assert(stufflib_double_almost(pi, pi_approx, 1e-15));
-  return 0;
+  return EXIT_SUCCESS;
 }

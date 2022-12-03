@@ -5,9 +5,11 @@
 #include "stufflib.h"
 
 typedef double (*math_function)(double);
-const double h = 0.0001;
 
-double diff(math_function f, double x) { return (f(x + h) - f(x)) / h; }
+double diff(math_function f, double x) {
+  const double h = 0.0001;
+  return (f(x + h) - f(x)) / h;
+}
 
 double pow2(double x) { return pow(x, 2); }
 
@@ -38,5 +40,5 @@ int main(int argc, char* const argv[argc + 1]) {
     assert(stufflib_double_almost(d_pow2_x, 2 * x[i], 1e-3));
   }
 
-  return 0;
+  return EXIT_SUCCESS;
 }
