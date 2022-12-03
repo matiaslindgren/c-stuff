@@ -21,7 +21,7 @@ all: $(BIN_PATHS)
 clean:
 	rm -rf $(OUT_DIR)
 
-$(BIN_PATHS): $(OUT_DIR)/%: src/%.c | $(OUT_DIR)
+$(BIN_PATHS): $(OUT_DIR)/%: src/%.c ./include/stufflib.h | $(OUT_DIR)
 	$(CLANG) $(CFLAGS) -I./include -o $@ $< $(LFLAGS)
 
 $(OUT_DIR):
