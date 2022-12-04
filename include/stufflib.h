@@ -28,7 +28,7 @@ void stufflib_set_zero_random(const size_t n, double dst[n], double probability)
   probability = fmax(0, fmin(1, probability));
   srand(time(NULL));
   for (size_t i = 0; i < n; ++i) {
-    if ((rand() / RAND_MAX) < probability) {
+    if ((1.0 * rand() / RAND_MAX) < probability) {
       dst[i] = 0;
     }
   }

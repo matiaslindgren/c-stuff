@@ -149,7 +149,7 @@ int main(int argc, char* const argv[argc + 1]) {
         }
 
         stufflib_fill_random(n, x, 1e6);
-        stufflib_set_zero_random(n, x, 0.001);
+        stufflib_set_zero_random(n, x, 0.01);
 
         if (!sort_funcs[f](n, x)) {
           fprintf(stderr, "failed allocating working memory\n");
