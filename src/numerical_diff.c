@@ -32,7 +32,7 @@ int main(int argc, char* const argv[argc + 1]) {
     double d_sin_x = diff(sin, x[i]);
     double d_pow2_x = diff(pow2, x[i]);
     if (verbose) {
-      printf("%4zd %8.1f %8.3f %8.3f %9.3f %9.3f %9.3f %9.3f\n", i, x[i], cos_x, sin_x, 2 * x[i],
+      printf("%4zd %8.1g %8.3g %8.3g %9.3g %9.3g %9.3g %9.3f\n", i, x[i], cos_x, sin_x, 2 * x[i],
              d_cos_x, d_sin_x, d_pow2_x);
     }
     assert(stufflib_double_almost(d_cos_x, -sin_x, 1e-3));
