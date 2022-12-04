@@ -6,54 +6,45 @@
 
 int test_stufflib_parse_argv_flag() {
   {
-    int argc = 2;
-    char* const argv[3] = {
+    int argc = 3;
+    char* const argv[4] = {
         "bin/path",
+        "-w",
         "-v",
         0,
     };
     if (!stufflib_parse_argv_flag(argc, argv, "-v")) {
       return 1;
     }
-    if (stufflib_parse_argv_flag(argc, argv, "-vv")) {
+    if (!stufflib_parse_argv_flag(argc, argv, "-w")) {
       return 1;
     }
-    if (stufflib_parse_argv_flag(argc, argv, "-wvv")) {
-      return 1;
-    }
-    if (stufflib_parse_argv_flag(argc, argv, "- v")) {
-      return 1;
-    }
-    if (stufflib_parse_argv_flag(argc, argv, "v")) {
-      return 1;
-    }
-    if (stufflib_parse_argv_flag(argc, argv, "")) {
-      return 1;
+    const char* should_not_match[] = {
+        "-x", "-vv", "-wvv", "v", "- v", "- w", "--w", "--v", "",
+    };
+    for (size_t i = 0; i < sizeof(should_not_match) / sizeof(should_not_match[0]); ++i) {
+      if (stufflib_parse_argv_flag(argc, argv, should_not_match[i])) {
+        return 1;
+      }
     }
   }
   {
-    int argc = 1;
-    char* const argv[2] = {
+    int argc = 2;
+    char* const argv[3] = {
         "bin/path",
+        "-x",
         0,
     };
-    if (stufflib_parse_argv_flag(argc, argv, "-v")) {
+    if (!stufflib_parse_argv_flag(argc, argv, "-x")) {
       return 1;
     }
-    if (stufflib_parse_argv_flag(argc, argv, "-vv")) {
-      return 1;
-    }
-    if (stufflib_parse_argv_flag(argc, argv, "-wvv")) {
-      return 1;
-    }
-    if (stufflib_parse_argv_flag(argc, argv, "- v")) {
-      return 1;
-    }
-    if (stufflib_parse_argv_flag(argc, argv, "v")) {
-      return 1;
-    }
-    if (stufflib_parse_argv_flag(argc, argv, "")) {
-      return 1;
+    const char* should_not_match[] = {
+        "-vv", "-wvv", "v", "- v", "- w", "--w", "--v", "", "-w", "-v",
+    };
+    for (size_t i = 0; i < sizeof(should_not_match) / sizeof(should_not_match[0]); ++i) {
+      if (stufflib_parse_argv_flag(argc, argv, should_not_match[i])) {
+        return 1;
+      }
     }
   }
   return 0;
