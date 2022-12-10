@@ -117,13 +117,13 @@ struct stufflib_png_header stufflib_png_parse_header(struct _stufflib_png_chunk 
     header.height = stufflib_int_parse_big_endian(buf);
   }
 
-  // TODO
+  // parse single byte fields
   {
-    const size_t meta_len = 5;
-    unsigned char buf[meta_len];
+    const size_t rest_len = 5;
+    unsigned char buf[rest_len];
 
-    memcpy(buf, &(chunk.data[chunk_data_pos]), meta_len);
-    chunk_data_pos += meta_len;
+    memcpy(buf, &(chunk.data[chunk_data_pos]), rest_len);
+    chunk_data_pos += rest_len;
     header.bit_depth = (uint8_t)(buf[0]);
     header.color_type = (uint8_t)(buf[1]);
     header.compression = (uint8_t)(buf[2]);
@@ -168,7 +168,7 @@ struct stufflib_png_image stufflib_png_read(const char* filename) {
   // check for 8 byte file header containing 'PNG' in ascii
   {
     const size_t header_len = 8;
-    char buf[header_len];
+    unsigned char buf[header_len];
     if (fread(buf, 1, header_len, fp) < header_len) {
       fprintf(stderr, "error: failed reading header of %s\n", filename);
       goto error;
