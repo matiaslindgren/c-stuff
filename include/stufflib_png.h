@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib_int.h"
+#include "stufflib.h"
 
 struct _stufflib_png_chunk {
   uint32_t length;

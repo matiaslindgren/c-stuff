@@ -1,5 +1,6 @@
 #ifndef _STUFFLIB_H_INCLUDED
 #define _STUFFLIB_H_INCLUDED
+#include <inttypes.h>
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -36,6 +37,22 @@ void stufflib_set_zero_random(const size_t n, double dst[n], double probability)
 
 int stufflib_double_almost(const double lhs, const double rhs, const double tolerance) {
   return fabs(lhs - rhs) < tolerance;
+}
+
+#ifndef UINT32_WIDTH
+#define UINT32_WIDTH (32)
+#endif
+#ifndef UINT32_BYTES
+#define UINT32_BYTES (UINT32_WIDTH / 8)
+#endif
+
+uint32_t stufflib_int_parse_big_endian(const unsigned char buf[static UINT32_BYTES]) {
+  uint32_t x = 0;
+  for (size_t i = 0; i < UINT32_BYTES; ++i) {
+    const size_t offset = 8 * (UINT32_BYTES - (i + 1));
+    x |= (uint32_t)(buf[i]) << offset;
+  }
+  return x;
 }
 
 #endif  // _STUFFLIB_H_INCLUDED
