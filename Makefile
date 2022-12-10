@@ -6,7 +6,7 @@ CFLAGS := \
 	-Werror \
 	-O3 \
 	-g \
-	-fsanitize=undefined
+	-fsanitize=address,undefined
 LFLAGS := -lm
 
 OUT_DIR   := out
