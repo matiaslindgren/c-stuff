@@ -7,6 +7,22 @@
 
 #include "stufflib.h"
 
+struct stufflib_png_header {
+  uint32_t width;
+  uint32_t height;
+  uint8_t bit_depth;
+  uint8_t color_type;
+  uint8_t compression;
+  uint8_t filter;
+  uint8_t interlace;
+};
+
+struct stufflib_png_image {
+  struct stufflib_png_header header;
+  size_t size;
+  unsigned char* data;
+};
+
 struct _stufflib_png_chunk {
   uint32_t length;
   uint32_t crc32;
@@ -78,16 +94,6 @@ error:
   return stufflib_png_make_empty_chunk();
 }
 
-struct stufflib_png_header {
-  uint32_t width;
-  uint32_t height;
-  uint8_t bit_depth;
-  uint8_t color_type;
-  uint8_t compression;
-  uint8_t filter;
-  uint8_t interlace;
-};
-
 int stufflib_png_is_supported(struct stufflib_png_header header) {
   return (header.compression == 0 && header.filter == 0 && header.interlace == 0 &&
           (header.color_type == 2 || header.color_type == 6) && header.bit_depth == 8);
@@ -133,12 +139,6 @@ struct stufflib_png_header stufflib_png_parse_header(struct _stufflib_png_chunk 
 
   return header;
 }
-
-struct stufflib_png_image {
-  struct stufflib_png_header header;
-  size_t size;
-  unsigned char* data;
-};
 
 struct stufflib_png_image stufflib_png_make_empty_image() {
   struct stufflib_png_image image = {0};
