@@ -45,6 +45,11 @@ struct _stufflib_png_chunk stufflib_png_make_empty_chunk() {
   return chunk;
 }
 
+const char* stufflib_png_color_types[] = {
+    [0] = "grayscale",       [2] = "truecolor (rgb)",        [3] = "indexed",
+    [4] = "grayscale alpha", [6] = "truecolor alpha (rgba)",
+};
+
 void _stufflib_png_dump_chunk(struct _stufflib_png_chunk chunk) {
   printf("%s: %" PRIu32 " bytes crc32: %" PRIu32 "\n", chunk.type, chunk.length, chunk.crc32);
 }
@@ -152,7 +157,7 @@ void stufflib_png_dump_img_meta(FILE* stream, struct stufflib_png_image image) {
   fprintf(stream, "  width: %" PRIu32 "\n", header.width);
   fprintf(stream, "  height: %" PRIu32 "\n", header.height);
   fprintf(stream, "  bit depth: %" PRIu8 "\n", header.bit_depth);
-  fprintf(stream, "  color type: %" PRIu8 "\n", header.color_type);
+  fprintf(stream, "  color type: %s\n", stufflib_png_color_types[header.color_type]);
   fprintf(stream, "  compression: %" PRIu8 "\n", header.compression);
   fprintf(stream, "  filter: %" PRIu8 "\n", header.filter);
   fprintf(stream, "  interlace: %" PRIu8 "\n", header.interlace);
