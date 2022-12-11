@@ -8,8 +8,9 @@
 
 typedef double* (*stufflib_sort_function)(size_t, double[]);
 
-void _stufflib_sort_merge_partitions(const size_t n, double src[static n], double dst[static n],
-                                     size_t begin, size_t mid, size_t end) {
+void _stufflib_sort_merge_partitions(const size_t n, double src[static n],
+                                     double dst[static n], size_t begin,
+                                     size_t mid, size_t end) {
   size_t lhs = begin;
   size_t rhs = mid;
   size_t out = begin;
@@ -28,8 +29,8 @@ void _stufflib_sort_merge_partitions(const size_t n, double src[static n], doubl
   }
 }
 
-void _stufflib_sort_merge(const size_t n, double src[static n], double tmp[static n], size_t begin,
-                          size_t end) {
+void _stufflib_sort_merge(const size_t n, double src[static n],
+                          double tmp[static n], size_t begin, size_t end) {
   assert(begin <= end);
   if (end - begin <= 1) {
     return;
@@ -56,7 +57,8 @@ double* stufflib_sort_merge(const size_t n, double src[static n]) {
   return src;
 }
 
-size_t _stufflib_sort_hoare_partition(const size_t n, double src[static n], size_t lo, size_t hi) {
+size_t _stufflib_sort_hoare_partition(const size_t n, double src[static n],
+                                      size_t lo, size_t hi) {
   const double pivot = src[(lo + hi) / 2];
   size_t lhs = lo - 1;
   size_t rhs = hi + 1;
@@ -76,7 +78,8 @@ size_t _stufflib_sort_hoare_partition(const size_t n, double src[static n], size
   }
 }
 
-void _stufflib_sort_quick(const size_t n, double src[static n], size_t lo, size_t hi) {
+void _stufflib_sort_quick(const size_t n, double src[static n], size_t lo,
+                          size_t hi) {
   if (lo >= hi || lo >= n || hi >= n) {
     return;
   }

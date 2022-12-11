@@ -49,7 +49,8 @@ int main(int argc, char* const argv[argc + 1]) {
           goto error;
         }
         clock_t end_time = clock();
-        double sort_msec = 1e3 * ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
+        double sort_msec =
+            1e3 * ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
 
         if (!stufflib_sort_is_sorted(n, x)) {
           fprintf(stderr, "result is not sorted\n");
@@ -58,7 +59,8 @@ int main(int argc, char* const argv[argc + 1]) {
         }
 
         if (verbose) {
-          printf("%7s %5zu %8zu %6.1f\n", sort_types[f], test + 1, n, sort_msec);
+          printf("%7s %5zu %8zu %6.1f\n", sort_types[f], test + 1, n,
+                 sort_msec);
         }
       }
 

@@ -27,14 +27,16 @@ size_t _UnionFind_exchange_root(size_t* parent, size_t new_root) {
   return old_root;
 }
 
-void _UnionFind_find_replace(size_t n, size_t parents[static n], size_t index, size_t new_root) {
+void _UnionFind_find_replace(size_t n, size_t parents[static n], size_t index,
+                             size_t new_root) {
   while (parents[index] != SIZE_MAX) {
     index = _UnionFind_exchange_root(&parents[index], new_root);
   }
   parents[index] = new_root;
 }
 
-size_t _UnionFind_find_compress(size_t n, size_t parents[static n], size_t index) {
+size_t _UnionFind_find_compress(size_t n, size_t parents[static n],
+                                size_t index) {
   size_t root = UnionFind_find_root(n, parents, index);
   while (index != root) {
     index = _UnionFind_exchange_root(&parents[index], root);
@@ -42,7 +44,8 @@ size_t _UnionFind_find_compress(size_t n, size_t parents[static n], size_t index
   return root;
 }
 
-size_t UnionFind_union(size_t n, size_t parents[static n], size_t lhs, size_t rhs) {
+size_t UnionFind_union(size_t n, size_t parents[static n], size_t lhs,
+                       size_t rhs) {
   size_t root = _UnionFind_find_compress(n, parents, lhs);
   _UnionFind_find_replace(n, parents, rhs, root);
   return root;
@@ -52,7 +55,8 @@ int main(void) {
   const size_t num_sets = 10;
   size_t* parents = UnionFind_init(num_sets);
   if (!parents) {
-    fprintf(stderr, "error: unable to allocate 'parents' array of size %zu\n", num_sets);
+    fprintf(stderr, "error: unable to allocate 'parents' array of size %zu\n",
+            num_sets);
     return EXIT_FAILURE;
   }
 

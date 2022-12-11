@@ -51,7 +51,8 @@ const char* stufflib_png_color_types[] = {
 };
 
 void _stufflib_png_dump_chunk(struct _stufflib_png_chunk chunk) {
-  printf("%s: %" PRIu32 " bytes crc32: %" PRIu32 "\n", chunk.type, chunk.length, chunk.crc32);
+  printf("%s: %" PRIu32 " bytes crc32: %" PRIu32 "\n", chunk.type, chunk.length,
+         chunk.crc32);
 }
 
 struct _stufflib_png_chunk stufflib_png_parse_next_chunk(FILE* fp) {
@@ -110,11 +111,14 @@ error:
 }
 
 int stufflib_png_is_supported(struct stufflib_png_header header) {
-  return (header.compression == 0 && header.filter == 0 && header.interlace == 0 &&
-          (header.color_type == 2 || header.color_type == 6) && header.bit_depth == 8);
+  return (header.compression == 0 && header.filter == 0 &&
+          header.interlace == 0 &&
+          (header.color_type == 2 || header.color_type == 6) &&
+          header.bit_depth == 8);
 }
 
-struct stufflib_png_header stufflib_png_parse_header(struct _stufflib_png_chunk chunk) {
+struct stufflib_png_header stufflib_png_parse_header(
+    struct _stufflib_png_chunk chunk) {
   struct stufflib_png_header header = {0};
 
   size_t chunk_data_pos = 0;
@@ -157,7 +161,8 @@ void stufflib_png_dump_img_meta(FILE* stream, struct stufflib_png_image image) {
   fprintf(stream, "  width: %" PRIu32 "\n", header.width);
   fprintf(stream, "  height: %" PRIu32 "\n", header.height);
   fprintf(stream, "  bit depth: %" PRIu8 "\n", header.bit_depth);
-  fprintf(stream, "  color type: %s\n", stufflib_png_color_types[header.color_type]);
+  fprintf(stream, "  color type: %s\n",
+          stufflib_png_color_types[header.color_type]);
   fprintf(stream, "  compression: %" PRIu8 "\n", header.compression);
   fprintf(stream, "  filter: %" PRIu8 "\n", header.filter);
   fprintf(stream, "  interlace: %" PRIu8 "\n", header.interlace);
@@ -234,7 +239,8 @@ unsupported_img_error:
   fprintf(stderr, "error: unsupported PNG features in: %s\n", filename);
   stufflib_png_dump_img_meta(stderr, image);
   fprintf(stderr,
-          "error: image must be 8-bit/color RGB/A non-interlaced, compression=0, filter=0\n");
+          "error: image must be 8-bit/color RGB/A non-interlaced, "
+          "compression=0, filter=0\n");
   goto error;
 corrupted_img_error:
   fprintf(stderr, "error: corrupted PNG image: %s\n", filename);
