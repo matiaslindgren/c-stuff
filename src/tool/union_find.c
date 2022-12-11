@@ -6,7 +6,7 @@
 size_t* UnionFind_init(size_t n) {
   size_t* parents = malloc(n * sizeof(size_t));
   if (!parents) {
-    return NULL;
+    return 0;
   }
   for (size_t i = 0; i < n; ++i) {
     parents[i] = SIZE_MAX;

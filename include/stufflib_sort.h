@@ -54,7 +54,7 @@ double* stufflib_sort_merge(const size_t n, double src[static n]) {
   assert(n);
   double* tmp = malloc(n * sizeof(*src));
   if (!tmp) {
-    return NULL;
+    return 0;
   }
   stufflib_copy_doubles(n, src, tmp);
   _stufflib_sort_merge(n, src, tmp, 0, n);
@@ -102,7 +102,7 @@ double* stufflib_sort_quick(const size_t n, double src[static n]) {
   assert(n);
   double* tmp = malloc(n * sizeof(*src));
   if (!tmp) {
-    return NULL;
+    return 0;
   }
   stufflib_copy_doubles(n, src, tmp);
   _stufflib_sort_quick(n, tmp, 0, n - 1);
@@ -116,7 +116,7 @@ double* stufflib_sort(const size_t n, double src[static n]) {
     return src;
   }
   if (!stufflib_sort_quick(n, src)) {
-    return NULL;
+    return 0;
   }
   return src;
 }

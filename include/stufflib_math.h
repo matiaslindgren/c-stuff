@@ -36,13 +36,13 @@ size_t stufflib_math_next_prime(size_t x) {
 
 size_t* stufflib_math_factorize(size_t n) {
   if (n == 0 || n == 1) {
-    return NULL;
+    return 0;
   }
 
   size_t capacity = 4;
   size_t* factors = malloc(capacity * sizeof(size_t));
   if (!factors) {
-    return NULL;
+    return 0;
   }
 
   size_t num_factors = 0;
@@ -80,7 +80,7 @@ size_t* stufflib_math_factorize(size_t n) {
 
 error:
   free(factors);
-  return NULL;
+  return 0;
 }
 
 double stufflib_math_linalg_dot(const size_t n,
