@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib.h"
+#include "stufflib_misc.h"
 
 struct stufflib_png_header {
   uint32_t width;

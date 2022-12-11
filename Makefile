@@ -9,29 +9,42 @@ CFLAGS := \
 	-fsanitize=address,undefined
 LFLAGS := -lm
 
-OUT_DIR   := out
-SRC_FILES := $(wildcard src/*.c)
+OUT_DIR  := out
+BIN_DIR  := $(OUT_DIR)/bin
+TEST_DIR := $(OUT_DIR)/test
+
+SRC_FILES := $(wildcard src/bin/*.c)
 BIN_FILES := $(notdir $(basename $(SRC_FILES)))
-BIN_PATHS := $(addprefix $(OUT_DIR)/,$(BIN_FILES))
+BIN_PATHS := $(addprefix $(BIN_DIR)/,$(BIN_FILES))
+
+TEST_SRC_FILES := $(wildcard src/test/*.c)
+TEST_BIN_FILES := $(notdir $(basename $(TEST_SRC_FILES)))
+TEST_BIN_PATHS := $(addprefix $(TEST_DIR)/,$(TEST_BIN_FILES))
 
 .PHONY: all
-all: $(BIN_PATHS)
+all: $(BIN_PATHS) $(TEST_BIN_PATHS)
 
 .PHONY: clean
 clean:
 	rm -rf $(OUT_DIR)
 
-$(BIN_PATHS): $(OUT_DIR)/%: src/%.c $(wildcard ./include/*.h) | $(OUT_DIR)
-	$(CLANG) $(CFLAGS) -I./include -o $@ $< $(LFLAGS)
-
 $(OUT_DIR):
 	mkdir $@
 
-TESTS := $(addprefix test_,$(BIN_FILES))
+$(BIN_DIR) $(TEST_DIR): $(OUT_DIR)
+	mkdir $@
+
+$(BIN_PATHS): $(BIN_DIR)/%: src/bin/%.c $(wildcard ./include/*.h) | $(BIN_DIR)
+	$(CLANG) $(CFLAGS) -I./include -o $@ $< $(LFLAGS)
+
+$(TEST_BIN_PATHS): $(TEST_DIR)/%: src/test/%.c $(wildcard ./include/*.h) | $(TEST_DIR)
+	$(CLANG) $(CFLAGS) -I./include -o $@ $< $(LFLAGS)
+
+RUN_TESTS := $(addprefix run_,$(TEST_BIN_FILES))
 
 .PHONY: test
-test: $(TESTS)
+test: $(RUN_TESTS)
 
-.PHONY: $(TESTS)
-$(TESTS): test_%: $(OUT_DIR)/%
+.PHONY: $(RUN_TESTS)
+$(RUN_TESTS): run_%: $(TEST_DIR)/%
 	./$<

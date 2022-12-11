@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "stufflib.h"
+#include "stufflib_math.h"
 
 typedef unsigned long long ull;
 
@@ -42,8 +42,8 @@ double ramanujan(int num_digits) {
 }
 
 int main(void) {
-  int num_digits = 16;
-  double pi = ramanujan(num_digits);
-  assert(stufflib_double_almost(pi, pi_approx, 1e-15));
+  const int num_digits = 16;
+  const double pi = ramanujan(num_digits);
+  assert(stufflib_math_double_almost(pi, pi_approx, 1e-15));
   return EXIT_SUCCESS;
 }

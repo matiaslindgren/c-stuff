@@ -2,11 +2,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "stufflib.h"
+#include "stufflib_argv.h"
+#include "stufflib_misc.h"
 #include "stufflib_png.h"
 
 int main(int argc, char* const argv[argc + 1]) {
-  int verbose = stufflib_parse_argv_flag(argc, argv, "-v");
+  int verbose = stufflib_argv_parse_flag(argc, argv, "-v");
 
   {
     const char* png_path = "./test-data/green-pixel.png";
