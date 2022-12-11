@@ -15,8 +15,10 @@ int main(int argc, char* const argv[argc + 1]) {
     return EXIT_FAILURE;
   }
 
-  printf("%s\n", png_path);
+  printf("FILE\n  %s\n", png_path);
+  printf("HEADER\n");
   stufflib_png_dump_img_meta(stdout, img);
+  printf("DATA\n");
 
   free(img.data);
 

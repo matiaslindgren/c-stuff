@@ -234,7 +234,7 @@ unsupported_img_error:
   fprintf(stderr, "error: unsupported PNG features in: %s\n", filename);
   stufflib_png_dump_img_meta(stderr, image);
   fprintf(stderr,
-          "error: image must be 8-bit/color RGB/A non-interlaced, non-compressed, non-filtered\n");
+          "error: image must be 8-bit/color RGB/A non-interlaced, compression=0, filter=0\n");
   goto error;
 corrupted_img_error:
   fprintf(stderr, "error: corrupted PNG image: %s\n", filename);
