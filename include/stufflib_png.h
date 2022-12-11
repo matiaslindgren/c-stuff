@@ -30,6 +30,16 @@ struct _stufflib_png_chunk {
   unsigned char* data;
 };
 
+struct stufflib_png_header stufflib_png_make_empty_header() {
+  struct stufflib_png_header header = {0};
+  return header;
+}
+
+struct stufflib_png_image stufflib_png_make_empty_image() {
+  struct stufflib_png_image image = {0};
+  return image;
+}
+
 struct _stufflib_png_chunk stufflib_png_make_empty_chunk() {
   struct _stufflib_png_chunk chunk = {0};
   return chunk;
@@ -99,11 +109,6 @@ int stufflib_png_is_supported(struct stufflib_png_header header) {
           (header.color_type == 2 || header.color_type == 6) && header.bit_depth == 8);
 }
 
-struct stufflib_png_header stufflib_png_make_empty_header() {
-  struct stufflib_png_header header = {0};
-  return header;
-}
-
 struct stufflib_png_header stufflib_png_parse_header(struct _stufflib_png_chunk chunk) {
   struct stufflib_png_header header = {0};
 
@@ -138,11 +143,6 @@ struct stufflib_png_header stufflib_png_parse_header(struct _stufflib_png_chunk 
   }
 
   return header;
-}
-
-struct stufflib_png_image stufflib_png_make_empty_image() {
-  struct stufflib_png_image image = {0};
-  return image;
 }
 
 void stufflib_png_dump_img_meta(FILE* stream, struct stufflib_png_image image) {
