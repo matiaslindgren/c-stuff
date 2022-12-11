@@ -8,7 +8,7 @@
 
 typedef double* (*stufflib_sort_function)(size_t, double[]);
 
-void _stufflib_sort_merge_partitions(size_t n, double src[static n], double dst[static n],
+void _stufflib_sort_merge_partitions(const size_t n, double src[static n], double dst[static n],
                                      size_t begin, size_t mid, size_t end) {
   size_t lhs = begin;
   size_t rhs = mid;
@@ -28,7 +28,7 @@ void _stufflib_sort_merge_partitions(size_t n, double src[static n], double dst[
   }
 }
 
-void _stufflib_sort_merge(size_t n, double src[static n], double tmp[static n], size_t begin,
+void _stufflib_sort_merge(const size_t n, double src[static n], double tmp[static n], size_t begin,
                           size_t end) {
   assert(begin <= end);
   if (end - begin <= 1) {
@@ -43,7 +43,7 @@ void _stufflib_sort_merge(size_t n, double src[static n], double tmp[static n], 
   _stufflib_sort_merge_partitions(n, src, tmp, begin, mid, end);
 }
 
-double* stufflib_sort_merge(size_t n, double src[static n]) {
+double* stufflib_sort_merge(const size_t n, double src[static n]) {
   assert(n);
   double* tmp = malloc(n * sizeof(*src));
   if (!tmp) {
@@ -56,14 +56,8 @@ double* stufflib_sort_merge(size_t n, double src[static n]) {
   return src;
 }
 
-void _swap(double a[static 1], double b[static 1]) {
-  double tmp = *a;
-  *a = *b;
-  *b = tmp;
-}
-
-size_t _stufflib_sort_hoare_partition(size_t n, double src[static n], size_t lo, size_t hi) {
-  double pivot = src[(lo + hi) / 2];
+size_t _stufflib_sort_hoare_partition(const size_t n, double src[static n], size_t lo, size_t hi) {
+  const double pivot = src[(lo + hi) / 2];
   size_t lhs = lo - 1;
   size_t rhs = hi + 1;
   while (1) {
@@ -76,11 +70,13 @@ size_t _stufflib_sort_hoare_partition(size_t n, double src[static n], size_t lo,
     if (lhs >= rhs) {
       return rhs;
     }
-    _swap(&src[lhs], &src[rhs]);
+    const double tmp = src[lhs];
+    src[lhs] = src[rhs];
+    src[rhs] = tmp;
   }
 }
 
-void _stufflib_sort_quick(size_t n, double src[static n], size_t lo, size_t hi) {
+void _stufflib_sort_quick(const size_t n, double src[static n], size_t lo, size_t hi) {
   if (lo >= hi || lo >= n || hi >= n) {
     return;
   }
@@ -89,7 +85,7 @@ void _stufflib_sort_quick(size_t n, double src[static n], size_t lo, size_t hi) 
   _stufflib_sort_quick(n, src, pivot_idx + 1, hi);
 }
 
-double* stufflib_sort_quick(size_t n, double src[static n]) {
+double* stufflib_sort_quick(const size_t n, double src[static n]) {
   assert(n);
   double* tmp = malloc(n * sizeof(*src));
   if (!tmp) {
@@ -102,7 +98,17 @@ double* stufflib_sort_quick(size_t n, double src[static n]) {
   return src;
 }
 
-int stufflib_sort_is_sorted(size_t n, double x[static n]) {
+double* stufflib_sort(const size_t n, double src[static n]) {
+  if (n == 1) {
+    return src;
+  }
+  if (!stufflib_sort_quick(n, src)) {
+    return NULL;
+  }
+  return src;
+}
+
+int stufflib_sort_is_sorted(const size_t n, double x[static n]) {
   for (size_t i = 1; i < n; ++i) {
     if (x[i - 1] > x[i]) {
       return 0;
