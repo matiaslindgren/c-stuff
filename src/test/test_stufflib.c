@@ -22,10 +22,19 @@ int test_stufflib_argv_parse_flag() {
       return 1;
     }
     const char* should_not_match[] = {
-        "-x", "-vv", "-wvv", "v", "- v", "- w", "--w", "--v", "",
+        "-x",
+        "-vv",
+        "-wvv",
+        "v",
+        "- v",
+        "- w",
+        "--w",
+        "--v",
+        "",
     };
     for (size_t i = 0;
-         i < sizeof(should_not_match) / sizeof(should_not_match[0]); ++i) {
+         i < sizeof(should_not_match) / sizeof(should_not_match[0]);
+         ++i) {
       if (stufflib_argv_parse_flag(argc, argv, should_not_match[i])) {
         return 1;
       }
@@ -42,10 +51,20 @@ int test_stufflib_argv_parse_flag() {
       return 1;
     }
     const char* should_not_match[] = {
-        "-vv", "-wvv", "v", "- v", "- w", "--w", "--v", "", "-w", "-v",
+        "-vv",
+        "-wvv",
+        "v",
+        "- v",
+        "- w",
+        "--w",
+        "--v",
+        "",
+        "-w",
+        "-v",
     };
     for (size_t i = 0;
-         i < sizeof(should_not_match) / sizeof(should_not_match[0]); ++i) {
+         i < sizeof(should_not_match) / sizeof(should_not_match[0]);
+         ++i) {
       if (stufflib_argv_parse_flag(argc, argv, should_not_match[i])) {
         return 1;
       }

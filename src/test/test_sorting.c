@@ -59,7 +59,10 @@ int main(int argc, char* const argv[argc + 1]) {
         }
 
         if (verbose) {
-          printf("%7s %5zu %8zu %6.1f\n", sort_types[f], test + 1, n,
+          printf("%7s %5zu %8zu %6.1f\n",
+                 sort_types[f],
+                 test + 1,
+                 n,
                  sort_msec);
         }
       }

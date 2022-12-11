@@ -10,7 +10,8 @@ double stufflib_math_diff(stufflib_math_function f, double x) {
   return (f(x + h) - f(x)) / h;
 }
 
-int stufflib_math_double_almost(const double lhs, const double rhs,
+int stufflib_math_double_almost(const double lhs,
+                                const double rhs,
                                 const double eps) {
   // TODO improve, test around 0 within [-eps, eps]
   return fabs(lhs - rhs) < eps;
@@ -82,7 +83,8 @@ error:
   return NULL;
 }
 
-double stufflib_math_linalg_dot(const size_t n, const double v1[n],
+double stufflib_math_linalg_dot(const size_t n,
+                                const double v1[n],
                                 const double v2[n]) {
   double dot = 0;
   for (size_t i = 0; i < n; ++i) {
@@ -91,9 +93,11 @@ double stufflib_math_linalg_dot(const size_t n, const double v1[n],
   return dot;
 }
 
-void stufflib_math_linalg_matmul(const size_t nrows, const size_t ncols,
+void stufflib_math_linalg_matmul(const size_t nrows,
+                                 const size_t ncols,
                                  const double m[nrows][ncols],
-                                 const double v[ncols], double out[nrows]) {
+                                 const double v[ncols],
+                                 double out[nrows]) {
   for (size_t row = 0; row < nrows; ++row) {
     out[row] = stufflib_math_linalg_dot(ncols, m[row], v);
   }
