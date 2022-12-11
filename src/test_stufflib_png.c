@@ -56,5 +56,21 @@ int main(int argc, char* const argv[argc + 1]) {
     free(github_squares.data);
   }
 
+  {
+    const char* png_path = "./test-data/github-profile.png";
+    if (verbose) {
+      printf("%s\n", png_path);
+    }
+    struct stufflib_png_image github_profile = stufflib_png_read(png_path);
+    if (verbose) {
+      stufflib_png_dump_img_meta(stdout, github_profile);
+    }
+    assert(github_profile.header.width == 420);
+    assert(github_profile.header.height == 420);
+    assert(github_profile.header.bit_depth == 8);
+    assert(github_profile.header.color_type == 2);
+    free(github_profile.data);
+  }
+
   return EXIT_SUCCESS;
 }
