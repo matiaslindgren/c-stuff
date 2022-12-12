@@ -31,7 +31,7 @@ int main(int argc, char* const argv[argc + 1]) {
     for (size_t s = 0; s < sizeof(array_sizes) / sizeof(*array_sizes); ++s) {
       const size_t n = array_sizes[s];
 
-      double* x = malloc(n * sizeof(double));
+      double* x = calloc(n, sizeof(double));
       if (!x) {
         fprintf(stderr, "failed allocating memory for test data\n");
         goto error;

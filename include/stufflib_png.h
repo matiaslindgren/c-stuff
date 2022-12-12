@@ -78,7 +78,7 @@ struct _stufflib_png_chunk stufflib_png_parse_next_chunk(FILE* fp) {
 
   // parse chunk data
   {
-    unsigned char* data = malloc(chunk.length * sizeof(unsigned char));
+    unsigned char* data = calloc(chunk.length, sizeof(unsigned char));
     if (!data) {
       goto error;
     }

@@ -40,7 +40,7 @@ size_t* stufflib_math_factorize(size_t n) {
   }
 
   size_t capacity = 4;
-  size_t* factors = malloc(capacity * sizeof(size_t));
+  size_t* factors = calloc(capacity, sizeof(size_t));
   if (!factors) {
     return 0;
   }

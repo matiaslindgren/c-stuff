@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 size_t* UnionFind_init(size_t n) {
-  size_t* parents = malloc(n * sizeof(size_t));
+  size_t* parents = calloc(n, sizeof(size_t));
   if (!parents) {
     return 0;
   }

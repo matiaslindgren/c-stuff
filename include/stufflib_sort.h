@@ -52,7 +52,7 @@ void _stufflib_sort_merge(const size_t n,
 
 double* stufflib_sort_merge(const size_t n, double src[static n]) {
   assert(n);
-  double* tmp = malloc(n * sizeof(*src));
+  double* tmp = calloc(n, sizeof(*src));
   if (!tmp) {
     return 0;
   }
@@ -100,7 +100,7 @@ void _stufflib_sort_quick(const size_t n,
 
 double* stufflib_sort_quick(const size_t n, double src[static n]) {
   assert(n);
-  double* tmp = malloc(n * sizeof(*src));
+  double* tmp = calloc(n, sizeof(*src));
   if (!tmp) {
     return 0;
   }
