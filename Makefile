@@ -4,7 +4,7 @@ CFLAGS := \
 	-std=c17 \
 	-Wall \
 	-Werror \
-	-O3 \
+	-O2 \
 	-g \
 	-fsanitize=address,undefined
 LFLAGS := -lm
