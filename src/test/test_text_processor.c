@@ -26,12 +26,15 @@ int _test_init_from_str() {
   return 0;
 }
 
+const size_t test_split_lineno;
+const size_t test_linecount;
+
 int _test_init_from_file() {
   struct stufflib_text* text =
       stufflib_text_from_file("./src/test/test_text_processor.c");
 
-  const size_t split_lineno = 71;
-  const size_t line_count = 85;
+  const size_t split_lineno = test_split_lineno;
+  const size_t line_count = test_linecount;
 
   assert(text);
   assert(text->data);
@@ -69,6 +72,7 @@ int _test_init_from_file() {
   return 0;
 }
 
+const size_t test_split_lineno = __LINE__;
 int main(void) {
   int (*tests[])(void) = {
       _test_init_empty,
@@ -83,3 +87,4 @@ int main(void) {
   }
   return EXIT_SUCCESS;
 }
+const size_t test_linecount = __LINE__;
