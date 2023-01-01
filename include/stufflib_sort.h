@@ -9,20 +9,22 @@
 
 typedef int stufflib_sort_compare(const void*, const void*);
 
-typedef void* stufflib_sort(const size_t, const size_t, void*);
+typedef void* stufflib_sort(void*,
+                            const size_t,
+                            const size_t,
+                            stufflib_sort_compare*);
 typedef double* stufflib_sort_double(const size_t, double*);
 typedef char** stufflib_sort_str(const size_t, char**);
 
-void _stufflib_sort_swap(void* lhs, void* rhs, const size_t offset) {
-  unsigned char* tmp = malloc(offset);
-  memcpy(tmp, lhs, offset);
-  memcpy(lhs, rhs, offset);
-  memcpy(rhs, tmp, offset);
+void _stufflib_sort_swap(void* lhs, void* rhs, const size_t size) {
+  unsigned char* tmp = malloc(size);
+  memcpy(tmp, lhs, size);
+  memcpy(lhs, rhs, size);
+  memcpy(rhs, tmp, size);
   free(tmp);
 }
 
-void _stufflib_sort_merge_merge(const size_t n,
-                                const size_t offset,
+void _stufflib_sort_merge_merge(const size_t size,
                                 void* restrict src,
                                 void* restrict dst,
                                 const size_t begin,
@@ -33,29 +35,28 @@ void _stufflib_sort_merge_merge(const size_t n,
   size_t rhs = mid;
   size_t out = begin;
   while (lhs < mid && rhs < end) {
-    if (compare(src + lhs * offset, src + rhs * offset) < 0) {
-      _stufflib_sort_swap(dst + out * offset, src + lhs * offset, offset);
+    if (compare(src + lhs * size, src + rhs * size) < 0) {
+      _stufflib_sort_swap(dst + out * size, src + lhs * size, size);
       ++lhs;
     } else {
-      _stufflib_sort_swap(dst + out * offset, src + rhs * offset, offset);
+      _stufflib_sort_swap(dst + out * size, src + rhs * size, size);
       ++rhs;
     }
     ++out;
   }
   while (lhs < mid) {
-    _stufflib_sort_swap(dst + out * offset, src + lhs * offset, offset);
+    _stufflib_sort_swap(dst + out * size, src + lhs * size, size);
     ++lhs;
     ++out;
   }
   while (rhs < end) {
-    _stufflib_sort_swap(dst + out * offset, src + rhs * offset, offset);
+    _stufflib_sort_swap(dst + out * size, src + rhs * size, size);
     ++rhs;
     ++out;
   }
 }
 
-void _stufflib_sort_merge(const size_t n,
-                          const size_t offset,
+void _stufflib_sort_merge(const size_t size,
                           void* restrict src,
                           void* restrict dst,
                           const size_t begin,
@@ -66,82 +67,82 @@ void _stufflib_sort_merge(const size_t n,
     return;
   }
   const size_t mid = stufflib_misc_midpoint(begin, end);
-  _stufflib_sort_merge(n, offset, dst, src, begin, mid, compare);
-  _stufflib_sort_merge(n, offset, dst, src, mid, end, compare);
-  _stufflib_sort_merge_merge(n, offset, src, dst, begin, mid, end, compare);
+  _stufflib_sort_merge(size, dst, src, begin, mid, compare);
+  _stufflib_sort_merge(size, dst, src, mid, end, compare);
+  _stufflib_sort_merge_merge(size, src, dst, begin, mid, end, compare);
 }
 
-void* stufflib_sort_merge(const size_t n,
-                          const size_t offset,
-                          void* src,
+void* stufflib_sort_merge(void* src,
+                          const size_t count,
+                          const size_t size,
                           stufflib_sort_compare* const compare) {
-  assert(n);
+  assert(count);
   assert(src);
-  void* tmp = calloc(n, offset);
+  void* tmp = calloc(count, size);
   if (!tmp) {
     return 0;
   }
-  memcpy(tmp, src, n * offset);
-  _stufflib_sort_merge(n, offset, src, tmp, 0, n, compare);
-  memcpy(src, tmp, n * offset);
+  memcpy(tmp, src, count * size);
+  _stufflib_sort_merge(size, src, tmp, 0, count, compare);
+  memcpy(src, tmp, count * size);
   free(tmp);
   return src;
 }
 
-size_t _stufflib_sort_hoare_partition(const size_t n,
-                                      const size_t offset,
+size_t _stufflib_sort_hoare_partition(const size_t count,
+                                      const size_t size,
                                       void* src,
                                       const size_t lo,
                                       const size_t hi,
                                       stufflib_sort_compare* const compare) {
   const size_t pivot = stufflib_misc_midpoint(lo, hi);
-  memcpy(src + n * offset, src + pivot * offset, offset);
+  memcpy(src + count * size, src + pivot * size, size);
   size_t lhs = lo - 1;
   size_t rhs = hi + 1;
   while (1) {
     do {
       ++lhs;
-    } while (compare(src + lhs * offset, src + n * offset) < 0);
+    } while (compare(src + lhs * size, src + count * size) < 0);
     do {
       --rhs;
-    } while (compare(src + rhs * offset, src + n * offset) > 0);
+    } while (compare(src + rhs * size, src + count * size) > 0);
     if (lhs >= rhs) {
       return rhs;
     }
-    _stufflib_sort_swap(src + lhs * offset, src + rhs * offset, offset);
+    _stufflib_sort_swap(src + lhs * size, src + rhs * size, size);
   }
 }
 
-void _stufflib_sort_quick(const size_t n,
-                          const size_t offset,
+void _stufflib_sort_quick(const size_t count,
+                          const size_t size,
                           void* src,
                           const size_t lo,
                           const size_t hi,
                           stufflib_sort_compare* const compare) {
-  if (lo >= hi || lo >= n || hi >= n) {
+  if (lo >= hi || lo >= count || hi >= count) {
     return;
   }
   const size_t pivot =
-      _stufflib_sort_hoare_partition(n, offset, src, lo, hi, compare);
-  _stufflib_sort_quick(n, offset, src, lo, pivot, compare);
-  _stufflib_sort_quick(n, offset, src, pivot + 1, hi, compare);
+      _stufflib_sort_hoare_partition(count, size, src, lo, hi, compare);
+  _stufflib_sort_quick(count, size, src, lo, pivot, compare);
+  _stufflib_sort_quick(count, size, src, pivot + 1, hi, compare);
 }
 
-void* stufflib_sort_quick(const size_t n,
-                          const size_t offset,
-                          void* src,
+void* stufflib_sort_quick(void* src,
+                          const size_t count,
+                          const size_t size,
                           stufflib_sort_compare* const compare) {
-  assert(n);
-  assert(offset);
+  assert(count);
+  assert(size);
   assert(src);
   // 1 slot for the pivot at the end
-  void* tmp = malloc((n + 1) * offset);
+  void* tmp = malloc((count + 1) * size);
   if (!tmp) {
     return 0;
   }
-  memcpy(tmp, src, n * offset);
-  _stufflib_sort_quick(n, offset, tmp, 0, n - 1, compare);
-  memcpy(src, tmp, n * offset);
+  memcpy(tmp, src, count * size);
+  _stufflib_sort_quick(count, size, tmp, 0, count - 1, compare);
+  memcpy(src, tmp, count * size);
   free(tmp);
   return src;
 }
@@ -154,20 +155,20 @@ int stufflib_sort_compare_double(const void* lhs, const void* rhs) {
   return 0;
 }
 
-double* stufflib_sort_quick_double(const size_t n, double src[n]) {
-  if (!stufflib_sort_quick(n,
+double* stufflib_sort_quick_double(const size_t count, double src[count]) {
+  if (!stufflib_sort_quick((void*)src,
+                           count,
                            sizeof(double),
-                           src,
                            stufflib_sort_compare_double)) {
     return 0;
   }
   return src;
 }
 
-double* stufflib_sort_merge_double(const size_t n, double src[n]) {
-  if (!stufflib_sort_merge(n,
+double* stufflib_sort_merge_double(const size_t count, double src[count]) {
+  if (!stufflib_sort_merge((void*)src,
+                           count,
                            sizeof(double),
-                           src,
                            stufflib_sort_compare_double)) {
     return 0;
   }
@@ -178,15 +179,21 @@ int stufflib_sort_compare_str(const void* lhs, const void* rhs) {
   return strcmp(((const char**)lhs)[0], ((const char**)rhs)[0]);
 }
 
-char** stufflib_sort_quick_str(const size_t n, char* src[n]) {
-  if (!stufflib_sort_quick(n, sizeof(char*), src, stufflib_sort_compare_str)) {
+char** stufflib_sort_quick_str(const size_t count, char* src[count]) {
+  if (!stufflib_sort_quick((void*)src,
+                           count,
+                           sizeof(char*),
+                           stufflib_sort_compare_str)) {
     return 0;
   }
   return src;
 }
 
-char** stufflib_sort_merge_str(const size_t n, char* src[n]) {
-  if (!stufflib_sort_merge(n, sizeof(char*), src, stufflib_sort_compare_str)) {
+char** stufflib_sort_merge_str(const size_t count, char* src[count]) {
+  if (!stufflib_sort_merge((void*)src,
+                           count,
+                           sizeof(char*),
+                           stufflib_sort_compare_str)) {
     return 0;
   }
   return src;
