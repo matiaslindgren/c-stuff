@@ -16,13 +16,13 @@ typedef void* stufflib_sort(void*,
 typedef double* stufflib_sort_double(const size_t, double*);
 typedef char** stufflib_sort_str(const size_t, char**);
 
-void _stufflib_sort_merge_merge(const size_t size,
-                                void* restrict src,
-                                void* restrict dst,
-                                const size_t begin,
-                                const size_t mid,
-                                const size_t end,
-                                stufflib_sort_compare* const compare) {
+void _stufflib_sort_mergesort_merge(const size_t size,
+                                    void* restrict src,
+                                    void* restrict dst,
+                                    const size_t begin,
+                                    const size_t mid,
+                                    const size_t end,
+                                    stufflib_sort_compare* const compare) {
   size_t lhs = begin;
   size_t rhs = mid;
   size_t out = begin;
@@ -48,26 +48,26 @@ void _stufflib_sort_merge_merge(const size_t size,
   }
 }
 
-void _stufflib_sort_merge(const size_t size,
-                          void* restrict src,
-                          void* restrict dst,
-                          const size_t begin,
-                          const size_t end,
-                          stufflib_sort_compare* const compare) {
+void _stufflib_sort_mergesort(const size_t size,
+                              void* restrict src,
+                              void* restrict dst,
+                              const size_t begin,
+                              const size_t end,
+                              stufflib_sort_compare* const compare) {
   assert(begin <= end);
   if (end - begin <= 1) {
     return;
   }
   const size_t mid = stufflib_misc_midpoint(begin, end);
-  _stufflib_sort_merge(size, dst, src, begin, mid, compare);
-  _stufflib_sort_merge(size, dst, src, mid, end, compare);
-  _stufflib_sort_merge_merge(size, src, dst, begin, mid, end, compare);
+  _stufflib_sort_mergesort(size, dst, src, begin, mid, compare);
+  _stufflib_sort_mergesort(size, dst, src, mid, end, compare);
+  _stufflib_sort_mergesort_merge(size, src, dst, begin, mid, end, compare);
 }
 
-void* stufflib_sort_merge(void* src,
-                          const size_t count,
-                          const size_t size,
-                          stufflib_sort_compare* const compare) {
+void* stufflib_sort_mergesort(void* src,
+                              const size_t count,
+                              const size_t size,
+                              stufflib_sort_compare* const compare) {
   assert(count);
   assert(src);
   void* tmp = calloc(count, size);
@@ -75,7 +75,7 @@ void* stufflib_sort_merge(void* src,
     return 0;
   }
   memcpy(tmp, src, count * size);
-  _stufflib_sort_merge(size, src, tmp, 0, count, compare);
+  _stufflib_sort_mergesort(size, src, tmp, 0, count, compare);
   memcpy(src, tmp, count * size);
   free(tmp);
   return src;
@@ -114,25 +114,25 @@ size_t _stufflib_sort_hoare_partition(const size_t count,
   }
 }
 
-void _stufflib_sort_quick(const size_t count,
-                          const size_t size,
-                          void* src,
-                          const size_t lo,
-                          const size_t hi,
-                          stufflib_sort_compare* const compare) {
+void _stufflib_sort_quicksort(const size_t count,
+                              const size_t size,
+                              void* src,
+                              const size_t lo,
+                              const size_t hi,
+                              stufflib_sort_compare* const compare) {
   if (lo >= hi || lo >= count || hi >= count) {
     return;
   }
   const size_t pivot =
       _stufflib_sort_hoare_partition(count, size, src, lo, hi, compare);
-  _stufflib_sort_quick(count, size, src, lo, pivot, compare);
-  _stufflib_sort_quick(count, size, src, pivot + 1, hi, compare);
+  _stufflib_sort_quicksort(count, size, src, lo, pivot, compare);
+  _stufflib_sort_quicksort(count, size, src, pivot + 1, hi, compare);
 }
 
-void* stufflib_sort_quick(void* src,
-                          const size_t count,
-                          const size_t size,
-                          stufflib_sort_compare* const compare) {
+void* stufflib_sort_quicksort(void* src,
+                              const size_t count,
+                              const size_t size,
+                              stufflib_sort_compare* const compare) {
   assert(count);
   assert(size);
   assert(src);
@@ -142,7 +142,7 @@ void* stufflib_sort_quick(void* src,
     return 0;
   }
   memcpy(tmp, src, count * size);
-  _stufflib_sort_quick(count, size, tmp, 0, count - 1, compare);
+  _stufflib_sort_quicksort(count, size, tmp, 0, count - 1, compare);
   memcpy(src, tmp, count * size);
   free(tmp);
   return src;
@@ -154,48 +154,36 @@ int stufflib_sort_compare_double(const void* lhs, const void* rhs) {
   return (lhs_num > rhs_num) - (lhs_num < rhs_num);
 }
 
-double* stufflib_sort_quick_double(const size_t count, double src[count]) {
-  if (!stufflib_sort_quick((void*)src,
-                           count,
-                           sizeof(double),
-                           stufflib_sort_compare_double)) {
-    return 0;
-  }
-  return src;
+double* stufflib_sort_quicksort_double(const size_t count, double src[count]) {
+  return stufflib_sort_quicksort((void*)src,
+                                 count,
+                                 sizeof(double),
+                                 stufflib_sort_compare_double);
 }
 
-double* stufflib_sort_merge_double(const size_t count, double src[count]) {
-  if (!stufflib_sort_merge((void*)src,
-                           count,
-                           sizeof(double),
-                           stufflib_sort_compare_double)) {
-    return 0;
-  }
-  return src;
+double* stufflib_sort_mergesort_double(const size_t count, double src[count]) {
+  return stufflib_sort_mergesort((void*)src,
+                                 count,
+                                 sizeof(double),
+                                 stufflib_sort_compare_double);
 }
 
 int stufflib_sort_compare_str(const void* lhs, const void* rhs) {
   return strcmp(((const char**)lhs)[0], ((const char**)rhs)[0]);
 }
 
-char** stufflib_sort_quick_str(const size_t count, char* src[count]) {
-  if (!stufflib_sort_quick((void*)src,
-                           count,
-                           sizeof(char*),
-                           stufflib_sort_compare_str)) {
-    return 0;
-  }
-  return src;
+char** stufflib_sort_quicksort_str(const size_t count, char* src[count]) {
+  return stufflib_sort_quicksort((void*)src,
+                                 count,
+                                 sizeof(char*),
+                                 stufflib_sort_compare_str);
 }
 
-char** stufflib_sort_merge_str(const size_t count, char* src[count]) {
-  if (!stufflib_sort_merge((void*)src,
-                           count,
-                           sizeof(char*),
-                           stufflib_sort_compare_str)) {
-    return 0;
-  }
-  return src;
+char** stufflib_sort_mergesort_str(const size_t count, char* src[count]) {
+  return stufflib_sort_mergesort((void*)src,
+                                 count,
+                                 sizeof(char*),
+                                 stufflib_sort_compare_str);
 }
 
 #endif  // _STUFFLIB_SORT_H_INCLUDED

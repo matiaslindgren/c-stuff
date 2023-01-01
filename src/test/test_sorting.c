@@ -118,14 +118,14 @@ int _test_quicksort_doubles(const int verbose) {
   if (verbose) {
     printf("test quicksort doubles\n");
   }
-  return _test_sort_doubles(stufflib_sort_quick_double, verbose);
+  return _test_sort_doubles(stufflib_sort_quicksort_double, verbose);
 }
 
 int _test_mergesort_doubles(const int verbose) {
   if (verbose) {
     printf("test mergesort doubles\n");
   }
-  return _test_sort_doubles(stufflib_sort_merge_double, verbose);
+  return _test_sort_doubles(stufflib_sort_mergesort_double, verbose);
 }
 
 int _test_qsort_doubles(const int verbose) {
@@ -241,14 +241,14 @@ int _test_quicksort_strings(const int verbose) {
   if (verbose) {
     printf("test quicksort strings\n");
   }
-  return _test_sort_strings(stufflib_sort_quick_str, verbose);
+  return _test_sort_strings(stufflib_sort_quicksort_str, verbose);
 }
 
 int _test_mergesort_strings(const int verbose) {
   if (verbose) {
     printf("test mergesort strings\n");
   }
-  return _test_sort_strings(stufflib_sort_merge_str, verbose);
+  return _test_sort_strings(stufflib_sort_mergesort_str, verbose);
 }
 
 int _test_qsort_strings(const int verbose) {
@@ -327,18 +327,18 @@ int _test_sort_named_vec3(_sort_named_vec3* _sort_named_vec3,
 
 _named_vec3* _mergesort_named_vec3s(const size_t count,
                                     _named_vec3 src[count]) {
-  return stufflib_sort_merge((void*)src,
-                             count,
-                             sizeof(_named_vec3),
-                             _compare_named_vec3);
+  return stufflib_sort_mergesort((void*)src,
+                                 count,
+                                 sizeof(_named_vec3),
+                                 _compare_named_vec3);
 }
 
 _named_vec3* _quicksort_named_vec3s(const size_t count,
                                     _named_vec3 src[count]) {
-  return stufflib_sort_quick((void*)src,
-                             count,
-                             sizeof(_named_vec3),
-                             _compare_named_vec3);
+  return stufflib_sort_quicksort((void*)src,
+                                 count,
+                                 sizeof(_named_vec3),
+                                 _compare_named_vec3);
 }
 
 _named_vec3* _stdlib_qsort_named_vec3s(const size_t count,
