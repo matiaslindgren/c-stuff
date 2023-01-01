@@ -178,6 +178,23 @@ void stufflib_png_dump_img_meta(FILE* stream, struct stufflib_png_image image) {
   fprintf(stream, "  interlace: %" PRIu8 "\n", header.interlace);
 }
 
+void stufflib_png_dump_img_data(FILE* stream,
+                                struct stufflib_png_image image,
+                                const size_t count) {
+  const size_t bytes_per_line = 40;
+  for (size_t i = 0; i < count && i < image.size; ++i) {
+    if (i) {
+      if (i % bytes_per_line == 0) {
+        fprintf(stream, "\n");
+      } else if (i % 2 == 0) {
+        fprintf(stream, " ");
+      }
+    }
+    fprintf(stream, "%02x", image.data[i]);
+  }
+  fprintf(stream, "\n");
+}
+
 struct stufflib_png_image stufflib_png_read(const char* filename) {
   FILE* fp = fopen(filename, "r");
   if (!fp) {
