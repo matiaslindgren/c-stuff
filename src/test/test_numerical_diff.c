@@ -13,8 +13,8 @@ int main(int argc, char* const argv[argc + 1]) {
 
   const size_t n = 10000;
   double x[n];
-  stufflib_rand_fill(n, x, 10);
-  stufflib_rand_set_zero(n, x, 0.01);
+  stufflib_rand_fill_double(n, x, 10);
+  stufflib_rand_set_zero_double(n, x, 0.01);
 
   if (verbose) {
     printf("%4s %8s %8s %8s %9s %9s %9s %9s\n",

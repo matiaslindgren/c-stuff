@@ -76,13 +76,13 @@ int test_stufflib_argv_parse_flag() {
 int test_stufflib_rand_fill() {
   const size_t n = 1000;
   double x[n];
-  stufflib_rand_fill(n, x, 0);
+  stufflib_rand_fill_double(n, x, 0);
   for (size_t i = 0; i < n; ++i) {
     if (fabs(x[i]) > 0) {
       return 1;
     }
   }
-  stufflib_rand_fill(n, x, 10);
+  stufflib_rand_fill_double(n, x, 10);
   for (size_t i = 0; i < n; ++i) {
     if (fabs(x[i]) > 10) {
       return 1;
@@ -97,13 +97,13 @@ int test_stufflib_rand_set_zero() {
   for (size_t i = 0; i < n; ++i) {
     x[i] = i + 1;
   }
-  stufflib_rand_set_zero(n, x, 0);
+  stufflib_rand_set_zero_double(n, x, 0);
   for (size_t i = 0; i < n; ++i) {
     if (fabs(x[i]) < 1) {
       return 1;
     }
   }
-  stufflib_rand_set_zero(n, x, 1);
+  stufflib_rand_set_zero_double(n, x, 1);
   for (size_t i = 0; i < n; ++i) {
     if (fabs(x[i]) > 0) {
       return 1;
