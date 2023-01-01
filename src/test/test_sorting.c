@@ -49,14 +49,14 @@ int _test_swap_doubles(const int verbose) {
   a[0] = -1;
   b[0] = 1;
 
-  stufflib_sort_swap_double((void*)(&a[0]), (void*)(&a[0]));
+  _stufflib_sort_swap((void*)(&a[0]), (void*)(&a[0]), sizeof(double));
   assert(a[0] == -1);
-  stufflib_sort_swap_double((void*)(&b[0]), (void*)(&b[0]));
+  _stufflib_sort_swap((void*)(&b[0]), (void*)(&b[0]), sizeof(double));
   assert(b[0] == 1);
-  stufflib_sort_swap_double((void*)(&a[0]), (void*)(&b[0]));
+  _stufflib_sort_swap((void*)(&a[0]), (void*)(&b[0]), sizeof(double));
   assert(a[0] == 1);
   assert(b[0] == -1);
-  stufflib_sort_swap_double((void*)(&a[0]), (void*)(&b[0]));
+  _stufflib_sort_swap((void*)(&a[0]), (void*)(&b[0]), sizeof(double));
   assert(a[0] == -1);
   assert(b[0] == 1);
 
@@ -149,33 +149,33 @@ int _test_swap_strings(const int verbose) {
   const char* a[] = {"hello", "there"};
   const char* b[] = {"ok", " "};
 
-  stufflib_sort_swap_str((void*)(&a[0]), (void*)(&a[0]));
+  _stufflib_sort_swap((void*)(&a[0]), (void*)(&a[0]), sizeof(char*));
   assert(strcmp(a[0], "hello") == 0);
-  stufflib_sort_swap_str((void*)(&a[1]), (void*)(&a[1]));
+  _stufflib_sort_swap((void*)(&a[1]), (void*)(&a[1]), sizeof(char*));
   assert(strcmp(a[1], "there") == 0);
-  stufflib_sort_swap_str((void*)(&b[0]), (void*)(&b[0]));
+  _stufflib_sort_swap((void*)(&b[0]), (void*)(&b[0]), sizeof(char*));
   assert(strcmp(b[0], "ok") == 0);
-  stufflib_sort_swap_str((void*)(&b[1]), (void*)(&b[1]));
+  _stufflib_sort_swap((void*)(&b[1]), (void*)(&b[1]), sizeof(char*));
   assert(strcmp(b[1], " ") == 0);
 
-  stufflib_sort_swap_str((void*)(&a[0]), (void*)(&a[1]));
+  _stufflib_sort_swap((void*)(&a[0]), (void*)(&a[1]), sizeof(char*));
   assert(strcmp(a[0], "there") == 0);
   assert(strcmp(a[1], "hello") == 0);
-  stufflib_sort_swap_str((void*)(&a[1]), (void*)(&a[0]));
+  _stufflib_sort_swap((void*)(&a[1]), (void*)(&a[0]), sizeof(char*));
   assert(strcmp(a[0], "hello") == 0);
   assert(strcmp(a[1], "there") == 0);
 
-  stufflib_sort_swap_str((void*)(&b[0]), (void*)(&b[1]));
+  _stufflib_sort_swap((void*)(&b[0]), (void*)(&b[1]), sizeof(char*));
   assert(strcmp(b[0], " ") == 0);
   assert(strcmp(b[1], "ok") == 0);
-  stufflib_sort_swap_str((void*)(&b[1]), (void*)(&b[0]));
+  _stufflib_sort_swap((void*)(&b[1]), (void*)(&b[0]), sizeof(char*));
   assert(strcmp(b[0], "ok") == 0);
   assert(strcmp(b[1], " ") == 0);
 
-  stufflib_sort_swap_str((void*)(&a[0]), (void*)(&b[0]));
+  _stufflib_sort_swap((void*)(&a[0]), (void*)(&b[0]), sizeof(char*));
   assert(strcmp(a[0], "ok") == 0);
   assert(strcmp(b[0], "hello") == 0);
-  stufflib_sort_swap_str((void*)(&a[0]), (void*)(&b[1]));
+  _stufflib_sort_swap((void*)(&a[0]), (void*)(&b[1]), sizeof(char*));
   assert(strcmp(a[0], " ") == 0);
   assert(strcmp(b[1], "ok") == 0);
 
