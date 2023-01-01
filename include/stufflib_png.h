@@ -59,7 +59,7 @@ struct _stufflib_png_chunk stufflib_png_parse_next_chunk(FILE* fp) {
   {
     const size_t length_len = 4;
     unsigned char buf[length_len];
-    if (fread(buf, 1, length_len, fp) < length_len) {
+    if (fread(buf, 1, length_len, fp) != length_len) {
       fprintf(stderr, "error: failed reading PNG chunk length");
       goto error;
     }
@@ -69,7 +69,7 @@ struct _stufflib_png_chunk stufflib_png_parse_next_chunk(FILE* fp) {
   // parse 4-char chunk type
   {
     const size_t type_len = 4;
-    if (fread(chunk.type, 1, type_len, fp) < type_len) {
+    if (fread(chunk.type, 1, type_len, fp) != type_len) {
       fprintf(stderr, "error: failed reading PNG chunk type");
       goto error;
     }
@@ -82,7 +82,7 @@ struct _stufflib_png_chunk stufflib_png_parse_next_chunk(FILE* fp) {
     if (!data) {
       goto error;
     }
-    if (fread(data, 1, chunk.length, fp) < chunk.length) {
+    if (fread(data, 1, chunk.length, fp) != chunk.length) {
       fprintf(stderr, "error: failed reading PNG chunk data");
       goto error;
     }
@@ -93,7 +93,7 @@ struct _stufflib_png_chunk stufflib_png_parse_next_chunk(FILE* fp) {
   {
     const size_t crc32_len = 4;
     unsigned char buf[crc32_len];
-    if (fread(buf, 1, crc32_len, fp) < crc32_len) {
+    if (fread(buf, 1, crc32_len, fp) != crc32_len) {
       fprintf(stderr, "error: failed reading PNG chunk crc32");
       goto error;
     }
@@ -189,7 +189,7 @@ struct stufflib_png_image stufflib_png_read(const char* filename) {
   {
     const size_t header_len = 8;
     unsigned char buf[header_len];
-    if (fread(buf, 1, header_len, fp) < header_len) {
+    if (fread(buf, 1, header_len, fp) != header_len) {
       fprintf(stderr, "error: failed reading header of %s\n", filename);
       goto error;
     }
