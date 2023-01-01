@@ -9,8 +9,6 @@
 #include "stufflib_rand.h"
 #include "stufflib_sort.h"
 
-enum sort_type { quick, merge, num_sort_types };
-
 typedef int test_function(const int);
 
 int _test_compare_doubles(const int verbose) {
@@ -65,9 +63,7 @@ int _test_swap_doubles(const int verbose) {
   return 0;
 }
 
-int _test_sort_doubles(stufflib_sort_double* sort_doubles,
-                       const char* sort_type,
-                       const int verbose) {
+int _test_sort_doubles(stufflib_sort_double* sort_doubles, const int verbose) {
   const size_t num_tests_per_size = 5;
   const size_t array_sizes[] = {1, 2, 10, 1000, 10000, 100000};
 
@@ -103,7 +99,7 @@ int _test_sort_doubles(stufflib_sort_double* sort_doubles,
       }
 
       if (verbose) {
-        printf("%7s %5zu %8zu %6.1f\n", sort_type, test + 1, n, sort_msec);
+        printf("%5zu %8zu %6.1f\n", test + 1, n, sort_msec);
       }
     }
 
@@ -113,12 +109,30 @@ int _test_sort_doubles(stufflib_sort_double* sort_doubles,
   return 0;
 }
 
+double* _stdlib_qsort_double(const size_t count, double src[count]) {
+  qsort((void*)src, count, sizeof(double), stufflib_sort_compare_double);
+  return src;
+}
+
 int _test_quicksort_doubles(const int verbose) {
-  return _test_sort_doubles(stufflib_sort_quick_double, "quick", verbose);
+  if (verbose) {
+    printf("test quicksort doubles\n");
+  }
+  return _test_sort_doubles(stufflib_sort_quick_double, verbose);
 }
 
 int _test_mergesort_doubles(const int verbose) {
-  return _test_sort_doubles(stufflib_sort_merge_double, "merge", verbose);
+  if (verbose) {
+    printf("test mergesort doubles\n");
+  }
+  return _test_sort_doubles(stufflib_sort_merge_double, verbose);
+}
+
+int _test_qsort_doubles(const int verbose) {
+  if (verbose) {
+    printf("test stdlib qsort doubles\n");
+  }
+  return _test_sort_doubles(_stdlib_qsort_double, verbose);
 }
 
 int _test_compare_strings(const int verbose) {
@@ -182,9 +196,7 @@ int _test_swap_strings(const int verbose) {
   return 0;
 }
 
-int _test_sort_strings(stufflib_sort_str* sort_strings,
-                       const char* sort_type,
-                       const int verbose) {
+int _test_sort_strings(stufflib_sort_str* sort_strings, const int verbose) {
   const size_t n = 5;
 
   char** s = calloc(n, sizeof(char*));
@@ -213,19 +225,37 @@ int _test_sort_strings(stufflib_sort_str* sort_strings,
 
   size_t test = 0;
   if (verbose) {
-    printf("%7s %5zu %8zu %6.1f\n", sort_type, test + 1, n, sort_msec);
+    printf("%5zu %8zu %6.1f\n", test + 1, n, sort_msec);
   }
 
   free(s);
   return 0;
 }
 
+char** _stdlib_qsort_str(const size_t count, char* src[count]) {
+  qsort((void*)src, count, sizeof(char*), stufflib_sort_compare_str);
+  return src;
+}
+
 int _test_quicksort_strings(const int verbose) {
-  return _test_sort_strings(stufflib_sort_quick_str, "quick", verbose);
+  if (verbose) {
+    printf("test quicksort strings\n");
+  }
+  return _test_sort_strings(stufflib_sort_quick_str, verbose);
 }
 
 int _test_mergesort_strings(const int verbose) {
-  return _test_sort_strings(stufflib_sort_merge_str, "merge", verbose);
+  if (verbose) {
+    printf("test mergesort strings\n");
+  }
+  return _test_sort_strings(stufflib_sort_merge_str, verbose);
+}
+
+int _test_qsort_strings(const int verbose) {
+  if (verbose) {
+    printf("test stdlib qsort strings\n");
+  }
+  return _test_sort_strings(_stdlib_qsort_str, verbose);
 }
 
 int main(int argc, char* const argv[argc + 1]) {
@@ -240,9 +270,11 @@ int main(int argc, char* const argv[argc + 1]) {
 
       _test_quicksort_doubles,
       _test_mergesort_doubles,
+      _test_qsort_doubles,
 
       _test_quicksort_strings,
       _test_mergesort_strings,
+      _test_qsort_strings,
   };
 
   for (size_t t = 0; t < (sizeof(tests) / sizeof(tests[0])); ++t) {
