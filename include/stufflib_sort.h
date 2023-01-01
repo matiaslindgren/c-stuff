@@ -16,14 +16,6 @@ typedef void* stufflib_sort(void*,
 typedef double* stufflib_sort_double(const size_t, double*);
 typedef char** stufflib_sort_str(const size_t, char**);
 
-void _stufflib_sort_swap(void* lhs, void* rhs, const size_t size) {
-  unsigned char* tmp = malloc(size);
-  memcpy(tmp, lhs, size);
-  memcpy(lhs, rhs, size);
-  memcpy(rhs, tmp, size);
-  free(tmp);
-}
-
 void _stufflib_sort_merge_merge(const size_t size,
                                 void* restrict src,
                                 void* restrict dst,
@@ -36,21 +28,21 @@ void _stufflib_sort_merge_merge(const size_t size,
   size_t out = begin;
   while (lhs < mid && rhs < end) {
     if (compare(src + lhs * size, src + rhs * size) < 0) {
-      _stufflib_sort_swap(dst + out * size, src + lhs * size, size);
+      memcpy(dst + out * size, src + lhs * size, size);
       ++lhs;
     } else {
-      _stufflib_sort_swap(dst + out * size, src + rhs * size, size);
+      memcpy(dst + out * size, src + rhs * size, size);
       ++rhs;
     }
     ++out;
   }
   while (lhs < mid) {
-    _stufflib_sort_swap(dst + out * size, src + lhs * size, size);
+    memcpy(dst + out * size, src + lhs * size, size);
     ++lhs;
     ++out;
   }
   while (rhs < end) {
-    _stufflib_sort_swap(dst + out * size, src + rhs * size, size);
+    memcpy(dst + out * size, src + rhs * size, size);
     ++rhs;
     ++out;
   }
@@ -89,6 +81,14 @@ void* stufflib_sort_merge(void* src,
   return src;
 }
 
+inline void _stufflib_sort_swap(void* lhs, void* rhs, const size_t size) {
+  unsigned char* tmp = malloc(size);
+  memcpy(tmp, lhs, size);
+  memcpy(lhs, rhs, size);
+  memcpy(rhs, tmp, size);
+  free(tmp);
+}
+
 size_t _stufflib_sort_hoare_partition(const size_t count,
                                       const size_t size,
                                       void* src,
@@ -96,16 +96,17 @@ size_t _stufflib_sort_hoare_partition(const size_t count,
                                       const size_t hi,
                                       stufflib_sort_compare* const compare) {
   const size_t pivot = stufflib_misc_midpoint(lo, hi);
-  memcpy(src + count * size, src + pivot * size, size);
+  const size_t pivot_pos = count * size;
+  memcpy(src + pivot_pos, src + pivot * size, size);
   size_t lhs = lo - 1;
   size_t rhs = hi + 1;
   while (1) {
     do {
       ++lhs;
-    } while (compare(src + lhs * size, src + count * size) < 0);
+    } while (compare(src + lhs * size, src + pivot_pos) < 0);
     do {
       --rhs;
-    } while (compare(src + rhs * size, src + count * size) > 0);
+    } while (compare(src + rhs * size, src + pivot_pos) > 0);
     if (lhs >= rhs) {
       return rhs;
     }
