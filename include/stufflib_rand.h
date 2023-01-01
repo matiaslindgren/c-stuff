@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-void stufflib_rand_fill(const size_t n, double dst[n], double scale) {
+void stufflib_rand_fill_double(const size_t n, double dst[n], double scale) {
   srand(time(0));
   for (size_t i = 0; i < n; ++i) {
     double r = rand() - RAND_MAX / 2;
@@ -12,7 +12,9 @@ void stufflib_rand_fill(const size_t n, double dst[n], double scale) {
   }
 }
 
-void stufflib_rand_set_zero(const size_t n, double dst[n], double probability) {
+void stufflib_rand_set_zero_double(const size_t n,
+                                   double dst[n],
+                                   double probability) {
   probability = fmax(0, fmin(1, probability));
   srand(time(0));
   for (size_t i = 0; i < n; ++i) {

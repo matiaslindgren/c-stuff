@@ -3,12 +3,6 @@
 #include <inttypes.h>
 #include <stdlib.h>
 
-void stufflib_copy_doubles(size_t n, double src[n], double dst[n]) {
-  for (size_t i = 0; i < n; ++i) {
-    dst[i] = src[i];
-  }
-}
-
 #ifndef UINT32_WIDTH
 #define UINT32_WIDTH (32)
 #endif
@@ -25,6 +19,10 @@ uint32_t stufflib_parse_big_endian_u32(
     x |= buf_value << byte_offset;
   }
   return x;
+}
+
+size_t stufflib_misc_midpoint(const size_t lo, const size_t hi) {
+  return lo + (hi - lo) / 2;
 }
 
 #endif  // _STUFFLIB_MISC_H_INCLUDED
