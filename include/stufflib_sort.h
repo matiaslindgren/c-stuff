@@ -150,9 +150,7 @@ void* stufflib_sort_quick(void* src,
 int stufflib_sort_compare_double(const void* lhs, const void* rhs) {
   const double lhs_num = ((const double*)lhs)[0];
   const double rhs_num = ((const double*)rhs)[0];
-  if (lhs_num < rhs_num) return -1;
-  if (lhs_num > rhs_num) return 1;
-  return 0;
+  return (lhs_num > rhs_num) - (lhs_num < rhs_num);
 }
 
 double* stufflib_sort_quick_double(const size_t count, double src[count]) {
