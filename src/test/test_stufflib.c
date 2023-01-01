@@ -122,10 +122,10 @@ int test_stufflib_math_double_almost() {
   return 0;
 }
 
-typedef int (*test_function)(void);
+typedef int test_function(void);
 
 int main(void) {
-  test_function tests[] = {
+  test_function* tests[] = {
       test_stufflib_argv_parse_flag,
       test_stufflib_rand_fill,
       test_stufflib_rand_set_zero,

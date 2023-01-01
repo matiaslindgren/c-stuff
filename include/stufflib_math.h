@@ -3,9 +3,9 @@
 #include <math.h>
 #include <stdlib.h>
 
-typedef double (*stufflib_math_function)(double);
+typedef double stufflib_math_function(double);
 
-double stufflib_math_diff(stufflib_math_function f, double x) {
+double stufflib_math_diff(stufflib_math_function* f, double x) {
   const double h = 0.0001;
   return (f(x + h) - f(x)) / h;
 }

@@ -11,7 +11,7 @@
 
 enum sort_type { quick, merge, num_sort_types };
 
-typedef int(test_function)(const int);
+typedef int test_function(const int);
 
 int _test_compare_doubles(const int verbose) {
   (void)verbose;

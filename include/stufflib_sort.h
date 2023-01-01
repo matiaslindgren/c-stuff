@@ -7,11 +7,11 @@
 
 #include "stufflib_misc.h"
 
-typedef int(stufflib_sort_compare)(const void*, const void*);
+typedef int stufflib_sort_compare(const void*, const void*);
 
-typedef void*(stufflib_sort)(const size_t, const size_t, void*);
-typedef double*(stufflib_sort_double)(const size_t, double*);
-typedef char**(stufflib_sort_str)(const size_t, char**);
+typedef void* stufflib_sort(const size_t, const size_t, void*);
+typedef double* stufflib_sort_double(const size_t, double*);
+typedef char** stufflib_sort_str(const size_t, char**);
 
 void _stufflib_sort_swap(void* lhs, void* rhs, const size_t offset) {
   unsigned char* tmp = malloc(offset);
