@@ -95,18 +95,18 @@ size_t _stufflib_sort_hoare_partition(const size_t count,
                                       const size_t lo,
                                       const size_t hi,
                                       stufflib_sort_compare* const compare) {
-  const size_t pivot = stufflib_misc_midpoint(lo, hi);
-  const size_t pivot_pos = count * size;
-  memcpy(src + pivot_pos, src + pivot * size, size);
+  const size_t pivot_idx = stufflib_misc_midpoint(lo, hi);
+  void* pivot = src + count * size;
+  memcpy(pivot, src + pivot_idx * size, size);
   size_t lhs = lo - 1;
   size_t rhs = hi + 1;
   while (1) {
     do {
       ++lhs;
-    } while (compare(src + lhs * size, src + pivot_pos) < 0);
+    } while (compare(src + lhs * size, pivot) < 0);
     do {
       --rhs;
-    } while (compare(src + rhs * size, src + pivot_pos) > 0);
+    } while (compare(src + rhs * size, pivot) > 0);
     if (lhs >= rhs) {
       return rhs;
     }
