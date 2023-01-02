@@ -84,13 +84,14 @@ void* stufflib_sort_mergesort(void* src,
 size_t _stufflib_sort_hoare_partition(const size_t count,
                                       const size_t size,
                                       void* src,
+                                      void* tmp,
                                       const size_t lo,
                                       const size_t hi,
                                       stufflib_sort_compare* const compare) {
-  void* tmp = malloc(size);
+  void* pivot = tmp;
+  void* swap_tmp = tmp + size;
 
   const size_t pivot_idx = stufflib_misc_midpoint(lo, hi);
-  void* pivot = src + count * size;
   memcpy(pivot, src + pivot_idx * size, size);
 
   size_t lhs = lo - 1;
@@ -103,20 +104,18 @@ size_t _stufflib_sort_hoare_partition(const size_t count,
       --rhs;
     } while (compare(src + rhs * size, pivot) > 0);
     if (lhs >= rhs) {
-      break;
+      return rhs;
     }
-    memcpy(tmp, src + lhs * size, size);
+    memcpy(swap_tmp, src + lhs * size, size);
     memcpy(src + lhs * size, src + rhs * size, size);
-    memcpy(src + rhs * size, tmp, size);
+    memcpy(src + rhs * size, swap_tmp, size);
   }
-
-  free(tmp);
-  return rhs;
 }
 
 void _stufflib_sort_quicksort(const size_t count,
                               const size_t size,
                               void* src,
+                              void* tmp,
                               const size_t lo,
                               const size_t hi,
                               stufflib_sort_compare* const compare) {
@@ -124,9 +123,9 @@ void _stufflib_sort_quicksort(const size_t count,
     return;
   }
   const size_t pivot =
-      _stufflib_sort_hoare_partition(count, size, src, lo, hi, compare);
-  _stufflib_sort_quicksort(count, size, src, lo, pivot, compare);
-  _stufflib_sort_quicksort(count, size, src, pivot + 1, hi, compare);
+      _stufflib_sort_hoare_partition(count, size, src, tmp, lo, hi, compare);
+  _stufflib_sort_quicksort(count, size, src, tmp, lo, pivot, compare);
+  _stufflib_sort_quicksort(count, size, src, tmp, pivot + 1, hi, compare);
 }
 
 void* stufflib_sort_quicksort(void* src,
@@ -136,13 +135,21 @@ void* stufflib_sort_quicksort(void* src,
   assert(count);
   assert(size);
   assert(src);
-  // 1 slot for the pivot at the end
-  void* tmp = malloc((count + 1) * size);
+  // 2 extra slots at the end for
+  // 0: pivot
+  // 1: swap space
+  void* tmp = malloc((count + 2) * size);
   if (!tmp) {
     return 0;
   }
   memcpy(tmp, src, count * size);
-  _stufflib_sort_quicksort(count, size, tmp, 0, count - 1, compare);
+  _stufflib_sort_quicksort(count,
+                           size,
+                           tmp,
+                           tmp + count * size,
+                           0,
+                           count - 1,
+                           compare);
   memcpy(src, tmp, count * size);
   free(tmp);
   return src;
