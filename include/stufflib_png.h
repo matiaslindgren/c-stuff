@@ -63,7 +63,7 @@ struct _stufflib_png_chunk stufflib_png_parse_next_chunk(FILE* fp) {
       fprintf(stderr, "error: failed reading PNG chunk length");
       goto error;
     }
-    chunk.length = stufflib_parse_big_endian_u32(buf);
+    chunk.length = stufflib_misc_parse_big_endian_u32(buf);
   }
 
   // parse 4-char chunk type
@@ -98,7 +98,7 @@ struct _stufflib_png_chunk stufflib_png_parse_next_chunk(FILE* fp) {
       goto error;
     }
     // TODO CRC
-    chunk.crc32 = stufflib_parse_big_endian_u32(buf);
+    chunk.crc32 = stufflib_misc_parse_big_endian_u32(buf);
   }
 
   return chunk;
@@ -125,13 +125,13 @@ struct stufflib_png_header stufflib_png_parse_header(
     size_t field_len = 4;
     unsigned char buf[field_len];
 
-    memcpy(buf, &(chunk.data[chunk_data_pos]), field_len);
+    memcpy(buf, chunk.data + chunk_data_pos, field_len);
     chunk_data_pos += field_len;
-    header.width = stufflib_parse_big_endian_u32(buf);
+    header.width = stufflib_misc_parse_big_endian_u32(buf);
 
-    memcpy(buf, &(chunk.data[chunk_data_pos]), field_len);
+    memcpy(buf, chunk.data + chunk_data_pos, field_len);
     chunk_data_pos += field_len;
-    header.height = stufflib_parse_big_endian_u32(buf);
+    header.height = stufflib_misc_parse_big_endian_u32(buf);
   }
 
   // parse single byte fields
@@ -139,7 +139,7 @@ struct stufflib_png_header stufflib_png_parse_header(
     const size_t rest_len = 5;
     unsigned char buf[rest_len];
 
-    memcpy(buf, &(chunk.data[chunk_data_pos]), rest_len);
+    memcpy(buf, chunk.data + chunk_data_pos, rest_len);
     chunk_data_pos += rest_len;
     header.bit_depth = (uint8_t)(buf[0]);
     header.color_type = (uint8_t)(buf[1]);
