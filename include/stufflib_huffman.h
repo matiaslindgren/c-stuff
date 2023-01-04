@@ -8,6 +8,8 @@ struct stufflib_huffman_tree {
   size_t code;
 };
 
+// Based on RFC 1951 (Deutsch, May 1996) from
+// https://datatracker.ietf.org/doc/html/rfc1951 (accessed 2023-01-04)
 stufflib_huffman_tree* stufflib_huffman_tree_init(
     const size_t n,
     const size_t bit_lengths[static n]) {
