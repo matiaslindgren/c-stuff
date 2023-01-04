@@ -25,4 +25,13 @@ size_t stufflib_misc_midpoint(const size_t lo, const size_t hi) {
   return lo + (hi - lo) / 2;
 }
 
+size_t stufflib_misc_vmax_size_t(const size_t n,
+                                 const size_t v[const static n]) {
+  size_t res = 0;
+  for (size_t i = 0; i < n; ++i) {
+    res = v[i] > res ? v[i] : res;
+  }
+  return res;
+}
+
 #endif  // _STUFFLIB_MISC_H_INCLUDED
