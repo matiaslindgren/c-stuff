@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "stufflib_huffman.h"
+#include "stufflib_inflate.h"
 #include "stufflib_png.h"
 
 int main(int argc, char* const argv[argc + 1]) {
@@ -25,15 +26,15 @@ int main(int argc, char* const argv[argc + 1]) {
     printf("DATA\n");
     stufflib_png_dump_img_data(stdout, img, data_dump_count);
   }
+  stufflib_inflate_data data = stufflib_inflate(img.size, img.data);
 
-  size_t x[] = {3, 3, 3, 3, 3, 2, 4, 4};
-  stufflib_huffman_tree* const tree =
-      stufflib_huffman_tree_init(sizeof(x) / sizeof(x[0]), x);
-  for (size_t i = 0; i < sizeof(x) / sizeof(x[0]); ++i) {
-    printf("%03zx %zu\n", tree[i].code, tree[i].length);
+  printf("data of len %zu\n", data.len);
+
+  for (size_t i = 0; i < data.len; ++i) {
+    printf("%3zu: %02x\n", i, data.data[i]);
   }
-  free(tree);
 
+  free(data.data);
   free(img.data);
 
   return EXIT_SUCCESS;

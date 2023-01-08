@@ -30,21 +30,6 @@ struct _stufflib_png_chunk {
   unsigned char* data;
 };
 
-struct stufflib_png_header stufflib_png_make_empty_header() {
-  struct stufflib_png_header header = {0};
-  return header;
-}
-
-struct stufflib_png_image stufflib_png_make_empty_image() {
-  struct stufflib_png_image image = {0};
-  return image;
-}
-
-struct _stufflib_png_chunk stufflib_png_make_empty_chunk() {
-  struct _stufflib_png_chunk chunk = {0};
-  return chunk;
-}
-
 void _stufflib_png_dump_chunk(struct _stufflib_png_chunk chunk) {
   printf("%s: %" PRIu32 " bytes crc32: %" PRIu32 "\n",
          chunk.type,
@@ -104,7 +89,7 @@ struct _stufflib_png_chunk stufflib_png_parse_next_chunk(FILE* fp) {
   return chunk;
 
 error:
-  return stufflib_png_make_empty_chunk();
+  return (struct _stufflib_png_chunk){0};
 }
 
 int stufflib_png_is_supported(struct stufflib_png_header header) {
@@ -239,7 +224,7 @@ struct stufflib_png_image stufflib_png_read(const char* filename) {
 
   size_t num_data = 0;
   // read chunks until end of image
-  struct _stufflib_png_chunk data_chunk = stufflib_png_make_empty_chunk();
+  struct _stufflib_png_chunk data_chunk = {0};
   while (memcmp(data_chunk.type, "IEND", 4)) {
     data_chunk = stufflib_png_parse_next_chunk(fp);
     if (data_chunk.type[0] == 0) {
@@ -252,6 +237,10 @@ struct stufflib_png_image stufflib_png_read(const char* filename) {
         free(data_chunk.data);
         goto unsupported_img_error;
       }
+      // IDAT check as defined in https://datatracker.ietf.org/doc/html/rfc1950
+      if ((data_chunk.data[0] * 256 + data_chunk.data[1]) % 31 != 0) {
+        goto corrupted_img_error;
+      }
       image.data = data_chunk.data;
       image.size += (size_t)(data_chunk.length);
     } else {
@@ -263,7 +252,7 @@ struct stufflib_png_image stufflib_png_read(const char* filename) {
   return image;
 
 unsupported_img_error:
-  fprintf(stderr, "error: unsupported PNG features in: %s\n", filename);
+  fprintf(stderr, "error: unsupported PNG features in %s\n", filename);
   stufflib_png_dump_img_meta(stderr, image);
   fprintf(stderr,
           "error: image must be 8-bit/color RGB/A non-interlaced, "
@@ -276,7 +265,7 @@ error:
   if (fp) {
     fclose(fp);
   }
-  return stufflib_png_make_empty_image();
+  return (struct stufflib_png_image){0};
 }
 
 #endif  // _STUFFLIB_PNG_H_INCLUDED
