@@ -1,6 +1,6 @@
 #ifndef _STUFFLIB_INFLATE_H_INCLUDED
 #define _STUFFLIB_INFLATE_H_INCLUDED
-// INFLATE: DEFLATE decoding (no encoding)
+// INFLATE: DEFLATE decoding (no compression implemented)
 // Implementation based on
 // 1. RFC 1950 (Deutsch and Gailly, May 1996),
 //    https://datatracker.ietf.org/doc/html/rfc1950 (accessed 2023-01-05)
@@ -92,6 +92,7 @@ stufflib_huffman_tree* stufflib_inflate_huffman_tree(
   }
   for (size_t code_len = 1; code_len <= max_code_len; ++code_len) {
     const size_t max_code = max_codes[code_len - 1];
+    // TODO compress by min_code, then only max_code - min_code + 1 slots needed
     if (!(symbols[code_len - 1] = calloc(max_code + 1, sizeof(size_t)))) {
       free(max_codes);
       free(symbols);
@@ -355,7 +356,7 @@ stufflib_data stufflib_inflate(const size_t n, const unsigned char data[n]) {
     goto error;
   }
   if ((data[0] * 256 + data[1]) % 31) {
-    fprintf(stderr, "DEFLATE block length complement check failed\n");
+    fprintf(stderr, "DEFLATE stream is corrupted\n");
     goto error;
   }
   const int cmethod = data[0] & 0x0F;
@@ -365,12 +366,12 @@ stufflib_data stufflib_inflate(const size_t n, const unsigned char data[n]) {
   }
   const int cinfo = (data[0] & 0xF0) >> 4;
   if (cinfo > 7) {
-    fprintf(stderr, "too large compression info %d > 7 \n", cinfo);
+    fprintf(stderr, "too large compression info %d > 7\n", cinfo);
     goto error;
   }
   const int fdict = (data[1] & 0x20) >> 5;
   if (fdict) {
-    fprintf(stderr, "dictionaries not supported\n");
+    fprintf(stderr, "dictionaries are not supported\n");
     goto error;
   }
 
@@ -410,9 +411,8 @@ stufflib_data stufflib_inflate(const size_t n, const unsigned char data[n]) {
 
   const size_t window_size = 1 << (cinfo + 8);
   size_t bit_pos[] = {2 * CHAR_BIT};
-  int is_final_block = 0;
 
-  while (!is_final_block) {
+  for (int is_final_block = 0; !is_final_block;) {
     is_final_block = _read_bit(data, *bit_pos);
     printf("bitpos %zu final %d\n", *bit_pos, is_final_block);
     ++(*bit_pos);
@@ -443,6 +443,8 @@ stufflib_data stufflib_inflate(const size_t n, const unsigned char data[n]) {
                                                 bit_pos);
       } break;
       case dynamic_huffman_codes: {
+        // TODO
+        goto error;
         output_size +=
             _decompress_and_copy_dynamic_huffman_block(window_size,
                                                        output + output_size,
