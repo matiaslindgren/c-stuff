@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "stufflib_huffman.h"
 #include "stufflib_inflate.h"
 #include "stufflib_png.h"
 
@@ -26,11 +25,11 @@ int main(int argc, char* const argv[argc + 1]) {
     printf("DATA\n");
     stufflib_png_dump_img_data(stdout, img, data_dump_count);
   }
-  stufflib_inflate_data data = stufflib_inflate(img.size, img.data);
+  stufflib_data data = stufflib_inflate(img.size, img.data);
 
-  printf("data of len %zu\n", data.len);
+  printf("data of size %zu\n", data.size);
 
-  for (size_t i = 0; i < data.len; ++i) {
+  for (size_t i = 0; i < data.size; ++i) {
     printf("%3zu: %02x\n", i, data.data[i]);
   }
 

@@ -5,9 +5,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "stufflib_inflate.h"
 #include "stufflib_misc.h"
 
+typedef struct stufflib_png_header stufflib_png_header;
 struct stufflib_png_header {
+  size_t size;
   uint32_t width;
   uint32_t height;
   uint8_t bit_depth;
@@ -17,61 +20,68 @@ struct stufflib_png_header {
   uint8_t interlace;
 };
 
+typedef struct stufflib_png_image stufflib_png_image;
 struct stufflib_png_image {
-  struct stufflib_png_header header;
+  stufflib_png_header header;
   size_t size;
   unsigned char* data;
 };
 
+typedef struct _stufflib_png_chunk _stufflib_png_chunk;
 struct _stufflib_png_chunk {
+  size_t size;
   uint32_t length;
   uint32_t crc32;
   unsigned char type[5];
   unsigned char* data;
 };
 
-void _stufflib_png_dump_chunk(struct _stufflib_png_chunk chunk) {
+void _stufflib_png_dump_chunk(_stufflib_png_chunk chunk) {
   printf("%s: %" PRIu32 " bytes crc32: %" PRIu32 "\n",
          chunk.type,
          chunk.length,
          chunk.crc32);
 }
 
-struct _stufflib_png_chunk stufflib_png_parse_next_chunk(FILE* fp) {
-  struct _stufflib_png_chunk chunk = {0};
+_stufflib_png_chunk stufflib_png_parse_next_chunk(FILE* fp) {
+  _stufflib_png_chunk chunk = {0};
 
   // parse big-endian 32-bit uint chunk length
   {
     const size_t length_len = 4;
     unsigned char buf[length_len];
     if (fread(buf, 1, length_len, fp) != length_len) {
-      fprintf(stderr, "error: failed reading PNG chunk length");
+      fprintf(stderr, "error: failed reading PNG chunk length\n");
       goto error;
     }
     chunk.length = stufflib_misc_parse_big_endian_u32(buf);
+    chunk.size += length_len;
   }
 
   // parse 4-char chunk type
   {
     const size_t type_len = 4;
     if (fread(chunk.type, 1, type_len, fp) != type_len) {
-      fprintf(stderr, "error: failed reading PNG chunk type");
+      fprintf(stderr, "error: failed reading PNG chunk type\n");
       goto error;
     }
     chunk.type[type_len] = 0;
+    chunk.size += type_len;
   }
 
   // parse chunk data
   {
-    unsigned char* data = calloc(chunk.length, sizeof(unsigned char));
+    unsigned char* data = calloc(chunk.length, 1);
     if (!data) {
       goto error;
     }
     if (fread(data, 1, chunk.length, fp) != chunk.length) {
-      fprintf(stderr, "error: failed reading PNG chunk data");
+      fprintf(stderr, "error: failed reading PNG chunk data\n");
+      free(data);
       goto error;
     }
     chunk.data = data;
+    chunk.size += chunk.length;
   }
 
   // parse 32-bit checksum
@@ -80,60 +90,25 @@ struct _stufflib_png_chunk stufflib_png_parse_next_chunk(FILE* fp) {
     unsigned char buf[crc32_len];
     if (fread(buf, 1, crc32_len, fp) != crc32_len) {
       fprintf(stderr, "error: failed reading PNG chunk crc32");
+      free(chunk.data);
       goto error;
     }
     // TODO CRC
     chunk.crc32 = stufflib_misc_parse_big_endian_u32(buf);
+    chunk.size += crc32_len;
   }
 
   return chunk;
 
 error:
-  return (struct _stufflib_png_chunk){0};
+  return (_stufflib_png_chunk){0};
 }
 
-int stufflib_png_is_supported(struct stufflib_png_header header) {
+int stufflib_png_is_supported(stufflib_png_header header) {
   return (header.compression == 0 && header.filter == 0 &&
           header.interlace == 0 &&
           (header.color_type == 2 || header.color_type == 6) &&
           header.bit_depth == 8);
-}
-
-struct stufflib_png_header stufflib_png_parse_header(
-    struct _stufflib_png_chunk chunk) {
-  struct stufflib_png_header header = {0};
-
-  size_t chunk_data_pos = 0;
-
-  // parse big-endian 32-bit uint PNG width and height
-  {
-    size_t field_len = 4;
-    unsigned char buf[field_len];
-
-    memcpy(buf, chunk.data + chunk_data_pos, field_len);
-    chunk_data_pos += field_len;
-    header.width = stufflib_misc_parse_big_endian_u32(buf);
-
-    memcpy(buf, chunk.data + chunk_data_pos, field_len);
-    chunk_data_pos += field_len;
-    header.height = stufflib_misc_parse_big_endian_u32(buf);
-  }
-
-  // parse single byte fields
-  {
-    const size_t rest_len = 5;
-    unsigned char buf[rest_len];
-
-    memcpy(buf, chunk.data + chunk_data_pos, rest_len);
-    chunk_data_pos += rest_len;
-    header.bit_depth = (uint8_t)(buf[0]);
-    header.color_type = (uint8_t)(buf[1]);
-    header.compression = (uint8_t)(buf[2]);
-    header.filter = (uint8_t)(buf[3]);
-    header.interlace = (uint8_t)(buf[4]);
-  }
-
-  return header;
 }
 
 const char* stufflib_png_format_color_type(uint8_t color_type) {
@@ -148,10 +123,7 @@ const char* stufflib_png_format_color_type(uint8_t color_type) {
   }[color_type];
 }
 
-void stufflib_png_dump_img_meta(FILE* stream, struct stufflib_png_image image) {
-  fprintf(stream, "  data length: %zu\n", image.size);
-  fprintf(stream, "  data begin: %p\n", image.data);
-  struct stufflib_png_header header = image.header;
+void stufflib_png_dump_header(FILE* stream, stufflib_png_header header) {
   fprintf(stream, "  width: %" PRIu32 "\n", header.width);
   fprintf(stream, "  height: %" PRIu32 "\n", header.height);
   fprintf(stream, "  bit depth: %" PRIu8 "\n", header.bit_depth);
@@ -163,8 +135,14 @@ void stufflib_png_dump_img_meta(FILE* stream, struct stufflib_png_image image) {
   fprintf(stream, "  interlace: %" PRIu8 "\n", header.interlace);
 }
 
+void stufflib_png_dump_img_meta(FILE* stream, stufflib_png_image image) {
+  fprintf(stream, "  data length: %zu\n", image.size);
+  fprintf(stream, "  data begin: %p\n", image.data);
+  stufflib_png_dump_header(stream, image.header);
+}
+
 void stufflib_png_dump_img_data(FILE* stream,
-                                struct stufflib_png_image image,
+                                stufflib_png_image image,
                                 const size_t count) {
   const size_t bytes_per_line = 40;
   for (size_t i = 0; i < count && i < image.size; ++i) {
@@ -180,11 +158,13 @@ void stufflib_png_dump_img_data(FILE* stream,
   fprintf(stream, "\n");
 }
 
-struct stufflib_png_image stufflib_png_read(const char* filename) {
+stufflib_png_header stufflib_png_read_header(const char* filename) {
+  stufflib_png_header header = {0};
+
   FILE* fp = fopen(filename, "r");
   if (!fp) {
     fprintf(stderr, "error: cannot open %s\n", filename);
-    goto error;
+    goto done;
   }
 
   // check for 8 byte file header containing 'PNG' in ascii
@@ -193,79 +173,164 @@ struct stufflib_png_image stufflib_png_read(const char* filename) {
     unsigned char buf[header_len];
     if (fread(buf, 1, header_len, fp) != header_len) {
       fprintf(stderr, "error: failed reading header of %s\n", filename);
-      goto error;
+      goto done;
     }
     if (!(buf[1] == 'P' && buf[2] == 'N' && buf[3] == 'G')) {
       fprintf(stderr, "error: not a PNG image: %s\n", filename);
-      goto error;
+      goto done;
     }
+    header.size += header_len;
   }
-
-  struct stufflib_png_image image = {0};
 
   {
     // file claims to be PNG, read the PNG header block
-    struct _stufflib_png_chunk header_chunk = stufflib_png_parse_next_chunk(fp);
-    if (header_chunk.length == 0) {
-      goto corrupted_img_error;
+    _stufflib_png_chunk chunk = stufflib_png_parse_next_chunk(fp);
+    if (chunk.length == 0) {
+      goto corrupted_header_error;
     }
-    struct stufflib_png_header header = stufflib_png_parse_header(header_chunk);
-    free(header_chunk.data);
+
+    header.size += chunk.size;
+
+    size_t chunk_data_pos = 0;
+
+    // parse big-endian 32-bit uint PNG width and height
+    {
+      size_t field_len = 4;
+      unsigned char buf[field_len];
+
+      memcpy(buf, chunk.data + chunk_data_pos, field_len);
+      chunk_data_pos += field_len;
+      header.width = stufflib_misc_parse_big_endian_u32(buf);
+
+      memcpy(buf, chunk.data + chunk_data_pos, field_len);
+      chunk_data_pos += field_len;
+      header.height = stufflib_misc_parse_big_endian_u32(buf);
+    }
+
+    // parse single byte fields
+    {
+      const size_t rest_len = 5;
+      unsigned char buf[rest_len];
+
+      memcpy(buf, chunk.data + chunk_data_pos, rest_len);
+      chunk_data_pos += rest_len;
+      header.bit_depth = (uint8_t)(buf[0]);
+      header.color_type = (uint8_t)(buf[1]);
+      header.compression = (uint8_t)(buf[2]);
+      header.filter = (uint8_t)(buf[3]);
+      header.interlace = (uint8_t)(buf[4]);
+    }
+
+    free(chunk.data);
     if (header.width == 0 || header.height == 0) {
-      goto corrupted_img_error;
+      goto corrupted_header_error;
     }
-    image.header = header;
     if (!stufflib_png_is_supported(header)) {
-      goto unsupported_img_error;
+      goto unsupported_header_error;
     }
+  }
+
+  goto done;
+
+unsupported_header_error:
+  fprintf(stderr,
+          ("error: unsupported PNG features in %s\n"
+           "image must be:\n"
+           "  8-bit/color\n"
+           "  RGB/A\n"
+           "  non-interlaced\n"
+           "  compression=0\n"
+           "  filter=0\n"
+           "instead, header is:\n"),
+          filename);
+  stufflib_png_dump_header(stderr, header);
+  goto error;
+
+corrupted_header_error:
+  fprintf(stderr, "error: corrupted PNG header in %s\n", filename);
+  goto error;
+
+error:
+  header = (stufflib_png_header){0};
+
+done:
+  if (fp) {
+    fclose(fp);
+  }
+  return header;
+}
+
+stufflib_png_image stufflib_png_read_image(const char* filename) {
+  stufflib_png_image image = {0};
+
+  FILE* fp = fopen(filename, "r");
+  if (!fp) {
+    fprintf(stderr, "error: cannot open %s\n", filename);
+    goto error;
+  }
+
+  image.header = stufflib_png_read_header(filename);
+  if (!(image.header.width && image.header.height)) {
+    goto error;
+  }
+
+  if (fseek(fp, image.header.size, SEEK_SET)) {
+    fprintf(stderr,
+            "error: failed seeking %zu bytes past PNG header in %s\n",
+            image.header.size,
+            filename);
+    goto error;
   }
 
   // TODO PLTE if color type 3
 
   size_t num_data = 0;
   // read chunks until end of image
-  struct _stufflib_png_chunk data_chunk = {0};
-  while (memcmp(data_chunk.type, "IEND", 4)) {
+  _stufflib_png_chunk data_chunk = {0};
+  while (memcmp(data_chunk.type, "IEND", 4) != 0) {
     data_chunk = stufflib_png_parse_next_chunk(fp);
     if (data_chunk.type[0] == 0) {
-      goto corrupted_img_error;
+      goto corrupted_image_error;
     }
-    if (!memcmp(data_chunk.type, "IDAT", 4)) {
+    if (memcmp(data_chunk.type, "IDAT", 4) == 0) {
       ++num_data;
       if (num_data > 1) {
         fprintf(stderr, "TODO handle multiple IDAT chunks\n");
         free(data_chunk.data);
-        goto unsupported_img_error;
+        goto corrupted_image_error;
       }
-      // IDAT check as defined in https://datatracker.ietf.org/doc/html/rfc1950
-      if ((data_chunk.data[0] * 256 + data_chunk.data[1]) % 31 != 0) {
-        goto corrupted_img_error;
+      stufflib_data img_data =
+          stufflib_inflate(data_chunk.length, data_chunk.data);
+      if (!img_data.size) {
+        goto corrupted_image_error;
       }
-      image.data = data_chunk.data;
-      image.size += (size_t)(data_chunk.length);
-    } else {
-      free(data_chunk.data);
+      image.data = img_data.data;
+      image.size = img_data.size;
     }
+    free(data_chunk.data);
   }
 
-  fclose(fp);
-  return image;
+  goto done;
 
-unsupported_img_error:
-  fprintf(stderr, "error: unsupported PNG features in %s\n", filename);
-  stufflib_png_dump_img_meta(stderr, image);
-  fprintf(stderr,
-          "error: image must be 8-bit/color RGB/A non-interlaced, "
-          "compression=0, filter=0\n");
+corrupted_image_error:
+  fprintf(stderr, "error: corrupted PNG image %s\n", filename);
   goto error;
-corrupted_img_error:
-  fprintf(stderr, "error: corrupted PNG image: %s\n", filename);
-  goto error;
+
 error:
+  image = (stufflib_png_image){0};
+
+done:
   if (fp) {
     fclose(fp);
   }
-  return (struct stufflib_png_image){0};
+  return image;
+}
+
+void stufflib_png_destroy(stufflib_png_image* image) {
+  if (image) {
+    free(image->data);
+    *image = (stufflib_png_image){0};
+  }
 }
 
 #endif  // _STUFFLIB_PNG_H_INCLUDED

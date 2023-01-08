@@ -47,4 +47,10 @@ size_t stufflib_misc_vmax_size_t(const size_t n, const size_t v[n]) {
   return res;
 }
 
+typedef struct stufflib_data stufflib_data;
+struct stufflib_data {
+  const size_t size;
+  unsigned char* data;
+};
+
 #endif  // _STUFFLIB_MISC_H_INCLUDED

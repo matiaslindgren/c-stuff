@@ -7,9 +7,10 @@
 // 2. RFC 1951 (Deutsch, May 1996),
 //    https://datatracker.ietf.org/doc/html/rfc1951 (accessed 2023-01-05)
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 
-#include "stufflib_png.h"
+#include "stufflib_misc.h"
 
 typedef struct stufflib_huffman_tree stufflib_huffman_tree;
 struct stufflib_huffman_tree {
@@ -142,12 +143,6 @@ static inline int _tree_contains(const stufflib_huffman_tree* tree,
          tree->symbols[code_len - 1][code];
 }
 
-typedef struct stufflib_inflate_data stufflib_inflate_data;
-struct stufflib_inflate_data {
-  size_t len;
-  unsigned char* data;
-};
-
 static inline stufflib_huffman_tree _make_fixed_literal_codes() {
   const size_t max_literal = 287;
   size_t* code_lengths = calloc(max_literal + 1, sizeof(size_t));
@@ -229,6 +224,25 @@ static inline size_t _read_big_endian_bits(
     res = (res << 1) | _read_bit(data, pos);
   }
   return res;
+}
+
+static inline size_t _copy_uncompressed_block(const size_t dst_len,
+                                              unsigned char dst[dst_len],
+                                              const size_t src_len,
+                                              const unsigned char src[src_len],
+                                              size_t* src_bit) {
+  size_t src_pos = *src_bit / CHAR_BIT + 1;
+  const size_t len = stufflib_misc_parse_lil_endian_u16(src + src_pos);
+  src_pos += 2;
+  const size_t nlen = stufflib_misc_parse_lil_endian_u16(src + src_pos);
+  src_pos += 2;
+  if ((~len & 0xffff) != nlen) {
+    fprintf(stderr, "corrupted zlib block, ~LEN != NLEN\n");
+    return 0;
+  }
+  memcpy(dst, (void*)(src + src_pos), len);
+  *src_bit += (src_pos + len) * CHAR_BIT;
+  return len;
 }
 
 static inline size_t _decompress_and_copy_fixed_huffman_block(
@@ -321,34 +335,29 @@ static inline size_t _decompress_and_copy_fixed_huffman_block(
   return dst_pos;
 }
 
-static inline size_t _copy_uncompressed_block(const size_t dst_len,
-                                              unsigned char dst[dst_len],
-                                              const size_t src_len,
-                                              const unsigned char src[src_len],
-                                              size_t* src_bit) {
-  size_t src_pos = *src_bit / CHAR_BIT + 1;
-  const size_t len = stufflib_misc_parse_lil_endian_u16(src + src_pos);
-  src_pos += 2;
-  const size_t nlen = stufflib_misc_parse_lil_endian_u16(src + src_pos);
-  src_pos += 2;
-  if ((~len & 0xffff) != nlen) {
-    fprintf(stderr, "corrupted zlib block, ~LEN != NLEN\n");
-    return 0;
-  }
-  memcpy(dst, (void*)(src + src_pos), len);
-  *src_bit += (src_pos + len) * CHAR_BIT;
-  return len;
+static inline size_t _decompress_and_copy_dynamic_huffman_block(
+    const size_t dst_len,
+    unsigned char dst[dst_len],
+    const size_t src_len,
+    const unsigned char src[src_len],
+    size_t* src_bit) {
+  return 0;
 }
 
-stufflib_inflate_data stufflib_inflate(const size_t n,
-                                       const unsigned char data[n]) {
-  assert(n >= 2);
-  assert((data[0] * 256 + data[1]) % 31 == 0);
+stufflib_data stufflib_inflate(const size_t n, const unsigned char data[n]) {
   unsigned char* output = 0;
-  size_t output_len = 0;
+  size_t output_size = 0;
   stufflib_huffman_tree fixed_literal_codes = _make_fixed_literal_codes();
   stufflib_huffman_tree fixed_dist_codes = _make_fixed_dist_codes();
 
+  if (n < 3) {
+    fprintf(stderr, "DEFLATE stream is too short\n");
+    goto error;
+  }
+  if ((data[0] * 256 + data[1]) % 31) {
+    fprintf(stderr, "DEFLATE block length complement check failed\n");
+    goto error;
+  }
   const int cmethod = data[0] & 0x0F;
   if (cmethod != 8) {
     fprintf(stderr, "unexpected compression method %d != 8\n", cmethod);
@@ -359,9 +368,11 @@ stufflib_inflate_data stufflib_inflate(const size_t n,
     fprintf(stderr, "too large compression info %d > 7 \n", cinfo);
     goto error;
   }
-  const size_t window_size = 1 << (cinfo + 8);
   const int fdict = (data[1] & 0x20) >> 5;
-  assert(!fdict);
+  if (fdict) {
+    fprintf(stderr, "dictionaries not supported\n");
+    goto error;
+  }
 
 #if 0
   for (size_t code_len = 1; code_len <= literal_codes.max_code_len;
@@ -397,15 +408,17 @@ stufflib_inflate_data stufflib_inflate(const size_t n,
   }
 #endif
 
+  const size_t window_size = 1 << (cinfo + 8);
   size_t bit_pos[] = {2 * CHAR_BIT};
   int is_final_block = 0;
 
   while (!is_final_block) {
     is_final_block = _read_bit(data, *bit_pos);
+    printf("bitpos %zu final %d\n", *bit_pos, is_final_block);
     ++(*bit_pos);
 
     {
-      unsigned char* tmp = realloc(output, output_len + window_size);
+      unsigned char* tmp = realloc(output, output_size + window_size);
       if (!tmp) {
         goto error;
       }
@@ -423,21 +436,26 @@ stufflib_inflate_data stufflib_inflate(const size_t n,
 
     switch (btype) {
       case no_compression: {
-        output_len += _copy_uncompressed_block(window_size,
-                                               output + output_len,
-                                               n,
-                                               data,
-                                               bit_pos);
+        output_size += _copy_uncompressed_block(window_size,
+                                                output + output_size,
+                                                n,
+                                                data,
+                                                bit_pos);
       } break;
       case dynamic_huffman_codes: {
-        goto error;
+        output_size +=
+            _decompress_and_copy_dynamic_huffman_block(window_size,
+                                                       output + output_size,
+                                                       n,
+                                                       data,
+                                                       bit_pos);
       } break;
       case fixed_huffman_codes: {
-        output_len +=
+        output_size +=
             _decompress_and_copy_fixed_huffman_block(&fixed_literal_codes,
                                                      &fixed_dist_codes,
                                                      window_size,
-                                                     output + output_len,
+                                                     output + output_size,
                                                      n,
                                                      data,
                                                      bit_pos);
@@ -453,26 +471,24 @@ stufflib_inflate_data stufflib_inflate(const size_t n,
     }
 
     {
-      unsigned char* tmp = realloc(output, output_len);
+      unsigned char* tmp = realloc(output, output_size);
       if (!tmp) {
         goto error;
       }
       output = tmp;
     }
-
-    printf("bitpos %zu final %d\n", *bit_pos, is_final_block);
   }
 
   goto done;
 
 error:
-  output_len = 0;
+  output_size = 0;
   free(output);
   output = 0;
 done:
   stufflib_inflate_tree_destroy(&fixed_literal_codes);
   stufflib_inflate_tree_destroy(&fixed_dist_codes);
-  return (stufflib_inflate_data){.len = output_len, .data = output};
+  return (stufflib_data){.size = output_size, .data = output};
 }
 
 #endif  // _STUFFLIB_INFLATE_H_INCLUDED
