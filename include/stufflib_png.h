@@ -290,6 +290,7 @@ stufflib_png_image stufflib_png_read_image(const char* filename) {
   while (memcmp(data_chunk.type, "IEND", 4) != 0) {
     data_chunk = stufflib_png_parse_next_chunk(fp);
     if (data_chunk.type[0] == 0) {
+      free(data_chunk.data);
       goto corrupted_image_error;
     }
     if (memcmp(data_chunk.type, "IDAT", 4) == 0) {
@@ -302,6 +303,7 @@ stufflib_png_image stufflib_png_read_image(const char* filename) {
       stufflib_data img_data =
           stufflib_inflate(data_chunk.length, data_chunk.data);
       if (!img_data.size) {
+        free(data_chunk.data);
         goto corrupted_image_error;
       }
       image.data = img_data.data;

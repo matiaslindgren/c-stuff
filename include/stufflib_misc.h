@@ -7,6 +7,7 @@
 
 #define STUFFLIB_MIN(x, y) ((x) < (y) ? (x) : (y))
 #define STUFFLIB_MAX(x, y) ((x) < (y) ? (y) : (x))
+#define STUFFLIB_ARRAY_LEN(a) (sizeof(a) / sizeof((a)[0]))
 
 #define UINT16_BYTES (16 / CHAR_BIT)
 #define UINT32_BYTES (32 / CHAR_BIT)
