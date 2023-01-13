@@ -96,6 +96,7 @@ stufflib_huffman_tree* stufflib_inflate_huffman_tree(
     const size_t max_code = max_codes[code_len - 1];
     if (!(symbols[code_len - 1] = calloc(max_code + 1, sizeof(size_t)))) {
       free(max_codes);
+      // TODO proper free for every pointer in symbols up to code_len
       free(symbols);
       free(codes);
       fprintf(stderr, "failed allocating symbols for code_len %zu\n", code_len);
@@ -179,7 +180,7 @@ error:
   return (stufflib_huffman_tree){0};
 }
 
-static stufflib_huffman_tree _make_fixed_dist_codes() {
+static stufflib_huffman_tree _make_fixed_distance_codes() {
   const size_t max_dist = 31;
   size_t* code_lengths = calloc(max_dist + 1, sizeof(size_t));
   if (!code_lengths) {
@@ -230,6 +231,71 @@ size_t _decode_next_code(const stufflib_huffman_tree codes[const static 1],
   return SIZE_MAX;
 }
 
+size_t _inflate_block(
+    const stufflib_huffman_tree literal_codes[const static 1],
+    const stufflib_huffman_tree distance_codes[const static 1],
+    const size_t dst_len,
+    unsigned char dst[dst_len],
+    const size_t src_len,
+    const unsigned char src[src_len],
+    size_t src_pos[static 1]) {
+  static size_t lengths[29] = {0};
+  static int lengths_extra[29] = {0};
+  static size_t distances[30] = {0};
+  static int distances_extra[30] = {0};
+
+  static int first_call = 1;
+  if (first_call) {
+    first_call = 0;
+
+    lengths[0] = 3;
+    for (size_t i = 1; i < STUFFLIB_ARRAY_LEN(lengths); ++i) {
+      const int extra_bits = (STUFFLIB_MAX(1, (i - 1) / 4) - 1) % 6;
+      lengths_extra[i - 1] = extra_bits;
+      lengths[i] = lengths[i - 1] + (1 << extra_bits);
+    }
+    lengths[28] = 258;
+
+    distances[0] = 1;
+    for (size_t i = 1; i < STUFFLIB_ARRAY_LEN(distances); ++i) {
+      const int extra_bits = STUFFLIB_MAX(1, (i - 1) / 2) - 1;
+      distances_extra[i - 1] = extra_bits;
+      distances[i] = distances[i - 1] + (1 << extra_bits);
+    }
+  }
+
+  const size_t end_of_block = 256;
+  size_t dst_pos = 0;
+
+  while (dst_pos < dst_len) {
+    const size_t symbol = _decode_next_code(literal_codes, src, src_pos);
+    assert(symbol < 286);
+    if (symbol == end_of_block) {
+      break;
+    }
+    if (symbol < end_of_block) {
+      dst[dst_pos++] = symbol & 0xff;
+      continue;
+    }
+    const size_t len_symbol = symbol - 257;
+    const size_t extra_len =
+        _next_n_bits(src, src_pos, lengths_extra[len_symbol]);
+    const size_t length = lengths[len_symbol] + extra_len;
+
+    const size_t dist_symbol = _decode_next_code(distance_codes, src, src_pos);
+    const size_t extra_dist =
+        _next_n_bits(src, src_pos, distances_extra[dist_symbol]);
+    const size_t back_distance = distances[dist_symbol] + extra_dist;
+
+    const size_t begin = dst_pos - back_distance;
+    for (size_t pos = begin; dst_pos < dst_len && pos < begin + length; ++pos) {
+      dst[dst_pos++] = dst[pos];
+    }
+  }
+
+  return dst_pos;
+}
+
 size_t stufflib_inflate_uncompressed_block(const size_t dst_len,
                                            unsigned char dst[dst_len],
                                            const size_t src_len,
@@ -256,126 +322,98 @@ size_t stufflib_inflate_dynamic_huffman_block(const size_t dst_len,
                                               size_t src_pos[static 1]) {
   const size_t num_lengths = 257 + _next_n_bits(src, src_pos, 5);
   const size_t num_distances = 1 + _next_n_bits(src, src_pos, 5);
-  const size_t num_len_lengths = 4 + _next_n_bits(src, src_pos, 4);
-  printf("dynamic, code counts %zu %zu %zu\n",
-         num_lengths,
-         num_distances,
-         num_len_lengths);
+  const size_t num_length_lengths = 4 + _next_n_bits(src, src_pos, 4);
+
   static const size_t length_order[] =
       {16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
+  static const size_t max_length = 18;
 
-  const size_t max_length = 18;
-  size_t* len_lengths = calloc(max_length + 1, sizeof(size_t));
-  if (!len_lengths) {
-    fprintf(stderr, "failed allocating dynamic len_lengths\n");
+  size_t* length_lengths = calloc(max_length + 1, sizeof(size_t));
+  if (!length_lengths) {
+    fprintf(stderr, "failed allocating dynamic length_lengths\n");
     goto error;
   }
-  for (size_t i = 0; i < num_len_lengths; ++i) {
-    len_lengths[length_order[i]] = _next_n_bits(src, src_pos, 3);
+  for (size_t i = 0; i < num_length_lengths; ++i) {
+    length_lengths[length_order[i]] = _next_n_bits(src, src_pos, 3);
   }
-  for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(length_order); ++i) {
-    if (len_lengths[length_order[i]]) {
-      printf("len %zu %zu\n", length_order[i], len_lengths[length_order[i]]);
-    }
-  }
-  stufflib_huffman_tree tree = (stufflib_huffman_tree){0};
-  if (!stufflib_inflate_huffman_tree(&tree, max_length, len_lengths)) {
-    free(len_lengths);
+  stufflib_huffman_tree length_codes = (stufflib_huffman_tree){0};
+  if (!stufflib_inflate_huffman_tree(&length_codes,
+                                     max_length,
+                                     length_lengths)) {
+    free(length_lengths);
     goto error;
   }
-  free(len_lengths);
+  free(length_lengths);
 
-  for (size_t code_len = 1; code_len <= tree.max_code_len; ++code_len) {
-    for (size_t i = 0; i < tree.max_codes[code_len - 1]; ++i) {
-      printf("%zu %zu %zu\n", code_len, i, tree.symbols[code_len - 1][i]);
-    }
-  }
-
-  for (size_t i = 0; i < num_lengths; ++i) {
-    const size_t symbol = _decode_next_code(&tree, src, src_pos);
+  size_t* dynamic_code_lengths =
+      calloc(num_lengths + num_distances + 1, sizeof(size_t));
+  for (size_t i = 0; i < num_lengths + num_distances;) {
+    const size_t symbol = _decode_next_code(&length_codes, src, src_pos);
     assert(symbol != SIZE_MAX);
-    printf("%zu: %zu\n", i, symbol);
-    if (symbol <= 15) {
-
+    size_t code_len = 0;
+    size_t num_repeats = 0;
+    if (symbol < 16) {
+      code_len = symbol;
+      num_repeats = 1;
     } else if (symbol == 16) {
+      assert(i > 0);
+      code_len = dynamic_code_lengths[i - 1];
+      num_repeats = 3 + _next_n_bits(src, src_pos, 2);
     } else if (symbol == 17) {
+      code_len = 0;
+      num_repeats = 3 + _next_n_bits(src, src_pos, 3);
     } else if (symbol == 18) {
+      code_len = 0;
+      num_repeats = 11 + _next_n_bits(src, src_pos, 7);
     } else {
-      assert(0);
+      fprintf(stderr, "unexpected symbol %zu in dynamic block\n", symbol);
+      free(dynamic_code_lengths);
+      goto error;
     }
+    for (size_t r = 0; r < num_repeats; ++r) {
+      dynamic_code_lengths[i + r] = code_len;
+    }
+    i += num_repeats;
   }
+  stufflib_inflate_tree_destroy(&length_codes);
 
-  stufflib_inflate_tree_destroy(&tree);
-  return 0;
+  stufflib_huffman_tree literal_codes = (stufflib_huffman_tree){0};
+  if (!stufflib_inflate_huffman_tree(&literal_codes,
+                                     num_lengths - 1,
+                                     dynamic_code_lengths)) {
+    free(dynamic_code_lengths);
+    goto error;
+  }
+  stufflib_huffman_tree distance_codes = (stufflib_huffman_tree){0};
+  if (!stufflib_inflate_huffman_tree(&distance_codes,
+                                     num_distances,
+                                     dynamic_code_lengths + num_lengths)) {
+    free(dynamic_code_lengths);
+    stufflib_inflate_tree_destroy(&literal_codes);
+    goto error;
+  }
+  free(dynamic_code_lengths);
+
+  const size_t decoded_size = _inflate_block(&literal_codes,
+                                             &distance_codes,
+                                             dst_len,
+                                             dst,
+                                             src_len,
+                                             src,
+                                             src_pos);
+  stufflib_inflate_tree_destroy(&literal_codes);
+  stufflib_inflate_tree_destroy(&distance_codes);
+  return decoded_size;
 
 error:
   return 0;
-}
-
-size_t stufflib_inflate_fixed_huffman_block(
-    const stufflib_huffman_tree literal_codes[const static 1],
-    const stufflib_huffman_tree dist_codes[const static 1],
-    const size_t dst_len,
-    unsigned char dst[dst_len],
-    const size_t src_len,
-    const unsigned char src[src_len],
-    size_t src_pos[static 1]) {
-  static size_t lengths[29] = {0};
-  static int lengths_extra[29] = {0};
-  static size_t distances[30] = {0};
-  static int distances_extra[30] = {0};
-  static int first_call = 1;
-  if (first_call) {
-    first_call = 0;
-    lengths[0] = 3;
-    for (size_t i = 1; i < STUFFLIB_ARRAY_LEN(lengths); ++i) {
-      const int extra_bits = (STUFFLIB_MAX(1, (i - 1) / 4) - 1) % 6;
-      lengths_extra[i - 1] = extra_bits;
-      lengths[i] = lengths[i - 1] + (1 << extra_bits);
-    }
-    lengths[28] = 258;
-    distances[0] = 1;
-    for (size_t i = 1; i < STUFFLIB_ARRAY_LEN(distances); ++i) {
-      const int extra_bits = STUFFLIB_MAX(1, (i - 1) / 2) - 1;
-      distances_extra[i - 1] = extra_bits;
-      distances[i] = distances[i - 1] + (1 << extra_bits);
-    }
-  }
-
-  size_t dst_pos = 0;
-  while (1) {
-    const size_t symbol = _decode_next_code(literal_codes, src, src_pos);
-    assert(symbol < 286);
-    if (symbol < 256) {
-      dst[dst_pos++] = symbol & 0xff;
-      continue;
-    }
-    if (symbol == 256) {
-      break;
-    }
-    const size_t len_symbol = symbol - 257;
-    const size_t num_extra_len_bits = lengths_extra[len_symbol];
-    const size_t extra_len = _next_n_bits(src, src_pos, num_extra_len_bits);
-    const size_t len = lengths[len_symbol] + extra_len;
-
-    const size_t dist_symbol = _decode_next_code(dist_codes, src, src_pos);
-    const size_t num_extra_dist_bits = distances_extra[dist_symbol];
-    const size_t extra_dist = _next_n_bits(src, src_pos, num_extra_dist_bits);
-    const size_t dist = distances[dist_symbol] + extra_dist;
-
-    const size_t begin = dst_pos - dist;
-    for (size_t pos = begin; pos < begin + len; ++pos) {
-      dst[dst_pos++] = dst[pos];
-    }
-  }
-  return dst_pos;
 }
 
 stufflib_data stufflib_inflate(const size_t n, const unsigned char data[n]) {
   unsigned char* output = 0;
   size_t output_size = 0;
   stufflib_huffman_tree fixed_literal_codes = _make_fixed_literal_codes();
-  stufflib_huffman_tree fixed_dist_codes = _make_fixed_dist_codes();
+  stufflib_huffman_tree fixed_distance_codes = _make_fixed_distance_codes();
 
   if (n < 3) {
     fprintf(stderr, "DEFLATE stream is too short\n");
@@ -400,40 +438,6 @@ stufflib_data stufflib_inflate(const size_t n, const unsigned char data[n]) {
     fprintf(stderr, "dictionaries are not supported\n");
     goto error;
   }
-
-#if 0
-  for (size_t code_len = 1; code_len <= literal_codes.max_code_len;
-       ++code_len) {
-    if (literal_codes.max_codes[code_len - 1]) {
-      printf("lc %3zu code_len max %zu\n",
-             code_len,
-             literal_codes.max_codes[code_len - 1]);
-      for (size_t code = 0; code <= literal_codes.max_codes[code_len - 1];
-           ++code) {
-        if (_tree_contains(&literal_codes, code, code_len)) {
-          printf("  %3zu -> %3zu\n",
-                 code,
-                 _tree_get(&literal_codes, code, code_len));
-        }
-      }
-    }
-  }
-  for (size_t code_len = 1; code_len <= dist_codes.max_code_len; ++code_len) {
-    if (dist_codes.max_codes[code_len - 1]) {
-      printf("lc %3zu code_len max %zu\n",
-             code_len,
-             dist_codes.max_codes[code_len - 1]);
-      for (size_t code = 0; code <= dist_codes.max_codes[code_len - 1];
-           ++code) {
-        if (_tree_contains(&dist_codes, code, code_len)) {
-          printf("  %3zu -> %3zu\n",
-                 code,
-                 _tree_get(&dist_codes, code, code_len));
-        }
-      }
-    }
-  }
-#endif
 
   const size_t window_size = 1 << (cinfo + 8);
   size_t src_pos[] = {2 * CHAR_BIT};
@@ -466,24 +470,31 @@ stufflib_data stufflib_inflate(const size_t n, const unsigned char data[n]) {
                                                            src_pos);
       } break;
       case dynamic_huffman_codes: {
-        // TODO
-        output_size +=
+        const size_t num_decoded =
             stufflib_inflate_dynamic_huffman_block(window_size,
                                                    output + output_size,
                                                    n,
                                                    data,
                                                    src_pos);
-        goto error;
+        if (!num_decoded) {
+          fprintf(stderr, "dynamic inflate failed\n");
+          goto error;
+        }
+        output_size += num_decoded;
       } break;
       case fixed_huffman_codes: {
-        output_size +=
-            stufflib_inflate_fixed_huffman_block(&fixed_literal_codes,
-                                                 &fixed_dist_codes,
-                                                 window_size,
-                                                 output + output_size,
-                                                 n,
-                                                 data,
-                                                 src_pos);
+        const size_t num_decoded = _inflate_block(&fixed_literal_codes,
+                                                  &fixed_distance_codes,
+                                                  window_size,
+                                                  output + output_size,
+                                                  n,
+                                                  data,
+                                                  src_pos);
+        if (!num_decoded) {
+          fprintf(stderr, "fixed inflate failed\n");
+          goto error;
+        }
+        output_size += num_decoded;
       } break;
       default: {
         fprintf(stderr, "invalid block type %d\n", btype);
@@ -512,7 +523,7 @@ error:
   output = 0;
 done:
   stufflib_inflate_tree_destroy(&fixed_literal_codes);
-  stufflib_inflate_tree_destroy(&fixed_dist_codes);
+  stufflib_inflate_tree_destroy(&fixed_distance_codes);
   return (stufflib_data){.size = output_size, .data = output};
 }
 
