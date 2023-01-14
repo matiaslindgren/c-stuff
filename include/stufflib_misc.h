@@ -36,6 +36,18 @@ uint32_t stufflib_misc_parse_big_endian_u32(
 #undef UINT16_BYTES
 #undef UINT32_BYTES
 
+// https://en.wikipedia.org/wiki/Adler-32
+uint32_t stufflib_misc_adler32(const size_t n, unsigned char data[n]) {
+  const uint32_t mod_adler = 65521;
+  uint32_t a = 1;
+  uint32_t b = 0;
+  for (size_t index = 0; index < n; ++index) {
+    a = (a + data[index]) % mod_adler;
+    b = (b + a) % mod_adler;
+  }
+  return (b << 16) | a;
+}
+
 size_t stufflib_misc_midpoint(const size_t lo, const size_t hi) {
   return lo + (hi - lo) / 2;
 }
@@ -50,8 +62,22 @@ size_t stufflib_misc_vmax_size_t(const size_t n, const size_t v[n]) {
 
 typedef struct stufflib_data stufflib_data;
 struct stufflib_data {
-  const size_t size;
+  size_t size;
   unsigned char* data;
 };
+
+void stufflib_misc_data_destroy(stufflib_data data) { free(data.data); }
+
+stufflib_data* stufflib_misc_concat(stufflib_data dst[static 1],
+                                    const stufflib_data src[static 1]) {
+  unsigned char* tmp = realloc(dst->data, dst->size + src->size);
+  if (!tmp) {
+    return 0;
+  }
+  dst->data = tmp;
+  memcpy(dst->data + dst->size, src->data, src->size);
+  dst->size += src->size;
+  return dst;
+}
 
 #endif  // _STUFFLIB_MISC_H_INCLUDED
