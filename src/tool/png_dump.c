@@ -36,12 +36,16 @@ int main(int argc, char* const argv[argc + 1]) {
     if (!img.data.size) {
       return EXIT_FAILURE;
     }
-    printf("FILE\n  %s\n", png_path);
     printf("HEADER\n");
     stufflib_png_dump_img_meta(stdout, img);
+    printf("FILTER (%zu bytes)\n", img.filter.size);
+    stufflib_png_dump_filter_freq(stdout, img.filter);
+    if (verbose) {
+      stufflib_misc_data_fdump(stdout, img.filter, 40);
+    }
     printf("DATA (%zu bytes)\n", img.data.size);
     if (verbose) {
-      stufflib_png_dump_img_data(stdout, img);
+      stufflib_misc_data_fdump(stdout, img.data, 40);
     }
     stufflib_png_image_destroy(img);
   }

@@ -2,6 +2,7 @@
 #define _STUFFLIB_MISC_H_INCLUDED
 #include <inttypes.h>
 #include <limits.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -66,7 +67,18 @@ struct stufflib_data {
   unsigned char* data;
 };
 
-void stufflib_misc_data_destroy(stufflib_data data) { free(data.data); }
+stufflib_data stufflib_misc_data_new(const size_t size) {
+  unsigned char* data = calloc(size, sizeof(unsigned char));
+  return (stufflib_data){
+      .size = data ? size : 0,
+      .data = data,
+  };
+}
+
+void stufflib_misc_data_destroy(stufflib_data data[static 1]) {
+  free(data->data);
+  *data = (stufflib_data){0};
+}
 
 stufflib_data* stufflib_misc_concat(stufflib_data dst[static 1],
                                     const stufflib_data src[static 1]) {
@@ -78,6 +90,22 @@ stufflib_data* stufflib_misc_concat(stufflib_data dst[static 1],
   memcpy(dst->data + dst->size, src->data, src->size);
   dst->size += src->size;
   return dst;
+}
+
+void stufflib_misc_data_fdump(FILE stream[const static 1],
+                              const stufflib_data data,
+                              const size_t bytes_per_line) {
+  for (size_t i = 0; i < data.size; ++i) {
+    if (i) {
+      if (i % bytes_per_line == 0) {
+        fprintf(stream, "\n");
+      } else if (i % 2 == 0) {
+        fprintf(stream, " ");
+      }
+    }
+    fprintf(stream, "%02x", data.data[i]);
+  }
+  fprintf(stream, "\n");
 }
 
 #endif  // _STUFFLIB_MISC_H_INCLUDED

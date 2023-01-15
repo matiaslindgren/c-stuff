@@ -51,12 +51,41 @@ enum stufflib_png_color_type {
 
 const char* stufflib_png_color_types[] = {
     "grayscale",
-    "",
+    0,
     "rgb",
     "indexed",
     "grayscale with alpha",
-    "",
+    0,
     "rgba",
+};
+
+size_t stufflib_png_bytes_per_pixel[] = {
+    // TODO
+    [stufflib_png_grayscale] = 1,
+    0,
+    [stufflib_png_rgb] = 3,
+    [stufflib_png_indexed] = 0,
+    [stufflib_png_grayscale_alpha] = 2,
+    0,
+    [stufflib_png_rgba] = 4,
+    0,
+};
+
+enum stufflib_png_filter_type {
+  stufflib_png_filter_none = 0,
+  stufflib_png_filter_sub,
+  stufflib_png_filter_up,
+  stufflib_png_filter_avg,
+  stufflib_png_filter_paeth,
+  stufflib_png_num_filter_types,
+};
+
+const char* stufflib_png_filter_types[] = {
+    "None",
+    "Sub",
+    "Up",
+    "Average",
+    "Paeth",
 };
 
 typedef struct stufflib_png_header stufflib_png_header;
@@ -87,10 +116,11 @@ typedef struct stufflib_png_image stufflib_png_image;
 struct stufflib_png_image {
   stufflib_png_header header;
   stufflib_data data;
+  stufflib_data filter;
 };
 
 void stufflib_png_chunk_destroy(stufflib_png_chunk chunk) {
-  stufflib_misc_data_destroy(chunk.data);
+  stufflib_misc_data_destroy(&chunk.data);
 }
 
 void stufflib_png_chunks_destroy(stufflib_png_chunks chunks) {
@@ -101,7 +131,19 @@ void stufflib_png_chunks_destroy(stufflib_png_chunks chunks) {
 }
 
 void stufflib_png_image_destroy(stufflib_png_image image) {
-  stufflib_misc_data_destroy(image.data);
+  stufflib_misc_data_destroy(&image.data);
+  stufflib_misc_data_destroy(&image.filter);
+}
+
+unsigned char* stufflib_png_image_get_pixel(
+    const stufflib_png_image image[static 1],
+    const size_t row,
+    const size_t col) {
+  const size_t width = image->header.width;
+  const size_t bytes_per_px =
+      stufflib_png_bytes_per_pixel[image->header.color_type];
+  const size_t idx = (row * (width + 2) + col) * bytes_per_px;
+  return image->data.data + idx;
 }
 
 int stufflib_png_is_supported(const stufflib_png_header header) {
@@ -127,25 +169,23 @@ void stufflib_png_dump_header(FILE stream[const static 1],
 
 void stufflib_png_dump_img_meta(FILE stream[const static 1],
                                 const stufflib_png_image image) {
+  fprintf(stream, "  filter length: %zu\n", image.filter.size);
   fprintf(stream, "  data length: %zu\n", image.data.size);
   fprintf(stream, "  data begin: %p\n", image.data.data);
   stufflib_png_dump_header(stream, image.header);
 }
 
-void stufflib_png_dump_img_data(FILE stream[const static 1],
-                                const stufflib_png_image image) {
-  const size_t bytes_per_line = 40;
-  for (size_t i = 0; i < image.data.size; ++i) {
-    if (i) {
-      if (i % bytes_per_line == 0) {
-        fprintf(stream, "\n");
-      } else if (i % 2 == 0) {
-        fprintf(stream, " ");
-      }
-    }
-    fprintf(stream, "%02x", image.data.data[i]);
+void stufflib_png_dump_filter_freq(FILE stream[const static 1],
+                                   const stufflib_data filter) {
+  size_t freq[stufflib_png_num_filter_types] = {0};
+  for (size_t i = 0; i < filter.size; ++i) {
+    ++freq[filter.data[i]];
   }
-  fprintf(stream, "\n");
+  fprintf(stream, "  %7s %12s\n", "filter", "count");
+  for (size_t filter = 0; filter < stufflib_png_num_filter_types; ++filter) {
+    const char* filter_name = stufflib_png_filter_types[filter];
+    fprintf(stream, "  %7s %12zu\n", filter_name, freq[filter]);
+  }
 }
 
 void _stufflib_png_dump_chunk(const stufflib_png_chunk chunk) {
@@ -288,10 +328,112 @@ stufflib_png_header stufflib_png_read_header(const char* filename) {
   return header;
 }
 
-size_t stufflib_png_data_size(stufflib_png_header header) {
-  // TODO properly
-  const int bytes_per_pixel = 3 + (header.color_type == stufflib_png_rgba);
-  return header.height + header.width * header.height * bytes_per_pixel;
+size_t stufflib_png_data_size(const stufflib_png_header header) {
+  const size_t bytes_per_px = stufflib_png_bytes_per_pixel[header.color_type];
+  return header.height + bytes_per_px * header.width * header.height;
+}
+
+int stufflib_png_unpack_and_pad_image_data(stufflib_png_image image[static 1]) {
+  stufflib_data filter = {0};
+  stufflib_data padded = {0};
+
+  const size_t width = image->header.width;
+  const size_t height = image->header.height;
+  const size_t bytes_per_px =
+      stufflib_png_bytes_per_pixel[image->header.color_type];
+
+  filter = stufflib_misc_data_new(height);
+  if (!filter.size) {
+    fprintf(stderr, "failed allocating scanline filter buffer\n");
+    goto error;
+  }
+  padded = stufflib_misc_data_new(bytes_per_px * (width + 2) * (height + 2));
+  if (!padded.size) {
+    fprintf(stderr, "failed allocating buffer for padded image data\n");
+    goto error;
+  }
+
+  for (size_t row = 0; row < height; ++row) {
+    const size_t idx_col0_raw = row * bytes_per_px * width + row;
+    filter.data[row] = image->data.data[idx_col0_raw];
+    for (size_t col = 0; col < width; ++col) {
+      for (size_t byte = 0; byte < bytes_per_px; ++byte) {
+        const size_t idx_raw = idx_col0_raw + 1 + col * bytes_per_px + byte;
+        const size_t idx_pad = (row + 1) * (width + 2) * bytes_per_px +
+                               (col + 1) * bytes_per_px + byte;
+        padded.data[idx_pad] = image->data.data[idx_raw];
+      }
+    }
+  }
+
+  image->filter = filter;
+  stufflib_misc_data_destroy(&image->data);
+  image->data = padded;
+  return 1;
+
+error:
+  stufflib_misc_data_destroy(&filter);
+  stufflib_misc_data_destroy(&padded);
+  return 0;
+}
+
+int stufflib_png_unapply_filter(stufflib_png_image image[static 1]) {
+  const size_t width = image->header.width;
+  const size_t height = image->header.height;
+  const size_t bytes_per_px =
+      stufflib_png_bytes_per_pixel[image->header.color_type];
+
+  for (size_t row = 1; row < height + 1; ++row) {
+    const enum stufflib_png_filter_type filter = image->filter.data[row - 1];
+    if (filter == stufflib_png_filter_none) {
+      continue;
+    }
+    for (size_t col = 1; col < width + 1; ++col) {
+      unsigned char* dst_px = stufflib_png_image_get_pixel(image, row, col);
+      const unsigned char* left_px =
+          stufflib_png_image_get_pixel(image, row, col - 1);
+      const unsigned char* above_px =
+          stufflib_png_image_get_pixel(image, row - 1, col);
+      const unsigned char* left_above_px =
+          stufflib_png_image_get_pixel(image, row - 1, col - 1);
+      for (size_t byte = 0; byte < bytes_per_px; ++byte) {
+        switch (filter) {
+          case stufflib_png_filter_sub: {
+            dst_px[byte] += left_px[byte];
+          } break;
+          case stufflib_png_filter_up: {
+            dst_px[byte] += above_px[byte];
+          } break;
+          case stufflib_png_filter_avg: {
+            dst_px[byte] += (left_px[byte] + above_px[byte]) / 2;
+          } break;
+          case stufflib_png_filter_paeth: {
+            const int a = left_px[byte];
+            const int b = above_px[byte];
+            const int c = left_above_px[byte];
+            const int p = a + b - c;
+            const int pa = abs(p - a);
+            const int pb = abs(p - b);
+            const int pc = abs(p - c);
+            if (pa <= pb && pa <= pc) {
+              dst_px[byte] += a;
+            } else if (pb <= pc) {
+              dst_px[byte] += b;
+            } else {
+              dst_px[byte] += c;
+            }
+          } break;
+          default: {
+            fprintf(stderr,
+                    "filter not implemented %s\n",
+                    stufflib_png_filter_types[filter]);
+            return 0;
+          } break;
+        }
+      }
+    }
+  }
+  return 1;
 }
 
 stufflib_png_image stufflib_png_read_image(const char* filename) {
@@ -330,9 +472,8 @@ stufflib_png_image stufflib_png_read_image(const char* filename) {
   }
   // TODO parse PLTE if header.color_type == stufflib_png_indexed
 
-  image.data.size = stufflib_png_data_size(image.header);
-  image.data.data = calloc(image.data.size, sizeof(unsigned char));
-  if (!image.data.data) {
+  image.data = stufflib_misc_data_new(stufflib_png_data_size(image.header));
+  if (!image.data.size) {
     fprintf(stderr, "failed allocating output buffer\n");
     goto error;
   }
@@ -341,14 +482,22 @@ stufflib_png_image stufflib_png_read_image(const char* filename) {
     fprintf(stderr, "failed decoding IDAT stream\n");
     goto error;
   }
+  if (!stufflib_png_unpack_and_pad_image_data(&image)) {
+    fprintf(stderr, "failed padding decoded image\n");
+    goto error;
+  }
+  if (!stufflib_png_unapply_filter(&image)) {
+    fprintf(stderr, "failed unfiltering decoded image\n");
+    goto error;
+  }
 
   stufflib_png_chunks_destroy(chunks);
-  stufflib_misc_data_destroy(idat);
+  stufflib_misc_data_destroy(&idat);
   return image;
 
 error:
   stufflib_png_chunks_destroy(chunks);
-  stufflib_misc_data_destroy(idat);
+  stufflib_misc_data_destroy(&idat);
   stufflib_png_image_destroy(image);
   return (stufflib_png_image){0};
 }
