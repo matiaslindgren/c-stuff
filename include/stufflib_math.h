@@ -84,8 +84,8 @@ error:
 }
 
 double stufflib_math_linalg_dot(const size_t n,
-                                const double v1[n],
-                                const double v2[n]) {
+                                const double v1[restrict n],
+                                const double v2[restrict n]) {
   double dot = 0;
   for (size_t i = 0; i < n; ++i) {
     dot += v1[i] * v2[i];
@@ -95,9 +95,9 @@ double stufflib_math_linalg_dot(const size_t n,
 
 void stufflib_math_linalg_matmul(const size_t nrows,
                                  const size_t ncols,
-                                 const double m[nrows][ncols],
-                                 const double v[ncols],
-                                 double out[nrows]) {
+                                 const double m[restrict nrows][ncols],
+                                 const double v[restrict ncols],
+                                 double out[restrict nrows]) {
   for (size_t row = 0; row < nrows; ++row) {
     out[row] = stufflib_math_linalg_dot(ncols, m[row], v);
   }

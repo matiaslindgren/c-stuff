@@ -7,22 +7,25 @@
 
 typedef struct stufflib_unionfind stufflib_unionfind;
 struct stufflib_unionfind {
-  size_t size;
+  size_t count;
   size_t* parents;
 };
 
-stufflib_unionfind stufflib_unionfind_new(const size_t num_sets) {
-  size_t* parents = calloc(num_sets, sizeof(size_t));
+int stufflib_unionfind_init(stufflib_unionfind uf[static 1],
+                            const size_t count) {
+  size_t* parents = calloc(count, sizeof(size_t));
   if (!parents) {
-    return (stufflib_unionfind){0};
+    return 0;
   }
-  for (size_t i = 0; i < num_sets; ++i) {
+  for (size_t i = 0; i < count; ++i) {
+    // TODO use null pointers instead of sentinels?
     parents[i] = SIZE_MAX;
   }
-  return (stufflib_unionfind){
-      .size = num_sets,
+  *uf = (stufflib_unionfind){
+      .count = count,
       .parents = parents,
   };
+  return 1;
 }
 
 void stufflib_unionfind_destroy(stufflib_unionfind uf[static 1]) {
@@ -30,9 +33,10 @@ void stufflib_unionfind_destroy(stufflib_unionfind uf[static 1]) {
   *uf = (stufflib_unionfind){0};
 }
 
-size_t stufflib_unionfind_find_root(const stufflib_unionfind uf, size_t index) {
-  while (uf.parents[index] != SIZE_MAX) {
-    index = uf.parents[index];
+size_t stufflib_unionfind_find_root(const stufflib_unionfind uf[const static 1],
+                                    size_t index) {
+  while (uf->parents[index] != SIZE_MAX) {
+    index = uf->parents[index];
   }
   return index;
 }
@@ -44,25 +48,27 @@ size_t _stufflib_unionfind_exchange_root(size_t parent[static 1],
   return old_root;
 }
 
-void _stufflib_unionfind_find_replace(const stufflib_unionfind uf,
-                                      size_t index,
-                                      const size_t new_root) {
-  while (uf.parents[index] != SIZE_MAX) {
-    index = _stufflib_unionfind_exchange_root(uf.parents + index, new_root);
+void _stufflib_unionfind_find_replace(
+    const stufflib_unionfind uf[const static 1],
+    size_t index,
+    const size_t new_root) {
+  while (uf->parents[index] != SIZE_MAX) {
+    index = _stufflib_unionfind_exchange_root(uf->parents + index, new_root);
   }
-  uf.parents[index] = new_root;
+  uf->parents[index] = new_root;
 }
 
-size_t _stufflib_unionfind_find_compress(const stufflib_unionfind uf,
-                                         size_t index) {
+size_t _stufflib_unionfind_find_compress(
+    const stufflib_unionfind uf[const static 1],
+    size_t index) {
   const size_t root = stufflib_unionfind_find_root(uf, index);
   while (index != root) {
-    index = _stufflib_unionfind_exchange_root(uf.parents + index, root);
+    index = _stufflib_unionfind_exchange_root(uf->parents + index, root);
   }
   return root;
 }
 
-size_t stufflib_unionfind_union(const stufflib_unionfind uf,
+size_t stufflib_unionfind_union(const stufflib_unionfind uf[const static 1],
                                 const size_t lhs,
                                 const size_t rhs) {
   size_t root = _stufflib_unionfind_find_compress(uf, lhs);
