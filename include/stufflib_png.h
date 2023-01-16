@@ -135,6 +135,18 @@ void stufflib_png_image_destroy(stufflib_png_image image) {
   stufflib_misc_data_destroy(&image.filter);
 }
 
+int stufflib_png_image_copy(stufflib_png_image dst[restrict static 1],
+                            const stufflib_png_image src[restrict static 1]) {
+  dst->header = src->header;
+  if (!stufflib_misc_data_copy(&dst->data, &src->data)) {
+    return 0;
+  }
+  if (!stufflib_misc_data_copy(&dst->filter, &src->filter)) {
+    return 0;
+  }
+  return 1;
+}
+
 unsigned char* stufflib_png_image_get_pixel(
     const stufflib_png_image image[static 1],
     const size_t row,

@@ -75,6 +75,16 @@ stufflib_data stufflib_misc_data_new(const size_t size) {
   };
 }
 
+int stufflib_misc_data_copy(stufflib_data dst[restrict static 1],
+                            const stufflib_data src[restrict static 1]) {
+  *dst = stufflib_misc_data_new(src->size);
+  if (!dst->size) {
+    return 0;
+  }
+  memcpy(dst->data, src->data, dst->size);
+  return 1;
+}
+
 void stufflib_misc_data_destroy(stufflib_data data[static 1]) {
   free(data->data);
   *data = (stufflib_data){0};
