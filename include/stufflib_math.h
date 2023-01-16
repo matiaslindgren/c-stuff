@@ -83,6 +83,14 @@ error:
   return 0;
 }
 
+double stufflib_math_linalg_norm2(const size_t n, const double v[restrict n]) {
+  double s = 0;
+  for (size_t i = 0; i < n; ++i) {
+    s += v[i] * v[i];
+  }
+  return sqrt(s);
+}
+
 double stufflib_math_linalg_dot(const size_t n,
                                 const double v1[restrict n],
                                 const double v2[restrict n]) {
