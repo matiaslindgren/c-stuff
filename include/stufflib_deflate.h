@@ -1,6 +1,8 @@
-#ifndef _STUFFLIB_INFLATE_H_INCLUDED
-#define _STUFFLIB_INFLATE_H_INCLUDED
-// INFLATE: DEFLATE decoding (no compression implemented)
+#ifndef _STUFFLIB_DEFLATE_H_INCLUDED
+#define _STUFFLIB_DEFLATE_H_INCLUDED
+// DEFLATE decoder.
+// Compression is not supported right now.
+//
 // Implementation based on
 // 1. RFC 1950 (Deutsch and Gailly, May 1996),
 //    https://datatracker.ietf.org/doc/html/rfc1950 (accessed 2023-01-05)
@@ -10,149 +12,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "stufflib_huffman.h"
 #include "stufflib_misc.h"
 
-typedef struct stufflib_huffman_tree stufflib_huffman_tree;
-struct stufflib_huffman_tree {
-  size_t max_code_len;
-  // TODO add min_codes so we use (code - min_code) as index for symbols
-  size_t* max_codes;
-  size_t** symbols;
-};
-
-typedef struct _stufflib_inflate_state _stufflib_inflate_state;
-struct _stufflib_inflate_state {
+typedef struct _stufflib_deflate_state _stufflib_deflate_state;
+struct _stufflib_deflate_state {
   stufflib_data dst;
   const stufflib_data src;
   size_t dst_pos;
   size_t src_bit;
 };
-
-stufflib_huffman_tree* stufflib_inflate_huffman_tree(
-    stufflib_huffman_tree tree[static 1],
-    const size_t max_symbol,
-    const size_t code_lengths[max_symbol + 1]) {
-  if (!max_symbol) {
-    goto return_empty;
-  }
-
-  const size_t max_code_len =
-      stufflib_misc_vmax_size_t(max_symbol + 1, code_lengths);
-
-  size_t* code_length_count = calloc(max_code_len + 1, sizeof(size_t));
-  if (!code_length_count) {
-    fprintf(stderr, "failed allocating code_length_count\n");
-    goto return_empty;
-  }
-  for (size_t symbol = 0; symbol <= max_symbol; ++symbol) {
-    ++code_length_count[code_lengths[symbol]];
-  }
-  code_length_count[0] = 0;
-
-  size_t* next_code = calloc(max_code_len + 1, sizeof(size_t));
-  if (!next_code) {
-    free(code_length_count);
-    fprintf(stderr, "failed allocating next_code\n");
-    goto return_empty;
-  }
-  {
-    size_t code = 0;
-    for (size_t code_len = 1; code_len <= max_code_len; ++code_len) {
-      code = (code + code_length_count[code_len - 1]) << 1;
-      next_code[code_len] = code;
-    }
-  }
-  free(code_length_count);
-
-  size_t* codes = calloc(max_symbol + 1, sizeof(size_t));
-  if (!codes) {
-    free(next_code);
-    fprintf(stderr, "failed allocating codes\n");
-    goto return_empty;
-  }
-  for (size_t symbol = 0; symbol <= max_symbol; ++symbol) {
-    const size_t code_len = code_lengths[symbol];
-    if (code_len) {
-      codes[symbol] = next_code[code_len];
-      ++next_code[code_len];
-    }
-  }
-  free(next_code);
-
-  size_t* max_codes = calloc(max_code_len, sizeof(size_t));
-  if (!max_codes) {
-    free(codes);
-    fprintf(stderr, "failed allocating max_codes\n");
-    goto return_empty;
-  }
-  for (size_t symbol = 0; symbol <= max_symbol; ++symbol) {
-    const size_t code = codes[symbol];
-    const size_t code_len = code_lengths[symbol];
-    if (code_len) {
-      max_codes[code_len - 1] = STUFFLIB_MAX(max_codes[code_len - 1], code);
-    }
-  }
-
-  size_t** symbols = calloc(max_code_len, sizeof(size_t*));
-  if (!symbols) {
-    free(max_codes);
-    free(codes);
-    fprintf(stderr, "failed allocating symbols\n");
-    goto return_empty;
-  }
-  for (size_t code_len = 1; code_len <= max_code_len; ++code_len) {
-    const size_t max_code = max_codes[code_len - 1];
-    if (!(symbols[code_len - 1] = calloc(max_code + 1, sizeof(size_t)))) {
-      free(max_codes);
-      // TODO proper free for every pointer in symbols up to code_len
-      free(symbols);
-      free(codes);
-      fprintf(stderr, "failed allocating symbols for code_len %zu\n", code_len);
-      goto return_empty;
-    }
-  }
-  for (size_t symbol = 0; symbol <= max_symbol; ++symbol) {
-    const size_t code = codes[symbol];
-    const size_t code_len = code_lengths[symbol];
-    if (code_len) {
-      symbols[code_len - 1][code] = symbol + 1;
-    }
-  }
-  free(codes);
-
-  *tree = (stufflib_huffman_tree){.max_code_len = max_code_len,
-                                  .max_codes = max_codes,
-                                  .symbols = symbols};
-  return tree;
-
-return_empty:
-  *tree = (stufflib_huffman_tree){0};
-  return tree;
-}
-
-void stufflib_inflate_tree_destroy(stufflib_huffman_tree tree[const static 1]) {
-  if (tree) {
-    for (size_t code_len = 1; code_len <= tree->max_code_len; ++code_len) {
-      free(tree->symbols[code_len - 1]);
-    }
-    free(tree->max_codes);
-    free(tree->symbols);
-  }
-  stufflib_inflate_huffman_tree(tree, 0, 0);
-}
-
-static size_t _tree_get(const stufflib_huffman_tree tree[const static 1],
-                        const size_t code,
-                        const size_t code_len) {
-  return tree->symbols[code_len - 1][code] - 1;
-}
-
-static int _tree_contains(const stufflib_huffman_tree tree[const static 1],
-                          const size_t code,
-                          const size_t code_len) {
-  return code_len > 0 && code <= tree->max_codes[code_len - 1] &&
-         tree->symbols[code_len - 1][code];
-}
 
 static stufflib_huffman_tree _make_fixed_literal_codes() {
   const size_t max_literal = 287;
@@ -176,7 +45,7 @@ static stufflib_huffman_tree _make_fixed_literal_codes() {
     }
   }
   stufflib_huffman_tree tree = (stufflib_huffman_tree){0};
-  if (!stufflib_inflate_huffman_tree(&tree, max_literal, code_lengths)) {
+  if (!stufflib_huffman_init(&tree, max_literal, code_lengths)) {
     free(code_lengths);
     goto error;
   }
@@ -184,7 +53,7 @@ static stufflib_huffman_tree _make_fixed_literal_codes() {
   return tree;
 
 error:
-  fprintf(stderr, "failed building fixed literal huffman codes for INFLATE\n");
+  fprintf(stderr, "failed building fixed literal huffman codes for DEFLATE\n");
   return (stufflib_huffman_tree){0};
 }
 
@@ -198,7 +67,7 @@ static stufflib_huffman_tree _make_fixed_distance_codes() {
     code_lengths[symbol] = 5;
   }
   stufflib_huffman_tree tree = (stufflib_huffman_tree){0};
-  if (!stufflib_inflate_huffman_tree(&tree, max_dist, code_lengths)) {
+  if (!stufflib_huffman_init(&tree, max_dist, code_lengths)) {
     free(code_lengths);
     goto error;
   }
@@ -206,11 +75,11 @@ static stufflib_huffman_tree _make_fixed_distance_codes() {
   return tree;
 
 error:
-  fprintf(stderr, "failed building fixed distance huffman codes for INFLATE\n");
+  fprintf(stderr, "failed building fixed distance huffman codes for DEFLATE\n");
   return (stufflib_huffman_tree){0};
 }
 
-static size_t _next_bit(_stufflib_inflate_state state[static 1]) {
+static size_t _next_bit(_stufflib_deflate_state state[static 1]) {
   const size_t src_pos = state->src_bit / CHAR_BIT;
   const size_t src_bit = state->src_bit % CHAR_BIT;
   assert(src_pos < state->src.size);
@@ -218,7 +87,7 @@ static size_t _next_bit(_stufflib_inflate_state state[static 1]) {
   return (state->src.data[src_pos] >> src_bit) & 1;
 }
 
-static size_t _next_n_bits(_stufflib_inflate_state state[static 1],
+static size_t _next_n_bits(_stufflib_deflate_state state[static 1],
                            const size_t count) {
   size_t res = 0;
   for (size_t i = 0; i < count; ++i) {
@@ -229,12 +98,12 @@ static size_t _next_n_bits(_stufflib_inflate_state state[static 1],
 
 static size_t _decode_next_code(
     const stufflib_huffman_tree codes[const static 1],
-    _stufflib_inflate_state state[static 1]) {
+    _stufflib_deflate_state state[static 1]) {
   size_t code = 0;
   for (size_t code_len = 1; code_len <= codes->max_code_len; ++code_len) {
     code = (code << 1) | _next_bit(state);
-    if (_tree_contains(codes, code, code_len)) {
-      return _tree_get(codes, code, code_len);
+    if (stufflib_huffman_contains(codes, code, code_len)) {
+      return stufflib_huffman_get(codes, code, code_len);
     }
   }
   return SIZE_MAX;
@@ -243,7 +112,7 @@ static size_t _decode_next_code(
 static void _inflate_block(
     const stufflib_huffman_tree literal_codes[const static 1],
     const stufflib_huffman_tree distance_codes[const static 1],
-    _stufflib_inflate_state state[static 1]) {
+    _stufflib_deflate_state state[static 1]) {
   static size_t lengths[29] = {0};
   static int lengths_extra[29] = {0};
   static size_t distances[30] = {0};
@@ -300,7 +169,7 @@ static void _inflate_block(
 }
 
 int stufflib_inflate_uncompressed_block(
-    _stufflib_inflate_state state[static 1]) {
+    _stufflib_deflate_state state[static 1]) {
   size_t src_byte_pos = state->src_bit / CHAR_BIT + 1;
   const size_t block_length =
       stufflib_misc_parse_lil_endian_u16(state->src.data + src_byte_pos);
@@ -320,7 +189,7 @@ int stufflib_inflate_uncompressed_block(
   return 0;
 }
 
-int stufflib_inflate_dynamic_block(_stufflib_inflate_state state[static 1]) {
+int stufflib_inflate_dynamic_block(_stufflib_deflate_state state[static 1]) {
   const size_t num_lengths = 257 + _next_n_bits(state, 5);
   const size_t num_distances = 1 + _next_n_bits(state, 5);
   const size_t num_length_lengths = 4 + _next_n_bits(state, 4);
@@ -338,9 +207,9 @@ int stufflib_inflate_dynamic_block(_stufflib_inflate_state state[static 1]) {
     length_lengths[length_order[i]] = _next_n_bits(state, 3);
   }
   stufflib_huffman_tree length_codes = (stufflib_huffman_tree){0};
-  if (!stufflib_inflate_huffman_tree(&length_codes,
-                                     max_length_length,
-                                     length_lengths)) {
+  if (!stufflib_huffman_init(&length_codes,
+                             max_length_length,
+                             length_lengths)) {
     free(length_lengths);
     goto error;
   }
@@ -376,43 +245,43 @@ int stufflib_inflate_dynamic_block(_stufflib_inflate_state state[static 1]) {
     }
     i += num_repeats;
   }
-  stufflib_inflate_tree_destroy(&length_codes);
+  stufflib_huffman_destroy(&length_codes);
 
   const size_t max_length = num_lengths - 1;
   const size_t max_distance = num_distances - 1;
 
   stufflib_huffman_tree literal_codes = (stufflib_huffman_tree){0};
-  if (!stufflib_inflate_huffman_tree(&literal_codes,
-                                     max_length,
-                                     dynamic_code_lengths)) {
+  if (!stufflib_huffman_init(&literal_codes,
+                             max_length,
+                             dynamic_code_lengths)) {
     free(dynamic_code_lengths);
     goto error;
   }
   stufflib_huffman_tree distance_codes = (stufflib_huffman_tree){0};
-  if (!stufflib_inflate_huffman_tree(&distance_codes,
-                                     max_distance,
-                                     dynamic_code_lengths + num_lengths)) {
+  if (!stufflib_huffman_init(&distance_codes,
+                             max_distance,
+                             dynamic_code_lengths + num_lengths)) {
     free(dynamic_code_lengths);
-    stufflib_inflate_tree_destroy(&literal_codes);
+    stufflib_huffman_destroy(&literal_codes);
     goto error;
   }
   free(dynamic_code_lengths);
 
   _inflate_block(&literal_codes, &distance_codes, state);
-  stufflib_inflate_tree_destroy(&literal_codes);
-  stufflib_inflate_tree_destroy(&distance_codes);
+  stufflib_huffman_destroy(&literal_codes);
+  stufflib_huffman_destroy(&distance_codes);
   return 0;
 
 error:
   return 1;
 }
 
-int stufflib_inflate_fixed_block(_stufflib_inflate_state state[static 1]) {
+int stufflib_inflate_fixed_block(_stufflib_deflate_state state[static 1]) {
   stufflib_huffman_tree literal_codes = _make_fixed_literal_codes();
   stufflib_huffman_tree distance_codes = _make_fixed_distance_codes();
   _inflate_block(&literal_codes, &distance_codes, state);
-  stufflib_inflate_tree_destroy(&literal_codes);
-  stufflib_inflate_tree_destroy(&distance_codes);
+  stufflib_huffman_destroy(&literal_codes);
+  stufflib_huffman_destroy(&distance_codes);
   return 0;
 }
 
@@ -441,7 +310,7 @@ size_t stufflib_inflate(stufflib_data dst, const stufflib_data src) {
     goto error;
   }
 
-  _stufflib_inflate_state* state = &(_stufflib_inflate_state){
+  _stufflib_deflate_state* state = &(_stufflib_deflate_state){
       .dst = dst,
       .src = src,
       .dst_pos = 0,
@@ -499,4 +368,4 @@ error:
   return 0;
 }
 
-#endif  // _STUFFLIB_INFLATE_H_INCLUDED
+#endif  // _STUFFLIB_DEFLATE_H_INCLUDED

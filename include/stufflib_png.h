@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib_inflate.h"
+#include "stufflib_deflate.h"
 #include "stufflib_misc.h"
 
 enum stufflib_png_chunk_type {
@@ -50,25 +50,20 @@ enum stufflib_png_color_type {
 };
 
 const char* stufflib_png_color_types[] = {
-    "grayscale",
-    0,
-    "rgb",
-    "indexed",
-    "grayscale with alpha",
-    0,
-    "rgba",
+    [stufflib_png_grayscale] = "grayscale",
+    [stufflib_png_rgb] = "rgb",
+    [stufflib_png_indexed] = "indexed",
+    [stufflib_png_grayscale_alpha] = "grayscale with alpha",
+    [stufflib_png_rgba] = "rgba",
 };
 
 size_t stufflib_png_bytes_per_pixel[] = {
     // TODO
     [stufflib_png_grayscale] = 1,
-    0,
     [stufflib_png_rgb] = 3,
     [stufflib_png_indexed] = 0,
     [stufflib_png_grayscale_alpha] = 2,
-    0,
     [stufflib_png_rgba] = 4,
-    0,
 };
 
 enum stufflib_png_filter_type {
@@ -81,11 +76,11 @@ enum stufflib_png_filter_type {
 };
 
 const char* stufflib_png_filter_types[] = {
-    "None",
-    "Sub",
-    "Up",
-    "Average",
-    "Paeth",
+    [stufflib_png_filter_none] = "None",
+    [stufflib_png_filter_sub] = "Sub",
+    [stufflib_png_filter_up] = "Up",
+    [stufflib_png_filter_avg] = "Average",
+    [stufflib_png_filter_paeth] = "Paeth",
 };
 
 typedef struct stufflib_png_header stufflib_png_header;
