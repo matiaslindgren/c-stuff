@@ -1,13 +1,18 @@
 #ifndef _STUFFLIB_DEFLATE_H_INCLUDED
 #define _STUFFLIB_DEFLATE_H_INCLUDED
 // DEFLATE decoder.
-// Compression is not supported right now.
+// Only non-compressed encoding is implemented.
 //
-// Implementation based on
-// 1. RFC 1950 (Deutsch and Gailly, May 1996),
-//    https://datatracker.ietf.org/doc/html/rfc1950 (accessed 2023-01-05)
-// 2. RFC 1951 (Deutsch, May 1996),
-//    https://datatracker.ietf.org/doc/html/rfc1951 (accessed 2023-01-05)
+// Reference:
+// 1. "RFC 1950" (Deutsch and Gailly, May 1996),
+//    https://datatracker.ietf.org/doc/html/rfc1950,
+//    accessed 2023-01-05
+// 2. "RFC 1951" (Deutsch, May 1996),
+//    https://datatracker.ietf.org/doc/html/rfc1951,
+//    accessed 2023-01-05
+// 3. "PNG (Portable Network Graphics) Specification, Version 1.2"
+//    http://www.libpng.org/pub/png/spec/1.2/PNG-Contents.html,
+//    accessed 2023-01-18
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -366,6 +371,48 @@ size_t stufflib_inflate(stufflib_data dst, const stufflib_data src) {
 
 error:
   return 0;
+}
+
+#define STUFFLIB_DEFLATE_BLOCK_SIZE 8192
+
+size_t stufflib_deflate_uncompressed(stufflib_data dst,
+                                     const stufflib_data src) {
+  const size_t block_size = STUFFLIB_DEFLATE_BLOCK_SIZE;
+  size_t dst_pos = 0;
+  size_t src_pos = 0;
+
+  const int cmethod = 8;
+  const int cinfo = 7;
+  const int cmf = (cinfo << 4) | cmethod;
+  dst.data[dst_pos++] = cmf;
+  dst.data[dst_pos++] = 31 - (cmf * 256) % 31;
+
+  for (int is_final_block = 0; !is_final_block;) {
+    assert(src_pos < src.size);
+    is_final_block = src_pos + block_size >= src.size;
+    dst.data[dst_pos++] = is_final_block & 1;
+
+    const size_t dist_to_end = src.size - src_pos;
+    const uint32_t len = STUFFLIB_MIN(block_size, dist_to_end) & 0xffff;
+    const uint32_t nlen = ~len;
+
+    memcpy(dst.data + dst_pos, &len, 2);
+    dst_pos += 2;
+    memcpy(dst.data + dst_pos, &nlen, 2);
+    dst_pos += 2;
+
+    memcpy(dst.data + dst_pos, src.data + src_pos, len);
+    dst_pos += len;
+    src_pos += len;
+  }
+
+  const unsigned char* adler32 =
+      stufflib_misc_encode_network_order_u32((unsigned char[4]){0},
+                                             stufflib_misc_adler32(src));
+  memcpy(dst.data + dst_pos, adler32, 4);
+  dst_pos += 4;
+
+  return dst_pos;
 }
 
 #endif  // _STUFFLIB_DEFLATE_H_INCLUDED

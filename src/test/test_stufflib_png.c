@@ -343,6 +343,39 @@ int test_read_large_images_with_dynamic_compression(const int verbose) {
   return 0;
 }
 
+int test_read_write_read(const int verbose) {
+  const char* img0_path = "./test-data/github-squares-rgb-dynamic.png";
+  if (verbose) {
+    printf("%s\n", img0_path);
+  }
+  stufflib_png_image img0 = stufflib_png_read_image(img0_path);
+  if (!img0.data.size) {
+    fprintf(stderr, "failed reading PNG image %s\n", img0_path);
+    return 1;
+  }
+  if (verbose) {
+    stufflib_png_dump_img_meta(stdout, img0);
+  }
+  const char* img1_path = "/tmp/stufflib_test.png";
+  assert(stufflib_png_write_image(img0, img1_path));
+  stufflib_png_image img1 = stufflib_png_read_image(img1_path);
+  if (img1.data.size != img0.data.size) {
+    fprintf(stderr,
+            "written %s img size %zu is not equal to size %zu of original %s\n",
+            img1_path,
+            img1.data.size,
+            img0.data.size,
+            img0_path);
+    return 1;
+  }
+  if (verbose) {
+    stufflib_png_dump_img_meta(stdout, img1);
+  }
+  stufflib_png_image_destroy(img1);
+  stufflib_png_image_destroy(img0);
+  return 0;
+}
+
 typedef int test_function(const int);
 
 int main(int argc, char* const argv[argc + 1]) {
@@ -358,6 +391,7 @@ int main(int argc, char* const argv[argc + 1]) {
       test_read_rgba_image_with_dynamic_compression,
       test_read_small_images_with_dynamic_compression,
       test_read_large_images_with_dynamic_compression,
+      test_read_write_read,
   };
   const char* test_names[] = {
       "test_read_single_pixel_chunks",
@@ -369,6 +403,7 @@ int main(int argc, char* const argv[argc + 1]) {
       "test_read_rgba_image_with_dynamic_compression",
       "test_read_small_images_with_dynamic_compression",
       "test_read_large_images_with_dynamic_compression",
+      "test_read_write_read",
   };
 
   for (size_t t = 0; t < STUFFLIB_ARRAY_LEN(tests); ++t) {

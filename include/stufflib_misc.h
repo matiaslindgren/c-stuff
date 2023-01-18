@@ -34,20 +34,18 @@ uint32_t stufflib_misc_parse_big_endian_u32(
   return x;
 }
 
+unsigned char* stufflib_misc_encode_network_order_u32(
+    unsigned char buf[static UINT32_BYTES],
+    uint32_t x) {
+  for (size_t i = UINT32_BYTES - 1; i < UINT32_BYTES; --i) {
+    buf[i] = x & 0xff;
+    x >>= CHAR_BIT;
+  }
+  return buf;
+}
+
 #undef UINT16_BYTES
 #undef UINT32_BYTES
-
-// https://en.wikipedia.org/wiki/Adler-32
-uint32_t stufflib_misc_adler32(const size_t n, unsigned char data[n]) {
-  const uint32_t mod_adler = 65521;
-  uint32_t a = 1;
-  uint32_t b = 0;
-  for (size_t index = 0; index < n; ++index) {
-    a = (a + data[index]) % mod_adler;
-    b = (b + a) % mod_adler;
-  }
-  return (b << 16) | a;
-}
 
 size_t stufflib_misc_midpoint(const size_t lo, const size_t hi) {
   return lo + (hi - lo) / 2;
@@ -116,6 +114,18 @@ void stufflib_misc_data_fdump(FILE stream[const static 1],
     fprintf(stream, "%02x", data.data[i]);
   }
   fprintf(stream, "\n");
+}
+
+// https://en.wikipedia.org/wiki/Adler-32
+uint32_t stufflib_misc_adler32(const stufflib_data data) {
+  const uint32_t mod_adler = 65521;
+  uint32_t a = 1;
+  uint32_t b = 0;
+  for (size_t index = 0; index < data.size; ++index) {
+    a = (a + data.data[index]) % mod_adler;
+    b = (b + a) % mod_adler;
+  }
+  return (b << 16) | a;
 }
 
 #endif  // _STUFFLIB_MISC_H_INCLUDED

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "stufflib_argv.h"
-#include "stufflib_inflate.h"
+#include "stufflib_deflate.h"
 #include "stufflib_png.h"
 
 int main(int argc, char* const argv[argc + 1]) {
