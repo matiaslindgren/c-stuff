@@ -150,7 +150,7 @@ static void _inflate_block(
     const size_t symbol = _decode_next_code(literal_codes, state);
     if (symbol < end_of_block) {
       assert(state->dst_pos < state->dst.size);
-      state->dst.data[state->dst_pos++] = symbol & 0xff;
+      state->dst.data[state->dst_pos++] = symbol & STUFFLIB_ONES(1);
       continue;
     }
     if (symbol == end_of_block) {
@@ -176,21 +176,31 @@ static void _inflate_block(
 int stufflib_inflate_uncompressed_block(
     _stufflib_deflate_state state[static 1]) {
   size_t src_byte_pos = state->src_bit / CHAR_BIT + 1;
-  const size_t block_length =
-      stufflib_misc_parse_lil_endian_u16(state->src.data + src_byte_pos);
+  const size_t block_len =
+      stufflib_misc_parse_lil_endian(2, state->src.data + src_byte_pos);
   src_byte_pos += 2;
-  const size_t block_length_check =
-      stufflib_misc_parse_lil_endian_u16(state->src.data + src_byte_pos);
+
+  const size_t block_len_check =
+      stufflib_misc_parse_lil_endian(2, state->src.data + src_byte_pos);
   src_byte_pos += 2;
-  if ((~block_length & 0xffff) != block_length_check) {
+
+  if ((~block_len & STUFFLIB_ONES(2)) != block_len_check) {
     fprintf(stderr, "corrupted zlib block, ~LEN != NLEN\n");
     return 1;
   }
+  if (block_len > state->src.size - src_byte_pos) {
+    fprintf(stderr, "corrupted zlib block, LEN too large\n");
+    return 1;
+  }
+
   memcpy(state->dst.data + state->dst_pos,
-         (void*)(state->src.data + src_byte_pos),
-         block_length);
-  state->dst_pos += block_length;
-  state->src_bit += (src_byte_pos + block_length) * CHAR_BIT;
+         state->src.data + src_byte_pos,
+         block_len);
+  src_byte_pos += block_len;
+
+  state->dst_pos += block_len;
+  state->src_bit = src_byte_pos * CHAR_BIT;
+
   return 0;
 }
 
@@ -393,22 +403,28 @@ size_t stufflib_deflate_uncompressed(stufflib_data dst,
     dst.data[dst_pos++] = is_final_block & 1;
 
     const size_t dist_to_end = src.size - src_pos;
-    const uint32_t len = STUFFLIB_MIN(block_size, dist_to_end) & 0xffff;
-    const uint32_t nlen = ~len;
+    const uint16_t block_len =
+        STUFFLIB_MIN(block_size, dist_to_end) & STUFFLIB_ONES(2);
 
-    memcpy(dst.data + dst_pos, &len, 2);
+    const unsigned char* block_len_bytes =
+        stufflib_misc_encode_lil_endian(2, (unsigned char[2]){0}, block_len);
+    const unsigned char* block_len_check_bytes =
+        stufflib_misc_encode_lil_endian(2, (unsigned char[2]){0}, ~block_len);
+
+    memcpy(dst.data + dst_pos, block_len_bytes, 2);
     dst_pos += 2;
-    memcpy(dst.data + dst_pos, &nlen, 2);
+    memcpy(dst.data + dst_pos, block_len_check_bytes, 2);
     dst_pos += 2;
 
-    memcpy(dst.data + dst_pos, src.data + src_pos, len);
-    dst_pos += len;
-    src_pos += len;
+    memcpy(dst.data + dst_pos, src.data + src_pos, block_len);
+    dst_pos += block_len;
+    src_pos += block_len;
   }
 
   const unsigned char* adler32 =
-      stufflib_misc_encode_network_order_u32((unsigned char[4]){0},
-                                             stufflib_misc_adler32(src));
+      stufflib_misc_encode_big_endian(4,
+                                      (unsigned char[4]){0},
+                                      stufflib_misc_adler32(src));
   memcpy(dst.data + dst_pos, adler32, 4);
   dst_pos += 4;
 

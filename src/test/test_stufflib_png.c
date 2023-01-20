@@ -343,8 +343,7 @@ int test_read_large_images_with_dynamic_compression(const int verbose) {
   return 0;
 }
 
-int test_read_write_read(const int verbose) {
-  const char* img0_path = "./test-data/github-squares-rgb-dynamic.png";
+int _test_read_write_read(const int verbose, const char* img0_path) {
   if (verbose) {
     printf("%s\n", img0_path);
   }
@@ -376,6 +375,51 @@ int test_read_write_read(const int verbose) {
   return 0;
 }
 
+int test_read_write_read_single_pixel(const int verbose) {
+  const char* paths[] = {
+      "./test-data/ff0000-1x1-rgb-nocomp.png",
+      "./test-data/00ff00-1x1-rgb-nocomp.png",
+      "./test-data/0000ff-1x1-rgb-nocomp.png",
+  };
+  for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(paths); ++i) {
+    const char* png_path = paths[i];
+    if (_test_read_write_read(verbose, png_path)) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+int test_read_write_read_small(const int verbose) {
+  const char* paths[] = {
+      "./test-data/0099ee-80x160-rgb-dynamic.png",
+      "./test-data/cc1177-80x160-rgb-dynamic.png",
+      "./test-data/ffaa55-80x160-rgb-dynamic.png",
+  };
+  for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(paths); ++i) {
+    const char* png_path = paths[i];
+    if (_test_read_write_read(verbose, png_path)) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+int test_read_write_read_large(const int verbose) {
+  const char* paths[] = {
+      "./test-data/aabbcc-1600x1600-rgb-dynamic.png",
+      "./test-data/github-profile-rgb-dynamic.png",
+      "./test-data/asan.png",
+  };
+  for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(paths); ++i) {
+    const char* png_path = paths[i];
+    if (_test_read_write_read(verbose, png_path)) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
 typedef int test_function(const int);
 
 int main(int argc, char* const argv[argc + 1]) {
@@ -391,7 +435,9 @@ int main(int argc, char* const argv[argc + 1]) {
       test_read_rgba_image_with_dynamic_compression,
       test_read_small_images_with_dynamic_compression,
       test_read_large_images_with_dynamic_compression,
-      test_read_write_read,
+      test_read_write_read_single_pixel,
+      test_read_write_read_small,
+      test_read_write_read_large,
   };
   const char* test_names[] = {
       "test_read_single_pixel_chunks",
@@ -403,7 +449,9 @@ int main(int argc, char* const argv[argc + 1]) {
       "test_read_rgba_image_with_dynamic_compression",
       "test_read_small_images_with_dynamic_compression",
       "test_read_large_images_with_dynamic_compression",
-      "test_read_write_read",
+      "test_read_write_read_single_pixel",
+      "test_read_write_read_small",
+      "test_read_write_read_large",
   };
 
   for (size_t t = 0; t < STUFFLIB_ARRAY_LEN(tests); ++t) {

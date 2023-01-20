@@ -9,43 +9,49 @@
 #define STUFFLIB_MIN(x, y) ((x) < (y) ? (x) : (y))
 #define STUFFLIB_MAX(x, y) ((x) < (y) ? (y) : (x))
 #define STUFFLIB_ARRAY_LEN(a) (sizeof(a) / sizeof((a)[0]))
+#define STUFFLIB_ONES(n) ((1 << ((n)*CHAR_BIT)) - 1)
 
-#define UINT16_BYTES (16 / CHAR_BIT)
-#define UINT32_BYTES (32 / CHAR_BIT)
-
-uint16_t stufflib_misc_parse_lil_endian_u16(
-    const unsigned char buf[static UINT16_BYTES]) {
-  uint16_t x = 0;
-  for (size_t i = 0; i < UINT16_BYTES; ++i) {
-    const uint16_t buf_value = buf[i];
-    x |= buf_value << (CHAR_BIT * i);
+size_t stufflib_misc_parse_lil_endian(const size_t size,
+                                      const unsigned char data[size]) {
+  size_t x = 0;
+  for (size_t i = size - 1; i < size; --i) {
+    x <<= CHAR_BIT;
+    x |= data[i];
   }
   return x;
 }
 
-uint32_t stufflib_misc_parse_big_endian_u32(
-    const unsigned char buf[static UINT32_BYTES]) {
-  uint32_t x = 0;
-  for (size_t i = 0; i < UINT32_BYTES; ++i) {
-    const uint32_t buf_value = buf[i];
-    const size_t byte_offset = CHAR_BIT * (UINT32_BYTES - (i + 1));
-    x |= buf_value << byte_offset;
+size_t stufflib_misc_parse_big_endian(const size_t size,
+                                      const unsigned char data[size]) {
+  size_t x = 0;
+  for (size_t i = 0; i < size; ++i) {
+    x <<= CHAR_BIT;
+    x |= data[i];
   }
   return x;
 }
 
-unsigned char* stufflib_misc_encode_network_order_u32(
-    unsigned char buf[static UINT32_BYTES],
-    uint32_t x) {
-  for (size_t i = UINT32_BYTES - 1; i < UINT32_BYTES; --i) {
-    buf[i] = x & 0xff;
-    x >>= CHAR_BIT;
+unsigned char* stufflib_misc_encode_lil_endian(const size_t size,
+                                               unsigned char dst[size],
+                                               const size_t value) {
+  size_t tmp = value;
+  for (size_t i = 0; i < size; ++i) {
+    dst[i] = tmp & STUFFLIB_ONES(1);
+    tmp >>= CHAR_BIT;
   }
-  return buf;
+  return dst;
 }
 
-#undef UINT16_BYTES
-#undef UINT32_BYTES
+unsigned char* stufflib_misc_encode_big_endian(const size_t size,
+                                               unsigned char dst[size],
+                                               const size_t value) {
+  size_t tmp = value;
+  for (size_t i = size - 1; i < size; --i) {
+    dst[i] = tmp & STUFFLIB_ONES(1);
+    tmp >>= CHAR_BIT;
+  }
+  return dst;
+}
 
 size_t stufflib_misc_midpoint(const size_t lo, const size_t hi) {
   return lo + (hi - lo) / 2;
@@ -66,7 +72,7 @@ struct stufflib_data {
 };
 
 stufflib_data stufflib_misc_data_new(const size_t size) {
-  unsigned char* data = calloc(size, sizeof(unsigned char));
+  unsigned char* data = calloc(size, 1);
   return (stufflib_data){
       .size = data ? size : 0,
       .data = data,

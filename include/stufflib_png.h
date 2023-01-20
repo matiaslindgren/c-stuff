@@ -234,7 +234,7 @@ stufflib_png_chunk stufflib_png_read_next_chunk(FILE fp[const static 1]) {
       fprintf(stderr, "error: failed reading PNG chunk length\n");
       goto error;
     }
-    const size_t chunk_size = stufflib_misc_parse_big_endian_u32(length_buf);
+    const size_t chunk_size = stufflib_misc_parse_big_endian(4, length_buf);
     if (chunk_size > ((size_t)1 << 31)) {
       fprintf(stderr, "error: PNG chunk length too large (%zu)\n", chunk_size);
       goto error;
@@ -253,7 +253,7 @@ stufflib_png_chunk stufflib_png_read_next_chunk(FILE fp[const static 1]) {
   }
 
   if (chunk.data.size) {
-    chunk.data.data = calloc(chunk.data.size, sizeof(unsigned char));
+    chunk.data.data = calloc(chunk.data.size, 1);
     if (!chunk.data.data) {
       goto error;
     }
@@ -270,7 +270,7 @@ stufflib_png_chunk stufflib_png_read_next_chunk(FILE fp[const static 1]) {
       fprintf(stderr, "error: failed reading PNG chunk crc32\n");
       goto error;
     }
-    chunk.crc32 = stufflib_misc_parse_big_endian_u32(crc32_buf);
+    chunk.crc32 = stufflib_misc_parse_big_endian(4, crc32_buf);
   }
 
   return chunk;
@@ -284,8 +284,8 @@ stufflib_png_header stufflib_png_parse_header(const stufflib_png_chunk chunk) {
   assert(chunk.type == stufflib_png_IHDR);
   unsigned char* data = chunk.data.data;
   return (stufflib_png_header){
-      .width = stufflib_misc_parse_big_endian_u32(data),
-      .height = stufflib_misc_parse_big_endian_u32(data + 4),
+      .width = stufflib_misc_parse_big_endian(4, data),
+      .height = stufflib_misc_parse_big_endian(4, data + 4),
       .bit_depth = (unsigned)(data[8]),
       .color_type = (enum stufflib_png_color_type)(data[9]),
       .compression = (unsigned)(data[10]),
@@ -603,12 +603,10 @@ int stufflib_png_chunk_fwrite_header(FILE stream[const static 1],
   unsigned char ihdr_data[4 + 13] = {0};
   memcpy(ihdr_data, "IHDR", 4);
   const unsigned char* width =
-      stufflib_misc_encode_network_order_u32((unsigned char[4]){0},
-                                             header.width);
+      stufflib_misc_encode_big_endian(4, (unsigned char[4]){0}, header.width);
   memcpy(ihdr_data + 4, width, 4);
   const unsigned char* height =
-      stufflib_misc_encode_network_order_u32((unsigned char[4]){0},
-                                             header.height);
+      stufflib_misc_encode_big_endian(4, (unsigned char[4]){0}, header.height);
   memcpy(ihdr_data + 8, height, 4);
   memcpy(ihdr_data + 12, &header.bit_depth, 1);
   memcpy(ihdr_data + 13, &header.color_type, 1);
@@ -618,7 +616,8 @@ int stufflib_png_chunk_fwrite_header(FILE stream[const static 1],
   if (fwrite(ihdr_data, 1, 17, stream) != 17) {
     return 0;
   }
-  const unsigned char* crc32 = stufflib_misc_encode_network_order_u32(
+  const unsigned char* crc32 = stufflib_misc_encode_big_endian(
+      4,
       (unsigned char[4]){0},
       stufflib_png_crc32(&(stufflib_data){.size = 17, .data = ihdr_data}));
   if (fwrite(crc32, 1, 4, stream) != 4) {
@@ -630,7 +629,6 @@ int stufflib_png_chunk_fwrite_header(FILE stream[const static 1],
 int stufflib_png_chunk_fwrite(FILE stream[const static 1],
                               const char* chunk_type,
                               const stufflib_data data[const static 1]) {
-  printf("write chunk %s len %zu\n", chunk_type, data->size);
   if (data->size > ((size_t)1 << 31)) {
     fprintf(stderr,
             "error: will not write too large %s chunk of size %zu",
@@ -649,7 +647,7 @@ int stufflib_png_chunk_fwrite(FILE stream[const static 1],
   int ok = 0;
 
   const unsigned char* chunk_len =
-      stufflib_misc_encode_network_order_u32((unsigned char[4]){0}, data->size);
+      stufflib_misc_encode_big_endian(4, (unsigned char[4]){0}, data->size);
   if (fwrite(chunk_len, 1, 4, stream) != 4) {
     fprintf(stderr, "error: failed writing %s chunk length\n", chunk_type);
     goto done;
@@ -663,8 +661,9 @@ int stufflib_png_chunk_fwrite(FILE stream[const static 1],
     goto done;
   }
   const unsigned char* crc32 =
-      stufflib_misc_encode_network_order_u32((unsigned char[4]){0},
-                                             stufflib_png_crc32(&crc_data));
+      stufflib_misc_encode_big_endian(4,
+                                      (unsigned char[4]){0},
+                                      stufflib_png_crc32(&crc_data));
   if (fwrite(crc32, 1, 4, stream) != 4) {
     fprintf(stderr, "error: failed writing %s chunk CRC32\n", chunk_type);
     goto done;
