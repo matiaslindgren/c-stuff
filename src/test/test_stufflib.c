@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "stufflib_argv.h"
+#include "stufflib_macros.h"
 #include "stufflib_math.h"
 #include "stufflib_rand.h"
 
@@ -131,7 +132,7 @@ int main(void) {
       test_stufflib_rand_set_zero,
       test_stufflib_math_double_almost,
   };
-  for (size_t i = 0; i < sizeof(tests) / sizeof(tests[0]); ++i) {
+  for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(tests); ++i) {
     if (tests[i]()) {
       fprintf(stderr, "test %zu failed\n", i);
       return EXIT_FAILURE;

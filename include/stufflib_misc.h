@@ -6,10 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define STUFFLIB_MIN(x, y) ((x) < (y) ? (x) : (y))
-#define STUFFLIB_MAX(x, y) ((x) < (y) ? (y) : (x))
-#define STUFFLIB_ARRAY_LEN(a) (sizeof(a) / sizeof((a)[0]))
-#define STUFFLIB_ONES(n) ((1 << ((n)*CHAR_BIT)) - 1)
+#include "stufflib_macros.h"
 
 size_t stufflib_misc_parse_lil_endian(const size_t size,
                                       const unsigned char data[size]) {

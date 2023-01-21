@@ -2,11 +2,12 @@
 #include <stdlib.h>
 
 #include "stufflib_img.h"
+#include "stufflib_macros.h"
 #include "stufflib_png.h"
 
 int main(int argc, char* const argv[argc + 1]) {
   if (argc != 3) {
-    fprintf(stderr, "usage: %s png_src_path png_dst_path\n", argv[0]);
+    STUFFLIB_PRINT_ERROR("usage: %s png_src_path png_dst_path", argv[0]);
     return EXIT_FAILURE;
   }
 

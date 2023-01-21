@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "stufflib_macros.h"
 #include "stufflib_text.h"
 
 int _test_init_empty() {
@@ -79,7 +80,7 @@ int main(void) {
       _test_init_from_str,
       _test_init_from_file,
   };
-  for (size_t t = 0; t < 3; ++t) {
+  for (size_t t = 0; t < STUFFLIB_ARRAY_LEN(tests); ++t) {
     if (tests[t]()) {
       fprintf(stderr, "test %zu failed\n", t + 1);
       return EXIT_FAILURE;

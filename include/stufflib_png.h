@@ -10,6 +10,7 @@
 #include <string.h>
 
 #include "stufflib_deflate.h"
+#include "stufflib_macros.h"
 #include "stufflib_misc.h"
 
 enum stufflib_png_chunk_type {
@@ -231,12 +232,12 @@ stufflib_png_chunk stufflib_png_read_next_chunk(FILE fp[const static 1]) {
     const size_t length_len = 4;
     unsigned char length_buf[length_len];
     if (fread(length_buf, 1, length_len, fp) != length_len) {
-      fprintf(stderr, "error: failed reading PNG chunk length\n");
+      STUFFLIB_PRINT_ERROR("failed reading PNG chunk length");
       goto error;
     }
     const size_t chunk_size = stufflib_misc_parse_big_endian(4, length_buf);
     if (chunk_size > ((size_t)1 << 31)) {
-      fprintf(stderr, "error: PNG chunk length too large (%zu)\n", chunk_size);
+      STUFFLIB_PRINT_ERROR("PNG chunk length too large (%zu)", chunk_size);
       goto error;
     }
     chunk.data.size = chunk_size;
@@ -246,7 +247,7 @@ stufflib_png_chunk stufflib_png_read_next_chunk(FILE fp[const static 1]) {
     const size_t type_len = 4;
     char chunk_type[type_len + 1];
     if (fread(chunk_type, 1, type_len, fp) != type_len) {
-      fprintf(stderr, "error: failed reading PNG chunk type\n");
+      STUFFLIB_PRINT_ERROR("failed reading PNG chunk type");
       goto error;
     }
     chunk.type = _stufflib_png_find_chunk_type(chunk_type);
@@ -258,7 +259,7 @@ stufflib_png_chunk stufflib_png_read_next_chunk(FILE fp[const static 1]) {
       goto error;
     }
     if (fread(chunk.data.data, 1, chunk.data.size, fp) != chunk.data.size) {
-      fprintf(stderr, "error: failed reading PNG chunk data\n");
+      STUFFLIB_PRINT_ERROR("failed reading PNG chunk data");
       goto error;
     }
   }
@@ -267,7 +268,7 @@ stufflib_png_chunk stufflib_png_read_next_chunk(FILE fp[const static 1]) {
     const size_t crc32_len = 4;
     unsigned char crc32_buf[crc32_len];
     if (fread(crc32_buf, 1, crc32_len, fp) != crc32_len) {
-      fprintf(stderr, "error: failed reading PNG chunk crc32\n");
+      STUFFLIB_PRINT_ERROR("failed reading PNG chunk crc32");
       goto error;
     }
     chunk.crc32 = stufflib_misc_parse_big_endian(4, crc32_buf);
@@ -297,7 +298,7 @@ stufflib_png_header stufflib_png_parse_header(const stufflib_png_chunk chunk) {
 stufflib_png_chunks stufflib_png_read_chunks(const char* filename) {
   FILE* fp = fopen(filename, "r");
   if (!fp) {
-    fprintf(stderr, "error: cannot open %s\n", filename);
+    STUFFLIB_PRINT_ERROR("cannot open %s", filename);
     goto error;
   }
 
@@ -306,11 +307,11 @@ stufflib_png_chunks stufflib_png_read_chunks(const char* filename) {
     const size_t header_len = 8;
     unsigned char buf[header_len];
     if (fread(buf, 1, header_len, fp) != header_len) {
-      fprintf(stderr, "error: failed reading PNG header\n");
+      STUFFLIB_PRINT_ERROR("failed reading PNG header");
       goto error;
     }
     if (!(buf[1] == 'P' && buf[2] == 'N' && buf[3] == 'G')) {
-      fprintf(stderr, "error: not a PNG image\n");
+      STUFFLIB_PRINT_ERROR("not a PNG image");
       goto error;
     }
   }
@@ -322,7 +323,7 @@ stufflib_png_chunks stufflib_png_read_chunks(const char* filename) {
     stufflib_png_chunk chunk = stufflib_png_read_next_chunk(fp);
     if (chunk.type == stufflib_png_null_chunk) {
       free(chunks);
-      fprintf(stderr, "error: unknown chunk\n");
+      STUFFLIB_PRINT_ERROR("unknown chunk");
       goto corrupted_image_error;
     }
     chunks = realloc(chunks, (count + 1) * sizeof(stufflib_png_chunk));
@@ -334,7 +335,7 @@ stufflib_png_chunks stufflib_png_read_chunks(const char* filename) {
   return (stufflib_png_chunks){.count = count, .chunks = chunks};
 
 corrupted_image_error:
-  fprintf(stderr, "error: cannot read file as PNG: %s\n", filename);
+  STUFFLIB_PRINT_ERROR("cannot read file as PNG: %s", filename);
 error:
   if (fp) {
     fclose(fp);
@@ -375,7 +376,7 @@ stufflib_data stufflib_png_pack_image_data(
 
   packed = stufflib_misc_data_new(stufflib_png_data_size(image->header));
   if (!packed.size) {
-    fprintf(stderr, "failed allocating packed image data buffer\n");
+    STUFFLIB_PRINT_ERROR("failed allocating packed image data buffer");
     goto error;
   }
 
@@ -406,12 +407,12 @@ int stufflib_png_unpack_and_pad_image_data(stufflib_png_image image[static 1]) {
 
   filter = stufflib_misc_data_new(height);
   if (!filter.size) {
-    fprintf(stderr, "failed allocating scanline filter buffer\n");
+    STUFFLIB_PRINT_ERROR("failed allocating scanline filter buffer");
     goto error;
   }
   padded = stufflib_misc_data_new(bytes_per_px * (width + 2) * (height + 2));
   if (!padded.size) {
-    fprintf(stderr, "failed allocating buffer for padded image data\n");
+    STUFFLIB_PRINT_ERROR("failed allocating buffer for padded image data");
     goto error;
   }
 
@@ -486,9 +487,8 @@ int stufflib_png_unapply_filter(stufflib_png_image image[static 1]) {
             }
           } break;
           default: {
-            fprintf(stderr,
-                    "filter not implemented %s\n",
-                    stufflib_png_filter_types[filter]);
+            STUFFLIB_PRINT_ERROR("filter not implemented %s",
+                                 stufflib_png_filter_types[filter]);
             return 0;
           } break;
         }
@@ -509,16 +509,15 @@ stufflib_png_image stufflib_png_read_image(const char* filename) {
 
   image.header = stufflib_png_parse_header(chunks.chunks[0]);
   if (!stufflib_png_is_supported(image.header)) {
-    fprintf(stderr,
-            ("error: unsupported PNG features in %s\n"
-             "  image must be:\n"
-             "    8-bit/color\n"
-             "    RGB/A\n"
-             "    non-interlaced\n"
-             "    compression=0\n"
-             "    filter=0\n"
-             "  instead, header is:\n"),
-            filename);
+    STUFFLIB_PRINT_ERROR(("unsupported PNG features in %s\n"
+                          "  image must be:\n"
+                          "    8-bit/color\n"
+                          "    RGB/A\n"
+                          "    non-interlaced\n"
+                          "    compression=0\n"
+                          "    filter=0\n"
+                          "  instead, header is:\n"),
+                         filename);
     stufflib_png_dump_header(stderr, image.header);
     goto error;
   }
@@ -527,7 +526,7 @@ stufflib_png_image stufflib_png_read_image(const char* filename) {
     const stufflib_png_chunk chunk = chunks.chunks[i];
     if (chunk.type == stufflib_png_IDAT) {
       if (!stufflib_misc_concat(&idat, &chunk.data)) {
-        fprintf(stderr, "failed concatenating IDAT block\n");
+        STUFFLIB_PRINT_ERROR("failed concatenating IDAT block");
         goto error;
       }
     }
@@ -536,20 +535,20 @@ stufflib_png_image stufflib_png_read_image(const char* filename) {
 
   image.data = stufflib_misc_data_new(stufflib_png_data_size(image.header));
   if (!image.data.size) {
-    fprintf(stderr, "failed allocating output buffer\n");
+    STUFFLIB_PRINT_ERROR("failed allocating output buffer");
     goto error;
   }
   const size_t num_decoded = stufflib_inflate(image.data, idat);
   if (num_decoded != image.data.size) {
-    fprintf(stderr, "failed decoding IDAT stream\n");
+    STUFFLIB_PRINT_ERROR("failed decoding IDAT stream");
     goto error;
   }
   if (!stufflib_png_unpack_and_pad_image_data(&image)) {
-    fprintf(stderr, "failed padding decoded image\n");
+    STUFFLIB_PRINT_ERROR("failed padding decoded image");
     goto error;
   }
   if (!stufflib_png_unapply_filter(&image)) {
-    fprintf(stderr, "failed unfiltering decoded image\n");
+    STUFFLIB_PRINT_ERROR("failed unfiltering decoded image");
     goto error;
   }
 
@@ -630,17 +629,15 @@ int stufflib_png_chunk_fwrite(FILE stream[const static 1],
                               const char* chunk_type,
                               const stufflib_data data[const static 1]) {
   if (data->size > ((size_t)1 << 31)) {
-    fprintf(stderr,
-            "error: will not write too large %s chunk of size %zu",
-            chunk_type,
-            data->size);
+    STUFFLIB_PRINT_ERROR("will not write too large %s chunk of size %zu",
+                         chunk_type,
+                         data->size);
     return 0;
   }
   stufflib_data crc_data = stufflib_misc_data_new(data->size + 4);
   if (!crc_data.size) {
-    fprintf(stderr,
-            "error: failed allocating CRC32 buffer for %s chunk\n",
-            chunk_type);
+    STUFFLIB_PRINT_ERROR("failed allocating CRC32 buffer for %s chunk",
+                         chunk_type);
     return 0;
   }
 
@@ -649,7 +646,7 @@ int stufflib_png_chunk_fwrite(FILE stream[const static 1],
   const unsigned char* chunk_len =
       stufflib_misc_encode_big_endian(4, (unsigned char[4]){0}, data->size);
   if (fwrite(chunk_len, 1, 4, stream) != 4) {
-    fprintf(stderr, "error: failed writing %s chunk length\n", chunk_type);
+    STUFFLIB_PRINT_ERROR("failed writing %s chunk length", chunk_type);
     goto done;
   }
   memcpy(crc_data.data, chunk_type, 4);
@@ -657,7 +654,7 @@ int stufflib_png_chunk_fwrite(FILE stream[const static 1],
     memcpy(crc_data.data + 4, data->data, data->size);
   }
   if (fwrite(crc_data.data, 1, crc_data.size, stream) != crc_data.size) {
-    fprintf(stderr, "error: failed writing %s chunk type + data\n", chunk_type);
+    STUFFLIB_PRINT_ERROR("failed writing %s chunk type + data", chunk_type);
     goto done;
   }
   const unsigned char* crc32 =
@@ -665,7 +662,7 @@ int stufflib_png_chunk_fwrite(FILE stream[const static 1],
                                       (unsigned char[4]){0},
                                       stufflib_png_crc32(&crc_data));
   if (fwrite(crc32, 1, 4, stream) != 4) {
-    fprintf(stderr, "error: failed writing %s chunk CRC32\n", chunk_type);
+    STUFFLIB_PRINT_ERROR("failed writing %s chunk CRC32", chunk_type);
     goto done;
   }
 
@@ -685,17 +682,17 @@ int stufflib_png_write_image(const stufflib_png_image image,
 
   fp = fopen(filename, "w");
   if (!fp) {
-    fprintf(stderr, "error: cannot open %s\n", filename);
+    STUFFLIB_PRINT_ERROR("cannot open %s", filename);
     goto done;
   }
   packed_data = stufflib_png_pack_image_data(&image);
   if (!packed_data.size) {
-    fprintf(stderr, "failed allocating buffer image data\n");
+    STUFFLIB_PRINT_ERROR("failed allocating buffer image data");
     goto done;
   }
   idat = stufflib_misc_data_new(stufflib_png_idat_max_size(image.header));
   if (!idat.size) {
-    fprintf(stderr, "failed allocating buffer for IDAT chunks\n");
+    STUFFLIB_PRINT_ERROR("failed allocating buffer for IDAT chunks");
     goto done;
   }
 
@@ -703,15 +700,15 @@ int stufflib_png_write_image(const stufflib_png_image image,
   idat.data = realloc(idat.data, idat.size);
 
   if (!stufflib_png_chunk_fwrite_header(fp, image.header)) {
-    fprintf(stderr, "failed writing PNG header to %s\n", filename);
+    STUFFLIB_PRINT_ERROR("failed writing PNG header to %s", filename);
     goto done;
   }
   if (!stufflib_png_chunk_fwrite(fp, "IDAT", &idat)) {
-    fprintf(stderr, "failed writing PNG IDAT chunks to %s\n", filename);
+    STUFFLIB_PRINT_ERROR("failed writing PNG IDAT chunks to %s", filename);
     goto done;
   }
   if (!stufflib_png_chunk_fwrite(fp, "IEND", &(stufflib_data){0})) {
-    fprintf(stderr, "failed writing PNG IEND chunk to %s\n", filename);
+    STUFFLIB_PRINT_ERROR("failed writing PNG IEND chunk to %s", filename);
     goto done;
   }
 

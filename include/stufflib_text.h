@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "stufflib_macros.h"
+
 #define _STUFFLIB_TEXT_LINEBUF_SIZE 4096
 
 struct stufflib_text;
@@ -109,16 +111,16 @@ struct stufflib_text* stufflib_text_from_str(const char line[static 1]) {
 
   const size_t line_len = strcspn(line, "\r\n");
   if (line_len >= _STUFFLIB_TEXT_LINEBUF_SIZE) {
-    fprintf(stderr, "line too long %zu\n", line_len);
+    STUFFLIB_PRINT_ERROR("line too long %zu", line_len);
     return 0;
   }
   text_buf = (char*)(calloc(line_len + 1, sizeof(char)));
   if (!text_buf) {
-    fprintf(stderr, "failed allocating memory\n");
+    STUFFLIB_PRINT_ERROR("failed allocating memory");
     goto error;
   }
   if (!strncpy(text_buf, line, line_len)) {
-    fprintf(stderr, "strcpy failed\n");
+    STUFFLIB_PRINT_ERROR("strcpy failed");
     goto error;
   }
   text = stufflib_text_init();
@@ -147,7 +149,7 @@ struct stufflib_text* stufflib_text_from_file(const char fname[static 1]) {
 
   FILE* fp = fopen(fname, "r");
   if (!fp) {
-    fprintf(stderr, "error: cannot open %s\n", fname);
+    STUFFLIB_PRINT_ERROR("error: cannot open %s", fname);
     goto error;
   }
 
@@ -160,11 +162,11 @@ struct stufflib_text* stufflib_text_from_file(const char fname[static 1]) {
       break;
     }
     if (!line || ferror(fp)) {
-      fprintf(stderr, "error while reading %s\n", fname);
+      STUFFLIB_PRINT_ERROR("error while reading %s", fname);
       goto error;
     }
     if (linebuf[max_line_len - 1] != 0) {
-      fprintf(stderr, "too long line found in %s\n", fname);
+      STUFFLIB_PRINT_ERROR("too long line found in %s", fname);
       goto error;
     }
 

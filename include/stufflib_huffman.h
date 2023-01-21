@@ -2,6 +2,7 @@
 #define _STUFFLIB_HUFFMAN_H_INCLUDED
 #include <stdlib.h>
 
+#include "stufflib_macros.h"
 #include "stufflib_misc.h"
 
 typedef struct stufflib_huffman_tree stufflib_huffman_tree;
@@ -31,7 +32,7 @@ int stufflib_huffman_init(stufflib_huffman_tree tree[static 1],
 
   code_length_count = calloc(max_code_len + 1, sizeof(size_t));
   if (!code_length_count) {
-    fprintf(stderr, "failed allocating code_length_count\n");
+    STUFFLIB_PRINT_ERROR("failed allocating code_length_count");
     goto error;
   }
   for (size_t symbol = 0; symbol <= max_symbol; ++symbol) {
@@ -41,7 +42,7 @@ int stufflib_huffman_init(stufflib_huffman_tree tree[static 1],
 
   next_code = calloc(max_code_len + 1, sizeof(size_t));
   if (!next_code) {
-    fprintf(stderr, "failed allocating next_code\n");
+    STUFFLIB_PRINT_ERROR("failed allocating next_code");
     goto error;
   }
   {
@@ -54,7 +55,7 @@ int stufflib_huffman_init(stufflib_huffman_tree tree[static 1],
 
   codes = calloc(max_symbol + 1, sizeof(size_t));
   if (!codes) {
-    fprintf(stderr, "failed allocating codes\n");
+    STUFFLIB_PRINT_ERROR("failed allocating codes");
     goto error;
   }
   for (size_t symbol = 0; symbol <= max_symbol; ++symbol) {
@@ -67,7 +68,7 @@ int stufflib_huffman_init(stufflib_huffman_tree tree[static 1],
 
   max_codes = calloc(max_code_len, sizeof(size_t));
   if (!max_codes) {
-    fprintf(stderr, "failed allocating max_codes\n");
+    STUFFLIB_PRINT_ERROR("failed allocating max_codes");
     goto error;
   }
   for (size_t symbol = 0; symbol <= max_symbol; ++symbol) {
@@ -80,13 +81,14 @@ int stufflib_huffman_init(stufflib_huffman_tree tree[static 1],
 
   symbols = calloc(max_code_len, sizeof(size_t*));
   if (!symbols) {
-    fprintf(stderr, "failed allocating symbols\n");
+    STUFFLIB_PRINT_ERROR("failed allocating symbols");
     goto error;
   }
   for (size_t code_len = 1; code_len <= max_code_len; ++code_len) {
     const size_t max_code = max_codes[code_len - 1];
     if (!(symbols[code_len - 1] = calloc(max_code + 1, sizeof(size_t)))) {
-      fprintf(stderr, "failed allocating symbols for code_len %zu\n", code_len);
+      STUFFLIB_PRINT_ERROR("failed allocating symbols for code_len %zu",
+                           code_len);
       goto error;
     }
   }

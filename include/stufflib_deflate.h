@@ -18,6 +18,7 @@
 #include <stdlib.h>
 
 #include "stufflib_huffman.h"
+#include "stufflib_macros.h"
 #include "stufflib_misc.h"
 
 typedef struct _stufflib_deflate_state _stufflib_deflate_state;

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "stufflib_argv.h"
+#include "stufflib_macros.h"
 #include "stufflib_misc.h"
 #include "stufflib_png.h"
 
@@ -160,7 +161,7 @@ static inline int test_read_single_pixel(const char* png_path,
   }
   stufflib_png_image pixel = stufflib_png_read_image(png_path);
   if (!pixel.data.size) {
-    fprintf(stderr, "failed reading PNG image %s\n", png_path);
+    STUFFLIB_PRINT_ERROR("failed reading PNG image %s", png_path);
     return 1;
   }
   if (verbose) {
@@ -260,7 +261,7 @@ int test_read_small_images_with_dynamic_compression(const int verbose) {
     }
     stufflib_png_image img = stufflib_png_read_image(png_path);
     if (!img.data.size) {
-      fprintf(stderr, "failed reading PNG image %s\n", png_path);
+      STUFFLIB_PRINT_ERROR("failed reading PNG image %s", png_path);
       return 1;
     }
     if (verbose) {
@@ -294,7 +295,7 @@ int test_read_large_images_with_dynamic_compression(const int verbose) {
     }
     stufflib_png_image square = stufflib_png_read_image(png_path);
     if (!square.data.size) {
-      fprintf(stderr, "failed reading PNG image %s\n", png_path);
+      STUFFLIB_PRINT_ERROR("failed reading PNG image %s", png_path);
       return 1;
     }
     if (verbose) {
@@ -324,7 +325,7 @@ int test_read_large_images_with_dynamic_compression(const int verbose) {
     }
     stufflib_png_image asan = stufflib_png_read_image(png_path);
     if (!asan.data.size) {
-      fprintf(stderr, "failed reading PNG image %s\n", png_path);
+      STUFFLIB_PRINT_ERROR("failed reading PNG image %s", png_path);
       return 1;
     }
     if (verbose) {
@@ -349,7 +350,7 @@ int _test_read_write_read(const int verbose, const char* img0_path) {
   }
   stufflib_png_image img0 = stufflib_png_read_image(img0_path);
   if (!img0.data.size) {
-    fprintf(stderr, "failed reading PNG image %s\n", img0_path);
+    STUFFLIB_PRINT_ERROR("failed reading PNG image %s", img0_path);
     return 1;
   }
   if (verbose) {
@@ -460,7 +461,7 @@ int main(int argc, char* const argv[argc + 1]) {
     }
     const int failed = tests[t](verbose);
     if (failed) {
-      fprintf(stderr, "test %s (%zu) failed\n", test_names[t], t);
+      STUFFLIB_PRINT_ERROR("test %s (%zu) failed", test_names[t], t);
       return EXIT_FAILURE;
     }
   }
