@@ -98,6 +98,7 @@ const char* stufflib_png_filter_types[] = {
 
 typedef struct stufflib_png_header stufflib_png_header;
 struct stufflib_png_header {
+  // TODO abstract away +2 padding-headache
   size_t width;
   size_t height;
   unsigned bit_depth;
@@ -381,11 +382,13 @@ stufflib_data stufflib_png_pack_image_data(
   }
 
   for (size_t row = 0; row < height; ++row) {
-    packed.data[row * width] = stufflib_png_filter_none;
+    const size_t filter_idx = bytes_per_px * row * width + row;
+    packed.data[filter_idx] = stufflib_png_filter_none;
     for (size_t col = 0; col < width; ++col) {
-      const size_t idx = bytes_per_px * (width * row + col) + row + 1;
-      const size_t idx_pad = bytes_per_px * ((width + 2) * (row + 1) + col + 1);
-      memcpy(packed.data + idx, image->data.data + idx_pad, bytes_per_px);
+      const size_t dst_idx = bytes_per_px * (width * row + col) + 1 + row;
+      const size_t src_idx =
+          bytes_per_px * ((width + 2) * (row + 1) + (col + 1));
+      memcpy(packed.data + dst_idx, image->data.data + src_idx, bytes_per_px);
     }
   }
 
