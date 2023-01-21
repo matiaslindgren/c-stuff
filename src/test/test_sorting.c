@@ -37,7 +37,7 @@ int _test_compare_doubles(const int verbose) {
 
   free(a);
   free(b);
-  return 0;
+  return 1;
 }
 
 int _test_sort_doubles(stufflib_sort_double* sort_doubles, const int verbose) {
@@ -50,7 +50,7 @@ int _test_sort_doubles(stufflib_sort_double* sort_doubles, const int verbose) {
     double* x = calloc(n, sizeof(double));
     if (!x) {
       fprintf(stderr, "failed allocating memory for test data of len %zu\n", n);
-      return 1;
+      return 0;
     }
 
     for (size_t test = 0; test < num_tests_per_size; ++test) {
@@ -61,7 +61,7 @@ int _test_sort_doubles(stufflib_sort_double* sort_doubles, const int verbose) {
       if (!sort_doubles(n, x)) {
         fprintf(stderr, "sort failed\n");
         free(x);
-        return 1;
+        return 0;
       }
       clock_t end_time = clock();
       double sort_msec =
@@ -71,7 +71,7 @@ int _test_sort_doubles(stufflib_sort_double* sort_doubles, const int verbose) {
         if (x[i - 1] > x[i]) {
           fprintf(stderr, "array of %zu doubles is not sorted after sort\n", n);
           free(x);
-          return 1;
+          return 0;
         }
       }
 
@@ -83,7 +83,7 @@ int _test_sort_doubles(stufflib_sort_double* sort_doubles, const int verbose) {
     free(x);
   }
 
-  return 0;
+  return 1;
 }
 
 double* _stdlib_qsort_double(const size_t count, double src[count]) {
@@ -132,7 +132,7 @@ int _test_compare_strings(const int verbose) {
   assert(stufflib_sort_compare_str((void*)(&a[1]), (void*)(&b[0])) == 1);
   assert(stufflib_sort_compare_str((void*)(&a[1]), (void*)(&b[1])) == 1);
 
-  return 0;
+  return 1;
 }
 
 int _test_sort_strings(stufflib_sort_str* sort_strings, const int verbose) {
@@ -149,7 +149,7 @@ int _test_sort_strings(stufflib_sort_str* sort_strings, const int verbose) {
   if (!sort_strings(n, s)) {
     fprintf(stderr, "sort failed\n");
     free(s);
-    return 1;
+    return 0;
   }
   clock_t end_time = clock();
   double sort_msec = 1e3 * ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
@@ -158,7 +158,7 @@ int _test_sort_strings(stufflib_sort_str* sort_strings, const int verbose) {
     if (strcmp(s[i - 1], s[i]) > 0) {
       fprintf(stderr, "array of %zu strings is not sorted after sort\n", n);
       free(s);
-      return 1;
+      return 0;
     }
   }
 
@@ -168,7 +168,7 @@ int _test_sort_strings(stufflib_sort_str* sort_strings, const int verbose) {
   }
 
   free(s);
-  return 0;
+  return 1;
 }
 
 char** _stdlib_qsort_str(const size_t count, char* src[count]) {
@@ -244,7 +244,7 @@ int _test_sort_named_vec3(_sort_named_vec3* _sort_named_vec3,
   clock_t start_time = clock();
   if (!_sort_named_vec3(n, items)) {
     fprintf(stderr, "sort failed\n");
-    return 1;
+    return 0;
   }
   clock_t end_time = clock();
   double sort_msec = 1e3 * ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
@@ -261,7 +261,7 @@ int _test_sort_named_vec3(_sort_named_vec3* _sort_named_vec3,
     printf("%5zu %8zu %6.1f\n", test + 1, n, sort_msec);
   }
 
-  return 0;
+  return 1;
 }
 
 _named_vec3* _mergesort_named_vec3s(const size_t count,
@@ -328,7 +328,7 @@ int main(int argc, char* const argv[argc + 1]) {
   };
 
   for (size_t t = 0; t < (sizeof(tests) / sizeof(tests[0])); ++t) {
-    if (tests[t](verbose)) {
+    if (!tests[t](verbose)) {
       fprintf(stderr, "test %zu failed\n", t + 1);
       return EXIT_FAILURE;
     }

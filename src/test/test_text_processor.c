@@ -13,7 +13,7 @@ int _test_init_empty() {
   assert(text->data == 0);
   assert(text->length == 0);
   stufflib_text_destroy(text);
-  return 0;
+  return 1;
 }
 
 int _test_init_from_str() {
@@ -24,7 +24,7 @@ int _test_init_from_str() {
   assert(text->data);
   assert(text->length == strlen("hello there"));
   stufflib_text_destroy(text);
-  return 0;
+  return 1;
 }
 
 const size_t test_split_lineno;
@@ -70,7 +70,7 @@ int _test_init_from_file() {
   assert(stufflib_text_line_count(text) == line_count);
 
   stufflib_text_destroy(text);
-  return 0;
+  return 1;
 }
 
 const size_t test_split_lineno = __LINE__;
@@ -81,7 +81,7 @@ int main(void) {
       _test_init_from_file,
   };
   for (size_t t = 0; t < STUFFLIB_ARRAY_LEN(tests); ++t) {
-    if (tests[t]()) {
+    if (!tests[t]()) {
       fprintf(stderr, "test %zu failed\n", t + 1);
       return EXIT_FAILURE;
     }
