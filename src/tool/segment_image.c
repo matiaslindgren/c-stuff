@@ -16,7 +16,7 @@ int main(int argc, char* const argv[argc + 1]) {
   if (!img.data.size) {
     return EXIT_FAILURE;
   }
-  stufflib_png_image res = stufflib_img_segmentation_rgb(img, 1, 0.5);
+  stufflib_png_image res = stufflib_img_segment_rgb(img, 4, 0.1);
   const char* png_dst_path = argv[2];
   int ok = stufflib_png_write_image(img, png_dst_path);
   stufflib_png_image_destroy(img);

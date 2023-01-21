@@ -221,13 +221,13 @@ int _compare_named_vec3(const void* a, const void* b) {
 int _test_sort_named_vec3(_sort_named_vec3* _sort_named_vec3,
                           const int verbose) {
   _named_vec3 items[] = {
-      {-1, 0, 0, "f"},
-      {-1, 0, 1, "e"},
-      {0, 0, 0, "d"},
-      {1, 0, 1e9, "c"},
-      {1, 1, 0, "b"},
-      {0, 0, 0, "a"},
-      {0, 0, 0, " a"},
+      {-1, 0,   0,  "f"},
+      {-1, 0,   1,  "e"},
+      { 0, 0,   0,  "d"},
+      { 1, 0, 1e9,  "c"},
+      { 1, 1,   0,  "b"},
+      { 0, 0,   0,  "a"},
+      { 0, 0,   0, " a"},
   };
   _named_vec3 sorted_items[] = {
       items[0],

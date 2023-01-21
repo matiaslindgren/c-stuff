@@ -6,9 +6,9 @@
 #include "stufflib_png.h"
 #include "stufflib_unionfind.h"
 
-stufflib_png_image stufflib_img_segmentation_rgb(const stufflib_png_image src,
-                                                 const size_t num_iterations,
-                                                 const double threshold) {
+stufflib_png_image stufflib_img_segment_rgb(const stufflib_png_image src,
+                                            const size_t num_iterations,
+                                            const double threshold) {
   // padded
   const size_t width = src.header.width + 2;
   const size_t height = src.header.height + 2;
