@@ -21,15 +21,53 @@
 #include "stufflib_macros.h"
 #include "stufflib_misc.h"
 
-typedef struct _stufflib_deflate_state _stufflib_deflate_state;
-struct _stufflib_deflate_state {
+typedef struct _length_codes _length_codes;
+struct _length_codes {
+  size_t lengths[29];
+  int extra[29];
+};
+
+typedef struct _distance_codes _distance_codes;
+struct _distance_codes {
+  size_t distances[30];
+  int extra[30];
+};
+
+typedef struct _deflate_state _deflate_state;
+struct _deflate_state {
+  const _length_codes len_codes;
+  const _distance_codes dist_codes;
   stufflib_data dst;
   const stufflib_data src;
   size_t dst_pos;
   size_t src_bit;
 };
 
-static stufflib_huffman_tree _make_fixed_literal_codes() {
+static _length_codes _make_static_length_codes() {
+  _length_codes codes = {0};
+  codes.lengths[0] = 3;
+  for (size_t i = 1; i < STUFFLIB_ARRAY_LEN(codes.lengths); ++i) {
+    const int extra_bits = (STUFFLIB_MAX(1, (i - 1) / 4) - 1) % 6;
+    codes.extra[i - 1] = extra_bits;
+    codes.lengths[i] = codes.lengths[i - 1] + (1 << extra_bits);
+  }
+  codes.lengths[28] = 258;
+  return codes;
+}
+
+static _distance_codes _make_static_distance_codes() {
+  _distance_codes codes = {0};
+  codes.distances[0] = 1;
+  for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(codes.distances); ++i) {
+    codes.extra[i] = STUFFLIB_MAX(1, i / 2) - 1;
+    if (i) {
+      codes.distances[i] = codes.distances[i - 1] + (1 << codes.extra[i - 1]);
+    }
+  }
+  return codes;
+}
+
+static stufflib_huffman_tree _make_fixed_literal_tree() {
   const size_t max_literal = 287;
   size_t* code_lengths = calloc(max_literal + 1, sizeof(size_t));
   if (!code_lengths) {
@@ -63,7 +101,7 @@ error:
   return (stufflib_huffman_tree){0};
 }
 
-static stufflib_huffman_tree _make_fixed_distance_codes() {
+static stufflib_huffman_tree _make_fixed_distance_tree() {
   const size_t max_dist = 31;
   size_t* code_lengths = calloc(max_dist + 1, sizeof(size_t));
   if (!code_lengths) {
@@ -85,7 +123,7 @@ error:
   return (stufflib_huffman_tree){0};
 }
 
-static size_t _next_bit(_stufflib_deflate_state state[static 1]) {
+static size_t _next_bit(_deflate_state state[static 1]) {
   const size_t src_pos = state->src_bit / CHAR_BIT;
   const size_t src_bit = state->src_bit % CHAR_BIT;
   assert(src_pos < state->src.size);
@@ -93,8 +131,7 @@ static size_t _next_bit(_stufflib_deflate_state state[static 1]) {
   return (state->src.data[src_pos] >> src_bit) & 1;
 }
 
-static size_t _next_n_bits(_stufflib_deflate_state state[static 1],
-                           const size_t count) {
+static size_t _next_n_bits(_deflate_state state[static 1], const size_t count) {
   size_t res = 0;
   for (size_t i = 0; i < count; ++i) {
     res |= _next_bit(state) << i;
@@ -104,7 +141,7 @@ static size_t _next_n_bits(_stufflib_deflate_state state[static 1],
 
 static size_t _decode_next_code(
     const stufflib_huffman_tree codes[const static 1],
-    _stufflib_deflate_state state[static 1]) {
+    _deflate_state state[static 1]) {
   size_t code = 0;
   for (size_t code_len = 1; code_len <= codes->max_code_len; ++code_len) {
     code = (code << 1) | _next_bit(state);
@@ -116,39 +153,13 @@ static size_t _decode_next_code(
 }
 
 static void _inflate_block(
-    const stufflib_huffman_tree literal_codes[const static 1],
-    const stufflib_huffman_tree distance_codes[const static 1],
-    _stufflib_deflate_state state[static 1]) {
-  static size_t lengths[29] = {0};
-  static int lengths_extra[29] = {0};
-  static size_t distances[30] = {0};
-  static int distances_extra[30] = {0};
-
-  static int first_call = 1;
-  if (first_call) {
-    first_call = 0;
-
-    lengths[0] = 3;
-    for (size_t i = 1; i < STUFFLIB_ARRAY_LEN(lengths); ++i) {
-      const int extra_bits = (STUFFLIB_MAX(1, (i - 1) / 4) - 1) % 6;
-      lengths_extra[i - 1] = extra_bits;
-      lengths[i] = lengths[i - 1] + (1 << extra_bits);
-    }
-    lengths[28] = 258;
-
-    distances[0] = 1;
-    for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(distances); ++i) {
-      distances_extra[i] = STUFFLIB_MAX(1, i / 2) - 1;
-      if (i) {
-        distances[i] = distances[i - 1] + (1 << distances_extra[i - 1]);
-      }
-    }
-  }
-
+    const stufflib_huffman_tree literal_tree[const static 1],
+    const stufflib_huffman_tree distance_tree[const static 1],
+    _deflate_state state[static 1]) {
   const size_t end_of_block = 256;
 
   while (1) {
-    const size_t symbol = _decode_next_code(literal_codes, state);
+    const size_t symbol = _decode_next_code(literal_tree, state);
     if (symbol < end_of_block) {
       assert(state->dst_pos < state->dst.size);
       state->dst.data[state->dst_pos++] = symbol & STUFFLIB_ONES(1);
@@ -159,12 +170,15 @@ static void _inflate_block(
     }
     assert(symbol < 286);
     const size_t len_symbol = symbol - 257;
-    const size_t extra_len = _next_n_bits(state, lengths_extra[len_symbol]);
-    const size_t length = lengths[len_symbol] + extra_len;
+    const size_t extra_len =
+        _next_n_bits(state, state->len_codes.extra[len_symbol]);
+    const size_t length = state->len_codes.lengths[len_symbol] + extra_len;
 
-    const size_t dist_symbol = _decode_next_code(distance_codes, state);
-    const size_t extra_dist = _next_n_bits(state, distances_extra[dist_symbol]);
-    const size_t back_distance = distances[dist_symbol] + extra_dist;
+    const size_t dist_symbol = _decode_next_code(distance_tree, state);
+    const size_t extra_dist =
+        _next_n_bits(state, state->dist_codes.extra[dist_symbol]);
+    const size_t back_distance =
+        state->dist_codes.distances[dist_symbol] + extra_dist;
 
     const size_t copy_begin = state->dst_pos - back_distance;
     for (size_t i = copy_begin; i < copy_begin + length; ++i) {
@@ -174,8 +188,7 @@ static void _inflate_block(
   }
 }
 
-int stufflib_inflate_uncompressed_block(
-    _stufflib_deflate_state state[static 1]) {
+int stufflib_inflate_uncompressed_block(_deflate_state state[static 1]) {
   size_t src_byte_pos = state->src_bit / CHAR_BIT + 1;
   const size_t block_len =
       stufflib_misc_parse_lil_endian(2, state->src.data + src_byte_pos);
@@ -205,7 +218,7 @@ int stufflib_inflate_uncompressed_block(
   return 0;
 }
 
-int stufflib_inflate_dynamic_block(_stufflib_deflate_state state[static 1]) {
+int stufflib_inflate_dynamic_block(_deflate_state state[static 1]) {
   const size_t num_lengths = 257 + _next_n_bits(state, 5);
   const size_t num_distances = 1 + _next_n_bits(state, 5);
   const size_t num_length_lengths = 4 + _next_n_bits(state, 4);
@@ -222,10 +235,8 @@ int stufflib_inflate_dynamic_block(_stufflib_deflate_state state[static 1]) {
   for (size_t i = 0; i < num_length_lengths; ++i) {
     length_lengths[length_order[i]] = _next_n_bits(state, 3);
   }
-  stufflib_huffman_tree length_codes = (stufflib_huffman_tree){0};
-  if (!stufflib_huffman_init(&length_codes,
-                             max_length_length,
-                             length_lengths)) {
+  stufflib_huffman_tree length_tree = (stufflib_huffman_tree){0};
+  if (!stufflib_huffman_init(&length_tree, max_length_length, length_lengths)) {
     free(length_lengths);
     goto error;
   }
@@ -234,7 +245,7 @@ int stufflib_inflate_dynamic_block(_stufflib_deflate_state state[static 1]) {
   size_t* dynamic_code_lengths =
       calloc(num_lengths + num_distances, sizeof(size_t));
   for (size_t i = 0; i < num_lengths + num_distances;) {
-    const size_t symbol = _decode_next_code(&length_codes, state);
+    const size_t symbol = _decode_next_code(&length_tree, state);
     assert(symbol != SIZE_MAX);
     size_t code_len = 0;
     size_t num_repeats = 0;
@@ -261,43 +272,41 @@ int stufflib_inflate_dynamic_block(_stufflib_deflate_state state[static 1]) {
     }
     i += num_repeats;
   }
-  stufflib_huffman_destroy(&length_codes);
+  stufflib_huffman_destroy(&length_tree);
 
   const size_t max_length = num_lengths - 1;
   const size_t max_distance = num_distances - 1;
 
-  stufflib_huffman_tree literal_codes = (stufflib_huffman_tree){0};
-  if (!stufflib_huffman_init(&literal_codes,
-                             max_length,
-                             dynamic_code_lengths)) {
+  stufflib_huffman_tree literal_tree = (stufflib_huffman_tree){0};
+  if (!stufflib_huffman_init(&literal_tree, max_length, dynamic_code_lengths)) {
     free(dynamic_code_lengths);
     goto error;
   }
-  stufflib_huffman_tree distance_codes = (stufflib_huffman_tree){0};
-  if (!stufflib_huffman_init(&distance_codes,
+  stufflib_huffman_tree distance_tree = (stufflib_huffman_tree){0};
+  if (!stufflib_huffman_init(&distance_tree,
                              max_distance,
                              dynamic_code_lengths + num_lengths)) {
     free(dynamic_code_lengths);
-    stufflib_huffman_destroy(&literal_codes);
+    stufflib_huffman_destroy(&literal_tree);
     goto error;
   }
   free(dynamic_code_lengths);
 
-  _inflate_block(&literal_codes, &distance_codes, state);
-  stufflib_huffman_destroy(&literal_codes);
-  stufflib_huffman_destroy(&distance_codes);
+  _inflate_block(&literal_tree, &distance_tree, state);
+  stufflib_huffman_destroy(&literal_tree);
+  stufflib_huffman_destroy(&distance_tree);
   return 0;
 
 error:
   return 1;
 }
 
-int stufflib_inflate_fixed_block(_stufflib_deflate_state state[static 1]) {
-  stufflib_huffman_tree literal_codes = _make_fixed_literal_codes();
-  stufflib_huffman_tree distance_codes = _make_fixed_distance_codes();
-  _inflate_block(&literal_codes, &distance_codes, state);
-  stufflib_huffman_destroy(&literal_codes);
-  stufflib_huffman_destroy(&distance_codes);
+int stufflib_inflate_fixed_block(_deflate_state state[static 1]) {
+  stufflib_huffman_tree literal_tree = _make_fixed_literal_tree();
+  stufflib_huffman_tree distance_tree = _make_fixed_distance_tree();
+  _inflate_block(&literal_tree, &distance_tree, state);
+  stufflib_huffman_destroy(&literal_tree);
+  stufflib_huffman_destroy(&distance_tree);
   return 0;
 }
 
@@ -326,7 +335,9 @@ size_t stufflib_inflate(stufflib_data dst, const stufflib_data src) {
     goto error;
   }
 
-  _stufflib_deflate_state* state = &(_stufflib_deflate_state){
+  _deflate_state* state = &(_deflate_state){
+      .len_codes = _make_static_length_codes(),
+      .dist_codes = _make_static_distance_codes(),
       .dst = dst,
       .src = src,
       .dst_pos = 0,
