@@ -43,7 +43,7 @@ struct _deflate_state {
   size_t src_bit;
 };
 
-static _length_codes _make_static_length_codes() {
+static _length_codes _make_length_codes() {
   _length_codes codes = {0};
   codes.lengths[0] = 3;
   for (size_t i = 1; i < STUFFLIB_ARRAY_LEN(codes.lengths); ++i) {
@@ -55,7 +55,7 @@ static _length_codes _make_static_length_codes() {
   return codes;
 }
 
-static _distance_codes _make_static_distance_codes() {
+static _distance_codes _make_distance_codes() {
   _distance_codes codes = {0};
   codes.distances[0] = 1;
   for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(codes.distances); ++i) {
@@ -336,8 +336,8 @@ size_t stufflib_inflate(stufflib_data dst, const stufflib_data src) {
   }
 
   _deflate_state* state = &(_deflate_state){
-      .len_codes = _make_static_length_codes(),
-      .dist_codes = _make_static_distance_codes(),
+      .len_codes = _make_length_codes(),
+      .dist_codes = _make_distance_codes(),
       .dst = dst,
       .src = src,
       .dst_pos = 0,
