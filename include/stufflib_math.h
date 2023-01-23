@@ -17,6 +17,10 @@ int stufflib_math_double_almost(const double lhs,
   return fabs(lhs - rhs) < eps;
 }
 
+double stufflib_math_clamp(const double lo, const double mid, const double hi) {
+  return fmin(hi, fmax(lo, mid));
+}
+
 int stufflib_math_is_prime(size_t x) {
   for (size_t i = 2; i * i < x; ++i) {
     if (x % i == 0) {
@@ -81,6 +85,44 @@ size_t* stufflib_math_factorize(size_t n) {
 error:
   free(factors);
   return 0;
+}
+
+double* stufflib_math_linalg_scalar_vmul(const double a,
+                                         const size_t n,
+                                         double dst[restrict n],
+                                         const double src[restrict n]) {
+  for (size_t i = 0; i < n; ++i) {
+    dst[i] = a * src[i];
+  }
+  return dst;
+}
+
+double* stufflib_math_linalg_vadd(const size_t n,
+                                  double dst[restrict n],
+                                  const double lhs[restrict n],
+                                  const double rhs[restrict n]) {
+  for (size_t i = 0; i < n; ++i) {
+    dst[i] = lhs[i] + rhs[i];
+  }
+  return dst;
+}
+
+double* stufflib_math_linalg_vsub(const size_t n,
+                                  double dst[restrict n],
+                                  const double lhs[restrict n],
+                                  const double rhs[restrict n]) {
+  for (size_t i = 0; i < n; ++i) {
+    dst[i] = lhs[i] - rhs[i];
+  }
+  return dst;
+}
+
+void stufflib_math_linalg_vadd_inplace(const size_t n,
+                                       double dst[restrict n],
+                                       const double src[restrict n]) {
+  for (size_t i = 0; i < n; ++i) {
+    dst[i] += src[i];
+  }
 }
 
 double stufflib_math_linalg_norm2(const size_t n, const double v[restrict n]) {

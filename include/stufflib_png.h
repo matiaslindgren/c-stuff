@@ -163,8 +163,17 @@ unsigned char* stufflib_png_image_get_pixel(
   const size_t width = image->header.width;
   const size_t bytes_per_px =
       stufflib_png_bytes_per_pixel[image->header.color_type];
-  const size_t idx = (row * (width + 2) + col) * bytes_per_px;
-  return image->data.data + idx;
+  const size_t data_pos = (row * (width + 2) + col) * bytes_per_px;
+  return image->data.data + data_pos;
+}
+
+void stufflib_png_image_set_pixel(stufflib_png_image image[static 1],
+                                  const size_t row,
+                                  const size_t col,
+                                  const unsigned char* new_value) {
+  memcpy(stufflib_png_image_get_pixel(image, row, col),
+         new_value,
+         stufflib_png_bytes_per_pixel[image->header.color_type]);
 }
 
 int stufflib_png_is_supported(const stufflib_png_header header) {
