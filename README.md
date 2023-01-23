@@ -13,6 +13,14 @@ Merge adjacent image segments by comparing the Euclidian distance between the av
 
 ![](/docs/img/tokyo.png)
 
-#### output
+#### output (`--threshold-percent=10`)
 
-![](/docs/img/tokyo_segmented.png)
+![](/docs/img/tokyo_segmented_10p.png)
+
+#### output (`--threshold-percent=20`)
+
+![](/docs/img/tokyo_segmented_20p.png)
+
+#### output (`--threshold-percent=30`)
+
+![](/docs/img/tokyo_segmented_30p.png)
