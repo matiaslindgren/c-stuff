@@ -44,20 +44,19 @@ size_t stufflib_unionfind_find_root(const stufflib_unionfind uf[const static 1],
 void _stufflib_unionfind_set_root(const stufflib_unionfind uf[const static 1],
                                   const size_t begin,
                                   const size_t root) {
-  for (size_t parent = begin;
-       parent != root && parent != _STUFFLIB_UNIONFIND_ROOT;) {
+  for (size_t parent = begin; parent != _STUFFLIB_UNIONFIND_ROOT;) {
     const size_t next = uf->parents[parent];
-    uf->parents[parent] = root;
+    if (parent != root) {
+      uf->parents[parent] = root;
+    }
     parent = next;
   }
 }
 
-size_t stufflib_unionfind_union(const stufflib_unionfind uf[const static 1],
-                                const size_t lhs,
-                                const size_t rhs) {
-  const size_t root = stufflib_unionfind_find_root(uf, lhs);
-  _stufflib_unionfind_set_root(uf, rhs, root);
-  return root;
+void stufflib_unionfind_union(const stufflib_unionfind uf[const static 1],
+                              const size_t lhs,
+                              const size_t rhs) {
+  _stufflib_unionfind_set_root(uf, rhs, stufflib_unionfind_find_root(uf, lhs));
 }
 
 #undef _STUFFLIB_UNIONFIND_ROOT
