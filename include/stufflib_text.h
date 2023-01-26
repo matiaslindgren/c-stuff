@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "stufflib_io.h"
 #include "stufflib_macros.h"
 
 #define STUFFLIB_TEXT_BUFFER_SIZE 8192
@@ -174,46 +175,26 @@ error:
 }
 
 stufflib_text* stufflib_text_from_file(const char fname[const static 1]) {
-  FILE* fp = 0;
-  stufflib_text* text = 0;
-
-  fp = fopen(fname, "r");
-  if (!fp) {
-    STUFFLIB_PRINT_ERROR("cannot open %s", fname);
+  stufflib_text* text = calloc(1, sizeof(stufflib_text));
+  char* const file_contents = stufflib_io_slurp_file(fname);
+  if (!file_contents) {
+    STUFFLIB_PRINT_ERROR("failed reading contents of %s", fname);
     goto error;
   }
-  text = calloc(1, sizeof(stufflib_text));
   if (!text) {
     STUFFLIB_PRINT_ERROR("failed allocating stufflib_text");
     goto error;
   }
-
-  while (!feof(fp)) {
-    char buffer[STUFFLIB_TEXT_BUFFER_SIZE] = {0};
-    const size_t buffer_size = STUFFLIB_TEXT_BUFFER_SIZE;
-
-    const size_t num_read = fread(buffer, 1, buffer_size, fp);
-    if (num_read == 0 && feof(fp)) {
-      break;
-    }
-    if (num_read == 0 || ferror(fp)) {
-      STUFFLIB_PRINT_ERROR("failed reading %zu bytes from %s",
-                           buffer_size,
-                           fname);
-      goto error;
-    }
-    if (!stufflib_text_append_str(text, buffer, num_read)) {
-      STUFFLIB_PRINT_ERROR("failed appending str during init from file");
-      goto error;
-    }
+  if (!stufflib_text_append_str(text, file_contents, strlen(file_contents))) {
+    STUFFLIB_PRINT_ERROR("failed appending str during init from file");
+    goto error;
   }
-  fclose(fp);
-
+  free(file_contents);
   return text;
 
 error:
-  if (fp) {
-    fclose(fp);
+  if (file_contents) {
+    free(file_contents);
   }
   if (text) {
     stufflib_text_destroy(text);
