@@ -15,13 +15,6 @@ struct stufflib_text {
   char* str;
 };
 
-stufflib_text* stufflib_text_init(stufflib_text text[static 1]) {
-  if (text) {
-    *text = (stufflib_text){0};
-  }
-  return text;
-}
-
 void stufflib_text_destroy(stufflib_text head[const static 1]) {
   for (stufflib_text* text = head; text;) {
     stufflib_text* next = text->next;
@@ -125,10 +118,8 @@ stufflib_text* stufflib_text_split(const stufflib_text head[const static 1],
     goto error;
   }
 
-  size_t sp = 0;
   stufflib_text* prev = root;
-  for (const char* lhs = full_str; lhs;) {
-    ++sp;
+  for (const char* chunk = full_str; chunk;) {
     stufflib_text* text = calloc(1, sizeof(stufflib_text));
     if (!text) {
       STUFFLIB_PRINT_ERROR("failed allocating next stufflib_text during split");
@@ -137,13 +128,13 @@ stufflib_text* stufflib_text_split(const stufflib_text head[const static 1],
     if (prev) {
       prev->next = text;
     }
-    const char* rhs = strstr(lhs, separator);
-    const size_t chunk_len = rhs ? rhs - lhs : strlen(lhs);
-    if (!stufflib_text_append_str(text, lhs, chunk_len)) {
+    const char* chunk_end = strstr(chunk, separator);
+    const size_t chunk_len = chunk_end ? chunk_end - chunk : strlen(chunk);
+    if (!stufflib_text_append_str(text, chunk, chunk_len)) {
       STUFFLIB_PRINT_ERROR("failed appending str during split");
       goto error;
     }
-    lhs = rhs ? rhs + strlen(separator) : rhs;
+    chunk = chunk_end ? chunk_end + strlen(separator) : chunk_end;
     if (!root) {
       root = text;
     }
@@ -211,20 +202,12 @@ stufflib_text* stufflib_text_from_file(const char fname[const static 1]) {
                            fname);
       goto error;
     }
-
-    const size_t new_length = text->length + num_read;
-    char* new_str = realloc(text->str, new_length + 1);
-    if (!new_str) {
-      STUFFLIB_PRINT_ERROR("failed resizing text->str to length %zu",
-                           new_length + 1);
+    if (!stufflib_text_append_str(text, buffer, num_read)) {
+      STUFFLIB_PRINT_ERROR("failed appending str during init from file");
       goto error;
     }
-    text->str = new_str;
-    memcpy(text->str + text->length, buffer, num_read);
-    text->length = new_length;
   }
   fclose(fp);
-  text->str[text->length] = 0;
 
   return text;
 
