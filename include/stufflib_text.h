@@ -6,190 +6,156 @@
 
 #include "stufflib_macros.h"
 
-#define _STUFFLIB_TEXT_LINEBUF_SIZE 4096
+#define STUFFLIB_TEXT_BUFFER_SIZE 8192
 
-struct stufflib_text;
-
+typedef struct stufflib_text stufflib_text;
 struct stufflib_text {
-  struct stufflib_text* next;
-  size_t lineno;
+  stufflib_text* next;
   size_t length;
-  char* data;
+  char* str;
 };
 
-struct stufflib_text* stufflib_text_init() {
-  return (struct stufflib_text*)(calloc(1, sizeof(struct stufflib_text)));
+stufflib_text* stufflib_text_init(stufflib_text text[static 1]) {
+  if (text) {
+    *text = (stufflib_text){0};
+  }
+  return text;
 }
 
-void stufflib_text_destroy(struct stufflib_text text[static 1]) {
-  while (text) {
-    struct stufflib_text* next = text->next;
-    if (text->data) {
-      free(text->data);
-    }
+void stufflib_text_destroy(stufflib_text head[const static 1]) {
+  for (stufflib_text* text = head; text;) {
+    stufflib_text* next = text->next;
+    free(text->str);
     free(text);
     text = next;
   }
 }
 
-void _stufflib_text_renumber_lines(struct stufflib_text text[static 1]) {
-  size_t lineno = 0;
-  while (text) {
-    text->lineno = ++lineno;
+stufflib_text* stufflib_text_split_at(stufflib_text head[const static 1],
+                                      const size_t index) {
+  stufflib_text* text = head;
+  for (size_t i = 0; i < index; ++i) {
+    if (!text) {
+      STUFFLIB_PRINT_ERROR("index %zu out of bounds", index);
+      return 0;
+    }
     text = text->next;
   }
-}
-
-struct stufflib_text* stufflib_text_split_after(
-    struct stufflib_text text[static 1],
-    const size_t lineno) {
-  while (text && text->lineno < lineno) {
-    text = text->next;
-  }
-  if (!text || text->lineno != lineno) {
-    return 0;
-  }
-  struct stufflib_text* rhs = text->next;
-  _stufflib_text_renumber_lines(rhs);
+  stufflib_text* rhs = text->next;
   text->next = 0;
   return rhs;
 }
 
-struct stufflib_text* stufflib_text_concat(struct stufflib_text lhs[static 1],
-                                           struct stufflib_text rhs[static 1]) {
-  struct stufflib_text* root = lhs;
+stufflib_text* stufflib_text_concat(stufflib_text lhs[static 1],
+                                    stufflib_text rhs[const static 1]) {
+  stufflib_text* root = lhs;
   while (lhs->next) {
     lhs = lhs->next;
   }
   lhs->next = rhs;
-  _stufflib_text_renumber_lines(root);
   return root;
 }
 
-size_t stufflib_text_line_count(struct stufflib_text text[static 1]) {
-  size_t lines = 0;
-  while (text) {
-    lines = text->lineno;
-    text = text->next;
+size_t stufflib_text_size(const stufflib_text head[const static 1]) {
+  size_t size = 0;
+  for (const stufflib_text* text = head; text; text = text->next) {
+    size += text->length;
   }
-  return lines;
+  return size;
+}
+
+size_t stufflib_text_count(const stufflib_text head[const static 1]) {
+  size_t count = 0;
+  for (const stufflib_text* text = head; text; text = text->next) {
+    ++count;
+  }
+  return count;
+}
+
+int stufflib_text_append_str(stufflib_text text[const static 1],
+                             const char str[const static 1],
+                             const size_t length) {
+  {
+    char* tmp = realloc(text->str, text->length + length + 1);
+    if (!tmp) {
+      STUFFLIB_PRINT_ERROR("failed reallocating text->str during append str");
+      return 0;
+    }
+    text->str = tmp;
+  }
+  if (length) {
+    memcpy(text->str + text->length, str, length);
+    text->length += length;
+  }
+  text->str[text->length] = 0;
+  return 1;
 }
 
 int stufflib_text_fprint(FILE stream[const static 1],
-                         struct stufflib_text text[static 1]) {
+                         const stufflib_text head[const static 1],
+                         const char separator[const static 1]) {
   int ret = 0;
-  while (ret >= 0 && text) {
-    ret = fprintf(stream, "%s\n", text->data);
-    text = text->next;
+  for (const stufflib_text* text = head; text && !(ret < 0);
+       text = text->next) {
+    ret = fprintf(stream, "%s%s", text->str, separator);
   }
   return ret;
 }
 
-int _stufflib_text_number_width(size_t x) {
-  int w = 0;
-  while (x) {
-    ++w;
-    x /= 10;
-  }
-  return w;
-}
-
-int stufflib_text_pretty_fprint(FILE stream[const static 1],
-                                struct stufflib_text text[static 1]) {
-  int ret = 0;
-  const int pad = _stufflib_text_number_width(stufflib_text_line_count(text));
-  while (ret >= 0 && text) {
-    ret = fprintf(stream, "%*zu: %s\n", pad, text->lineno, text->data);
-    text = text->next;
-  }
-  return ret;
-}
-
-struct stufflib_text* stufflib_text_from_str(const char line[static 1]) {
-  char* text_buf = 0;
-  struct stufflib_text* text = 0;
-
-  const size_t line_len = strcspn(line, "\r\n");
-  if (line_len >= _STUFFLIB_TEXT_LINEBUF_SIZE) {
-    STUFFLIB_PRINT_ERROR("line too long %zu", line_len);
+char* stufflib_text_to_str(const stufflib_text head[const static 1]) {
+  char* str = calloc(stufflib_text_size(head) + 1, 1);
+  if (!str) {
+    STUFFLIB_PRINT_ERROR("failed allocating str");
     return 0;
   }
-  text_buf = (char*)(calloc(line_len + 1, sizeof(char)));
-  if (!text_buf) {
-    STUFFLIB_PRINT_ERROR("failed allocating memory");
-    goto error;
+  char* pos = str;
+  for (const stufflib_text* text = head; text; text = text->next) {
+    memcpy(pos, text->str, text->length);
+    pos += text->length;
   }
-  if (!strncpy(text_buf, line, line_len)) {
-    STUFFLIB_PRINT_ERROR("strcpy failed");
-    goto error;
-  }
-  text = stufflib_text_init();
-  if (!text) {
-    fprintf(stderr,
-            "error: failed allocating memory for stufflib_text struct\n");
-    goto error;
-  }
-  text->data = text_buf;
-  text->length = line_len;
-  text->lineno = 1;
-  return text;
-
-error:
-  if (text_buf) {
-    free(text_buf);
-  }
-  if (text) {
-    stufflib_text_destroy(text);
-  }
-  return 0;
+  return str;
 }
 
-struct stufflib_text* stufflib_text_from_file(const char fname[static 1]) {
-  struct stufflib_text* root = 0;
-
-  FILE* fp = fopen(fname, "r");
-  if (!fp) {
-    STUFFLIB_PRINT_ERROR("error: cannot open %s", fname);
+stufflib_text* stufflib_text_split(const stufflib_text head[const static 1],
+                                   const char separator[const static 1]) {
+  stufflib_text* root = 0;
+  char* full_str = stufflib_text_to_str(head);
+  if (!full_str) {
+    STUFFLIB_PRINT_ERROR("failed flattening stufflib_text to single str");
     goto error;
   }
 
-  for (struct stufflib_text* head = 0; !feof(fp);) {
-    const size_t max_line_len = _STUFFLIB_TEXT_LINEBUF_SIZE;
-    char linebuf[_STUFFLIB_TEXT_LINEBUF_SIZE] = {0};
-
-    const char* line = fgets(linebuf, max_line_len, fp);
-    if (!line && feof(fp)) {
-      break;
-    }
-    if (!line || ferror(fp)) {
-      STUFFLIB_PRINT_ERROR("error while reading %s", fname);
+  size_t sp = 0;
+  stufflib_text* prev = root;
+  for (const char* lhs = full_str; lhs;) {
+    ++sp;
+    stufflib_text* text = calloc(1, sizeof(stufflib_text));
+    if (!text) {
+      STUFFLIB_PRINT_ERROR("failed allocating next stufflib_text during split");
       goto error;
-    }
-    if (linebuf[max_line_len - 1] != 0) {
-      STUFFLIB_PRINT_ERROR("too long line found in %s", fname);
-      goto error;
-    }
-
-    struct stufflib_text* prev = head;
-    head = stufflib_text_from_str(line);
-    if (!head) {
-      goto error;
-    }
-    if (!root) {
-      root = head;
     }
     if (prev) {
-      head->lineno = prev->lineno + 1;
-      prev->next = head;
+      prev->next = text;
     }
+    const char* rhs = strstr(lhs, separator);
+    const size_t chunk_len = rhs ? rhs - lhs : strlen(lhs);
+    if (!stufflib_text_append_str(text, lhs, chunk_len)) {
+      STUFFLIB_PRINT_ERROR("failed appending str during split");
+      goto error;
+    }
+    lhs = rhs ? rhs + strlen(separator) : rhs;
+    if (!root) {
+      root = text;
+    }
+    prev = text;
   }
-  fclose(fp);
+  free(full_str);
 
   return root;
 
 error:
-  if (fp) {
-    fclose(fp);
+  if (full_str) {
+    free(full_str);
   }
   if (root) {
     stufflib_text_destroy(root);
@@ -197,6 +163,79 @@ error:
   return 0;
 }
 
-#undef _STUFFLIB_TEXT_LINEBUF_SIZE
+stufflib_text* stufflib_text_from_str(const char str[const static 1]) {
+  stufflib_text* text = calloc(1, sizeof(stufflib_text));
+  if (!text) {
+    STUFFLIB_PRINT_ERROR("failed allocating stufflib_text");
+    goto error;
+  }
+  if (!stufflib_text_append_str(text, str, strlen(str))) {
+    STUFFLIB_PRINT_ERROR("failed appending str to stufflib_text");
+    goto error;
+  }
+  return text;
+
+error:
+  if (text) {
+    stufflib_text_destroy(text);
+  }
+  return 0;
+}
+
+stufflib_text* stufflib_text_from_file(const char fname[const static 1]) {
+  FILE* fp = 0;
+  stufflib_text* text = 0;
+
+  fp = fopen(fname, "r");
+  if (!fp) {
+    STUFFLIB_PRINT_ERROR("cannot open %s", fname);
+    goto error;
+  }
+  text = calloc(1, sizeof(stufflib_text));
+  if (!text) {
+    STUFFLIB_PRINT_ERROR("failed allocating stufflib_text");
+    goto error;
+  }
+
+  while (!feof(fp)) {
+    char buffer[STUFFLIB_TEXT_BUFFER_SIZE] = {0};
+    const size_t buffer_size = STUFFLIB_TEXT_BUFFER_SIZE;
+
+    const size_t num_read = fread(buffer, 1, buffer_size, fp);
+    if (num_read == 0 && feof(fp)) {
+      break;
+    }
+    if (num_read == 0 || ferror(fp)) {
+      STUFFLIB_PRINT_ERROR("failed reading %zu bytes from %s",
+                           buffer_size,
+                           fname);
+      goto error;
+    }
+
+    const size_t new_length = text->length + num_read;
+    char* new_str = realloc(text->str, new_length + 1);
+    if (!new_str) {
+      STUFFLIB_PRINT_ERROR("failed resizing text->str to length %zu",
+                           new_length + 1);
+      goto error;
+    }
+    text->str = new_str;
+    memcpy(text->str + text->length, buffer, num_read);
+    text->length = new_length;
+  }
+  fclose(fp);
+  text->str[text->length] = 0;
+
+  return text;
+
+error:
+  if (fp) {
+    fclose(fp);
+  }
+  if (text) {
+    stufflib_text_destroy(text);
+  }
+  return 0;
+}
 
 #endif  // _STUFFLIB_TEXT_H_INCLUDED
