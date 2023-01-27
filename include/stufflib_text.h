@@ -6,6 +6,7 @@
 
 #include "stufflib_io.h"
 #include "stufflib_macros.h"
+#include "stufflib_str.h"
 
 #define STUFFLIB_TEXT_BUFFER_SIZE 8192
 
@@ -113,14 +114,23 @@ char* stufflib_text_to_str(const stufflib_text head[const static 1]) {
 stufflib_text* stufflib_text_split(const stufflib_text head[const static 1],
                                    const char separator[const static 1]) {
   stufflib_text* root = 0;
-  char* full_str = stufflib_text_to_str(head);
+  char** chunks = 0;
+  char* full_str = 0;
+
+  full_str = stufflib_text_to_str(head);
   if (!full_str) {
     STUFFLIB_PRINT_ERROR("failed flattening stufflib_text to single str");
     goto error;
   }
 
+  chunks = stufflib_str_split(full_str, separator);
+  if (!chunks) {
+    STUFFLIB_PRINT_ERROR("failed splitting string");
+    goto error;
+  }
+
   stufflib_text* prev = root;
-  for (const char* chunk = full_str; chunk;) {
+  for (char** chunk = chunks; *chunk; ++chunk) {
     stufflib_text* text = calloc(1, sizeof(stufflib_text));
     if (!text) {
       STUFFLIB_PRINT_ERROR("failed allocating next stufflib_text during split");
@@ -129,25 +139,26 @@ stufflib_text* stufflib_text_split(const stufflib_text head[const static 1],
     if (prev) {
       prev->next = text;
     }
-    const char* chunk_end = strstr(chunk, separator);
-    const size_t chunk_len = chunk_end ? chunk_end - chunk : strlen(chunk);
-    if (!stufflib_text_append_str(text, chunk, chunk_len)) {
+    if (!stufflib_text_append_str(text, *chunk, strlen(*chunk))) {
       STUFFLIB_PRINT_ERROR("failed appending str during split");
       goto error;
     }
-    chunk = chunk_end ? chunk_end + strlen(separator) : chunk_end;
     if (!root) {
       root = text;
     }
     prev = text;
   }
   free(full_str);
+  stufflib_str_split_destroy(chunks);
 
   return root;
 
 error:
   if (full_str) {
     free(full_str);
+  }
+  if (chunks) {
+    stufflib_str_split_destroy(chunks);
   }
   if (root) {
     stufflib_text_destroy(root);

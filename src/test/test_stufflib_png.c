@@ -2,10 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "stufflib_argv.h"
-#include "stufflib_macros.h"
-#include "stufflib_misc.h"
 #include "stufflib_png.h"
+#include "stufflib_test.h"
 
 int test_read_single_pixel_chunks(const int verbose) {
   for (size_t i = 0; i < 3; ++i) {
@@ -421,49 +419,15 @@ int test_read_write_read_large(const int verbose) {
   return 1;
 }
 
-typedef int test_function(const int);
-
-int main(int argc, char* const argv[argc + 1]) {
-  const int verbose = stufflib_argv_parse_flag(argc, argv, "-v");
-
-  test_function* tests[] = {
-      test_read_single_pixel_chunks,
-      test_read_large_image_with_many_chunks,
-      test_read_single_pixel_header,
-      test_read_img_header,
-      test_read_single_pixel_no_compression,
-      test_read_single_pixel_with_fixed_compression,
-      test_read_rgba_image_with_dynamic_compression,
-      test_read_small_images_with_dynamic_compression,
-      test_read_large_images_with_dynamic_compression,
-      test_read_write_read_single_pixel,
-      test_read_write_read_small,
-      test_read_write_read_large,
-  };
-  const char* test_names[] = {
-      "test_read_single_pixel_chunks",
-      "test_read_large_image_with_many_chunks",
-      "test_read_single_pixel_header",
-      "test_read_img_header",
-      "test_read_single_pixel_no_compression",
-      "test_read_single_pixel_with_fixed_compression",
-      "test_read_rgba_image_with_dynamic_compression",
-      "test_read_small_images_with_dynamic_compression",
-      "test_read_large_images_with_dynamic_compression",
-      "test_read_write_read_single_pixel",
-      "test_read_write_read_small",
-      "test_read_write_read_large",
-  };
-
-  for (size_t t = 0; t < STUFFLIB_ARRAY_LEN(tests); ++t) {
-    if (verbose) {
-      printf("\n%s\n", test_names[t]);
-    }
-    if (!tests[t](verbose)) {
-      STUFFLIB_PRINT_ERROR("test %s (%zu) failed", test_names[t], t);
-      return EXIT_FAILURE;
-    }
-  }
-
-  return EXIT_SUCCESS;
-}
+STUFFLIB_TEST_MAIN(test_read_single_pixel_chunks,
+                   test_read_large_image_with_many_chunks,
+                   test_read_single_pixel_header,
+                   test_read_img_header,
+                   test_read_single_pixel_no_compression,
+                   test_read_single_pixel_with_fixed_compression,
+                   test_read_rgba_image_with_dynamic_compression,
+                   test_read_small_images_with_dynamic_compression,
+                   test_read_large_images_with_dynamic_compression,
+                   test_read_write_read_single_pixel,
+                   test_read_write_read_small,
+                   test_read_write_read_large);

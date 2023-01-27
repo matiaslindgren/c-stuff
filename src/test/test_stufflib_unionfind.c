@@ -1,6 +1,4 @@
-#include "stufflib_argv.h"
-#include "stufflib_macros.h"
-#include "stufflib_misc.h"
+#include "stufflib_test.h"
 #include "stufflib_unionfind.h"
 
 int _check_roots(const stufflib_unionfind uf, size_t expected_roots[static 1]) {
@@ -117,30 +115,4 @@ int test_union_self(const int verbose) {
   return 1;
 }
 
-typedef int test_function(const int);
-
-int main(int argc, char* const argv[argc + 1]) {
-  const int verbose = stufflib_argv_parse_flag(argc, argv, "-v");
-
-  test_function* tests[] = {
-      test_union_until_single_set,
-      test_union_self,
-  };
-  const char* test_names[] = {
-      "test_union_until_single_set",
-      "test_union_self",
-  };
-
-  for (size_t t = 0; t < STUFFLIB_ARRAY_LEN(tests); ++t) {
-    if (verbose) {
-      printf("\n%s\n", test_names[t]);
-    }
-    const int ok = tests[t](verbose);
-    if (!ok) {
-      STUFFLIB_PRINT_ERROR("test %s (test idx: %zu) failed", test_names[t], t);
-      return EXIT_FAILURE;
-    }
-  }
-
-  return EXIT_SUCCESS;
-}
+STUFFLIB_TEST_MAIN(test_union_until_single_set, test_union_self);

@@ -5,13 +5,11 @@
 #include <string.h>
 #include <time.h>
 
-#include "stufflib_argv.h"
 #include "stufflib_rand.h"
 #include "stufflib_sort.h"
+#include "stufflib_test.h"
 
-typedef int test_function(const int);
-
-int _test_compare_doubles(const int verbose) {
+int test_compare_doubles(const int verbose) {
   (void)verbose;
   double* a = calloc(2, sizeof(double));
   double* b = calloc(2, sizeof(double));
@@ -40,7 +38,7 @@ int _test_compare_doubles(const int verbose) {
   return 1;
 }
 
-int _test_sort_doubles(stufflib_sort_double* sort_doubles, const int verbose) {
+int test_sort_doubles(stufflib_sort_double* sort_doubles, const int verbose) {
   const size_t num_tests_per_size = 5;
   const size_t array_sizes[] = {1, 2, 10, 1000, 10000, 100000};
 
@@ -91,28 +89,28 @@ double* _stdlib_qsort_double(const size_t count, double src[count]) {
   return src;
 }
 
-int _test_quicksort_doubles(const int verbose) {
+int test_quicksort_doubles(const int verbose) {
   if (verbose) {
     printf("test quicksort doubles\n");
   }
-  return _test_sort_doubles(stufflib_sort_quicksort_double, verbose);
+  return test_sort_doubles(stufflib_sort_quicksort_double, verbose);
 }
 
-int _test_mergesort_doubles(const int verbose) {
+int test_mergesort_doubles(const int verbose) {
   if (verbose) {
     printf("test mergesort doubles\n");
   }
-  return _test_sort_doubles(stufflib_sort_mergesort_double, verbose);
+  return test_sort_doubles(stufflib_sort_mergesort_double, verbose);
 }
 
-int _test_qsort_doubles(const int verbose) {
+int test_qsort_doubles(const int verbose) {
   if (verbose) {
     printf("test stdlib qsort doubles\n");
   }
-  return _test_sort_doubles(_stdlib_qsort_double, verbose);
+  return test_sort_doubles(_stdlib_qsort_double, verbose);
 }
 
-int _test_compare_strings(const int verbose) {
+int test_compare_strings(const int verbose) {
   (void)verbose;
   const char* a[] = {"hello", "there"};
   const char* b[] = {"ok", " "};
@@ -135,7 +133,7 @@ int _test_compare_strings(const int verbose) {
   return 1;
 }
 
-int _test_sort_strings(stufflib_sort_str* sort_strings, const int verbose) {
+int test_sort_strings(stufflib_sort_str* sort_strings, const int verbose) {
   const size_t n = 5;
 
   char** s = calloc(n, sizeof(char*));
@@ -176,25 +174,25 @@ char** _stdlib_qsort_str(const size_t count, char* src[count]) {
   return src;
 }
 
-int _test_quicksort_strings(const int verbose) {
+int test_quicksort_strings(const int verbose) {
   if (verbose) {
     printf("test quicksort strings\n");
   }
-  return _test_sort_strings(stufflib_sort_quicksort_str, verbose);
+  return test_sort_strings(stufflib_sort_quicksort_str, verbose);
 }
 
-int _test_mergesort_strings(const int verbose) {
+int test_mergesort_strings(const int verbose) {
   if (verbose) {
     printf("test mergesort strings\n");
   }
-  return _test_sort_strings(stufflib_sort_mergesort_str, verbose);
+  return test_sort_strings(stufflib_sort_mergesort_str, verbose);
 }
 
-int _test_qsort_strings(const int verbose) {
+int test_qsort_strings(const int verbose) {
   if (verbose) {
     printf("test stdlib qsort strings\n");
   }
-  return _test_sort_strings(_stdlib_qsort_str, verbose);
+  return test_sort_strings(_stdlib_qsort_str, verbose);
 }
 
 typedef struct _named_vec3 _named_vec3;
@@ -218,8 +216,8 @@ int _compare_named_vec3(const void* a, const void* b) {
   return res;
 }
 
-int _test_sort_named_vec3(_sort_named_vec3* _sort_named_vec3,
-                          const int verbose) {
+int test_sort_named_vec3(_sort_named_vec3* _sort_named_vec3,
+                         const int verbose) {
   _named_vec3 items[] = {
       {-1, 0,   0,  "f"},
       {-1, 0,   1,  "e"},
@@ -286,53 +284,35 @@ _named_vec3* _stdlib_qsort_named_vec3s(const size_t count,
   return src;
 }
 
-int _test_quicksort_custom_obj(const int verbose) {
+int test_quicksort_custom_obj(const int verbose) {
   if (verbose) {
     printf("test quicksort custom_obj\n");
   }
-  return _test_sort_named_vec3(_quicksort_named_vec3s, verbose);
+  return test_sort_named_vec3(_quicksort_named_vec3s, verbose);
 }
 
-int _test_mergesort_custom_obj(const int verbose) {
+int test_mergesort_custom_obj(const int verbose) {
   if (verbose) {
     printf("test mergesort custom objects\n");
   }
-  return _test_sort_named_vec3(_mergesort_named_vec3s, verbose);
+  return test_sort_named_vec3(_mergesort_named_vec3s, verbose);
 }
 
-int _test_qsort_custom_obj(const int verbose) {
+int test_qsort_custom_obj(const int verbose) {
   if (verbose) {
     printf("test stdlib qsort custom objects\n");
   }
-  return _test_sort_named_vec3(_stdlib_qsort_named_vec3s, verbose);
+  return test_sort_named_vec3(_stdlib_qsort_named_vec3s, verbose);
 }
 
-int main(int argc, char* const argv[argc + 1]) {
-  int verbose = stufflib_argv_parse_flag(argc, argv, "-v");
-
-  test_function* tests[] = {
-      _test_compare_doubles,
-      _test_compare_strings,
-
-      _test_quicksort_doubles,
-      _test_mergesort_doubles,
-      _test_qsort_doubles,
-
-      _test_quicksort_strings,
-      _test_mergesort_strings,
-      _test_qsort_strings,
-
-      _test_quicksort_custom_obj,
-      _test_mergesort_custom_obj,
-      _test_qsort_custom_obj,
-  };
-
-  for (size_t t = 0; t < (sizeof(tests) / sizeof(tests[0])); ++t) {
-    if (!tests[t](verbose)) {
-      fprintf(stderr, "test %zu failed\n", t + 1);
-      return EXIT_FAILURE;
-    }
-  }
-
-  return EXIT_SUCCESS;
-}
+STUFFLIB_TEST_MAIN(test_compare_doubles,
+                   test_compare_strings,
+                   test_quicksort_doubles,
+                   test_mergesort_doubles,
+                   test_qsort_doubles,
+                   test_quicksort_strings,
+                   test_mergesort_strings,
+                   test_qsort_strings,
+                   test_quicksort_custom_obj,
+                   test_mergesort_custom_obj,
+                   test_qsort_custom_obj);

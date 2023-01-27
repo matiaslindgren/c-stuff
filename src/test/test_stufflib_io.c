@@ -2,9 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "stufflib_argv.h"
 #include "stufflib_io.h"
-#include "stufflib_macros.h"
+#include "stufflib_test.h"
 
 int test_file_size() {
   assert(stufflib_io_file_size("./test-data/empty") == 0);
@@ -33,29 +32,4 @@ int test_file_slurp() {
   return 1;
 }
 
-typedef int test_function(void);
-
-int main(int argc, char* const argv[argc + 1]) {
-  const int verbose = stufflib_argv_parse_flag(argc, argv, "-v");
-
-  test_function* tests[] = {
-      test_file_size,
-      test_file_slurp,
-  };
-  const char* test_names[] = {
-      "test_file_size",
-      "test_file_slurp",
-  };
-
-  for (size_t t = 0; t < STUFFLIB_ARRAY_LEN(tests); ++t) {
-    if (verbose) {
-      printf("\n%s\n", test_names[t]);
-    }
-    if (!tests[t]()) {
-      STUFFLIB_PRINT_ERROR("test %s (%zu) failed", test_names[t], t);
-      return EXIT_FAILURE;
-    }
-  }
-
-  return EXIT_SUCCESS;
-}
+STUFFLIB_TEST_MAIN(test_file_size, test_file_slurp);
