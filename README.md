@@ -1,7 +1,7 @@
 # c-stuff
 
 Useless library/toolkit/scribble that reimplements solved problems for the sake of learning.
-Contains mostly solutions to the programming challenges suggested by Jens Gustedt in [Modern C](https://gustedt.gitlabpages.inria.fr/modern-c/).
+Contains mostly over-engineered solutions to the programming challenges suggested by Jens Gustedt in [Modern C](https://gustedt.gitlabpages.inria.fr/modern-c/).
 
 ## `src/tools`
 
@@ -24,3 +24,42 @@ Merge adjacent image segments by comparing the Euclidian distance between the av
 #### output (`--threshold-percent=30`)
 
 ![](/docs/img/tokyo_segmented_30p.png)
+
+### `txt.c`
+
+Stream text editor.
+
+Create 2 files:
+```
+echo hello > hello.txt
+echo there > there.txt
+```
+
+Concatenate:
+```
+./out/tool/txt concat ./hello.txt ./there.txt
+```
+`stdout`:
+```
+hello
+there
+```
+
+Replace:
+```
+out/tool/txt replace hello you ./hello.txt
+```
+`stdout`:
+```
+you
+```
+
+Concatenate and replace:
+```
+./out/tool/txt concat ./hello.txt ./there.txt | ./out/tool/txt replace hello you /dev/stdin
+```
+`stdout`:
+```
+you
+there
+```
