@@ -10,6 +10,7 @@
 typedef struct stufflib_args stufflib_args;
 struct stufflib_args {
   char* program;
+  // pointers main argv
   char* const** required;
   char* const** optional;
 };
