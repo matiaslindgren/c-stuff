@@ -94,6 +94,9 @@ int stufflib_text_fprint(FILE stream[const static 1],
        text = text->next) {
     ret = fprintf(stream, "%s%s", text->str, separator);
   }
+  if (!(ret < 0)) {
+    fflush(stream);
+  }
   return ret;
 }
 
@@ -133,7 +136,7 @@ stufflib_text* stufflib_text_split(const stufflib_text head[const static 1],
   for (char** chunk = chunks; *chunk; ++chunk) {
     stufflib_text* text = calloc(1, sizeof(stufflib_text));
     if (!text) {
-      STUFFLIB_PRINT_ERROR("failed allocating next stufflib_text during split");
+      STUFFLIB_PRINT_ERROR("failed allocating stufflib_text during split");
       goto error;
     }
     if (prev) {

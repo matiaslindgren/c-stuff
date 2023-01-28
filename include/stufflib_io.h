@@ -36,16 +36,18 @@ done:
 
 char* stufflib_io_slurp_file(const char fname[const static 1]) {
   char* content = 0;
-  FILE* fp = fopen(fname, "r");
-  if (!fp) {
-    STUFFLIB_PRINT_ERROR("cannot open %s", fname);
-    goto done;
-  }
+  FILE* fp = 0;
 
   const size_t size = stufflib_io_file_size(fname);
   content = calloc(size + 1, 1);
   if (!content) {
     STUFFLIB_PRINT_ERROR("failed allocating buffer for reading %s", fname);
+    goto done;
+  }
+
+  fp = fopen(fname, "r");
+  if (!fp) {
+    STUFFLIB_PRINT_ERROR("cannot open %s", fname);
     goto done;
   }
 
