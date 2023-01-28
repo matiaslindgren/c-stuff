@@ -65,10 +65,11 @@ you
 
 #### Combine commands
 ```
-./out/tool/txt concat ./hello.txt ./there.txt | ./out/tool/txt replace hello you /dev/stdin
+./out/tool/txt replace hello you ./hello.txt \
+  | ./out/tool/txt replace \n ' ' /dev/stdin \
+  | ./out/tool/txt concat /dev/stdin ./there.txt
 ```
 `stdout`:
 ```
-you
-there
+you there
 ```
