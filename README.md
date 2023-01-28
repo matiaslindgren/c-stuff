@@ -16,21 +16,40 @@ make -j test
 
 Merge adjacent image segments by comparing the Euclidian distance between the average RGB-pixel of each segment.
 
-#### input
+#### Input: `./docs/img/tokyo.png`
 
 ![](/docs/img/tokyo.png)
 
-#### output (`--threshold-percent=10`)
+```
+./out/tool/segment_image \
+  --threshold-percent=10 \
+  ./docs/img/tokyo.png \
+  ./docs/img/tokyo_segmented_10p.png
+```
 
+#### `./docs/img/tokyo_segmented_10p.png`
 ![](/docs/img/tokyo_segmented_10p.png)
 
-#### output (`--threshold-percent=20`)
+```
+./out/tool/segment_image \
+  --threshold-percent=20 \
+  ./docs/img/tokyo.png \
+  ./docs/img/tokyo_segmented_20p.png
+```
 
+#### `./docs/img/tokyo_segmented_20p.png`
 ![](/docs/img/tokyo_segmented_20p.png)
 
-#### output (`--threshold-percent=30`)
+```
+./out/tool/segment_image \
+  --threshold-percent=30 \
+  ./docs/img/tokyo.png \
+  ./docs/img/tokyo_segmented_30p.png
+```
 
+#### `./docs/img/tokyo_segmented_30p.png`
 ![](/docs/img/tokyo_segmented_30p.png)
+
 
 ### `txt.c`
 
