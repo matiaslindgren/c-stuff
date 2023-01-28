@@ -238,6 +238,23 @@ error:
   return 0;
 }
 
+size_t stufflib_text_count_matches(const stufflib_text head[const static 1],
+                                   const char pattern[const static 1]) {
+  size_t count = 0;
+  for (const stufflib_text* src = head; src; src = src->next) {
+    for (const char* src_str = src->str; src_str;) {
+      const char* match = strstr(src_str, pattern);
+      if (match) {
+        src_str = match + strlen(pattern);
+        ++count;
+      } else {
+        src_str = 0;
+      }
+    }
+  }
+  return count;
+}
+
 stufflib_text* stufflib_text_from_file(const char fname[const static 1]) {
   stufflib_text* text = calloc(1, sizeof(stufflib_text));
   char* const file_contents = stufflib_io_slurp_file(fname);

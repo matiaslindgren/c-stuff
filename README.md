@@ -54,6 +54,15 @@ there
 you
 ```
 
+#### Count pattern occurrence
+```
+./out/tool/txt count l ./hello.txt
+```
+`stdout`:
+```
+2
+```
+
 #### Combine commands
 ```
 ./out/tool/txt concat ./hello.txt ./there.txt | ./out/tool/txt replace hello you /dev/stdin
