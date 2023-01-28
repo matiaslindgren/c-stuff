@@ -98,7 +98,7 @@ you there
 
 ## Sorting: `./src/tool/sort.c`
 
-Create data:
+Create data (on macOS, use `gfind`):
 ```
 find ./test-data -printf '%s\n' > test-data-sizes.txt
 ```

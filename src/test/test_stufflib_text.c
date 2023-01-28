@@ -117,7 +117,7 @@ int test_init_from_file_and_splitlines() {
   stufflib_text* line = lines;
   for (size_t i = 1; i <= 100; ++i) {
     char expected[100] = {0};
-    sprintf(expected, "%zu", i);
+    snprintf(expected, 4, "%zu", i);
     assert(line);
     assert(line->str);
     assert(strcmp(line->str, expected) == 0);
