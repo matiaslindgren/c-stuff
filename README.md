@@ -10,92 +10,88 @@ make -j
 make -j test
 ```
 
-## `src/tools`
-
-### `segment_image.c`
+## Image segmentation: `./src/tool/segment_image.c`
 
 Merge adjacent image segments by comparing the Euclidian distance between the average RGB-pixel of each segment.
+
+### Examples
 
 #### Input: `./docs/img/tokyo.png`
 
 ![](/docs/img/tokyo.png)
 
+#### Output: `./docs/img/tokyo_segmented_10p.png`
 ```
 ./out/tool/segment_image \
   --threshold-percent=10 \
   ./docs/img/tokyo.png \
   ./docs/img/tokyo_segmented_10p.png
 ```
-
-#### `./docs/img/tokyo_segmented_10p.png`
 ![](/docs/img/tokyo_segmented_10p.png)
 
+#### Output: `./docs/img/tokyo_segmented_20p.png`
 ```
 ./out/tool/segment_image \
   --threshold-percent=20 \
   ./docs/img/tokyo.png \
   ./docs/img/tokyo_segmented_20p.png
 ```
-
-#### `./docs/img/tokyo_segmented_20p.png`
 ![](/docs/img/tokyo_segmented_20p.png)
 
+#### Output: `./docs/img/tokyo_segmented_30p.png`
 ```
 ./out/tool/segment_image \
   --threshold-percent=30 \
   ./docs/img/tokyo.png \
   ./docs/img/tokyo_segmented_30p.png
 ```
-
-#### `./docs/img/tokyo_segmented_30p.png`
 ![](/docs/img/tokyo_segmented_30p.png)
 
 
-### `txt.c`
+## Stream text editor: `./src/tool/txt.c`
 
-Stream text editor.
-
+### Example
 Create 2 files:
 ```
 echo hello > hello.txt
 echo there > there.txt
 ```
 
-#### Concatenate
+### Concatenate
 ```
 ./out/tool/txt concat ./hello.txt ./there.txt
 ```
-`stdout`:
+#### `stdout`:
 ```
 hello
 there
 ```
 
-#### Replace
+### Replace
 ```
 ./out/tool/txt replace hello you ./hello.txt
 ```
-`stdout`:
+#### `stdout`:
 ```
 you
 ```
 
-#### Count pattern occurrence
+### Count pattern occurrence
 ```
 ./out/tool/txt count l ./hello.txt
 ```
-`stdout`:
+#### `stdout`:
 ```
 2
 ```
 
-#### Combine commands
+### Combine commands
 ```
 ./out/tool/txt replace hello you ./hello.txt \
   | ./out/tool/txt replace \n ' ' /dev/stdin \
   | ./out/tool/txt concat /dev/stdin ./there.txt
 ```
-`stdout`:
+#### `stdout`:
 ```
 you there
 ```
