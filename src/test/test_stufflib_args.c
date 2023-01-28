@@ -21,6 +21,7 @@ int test_parse_positional(const int verbose) {
   assert(strcmp(*args->required[0], "arg1") == 0);
 
   assert(strcmp(stufflib_args_get_positional(args, 0), "arg1") == 0);
+  assert(stufflib_args_count_positional(args) == 1);
 
   stufflib_args_destroy(args);
   return 1;
@@ -58,6 +59,8 @@ int test_parse_one_flag(const int verbose) {
     assert(!stufflib_args_parse_flag(args, should_not_match[i]));
   }
 
+  assert(stufflib_args_count_positional(args) == 0);
+
   stufflib_args_destroy(args);
   return 1;
 }
@@ -84,6 +87,7 @@ int test_parse_positional_after_optional(const int verbose) {
 
   assert(stufflib_args_parse_flag(args, "-v"));
   assert(strcmp(stufflib_args_get_positional(args, 0), "arg1") == 0);
+  assert(stufflib_args_count_positional(args) == 1);
 
   stufflib_args_destroy(args);
   return 1;
@@ -125,6 +129,8 @@ int test_parse_two_flags(const int verbose) {
   for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(should_not_match); ++i) {
     assert(!stufflib_args_parse_flag(args, should_not_match[i]));
   }
+
+  assert(stufflib_args_count_positional(args) == 0);
 
   stufflib_args_destroy(args);
   return 1;
@@ -173,6 +179,8 @@ int test_parse_uint(const int verbose) {
   for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(should_not_match); ++i) {
     assert(stufflib_args_parse_uint(args, should_not_match[i], 10) == 0);
   }
+
+  assert(stufflib_args_count_positional(args) == 0);
 
   stufflib_args_destroy(args);
   return 1;

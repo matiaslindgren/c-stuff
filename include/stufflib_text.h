@@ -188,6 +188,56 @@ error:
   return 0;
 }
 
+stufflib_text* stufflib_text_replace(const stufflib_text head[const static 1],
+                                     const char old_str[const static 1],
+                                     const char new_str[const static 1]) {
+  stufflib_text* root = 0;
+
+  stufflib_text* prev = 0;
+  for (const stufflib_text* src = head; src; src = src->next) {
+    stufflib_text* dst = calloc(1, sizeof(stufflib_text));
+    if (!dst) {
+      STUFFLIB_PRINT_ERROR("failed allocating stufflib_text during replace");
+      goto error;
+    }
+    if (!root) {
+      root = dst;
+    }
+    if (prev) {
+      prev->next = dst;
+    }
+
+    for (const char* src_str = src->str; src_str;) {
+      const char* match = strstr(src_str, old_str);
+      if (match) {
+        if (!stufflib_text_append_str(dst, src_str, match - src_str)) {
+          STUFFLIB_PRINT_ERROR("failed appending prefix during replace");
+          goto error;
+        }
+        if (!stufflib_text_append_str(dst, new_str, strlen(new_str))) {
+          STUFFLIB_PRINT_ERROR("failed appending new_str during replace");
+          goto error;
+        }
+        src_str = match + strlen(old_str);
+      } else {
+        if (!stufflib_text_append_str(dst, src_str, strlen(src_str))) {
+          STUFFLIB_PRINT_ERROR("failed appending src->ste during replace");
+          goto error;
+        }
+        src_str = 0;
+      }
+    }
+
+    prev = dst;
+  }
+
+  return root;
+
+error:
+  stufflib_text_destroy(root);
+  return 0;
+}
+
 stufflib_text* stufflib_text_from_file(const char fname[const static 1]) {
   stufflib_text* text = calloc(1, sizeof(stufflib_text));
   char* const file_contents = stufflib_io_slurp_file(fname);

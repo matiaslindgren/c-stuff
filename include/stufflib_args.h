@@ -71,6 +71,15 @@ char* const stufflib_args_get_positional(
   return 0;
 }
 
+size_t stufflib_args_count_positional(
+    const stufflib_args args[const static 1]) {
+  size_t count = 0;
+  while (args->required[count]) {
+    ++count;
+  }
+  return count;
+}
+
 int stufflib_args_parse_flag(const stufflib_args args[const static 1],
                              const char arg[const static 1]) {
   for (size_t i = 0; args->optional[i]; ++i) {
