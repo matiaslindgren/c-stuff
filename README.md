@@ -95,3 +95,68 @@ you
 ```
 you there
 ```
+
+## Sorting: `./src/tool/sort.c`
+
+Create data:
+```
+find ./test-data -printf '%s\n' > test-data-sizes.txt
+```
+
+### Sort lines as doubles
+```
+./out/tool/sort doubles ./test-data-sizes.txt
+```
+#### `stdout`:
+```
+0
+0
+1
+11
+69
+69
+69
+72
+72
+72
+72
+160
+237
+238
+238
+292
+1554
+2970
+4096
+11223
+24733
+```
+
+### Sort lines as strings
+```
+./out/tool/sort strings ./test-data-sizes.txt
+```
+#### `stdout`:
+```
+
+0
+1
+11
+11223
+1554
+160
+237
+238
+238
+24733
+292
+2970
+4096
+69
+69
+69
+72
+72
+72
+72
+```

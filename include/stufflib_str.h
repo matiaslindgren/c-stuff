@@ -7,13 +7,19 @@
 
 #include "stufflib_macros.h"
 
-void stufflib_str_split_destroy(char** chunks) {
-  if (chunks) {
-    for (char** chunk = chunks; *chunk; ++chunk) {
-      free(*chunk);
-    }
-    free(chunks);
+void stufflib_str_split_destroy(char* chunks[const static 1]) {
+  for (char** chunk = chunks; *chunk; ++chunk) {
+    free(*chunk);
   }
+  free(chunks);
+}
+
+size_t stufflib_str_count_chunks(char* chunks[const static 1]) {
+  size_t count = 0;
+  for (char** chunk = chunks; *chunk; ++chunk) {
+    ++count;
+  }
+  return count;
 }
 
 // TODO flat
