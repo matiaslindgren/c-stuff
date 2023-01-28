@@ -3,6 +3,13 @@
 Useless library/toolkit/scribble that reimplements solved problems for the sake of learning.
 Contains mostly over-engineered solutions to the programming challenges suggested by Jens Gustedt in [Modern C](https://gustedt.gitlabpages.inria.fr/modern-c/).
 
+## Build
+
+```
+make -j
+make -j test
+```
+
 ## `src/tools`
 
 ### `segment_image.c`
