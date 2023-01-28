@@ -17,22 +17,24 @@
 
 #define STUFFLIB_TEST_MAIN(...)                                         \
   int main(int argc, char* const argv[argc + 1]) {                      \
-    const int verbose = stufflib_argv_parse_flag(argc, argv, "-v");     \
+    stufflib_args* args = stufflib_args_from_argv(argc, argv);          \
+    const int verbose = stufflib_args_parse_flag(args, "-v");           \
     int (*tests[])(const int) = {__VA_ARGS__};                          \
     char** test_names = stufflib_str_split(#__VA_ARGS__, ", ");         \
     assert(test_names);                                                 \
-    for (size_t t = 0; t < STUFFLIB_ARRAY_LEN(tests); ++t) {            \
+    int ok = 1;                                                         \
+    for (size_t t = 0; ok && t < STUFFLIB_ARRAY_LEN(tests); ++t) {      \
       if (verbose) {                                                    \
         printf("%s\n", test_names[t]);                                  \
       }                                                                 \
-      if (!tests[t](verbose)) {                                         \
+      ok = tests[t](verbose);                                           \
+      if (!ok) {                                                        \
         STUFFLIB_PRINT_ERROR("test %s (%zu) failed", test_names[t], t); \
-        stufflib_str_split_destroy(test_names);                         \
-        return EXIT_FAILURE;                                            \
       }                                                                 \
     }                                                                   \
+    stufflib_args_destroy(args);                                        \
     stufflib_str_split_destroy(test_names);                             \
-    return EXIT_SUCCESS;                                                \
+    return ok ? EXIT_SUCCESS : EXIT_FAILURE;                            \
   }
 
 #endif  // _STUFFLIB_MACROS_H_INCLUDED

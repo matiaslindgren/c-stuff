@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "stufflib_argv.h"
+#include "stufflib_args.h"
 #include "stufflib_macros.h"
 #include "stufflib_math.h"
 #include "stufflib_png.h"
@@ -147,11 +147,16 @@ int main(int argc, char* const argv[argc + 1]) {
     return EXIT_FAILURE;
   }
 
-  const char* png_src_path = argv[1];
-  const char* png_dst_path = argv[2];
+  stufflib_args* args = stufflib_args_from_argv(argc, argv);
+
+  const char* png_src_path = stufflib_args_get_positional(args, 0);
+  const char* png_dst_path = stufflib_args_get_positional(args, 1);
   const size_t threshold =
-      stufflib_argv_parse_uint(argc, argv, "--threshold-percent", 10);
-  const int verbose = stufflib_argv_parse_flag(argc, argv, "-v");
+      stufflib_args_parse_uint(args, "--threshold-percent", 10);
+  const int verbose = stufflib_args_parse_flag(args, "-v");
+
+  stufflib_args_destroy(args);
+  args = 0;
 
   if (verbose) {
     printf("read %s\n", png_src_path);
@@ -172,6 +177,5 @@ int main(int argc, char* const argv[argc + 1]) {
 
   stufflib_png_image_destroy(img);
   stufflib_png_image_destroy(res);
-
   return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "stufflib_args.h"
 #include "stufflib_text.h"
 
 int main(int argc, char* const argv[argc + 1]) {
@@ -9,7 +10,11 @@ int main(int argc, char* const argv[argc + 1]) {
     return EXIT_FAILURE;
   }
 
-  const char* text_path = argv[1];
+  stufflib_args* args = stufflib_args_from_argv(argc, argv);
+  const char* text_path = stufflib_args_get_positional(args, 0);
+  stufflib_args_destroy(args);
+  args = 0;
+
   stufflib_text* text = stufflib_text_from_file(text_path);
   if (!text) {
     goto error;

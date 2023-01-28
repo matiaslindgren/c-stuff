@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "stufflib_argv.h"
+#include "stufflib_args.h"
 #include "stufflib_deflate.h"
 #include "stufflib_png.h"
 
@@ -10,8 +10,13 @@ int main(int argc, char* const argv[argc + 1]) {
     fprintf(stderr, "usage: %s png_path [-v]\n", argv[0]);
     return EXIT_FAILURE;
   }
-  const char* png_path = argv[1];
-  const int verbose = stufflib_argv_parse_flag(argc, argv, "-v");
+  stufflib_args* args = stufflib_args_from_argv(argc, argv);
+
+  const char* png_path = stufflib_args_get_positional(args, 0);
+  const int verbose = stufflib_args_parse_flag(args, "-v");
+
+  stufflib_args_destroy(args);
+  args = 0;
 
   printf("FILE\n  %s\n", png_path);
 
