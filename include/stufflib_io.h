@@ -33,13 +33,15 @@ done:
 }
 
 char* stufflib_io_slurp_file(const char fname[const static 1]) {
-  char* content = 0;
-  FILE* fp = 0;
-
-  fp = fopen(fname, "r");
+  char* content = calloc(1, 1);
+  FILE* fp = fopen(fname, "r");
+  if (!content) {
+    STUFFLIB_PRINT_ERROR("failed allocating slurp buffer");
+    goto error;
+  }
   if (!fp) {
     STUFFLIB_PRINT_ERROR("cannot open %s", fname);
-    goto done;
+    goto error;
   }
 
   {
@@ -51,9 +53,7 @@ char* stufflib_io_slurp_file(const char fname[const static 1]) {
         char* tmp = realloc(content, size + 1);
         if (!tmp) {
           STUFFLIB_PRINT_ERROR("failed resizing slurp buffer");
-          free(content);
-          content = 0;
-          goto done;
+          goto error;
         }
         content = tmp;
       }
@@ -63,16 +63,20 @@ char* stufflib_io_slurp_file(const char fname[const static 1]) {
   }
   if (ferror(fp)) {
     STUFFLIB_PRINT_ERROR("failed reading from %s", fname);
-    free(content);
-    content = 0;
-    goto done;
+    goto error;
   }
 
-done:
+  fclose(fp);
+  return content;
+
+error:
   if (fp) {
     fclose(fp);
   }
-  return content;
+  if (content) {
+    free(content);
+  }
+  return 0;
 }
 
 #endif  // _STUFFLIB_IO_H_INCLUDED
