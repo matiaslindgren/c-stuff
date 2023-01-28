@@ -35,7 +35,7 @@ echo hello > hello.txt
 echo there > there.txt
 ```
 
-Concatenate:
+#### Concatenate
 ```
 ./out/tool/txt concat ./hello.txt ./there.txt
 ```
@@ -45,16 +45,16 @@ hello
 there
 ```
 
-Replace:
+#### Replace
 ```
-out/tool/txt replace hello you ./hello.txt
+./out/tool/txt replace hello you ./hello.txt
 ```
 `stdout`:
 ```
 you
 ```
 
-Concatenate and replace:
+#### Combine commands
 ```
 ./out/tool/txt concat ./hello.txt ./there.txt | ./out/tool/txt replace hello you /dev/stdin
 ```
