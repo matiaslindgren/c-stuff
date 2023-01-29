@@ -78,11 +78,11 @@ you
 
 ### Count pattern occurrence
 ```
-./out/tool/txt count l ./hello.txt
+./out/tool/txt count '##' ./README.md
 ```
 #### `stdout`:
 ```
-2
+33
 ```
 
 ### Combine commands
