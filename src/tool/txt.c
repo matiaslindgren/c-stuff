@@ -111,12 +111,47 @@ done:
   return ok;
 }
 
+int slicelines(const stufflib_args args[const static 1]) {
+  if (stufflib_args_count_positional(args) != 4) {
+    STUFFLIB_PRINT_ERROR("too few arguments to slicelines");
+    return 0;
+  }
+
+  int ok = 0;
+
+  const size_t begin = strtoull(stufflib_args_get_positional(args, 1), 0, 10);
+  const size_t end = strtoull(stufflib_args_get_positional(args, 2), 0, 10);
+  const char* path = stufflib_args_get_positional(args, 3);
+
+  char** lines = stufflib_io_slurp_lines(path, "\n");
+  if (!lines) {
+    goto done;
+  }
+  for (size_t pos = 0; lines[pos] && pos < end; ++pos) {
+    if (begin <= pos) {
+      if (printf("%s\n", lines[pos]) < 0) {
+        goto done;
+      }
+    }
+  }
+
+  ok = 1;
+
+done:
+  if (lines) {
+    stufflib_str_chunks_destroy(lines);
+  }
+  return ok;
+}
+
 void print_usage(const stufflib_args args[const static 1]) {
   fprintf(stderr,
           ("usage:\n"
            "  %s concat path [paths...]\n"
            "  %s count pattern path\n"
-           "  %s replace old_str new_str path\n"),
+           "  %s replace old_str new_str path\n"
+           "  %s slicelines begin end path\n"),
+          args->program,
           args->program,
           args->program,
           args->program);
@@ -133,6 +168,8 @@ int main(int argc, char* const argv[argc + 1]) {
       ok = count(args);
     } else if (strcmp(command, "replace") == 0) {
       ok = replace(args);
+    } else if (strcmp(command, "slicelines") == 0) {
+      ok = slicelines(args);
     } else {
       STUFFLIB_PRINT_ERROR("unknown command %s", command);
     }

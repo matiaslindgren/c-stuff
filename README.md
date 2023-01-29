@@ -85,6 +85,37 @@ you
 33
 ```
 
+### Slice lines
+```
+./out/tool/txt slicelines 159 182 ./src/tool/txt.c
+```
+#### `stdout`:
+```
+int main(int argc, char* const argv[argc + 1]) {
+  stufflib_args* args = stufflib_args_from_argv(argc, argv);
+  int ok = 0;
+  const char* command = stufflib_args_get_positional(args, 0);
+  if (command) {
+    if (strcmp(command, "concat") == 0) {
+      ok = concat(args);
+    } else if (strcmp(command, "count") == 0) {
+      ok = count(args);
+    } else if (strcmp(command, "replace") == 0) {
+      ok = replace(args);
+    } else if (strcmp(command, "slicelines") == 0) {
+      ok = slicelines(args);
+    } else {
+      STUFFLIB_PRINT_ERROR("unknown command %s", command);
+    }
+  }
+  if (!ok) {
+    print_usage(args);
+  }
+  stufflib_args_destroy(args);
+  return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+}
+```
+
 ### Combine commands
 ```
 ./out/tool/txt replace hello you ./hello.txt \
