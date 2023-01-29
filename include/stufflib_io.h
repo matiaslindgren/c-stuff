@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "stufflib_macros.h"
+#include "stufflib_str.h"
 
 size_t stufflib_io_file_size(const char fname[const static 1]) {
   size_t size = 0;
@@ -75,6 +76,44 @@ error:
   }
   if (content) {
     free(content);
+  }
+  return 0;
+}
+
+char** stufflib_io_slurp_lines(const char fname[const static 1],
+                               const char line_ending[const static 1]) {
+  char* file_content = 0;
+  char** lines = 0;
+
+  file_content = stufflib_io_slurp_file(fname);
+  if (!file_content) {
+    goto error;
+  }
+
+  lines = stufflib_str_split(file_content, line_ending);
+  if (!lines) {
+    goto error;
+  }
+
+  const size_t num_lines = stufflib_str_chunks_count(lines);
+  if (strcmp(lines[num_lines - 1], "") == 0) {
+    char** tmp = stufflib_str_slice_chunks(lines, 0, num_lines - 1);
+    if (!tmp) {
+      goto error;
+    }
+    stufflib_str_chunks_destroy(lines);
+    lines = tmp;
+  }
+
+  free(file_content);
+  return lines;
+
+error:
+  if (file_content) {
+    free(file_content);
+  }
+  if (lines) {
+    stufflib_str_chunks_destroy(lines);
   }
   return 0;
 }

@@ -152,7 +152,7 @@ stufflib_text* stufflib_text_split(const stufflib_text head[const static 1],
     prev = text;
   }
   free(full_str);
-  stufflib_str_split_destroy(chunks);
+  stufflib_str_chunks_destroy(chunks);
 
   return root;
 
@@ -161,7 +161,7 @@ error:
     free(full_str);
   }
   if (chunks) {
-    stufflib_str_split_destroy(chunks);
+    stufflib_str_chunks_destroy(chunks);
   }
   if (root) {
     stufflib_text_destroy(root);

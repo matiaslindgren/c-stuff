@@ -110,7 +110,6 @@ find ./test-data -printf '%s\n' > test-data-sizes.txt
 #### `stdout`:
 ```
 0
-0
 1
 11
 69
@@ -138,7 +137,6 @@ find ./test-data -printf '%s\n' > test-data-sizes.txt
 ```
 #### `stdout`:
 ```
-
 0
 1
 11

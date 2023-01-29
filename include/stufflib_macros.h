@@ -33,7 +33,7 @@
       }                                                                 \
     }                                                                   \
     stufflib_args_destroy(args);                                        \
-    stufflib_str_split_destroy(test_names);                             \
+    stufflib_str_chunks_destroy(test_names);                            \
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;                            \
   }
 

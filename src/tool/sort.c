@@ -27,7 +27,6 @@ int main(int argc, char* const argv[argc + 1]) {
   int ok = 0;
 
   stufflib_args* args = 0;
-  char* file_contents = 0;
   char** lines = 0;
   double* numbers = 0;
 
@@ -45,16 +44,12 @@ int main(int argc, char* const argv[argc + 1]) {
   }
 
   const char* path = stufflib_args_get_positional(args, 1);
-  file_contents = stufflib_io_slurp_file(path);
-  if (!file_contents) {
-    goto done;
-  }
-  lines = stufflib_str_split(file_contents, "\n");
+  lines = stufflib_io_slurp_lines(path, "\n");
   if (!lines) {
     goto done;
   }
 
-  const size_t num_lines = stufflib_str_count_chunks(lines);
+  const size_t num_lines = stufflib_str_chunks_count(lines);
 
   if (sort_as_doubles) {
     numbers = calloc(num_lines, sizeof(double));
@@ -89,11 +84,8 @@ done:
   if (args) {
     stufflib_args_destroy(args);
   }
-  if (file_contents) {
-    free(file_contents);
-  }
   if (lines) {
-    stufflib_str_split_destroy(lines);
+    stufflib_str_chunks_destroy(lines);
   }
   if (numbers) {
     free(numbers);
