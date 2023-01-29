@@ -14,8 +14,6 @@ make -j test
 
 Merge adjacent image segments by comparing the Euclidian distance between the average RGB-pixel of each segment.
 
-### Examples
-
 #### Input: `./docs/img/tokyo.png`
 
 ![](/docs/img/tokyo.png)
@@ -50,7 +48,6 @@ Merge adjacent image segments by comparing the Euclidian distance between the av
 
 ## Stream text editor: `./src/tool/txt.c`
 
-### Example
 Create 2 files:
 ```
 echo hello > hello.txt
