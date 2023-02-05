@@ -46,6 +46,99 @@ Merge adjacent image segments by comparing the Euclidian distance between the av
 ![](/docs/img/tokyo_segmented_30p.png)
 
 
+## Sorting: `./src/tool/sort.c`
+
+Simple and slow sorting.
+
+Create data (on macOS, use `gfind`) by calculating the size of each input file used during testing:
+```
+find ./test-data -printf '%s\n' > test-data-sizes.txt
+```
+
+### Sort lines as numeric
+```
+./out/tool/sort numeric ./test-data-sizes.txt
+```
+#### `stdout`:
+```
+0
+1
+11
+69
+69
+69
+72
+72
+72
+72
+160
+237
+238
+238
+292
+1554
+2970
+4096
+11223
+24733
+```
+
+### Sort lines as strings
+```
+./out/tool/sort strings ./test-data-sizes.txt
+```
+#### `stdout`:
+```
+0
+1
+11
+11223
+1554
+160
+237
+238
+238
+24733
+292
+2970
+4096
+69
+69
+69
+72
+72
+72
+72
+```
+
+### Sort lines as numeric in descending order
+```
+./out/tool/sort numeric --reverse ./test-data-sizes.txt
+```
+#### `stdout`:
+```
+24733
+11223
+4096
+2970
+1554
+292
+238
+238
+237
+160
+72
+72
+72
+72
+69
+69
+69
+11
+1
+0
+```
+
 ## Stream text editor: `./src/tool/txt.c`
 
 Create 2 files:
@@ -113,78 +206,32 @@ int main(int argc, char* const argv[argc + 1]) {
 }
 ```
 
-### Combine commands
+### Get top 20 words by frequency from `./include/stufflib_png.h`
 ```
-./out/tool/txt replace hello you ./hello.txt \
-  | ./out/tool/txt replace \n ' ' /dev/stdin \
-  | ./out/tool/txt concat /dev/stdin ./there.txt
-```
-#### `stdout`:
-```
-you there
-```
-
-## Sorting: `./src/tool/sort.c`
-
-Simple and slow sorting.
-
-Create data (on macOS, use `gfind`):
-```
-find ./test-data -printf '%s\n' > test-data-sizes.txt
-```
-
-### Sort lines as numeric
-```
-./out/tool/sort numeric ./test-data-sizes.txt
+./out/tool/txt count_words ./include/stufflib_png.h \
+  | ./out/tool/sort numeric --reverse /dev/stdin \
+  | ./out/tool/txt slicelines 0 20 /dev/stdin
 ```
 #### `stdout`:
 ```
-0
-1
-11
-69
-69
-69
-72
-72
-72
-72
-160
-237
-238
-238
-292
-1554
-2970
-4096
-11223
-24733
-```
-
-### Sort lines as strings
-```
-./out/tool/sort strings ./test-data-sizes.txt
-```
-#### `stdout`:
-```
-0
-1
-11
-11223
-1554
-160
-237
-238
-238
-24733
-292
-2970
-4096
-69
-69
-69
-72
-72
-72
-72
+56 }
+55 {
+44 const
+25 =
+25 size_t
+22 }
+20 return
+18 *
+18 }
+16 =
+16 =
+15 if
+15 error;
+12 {
+12 unsigned
+12 fprintf(stream,
+11 STUFFLIB_PRINT_ERROR("failed
+11 row
+11 size_t
+10 int
 ```
