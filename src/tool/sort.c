@@ -29,12 +29,6 @@ char** sort_doubles(const size_t count, char* lines[count]) {
                                  compare_as_doubles);
 }
 
-void print_sorted_lines(const size_t count, char* lines[const count]) {
-  for (size_t i = 0; i < count; ++i) {
-    printf("%s\n", lines[i]);
-  }
-}
-
 int main(int argc, char* const argv[argc + 1]) {
   int ok = 0;
 
@@ -74,7 +68,12 @@ int main(int argc, char* const argv[argc + 1]) {
     }
   }
 
-  print_sorted_lines(num_lines, lines);
+  const int reverse = stufflib_args_parse_flag(args, "--reverse");
+  for (size_t i = 0; i < num_lines; ++i) {
+    const size_t index = reverse ? num_lines - (i + 1) : i;
+    printf("%s\n", lines[index]);
+  }
+
   ok = 1;
 
 done:
