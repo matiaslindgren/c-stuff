@@ -1,5 +1,8 @@
 #ifndef _STUFFLIB_HASH_H_INCLUDED
 #define _STUFFLIB_HASH_H_INCLUDED
+// Adapted from the PNG specification
+// http://www.libpng.org/pub/png/spec/1.2/PNG-CRCAppendix.html
+// Accessed 2023-02-05
 #include <inttypes.h>
 #include <limits.h>
 #include <string.h>
@@ -23,9 +26,6 @@ void stufflib_hash_crc32_lut_init() {
   }
 }
 
-// Adapted from the PNG specification
-// http://www.libpng.org/pub/png/spec/1.2/PNG-CRCAppendix.html
-// Accessed 2023-02-05
 uint32_t stufflib_hash_crc32(const uint32_t crc32_init,
                              const size_t count,
                              const void* data) {
