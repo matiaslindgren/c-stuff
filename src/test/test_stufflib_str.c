@@ -91,4 +91,56 @@ int test_slice() {
   return 1;
 }
 
-STUFFLIB_TEST_MAIN(test_no_splits, test_1_split, test_2_splits, test_slice)
+int test_split_set() {
+  char** chunks = stufflib_str_split_any("abcdeefgghhiiikkij",
+                                         4,
+                                         (const char*[]){"c", "e", "f", "i"});
+  const char* expected[] = {"ab", "d", "", "", "gghh", "", "", "kk", "j"};
+  const size_t num_chunks = STUFFLIB_ARRAY_LEN(expected);
+  for (size_t i = 0; i < num_chunks; ++i) {
+    assert(chunks[i]);
+    assert(strcmp(chunks[i], expected[i]) == 0);
+  }
+  assert(chunks[num_chunks] == 0);
+  stufflib_str_chunks_destroy(chunks);
+  return 1;
+}
+
+int test_split_whitespace() {
+  char** chunks =
+      stufflib_str_split_whitespace("ab c\td  e \t\t f\ng\n\nhi\n\nj k \tl");
+  const char* expected[] = {
+      "ab",
+      "c",
+      "d",
+      "",
+      "e",
+      "",
+      "",
+      "",
+      "f",
+      "g",
+      "",
+      "hi",
+      "",
+      "j",
+      "k",
+      "",
+      "l",
+  };
+  const size_t num_chunks = STUFFLIB_ARRAY_LEN(expected);
+  for (size_t i = 0; i < num_chunks; ++i) {
+    assert(chunks[i]);
+    assert(strcmp(chunks[i], expected[i]) == 0);
+  }
+  assert(chunks[num_chunks] == 0);
+  stufflib_str_chunks_destroy(chunks);
+  return 1;
+}
+
+STUFFLIB_TEST_MAIN(test_no_splits,
+                   test_1_split,
+                   test_2_splits,
+                   test_slice,
+                   test_split_set,
+                   test_split_whitespace)
