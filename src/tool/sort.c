@@ -68,7 +68,7 @@ int main(int argc, char* const argv[argc + 1]) {
       goto done;
     }
   } else {
-    if (!stufflib_sort_mergesort_str(num_lines, lines)) {
+    if (!stufflib_sort_quicksort_str(num_lines, lines)) {
       STUFFLIB_PRINT_ERROR("failed sorting input as strings");
       goto done;
     }
