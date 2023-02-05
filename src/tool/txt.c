@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "stufflib_args.h"
+#include "stufflib_hashmap.h"
 #include "stufflib_text.h"
 
 int concat(const stufflib_args args[const static 1]) {
@@ -144,13 +145,71 @@ done:
   return ok;
 }
 
+int count_words(const stufflib_args args[const static 1]) {
+  if (stufflib_args_count_positional(args) != 2) {
+    STUFFLIB_PRINT_ERROR("too few arguments to count_words");
+    return 0;
+  }
+
+  int ok = 0;
+  char* file_content = 0;
+  char** words = 0;
+  stufflib_hashmap word_counts = {0};
+
+  const char* path = stufflib_args_get_positional(args, 1);
+
+  file_content = stufflib_io_slurp_file(path);
+  if (!file_content) {
+    goto done;
+  }
+  words = stufflib_str_split_whitespace(file_content);
+  if (!words) {
+    goto done;
+  }
+  if (!stufflib_hashmap_init(&word_counts, 100)) {
+    goto done;
+  }
+
+  for (size_t i = 0; words[i]; ++i) {
+    if (strlen(words[i]) == 0) {
+      continue;
+    }
+    if (!stufflib_hashmap_contains(&word_counts, words[i])) {
+      stufflib_hashmap_insert(&word_counts, words[i], 0);
+    }
+    ++(stufflib_hashmap_get(&word_counts, words[i])->value);
+  }
+
+  for (size_t i = 0; i < word_counts.size; ++i) {
+    const char* key = word_counts.nodes[i].key;
+    if (key) {
+      const size_t value = word_counts.nodes[i].value;
+      printf("%zu %s\n", value, key);
+    }
+  }
+
+  ok = 1;
+
+done:
+  if (file_content) {
+    free(file_content);
+  }
+  if (words) {
+    stufflib_str_chunks_destroy(words);
+  }
+  stufflib_hashmap_destroy(&word_counts);
+  return ok;
+}
+
 void print_usage(const stufflib_args args[const static 1]) {
   fprintf(stderr,
           ("usage:\n"
            "  %s concat path [paths...]\n"
            "  %s count pattern path\n"
            "  %s replace old_str new_str path\n"
-           "  %s slicelines begin end path\n"),
+           "  %s slicelines begin end path\n"
+           "  %s count_words path\n"),
+          args->program,
           args->program,
           args->program,
           args->program,
@@ -170,6 +229,8 @@ int main(int argc, char* const argv[argc + 1]) {
       ok = replace(args);
     } else if (strcmp(command, "slicelines") == 0) {
       ok = slicelines(args);
+    } else if (strcmp(command, "count_words") == 0) {
+      ok = count_words(args);
     } else {
       STUFFLIB_PRINT_ERROR("unknown command %s", command);
     }
