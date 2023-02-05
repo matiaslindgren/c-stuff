@@ -126,14 +126,16 @@ you there
 
 ## Sorting: `./src/tool/sort.c`
 
+Simple and slow sorting.
+
 Create data (on macOS, use `gfind`):
 ```
 find ./test-data -printf '%s\n' > test-data-sizes.txt
 ```
 
-### Sort lines as doubles
+### Sort lines as numeric
 ```
-./out/tool/sort doubles ./test-data-sizes.txt
+./out/tool/sort numeric ./test-data-sizes.txt
 ```
 #### `stdout`:
 ```
