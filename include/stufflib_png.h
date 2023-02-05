@@ -10,6 +10,7 @@
 #include <string.h>
 
 #include "stufflib_deflate.h"
+#include "stufflib_hash.h"
 #include "stufflib_macros.h"
 #include "stufflib_misc.h"
 
@@ -305,6 +306,16 @@ stufflib_png_header stufflib_png_parse_header(const stufflib_png_chunk chunk) {
   };
 }
 
+uint32_t stufflib_png_chunk_compute_crc32(
+    const stufflib_png_chunk chunk[const static 1]) {
+  const char* type_str = stufflib_png_chunk_types[chunk->type];
+  const uint32_t crc32_type = stufflib_hash_crc32_str(type_str);
+  const uint32_t crc32_chunk = stufflib_hash_crc32(crc32_type ^ 0xffffffff,
+                                                   chunk->data.size,
+                                                   chunk->data.data);
+  return crc32_chunk ^ 0xffffffff;
+}
+
 stufflib_png_chunks stufflib_png_read_chunks(const char* filename) {
   FILE* fp = fopen(filename, "r");
   if (!fp) {
@@ -334,6 +345,11 @@ stufflib_png_chunks stufflib_png_read_chunks(const char* filename) {
     if (chunk.type == stufflib_png_null_chunk) {
       free(chunks);
       STUFFLIB_PRINT_ERROR("unknown chunk");
+      goto corrupted_image_error;
+    }
+    if (chunk.crc32 != stufflib_png_chunk_compute_crc32(&chunk)) {
+      free(chunks);
+      STUFFLIB_PRINT_ERROR("mismatching crc32");
       goto corrupted_image_error;
     }
     chunks = realloc(chunks, (count + 1) * sizeof(stufflib_png_chunk));
@@ -575,32 +591,6 @@ error:
   return (stufflib_png_image){0};
 }
 
-static unsigned long crc_table[256] = {0};
-static int crc_table_computed = 0;
-
-// http://www.libpng.org/pub/png/spec/1.2/PNG-CRCAppendix.html
-unsigned long stufflib_png_crc32(const stufflib_data data[const static 1]) {
-  if (!crc_table_computed) {
-    for (size_t n = 0; n < STUFFLIB_ARRAY_LEN(crc_table); n++) {
-      unsigned long c = n;
-      for (size_t k = 0; k < 8; k++) {
-        if (c & 1) {
-          c = 0xedb88320L ^ (c >> 1);
-        } else {
-          c = c >> 1;
-        }
-      }
-      crc_table[n] = c;
-    }
-    crc_table_computed = 1;
-  }
-  unsigned long c = 0xffffffffL;
-  for (size_t n = 0; n < data->size; n++) {
-    c = crc_table[(c ^ data->data[n]) & 0xff] ^ (c >> 8);
-  }
-  return c ^ 0xffffffffL;
-}
-
 int stufflib_png_chunk_fwrite_header(FILE stream[const static 1],
                                      const stufflib_png_header header) {
   const unsigned char png_signature[8] = {137, 80, 78, 71, 13, 10, 26, 10};
@@ -630,7 +620,7 @@ int stufflib_png_chunk_fwrite_header(FILE stream[const static 1],
   const unsigned char* crc32 = stufflib_misc_encode_big_endian(
       4,
       (unsigned char[4]){0},
-      stufflib_png_crc32(&(stufflib_data){.size = 17, .data = ihdr_data}));
+      stufflib_hash_crc32_bytes(STUFFLIB_ARRAY_LEN(ihdr_data), ihdr_data));
   if (fwrite(crc32, 1, 4, stream) != 4) {
     return 0;
   }
@@ -669,10 +659,10 @@ int stufflib_png_chunk_fwrite(FILE stream[const static 1],
     STUFFLIB_PRINT_ERROR("failed writing %s chunk type + data", chunk_type);
     goto done;
   }
-  const unsigned char* crc32 =
-      stufflib_misc_encode_big_endian(4,
-                                      (unsigned char[4]){0},
-                                      stufflib_png_crc32(&crc_data));
+  const unsigned char* crc32 = stufflib_misc_encode_big_endian(
+      4,
+      (unsigned char[4]){0},
+      stufflib_hash_crc32_bytes(crc_data.size, crc_data.data));
   if (fwrite(crc32, 1, 4, stream) != 4) {
     STUFFLIB_PRINT_ERROR("failed writing %s chunk CRC32", chunk_type);
     goto done;
