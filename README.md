@@ -10,15 +10,25 @@ make -j
 make -j test
 ```
 
-## Image segmentation: `./src/tool/segment_image.c`
+## Image segmentation
+
+Source: [`./src/tool/segment_image.c`](./src/tool/segment_image.c)
 
 Merge adjacent image segments by comparing the Euclidian distance between the average RGB-pixel of each segment.
 
-#### Input: `./docs/img/tokyo.png`
+### Usage
+
+```
+./out/tool/segment_image png_src_path png_dst_path [--threshold-percent=N] [-v]
+```
+
+### Example
+
+#### Input
 
 ![](/docs/img/tokyo.png)
 
-#### Output: `./docs/img/tokyo_segmented_10p.png`
+#### Threshold 10%
 ```
 ./out/tool/segment_image \
   --threshold-percent=10 \
@@ -27,7 +37,7 @@ Merge adjacent image segments by comparing the Euclidian distance between the av
 ```
 ![](/docs/img/tokyo_segmented_10p.png)
 
-#### Output: `./docs/img/tokyo_segmented_20p.png`
+#### Threshold 20%
 ```
 ./out/tool/segment_image \
   --threshold-percent=20 \
@@ -36,7 +46,7 @@ Merge adjacent image segments by comparing the Euclidian distance between the av
 ```
 ![](/docs/img/tokyo_segmented_20p.png)
 
-#### Output: `./docs/img/tokyo_segmented_30p.png`
+#### Threshold 30%
 ```
 ./out/tool/segment_image \
   --threshold-percent=30 \
@@ -46,16 +56,25 @@ Merge adjacent image segments by comparing the Euclidian distance between the av
 ![](/docs/img/tokyo_segmented_30p.png)
 
 
-## Sorting: `./src/tool/sort.c`
+## Sorting
 
-Simple and slow sorting.
+Source: [`./src/tool/sort.c`](./src/tool/sort.c)
+
+Simple and slow line sorting.
+
+### Usage
+```
+usage: ./out/tool/sort { numeric | strings } path
+```
+
+### Example
 
 Create data (on macOS, use `gfind`) by calculating the size of each input file used during testing:
 ```
 find ./test-data -printf '%s\n' > test-data-sizes.txt
 ```
 
-### Sort lines as numeric
+#### Sort lines as numbers
 ```
 ./out/tool/sort numeric ./test-data-sizes.txt
 ```
@@ -83,7 +102,7 @@ find ./test-data -printf '%s\n' > test-data-sizes.txt
 24733
 ```
 
-### Sort lines as strings
+#### Sort lines as strings
 ```
 ./out/tool/sort strings ./test-data-sizes.txt
 ```
@@ -111,7 +130,7 @@ find ./test-data -printf '%s\n' > test-data-sizes.txt
 72
 ```
 
-### Sort lines as numeric in descending order
+#### Sort lines as numbers in descending order
 ```
 ./out/tool/sort numeric --reverse ./test-data-sizes.txt
 ```
@@ -139,7 +158,21 @@ find ./test-data -printf '%s\n' > test-data-sizes.txt
 0
 ```
 
-## Stream text editor: `./src/tool/txt.c`
+## Stream text editor
+
+Source: [`./src/tool/txt.c`](./src/tool/txt.c)
+
+### Usage
+```
+usage:
+  ./out/tool/txt concat path [paths...]
+  ./out/tool/txt count pattern path
+  ./out/tool/txt replace old_str new_str path
+  ./out/tool/txt slicelines begin end path
+  ./out/tool/txt count_words path
+```
+
+### Example
 
 Create 2 files:
 ```
@@ -147,7 +180,7 @@ echo hello > hello.txt
 echo there > there.txt
 ```
 
-### Concatenate
+#### Concatenate
 ```
 ./out/tool/txt concat ./hello.txt ./there.txt
 ```
@@ -157,7 +190,7 @@ hello
 there
 ```
 
-### Replace
+#### Replace
 ```
 ./out/tool/txt replace hello you ./hello.txt
 ```
@@ -166,7 +199,7 @@ there
 you
 ```
 
-### Count pattern occurrence
+#### Count pattern occurrence
 ```
 ./out/tool/txt count '##' ./README.md
 ```
@@ -175,7 +208,7 @@ you
 33
 ```
 
-### Slice lines
+#### Slice lines
 ```
 ./out/tool/txt slicelines 159 182 ./src/tool/txt.c
 ```
@@ -206,7 +239,9 @@ int main(int argc, char* const argv[argc + 1]) {
 }
 ```
 
-### Get top 20 words by frequency from `./include/stufflib_png.h`
+#### Get top 20 words by frequency from `./include/stufflib_png.h`
+
+Tokenisation is simply "split at whitespace".
 ```
 ./out/tool/txt count_words ./include/stufflib_png.h \
   | ./out/tool/sort numeric --reverse /dev/stdin \
