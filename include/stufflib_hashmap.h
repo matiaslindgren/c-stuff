@@ -5,7 +5,10 @@
 
 #include "stufflib_hash.h"
 #include "stufflib_macros.h"
+#include "stufflib_math.h"
 #include "stufflib_misc.h"
+
+#define STUFFLIB_HASHMAP_MAX_LOAD_FACTOR 0.5
 
 typedef struct stufflib_hashmap_node stufflib_hashmap_node;
 struct stufflib_hashmap_node {
@@ -15,58 +18,59 @@ struct stufflib_hashmap_node {
 
 typedef struct stufflib_hashmap stufflib_hashmap;
 struct stufflib_hashmap {
-  double load_factor;
   size_t size;
   size_t capacity;
   stufflib_hashmap_node* nodes;
 };
 
-void stufflib_hashmap_destroy(stufflib_hashmap map[static 1]) {
-  assert(map);
-  free(map->nodes);
-  map->size = 0;
-  map->capacity = 0;
-}
+static size_t stufflib_hashmap_num_collisions = 0;
 
-int stufflib_hashmap_resize(stufflib_hashmap map[static 1],
-                            const size_t capacity) {
-  if (capacity) {
-    stufflib_hashmap_node* new_nodes =
-        calloc(capacity, sizeof(stufflib_hashmap_node));
-    if (!new_nodes) {
-      STUFFLIB_PRINT_ERROR("failed allocating %zu hashmap nodes", capacity);
-      return 0;
-    }
-    if (map->size) {
-      assert(map->nodes);
-      memcpy(new_nodes, map->nodes, map->size * sizeof(stufflib_hashmap_node));
-      free(map->nodes);
-    }
-    map->nodes = new_nodes;
-    map->capacity = capacity;
+static inline int _realloc_nodes(stufflib_hashmap map[const static 1],
+                                 const size_t new_capacity) {
+  stufflib_hashmap_node* new_nodes =
+      calloc(new_capacity, sizeof(stufflib_hashmap_node));
+  if (!new_nodes) {
+    STUFFLIB_PRINT_ERROR("failed allocating %zu hashmap nodes", new_capacity);
+    return 0;
   }
+  map->nodes = new_nodes;
+  map->capacity = new_capacity;
   return 1;
 }
 
 stufflib_hashmap* stufflib_hashmap_init(stufflib_hashmap map[const static 1],
                                         const size_t capacity) {
-  *map = (stufflib_hashmap){.load_factor = 0.5};
-  if (!stufflib_hashmap_resize(map, capacity)) {
-    STUFFLIB_PRINT_ERROR("failed allocating hashmap with capacity %zu",
-                         capacity);
-    return 0;
+  *map = (stufflib_hashmap){0};
+  if (capacity) {
+    if (!_realloc_nodes(map, capacity)) {
+      return 0;
+    }
   }
   return map;
 }
 
-stufflib_hashmap_node* stufflib_hashmap_get(stufflib_hashmap map[static 1],
-                                            const char key[const static 1]) {
+void stufflib_hashmap_destroy(stufflib_hashmap map[const static 1]) {
+  assert(map);
+  free(map->nodes);
+  *map = (stufflib_hashmap){0};
+}
+
+double stufflib_hashmap_load_factor(stufflib_hashmap map[const static 1]) {
+  assert(map->capacity);
+  return (double)map->size / (double)map->capacity;
+}
+
+stufflib_hashmap_node* stufflib_hashmap_get(
+    stufflib_hashmap map[const static 1],
+    const char key[const static 1]) {
   if (!map->capacity) {
     return 0;
   }
   size_t index = stufflib_hash_crc32_str(key);
   for (size_t probe = 0;; ++probe) {
-    index += probe + probe * probe;
+    // https://en.wikipedia.org/wiki/Quadratic_probing#Quadratic_function
+    // accessed 2023-02-06
+    index += (probe + probe * probe) / 2;
     index %= map->capacity;
     stufflib_hashmap_node* node = map->nodes + index;
     assert(node);
@@ -78,8 +82,31 @@ stufflib_hashmap_node* stufflib_hashmap_get(stufflib_hashmap map[static 1],
       // match
       return node;
     }
-    // collision, continue
+    ++stufflib_hashmap_num_collisions;
   }
+}
+
+int stufflib_hashmap_resize(stufflib_hashmap map[const static 1],
+                            const size_t new_capacity) {
+  assert(new_capacity > 0);
+  assert(new_capacity >= map->size);
+  stufflib_hashmap_node* const old_nodes = map->nodes;
+  const size_t old_capacity = map->capacity;
+  if (!_realloc_nodes(map, new_capacity)) {
+    return 0;
+  }
+  for (size_t i = 0; i < old_capacity; ++i) {
+    const char* key = old_nodes[i].key;
+    if (key) {
+      const size_t value = old_nodes[i].value;
+      *stufflib_hashmap_get(map, key) = (stufflib_hashmap_node){
+          .key = key,
+          .value = value,
+      };
+    }
+  }
+  free(old_nodes);
+  return 1;
 }
 
 int stufflib_hashmap_contains(stufflib_hashmap map[const static 1],
@@ -88,29 +115,27 @@ int stufflib_hashmap_contains(stufflib_hashmap map[const static 1],
   return node && node->key != 0 && strcmp(node->key, key) == 0;
 }
 
-int stufflib_hashmap_insert(stufflib_hashmap map[static 1],
+int stufflib_hashmap_insert(stufflib_hashmap map[const static 1],
                             const char key[const static 1],
                             const size_t value) {
-  if ((double)map->size / (double)map->capacity > map->load_factor) {
-    const size_t new_capacity = (double)(map->capacity + 1) / map->load_factor;
+  assert(map->size < map->capacity);
+  *stufflib_hashmap_get(map, key) = (stufflib_hashmap_node){
+      .key = key,
+      .value = value,
+  };
+  ++map->size;
+  if (stufflib_hashmap_load_factor(map) > STUFFLIB_HASHMAP_MAX_LOAD_FACTOR) {
+    const size_t new_capacity = stufflib_math_next_power_of_two(map->capacity);
     if (!stufflib_hashmap_resize(map, new_capacity)) {
       STUFFLIB_PRINT_ERROR("failed resizing hashmap to capacity %zu",
                            new_capacity);
       return 0;
     }
-    printf("resize %zu/%zu\n", map->size, map->capacity);
   }
-  stufflib_hashmap_node* node = stufflib_hashmap_get(map, key);
-  assert(node);
-  *node = (stufflib_hashmap_node){
-      .key = key,
-      .value = value,
-  };
-  ++map->size;
   return 1;
 }
 
-void stufflib_hashmap_update(stufflib_hashmap map[static 1],
+void stufflib_hashmap_update(stufflib_hashmap map[const static 1],
                              const char key[const static 1],
                              const size_t value) {
   assert(stufflib_hashmap_contains(map, key));

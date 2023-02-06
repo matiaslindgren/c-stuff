@@ -7,7 +7,7 @@
 #include <limits.h>
 #include <string.h>
 
-#include "stufflib_misc.h"
+#include "stufflib_macros.h"
 
 static uint32_t stufflib_hash_crc32_lut[0xff + 1] = {0};
 static int stufflib_hash_crc32_lut_computed = 0;

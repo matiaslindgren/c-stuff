@@ -214,24 +214,24 @@ int main(int argc, char* const argv[argc + 1]) {
 ```
 #### `stdout`:
 ```
-56 }
-55 {
-44 const
-25 =
-25 size_t
-22 }
-20 return
-18 *
-18 }
-16 =
-16 =
-15 if
-15 error;
-12 {
-12 unsigned
-12 fprintf(stream,
-11 STUFFLIB_PRINT_ERROR("failed
-11 row
-11 size_t
-10 int
+99 }
+22 STUFFLIB_PRINT_ERROR("failed
+19 error;
+17 for
+16 int
+15 1,
+13 stufflib_data
+13 bytes_per_px
+13 chunk
+11 stufflib_png_header
+10 PNG
+10 static
+9 done;
+9 stufflib_png_image
+8 1],
+8 #include
+8 void
+8 1);
+7 allocating
+7 stream)
 ```

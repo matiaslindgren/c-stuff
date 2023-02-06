@@ -196,6 +196,23 @@ int test_double_almost() {
   return 1;
 }
 
+int test_round_up_pow2() {
+  assert(stufflib_math_next_power_of_two(0) == 1);
+  assert(stufflib_math_next_power_of_two(1) == 2);
+  assert(stufflib_math_next_power_of_two(2) == 4);
+  assert(stufflib_math_next_power_of_two(3) == 4);
+  assert(stufflib_math_next_power_of_two(4) == 8);
+  assert(stufflib_math_next_power_of_two(5) == 8);
+  assert(stufflib_math_next_power_of_two(6) == 8);
+  assert(stufflib_math_next_power_of_two(7) == 8);
+  assert(stufflib_math_next_power_of_two(8) == 16);
+  assert(stufflib_math_next_power_of_two(0xfe) == 0x100);
+  assert(stufflib_math_next_power_of_two(0xff) == 0x100);
+  assert(stufflib_math_next_power_of_two(0xffff) == 0x10000);
+  assert(stufflib_math_next_power_of_two(0xffffffff) == 0x100000000);
+  return 1;
+}
+
 STUFFLIB_TEST_MAIN(test_factorize_primes,
                    test_factorize_4,
                    test_factorize_25,
@@ -206,4 +223,5 @@ STUFFLIB_TEST_MAIN(test_factorize_primes,
                    test_factorize_20221210,
                    test_double_almost,
                    test_numerical_diff,
-                   test_linalg);
+                   test_linalg,
+                   test_round_up_pow2);

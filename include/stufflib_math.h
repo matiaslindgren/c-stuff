@@ -21,6 +21,14 @@ double stufflib_math_clamp(const double lo, const double mid, const double hi) {
   return fmin(hi, fmax(lo, mid));
 }
 
+size_t stufflib_math_next_power_of_two(const size_t x1) {
+  size_t x2 = 1;
+  while (x2 <= x1) {
+    x2 *= 2;
+  }
+  return x2;
+}
+
 int stufflib_math_is_prime(size_t x) {
   for (size_t i = 2; i * i < x; ++i) {
     if (x % i == 0) {
