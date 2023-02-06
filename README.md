@@ -250,24 +250,24 @@ Tokenisation is simply "split at whitespace".
 ```
 #### `stdout`:
 ```
+167 =
+110 {
 99 }
+71 const
+49 if
+45 +
+40 size_t
+34 return
+30 goto
+24 0;
+23 char*
+22 unsigned
 22 STUFFLIB_PRINT_ERROR("failed
+20 *
 19 error;
+19 "
 17 for
 16 int
 15 1,
-13 stufflib_data
-13 bytes_per_px
-13 chunk
-11 stufflib_png_header
-10 PNG
-10 static
-9 done;
-9 stufflib_png_image
-8 1],
-8 #include
-8 void
-8 1);
-7 allocating
-7 stream)
+15 !=
 ```

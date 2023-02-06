@@ -166,7 +166,7 @@ int count_words(const stufflib_args args[const static 1]) {
   if (!words) {
     goto done;
   }
-  if (!stufflib_hashmap_init(&word_counts, 100)) {
+  if (!stufflib_hashmap_init(&word_counts, 1 << 16)) {
     goto done;
   }
 
@@ -180,7 +180,7 @@ int count_words(const stufflib_args args[const static 1]) {
     ++(stufflib_hashmap_get(&word_counts, words[i])->value);
   }
 
-  for (size_t i = 0; i < word_counts.size; ++i) {
+  for (size_t i = 0; i < word_counts.capacity; ++i) {
     const char* key = word_counts.nodes[i].key;
     if (key) {
       const size_t value = word_counts.nodes[i].value;
