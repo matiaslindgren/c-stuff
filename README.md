@@ -64,7 +64,7 @@ Simple and slow line sorting.
 
 ### Usage
 ```
-usage: ./out/tool/sort { numeric | strings } path
+./out/tool/sort { numeric | strings } path
 ```
 
 ### Example
@@ -164,12 +164,11 @@ Source: [`./src/tool/txt.c`](./src/tool/txt.c)
 
 ### Usage
 ```
-usage:
-  ./out/tool/txt concat path [paths...]
-  ./out/tool/txt count pattern path
-  ./out/tool/txt replace old_str new_str path
-  ./out/tool/txt slicelines begin end path
-  ./out/tool/txt count_words path
+./out/tool/txt concat path [paths...]
+./out/tool/txt count pattern path
+./out/tool/txt replace old_str new_str path
+./out/tool/txt slicelines begin end path
+./out/tool/txt count_words path
 ```
 
 ### Example
@@ -210,7 +209,7 @@ you
 
 #### Slice lines
 ```
-./out/tool/txt slicelines 159 182 ./src/tool/txt.c
+./out/tool/txt slicelines 218 243 ./src/tool/txt.c
 ```
 #### `stdout`:
 ```
@@ -227,6 +226,8 @@ int main(int argc, char* const argv[argc + 1]) {
       ok = replace(args);
     } else if (strcmp(command, "slicelines") == 0) {
       ok = slicelines(args);
+    } else if (strcmp(command, "count_words") == 0) {
+      ok = count_words(args);
     } else {
       STUFFLIB_PRINT_ERROR("unknown command %s", command);
     }
