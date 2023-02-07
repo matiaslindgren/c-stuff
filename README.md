@@ -10,27 +10,59 @@ make -j
 make -j test
 ```
 
-## Image segmentation
+## PNG tools
 
-Source: [`./src/tool/segment_image.c`](./src/tool/segment_image.c)
+Source: [`./src/tool/img.c`](./src/tool/img.c)
 
-Merge adjacent image segments by comparing the Euclidian distance between the average RGB-pixel of each segment.
+Simple PNG decoder implemented without dependencies.
 
 ### Usage
-
 ```
-./out/tool/segment_image png_src_path png_dst_path [--threshold-percent=N] [-v]
+./out/tool/img png_info png_path
+./out/tool/img segment png_src_path png_dst_path [--threshold-percent=N] [-v]
+./out/tool/img png_dump_raw png_path
 ```
 
-### Example
+### Get PNG info
+
+Decode and inspect a PNG image.
 
 #### Input
 
 ![](/docs/img/tokyo.png)
 
+```
+./out/tool/img png_info ./docs/img/tokyo.png
+```
+#### `stdout`:
+```
+file: ./docs/img/tokyo.png
+  filter length: 500
+  data length: 756012
+  data begin: 0x7f7b36214800
+  width: 500
+  height: 500
+  bit depth: 8
+  color type: rgb
+  compression: 0
+  filter: 0
+  interlace: 0
+filters:
+   filter        count
+     None            0
+      Sub           31
+       Up            0
+  Average          228
+    Paeth          241
+```
+
+### Image segmentation
+
+Merges adjacent image segments by comparing the Euclidian distance between the average RGB-pixel of each segment, where each RGB-pixel (3 bytes) is interpreted as a vector of length 3: `[R, G, B]`.
+
 #### Threshold 10%
 ```
-./out/tool/segment_image \
+./out/tool/img segment \
   --threshold-percent=10 \
   ./docs/img/tokyo.png \
   ./docs/img/tokyo_segmented_10p.png
@@ -39,7 +71,7 @@ Merge adjacent image segments by comparing the Euclidian distance between the av
 
 #### Threshold 20%
 ```
-./out/tool/segment_image \
+./out/tool/img segment \
   --threshold-percent=20 \
   ./docs/img/tokyo.png \
   ./docs/img/tokyo_segmented_20p.png
@@ -48,13 +80,30 @@ Merge adjacent image segments by comparing the Euclidian distance between the av
 
 #### Threshold 30%
 ```
-./out/tool/segment_image \
+./out/tool/img segment \
   --threshold-percent=30 \
   ./docs/img/tokyo.png \
   ./docs/img/tokyo_segmented_30p.png
 ```
 ![](/docs/img/tokyo_segmented_30p.png)
 
+
+### Dump raw IDAT stream
+
+Decode a PNG image and write the decoded binary stream to stdout.
+
+#### Example: single red pixel
+
+This example requires `xxd`.
+
+```
+./out/tool/img png_dump_raw ./test-data/ff0000-1x1-rgb-fixed.png | xxd -b
+```
+#### `stdout`:
+```
+00000000: 00001000 00011101 01100011 11111000 11001111 11000000  ..c...
+00000006: 00000000 00000000 00000011 00000001 00000001 00000000  ......
+```
 
 ## Sorting
 
