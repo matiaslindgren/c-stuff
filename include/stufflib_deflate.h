@@ -97,7 +97,8 @@ static stufflib_huffman_tree _make_fixed_literal_tree() {
   return tree;
 
 error:
-  fprintf(stderr, "failed building fixed literal huffman codes for DEFLATE\n");
+  STUFFLIB_PRINT_ERROR(
+      "failed building fixed literal huffman codes for DEFLATE");
   return (stufflib_huffman_tree){0};
 }
 
@@ -119,7 +120,8 @@ static stufflib_huffman_tree _make_fixed_distance_tree() {
   return tree;
 
 error:
-  fprintf(stderr, "failed building fixed distance huffman codes for DEFLATE\n");
+  STUFFLIB_PRINT_ERROR(
+      "failed building fixed distance huffman codes for DEFLATE");
   return (stufflib_huffman_tree){0};
 }
 
@@ -199,12 +201,12 @@ int stufflib_inflate_uncompressed_block(_deflate_state state[static 1]) {
   src_byte_pos += 2;
 
   if ((~block_len & STUFFLIB_ONES(2)) != block_len_check) {
-    fprintf(stderr, "corrupted zlib block, ~LEN != NLEN\n");
-    return 1;
+    STUFFLIB_PRINT_ERROR("corrupted zlib block, ~LEN != NLEN");
+    return 0;
   }
   if (block_len > state->src.size - src_byte_pos) {
-    fprintf(stderr, "corrupted zlib block, LEN too large\n");
-    return 1;
+    STUFFLIB_PRINT_ERROR("corrupted zlib block, LEN too large");
+    return 0;
   }
 
   memcpy(state->dst.data + state->dst_pos,
@@ -215,7 +217,7 @@ int stufflib_inflate_uncompressed_block(_deflate_state state[static 1]) {
   state->dst_pos += block_len;
   state->src_bit = src_byte_pos * CHAR_BIT;
 
-  return 0;
+  return 1;
 }
 
 int stufflib_inflate_dynamic_block(_deflate_state state[static 1]) {
@@ -229,7 +231,7 @@ int stufflib_inflate_dynamic_block(_deflate_state state[static 1]) {
 
   size_t* length_lengths = calloc(max_length_length + 1, sizeof(size_t));
   if (!length_lengths) {
-    fprintf(stderr, "failed allocating dynamic length_lengths\n");
+    STUFFLIB_PRINT_ERROR("failed allocating dynamic length_lengths");
     goto error;
   }
   for (size_t i = 0; i < num_length_lengths; ++i) {
@@ -263,7 +265,7 @@ int stufflib_inflate_dynamic_block(_deflate_state state[static 1]) {
       code_len = 0;
       num_repeats = 11 + _next_n_bits(state, 7);
     } else {
-      fprintf(stderr, "unexpected symbol %zu in dynamic block\n", symbol);
+      STUFFLIB_PRINT_ERROR("unexpected symbol %zu in dynamic block", symbol);
       free(dynamic_code_lengths);
       goto error;
     }
@@ -295,10 +297,10 @@ int stufflib_inflate_dynamic_block(_deflate_state state[static 1]) {
   _inflate_block(&literal_tree, &distance_tree, state);
   stufflib_huffman_destroy(&literal_tree);
   stufflib_huffman_destroy(&distance_tree);
-  return 0;
+  return 1;
 
 error:
-  return 1;
+  return 0;
 }
 
 int stufflib_inflate_fixed_block(_deflate_state state[static 1]) {
@@ -307,31 +309,31 @@ int stufflib_inflate_fixed_block(_deflate_state state[static 1]) {
   _inflate_block(&literal_tree, &distance_tree, state);
   stufflib_huffman_destroy(&literal_tree);
   stufflib_huffman_destroy(&distance_tree);
-  return 0;
+  return 1;
 }
 
 size_t stufflib_inflate(stufflib_data dst, const stufflib_data src) {
   if (src.size < 3) {
-    fprintf(stderr, "DEFLATE stream is too short\n");
+    STUFFLIB_PRINT_ERROR("DEFLATE stream is too short");
     goto error;
   }
   if ((src.data[0] * 256 + src.data[1]) % 31) {
-    fprintf(stderr, "DEFLATE stream is corrupted\n");
+    STUFFLIB_PRINT_ERROR("DEFLATE stream is corrupted");
     goto error;
   }
   const int cmethod = src.data[0] & 0x0F;
   if (cmethod != 8) {
-    fprintf(stderr, "unexpected compression method %d != 8\n", cmethod);
+    STUFFLIB_PRINT_ERROR("unexpected compression method %d != 8", cmethod);
     goto error;
   }
   const int cinfo = (src.data[0] & 0xF0) >> 4;
   if (cinfo > 7) {
-    fprintf(stderr, "too large compression info %d > 7\n", cinfo);
+    STUFFLIB_PRINT_ERROR("too large compression info %d > 7", cinfo);
     goto error;
   }
   const int fdict = (src.data[1] & 0x20) >> 5;
   if (fdict) {
-    fprintf(stderr, "dictionaries are not supported\n");
+    STUFFLIB_PRINT_ERROR("dictionaries are not supported");
     goto error;
   }
 
@@ -354,25 +356,25 @@ size_t stufflib_inflate(stufflib_data dst, const stufflib_data src) {
     const enum block_type type = _next_n_bits(state, 2);
     switch (type) {
       case no_compression: {
-        if (stufflib_inflate_uncompressed_block(state)) {
-          fprintf(stderr, "failed inflating uncompressed block\n");
+        if (!stufflib_inflate_uncompressed_block(state)) {
+          STUFFLIB_PRINT_ERROR("failed inflating uncompressed block");
           goto error;
         }
       } break;
       case dynamic_huffman_trees: {
-        if (stufflib_inflate_dynamic_block(state)) {
-          fprintf(stderr, "failed inflating dynamic block\n");
+        if (!stufflib_inflate_dynamic_block(state)) {
+          STUFFLIB_PRINT_ERROR("failed inflating dynamic block");
           goto error;
         }
       } break;
       case fixed_huffman_trees: {
-        if (stufflib_inflate_fixed_block(state)) {
-          fprintf(stderr, "failed inflating fixed block\n");
+        if (!stufflib_inflate_fixed_block(state)) {
+          STUFFLIB_PRINT_ERROR("failed inflating fixed block");
           goto error;
         }
       } break;
       default: {
-        fprintf(stderr, "invalid block type %d\n", type);
+        STUFFLIB_PRINT_ERROR("invalid block type %d", type);
         goto error;
       } break;
     }
@@ -382,10 +384,10 @@ size_t stufflib_inflate(stufflib_data dst, const stufflib_data src) {
   /* const size_t dst_adler32 = */
   /*     stufflib_misc_adler32(state->dst.size, state->dst.data); */
   /* if (dst_adler32 != src_adler32) { */
-  /*   fprintf(stderr, */
-  /*           "output stream adler32 %zu not equal to expected %zu\n", */
-  /*           dst_adler32, */
-  /*           src_adler32); */
+  /*   STUFFLIB_PRINT_ERROR("output stream adler32 %zu not equal to expected
+   * %zu", */
+  /*                        dst_adler32, */
+  /*                        src_adler32); */
   /*   goto error; */
   /* } */
 
