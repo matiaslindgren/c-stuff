@@ -8,11 +8,13 @@
 
 #define STUFFLIB_ONES(n) ((1 << ((n)*CHAR_BIT)) - 1)
 
-#define STUFFLIB_PRINT_ERROR(msg, ...)                       \
-  do {                                                       \
-    fprintf(stderr, "error (%s@L%d): ", __FILE__, __LINE__); \
-    fprintf(stderr, (msg), ##__VA_ARGS__);                   \
-    fprintf(stderr, "\n");                                   \
+#define STUFFLIB_PRINT_ERROR(msg, ...)                   \
+  do {                                                   \
+    const char* const fname = __FILE__;                  \
+    const unsigned long lineno = __LINE__;               \
+    fprintf(stderr, "error (%s@L%ld): ", fname, lineno); \
+    fprintf(stderr, (msg), ##__VA_ARGS__);               \
+    fprintf(stderr, "\n");                               \
   } while (0)
 
 #define STUFFLIB_TEST_MAIN(...)                                         \
