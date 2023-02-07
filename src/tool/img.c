@@ -9,21 +9,61 @@
 #include "stufflib_png.h"
 #include "stufflib_unionfind.h"
 
-static stufflib_png_image segment(const stufflib_png_image src,
-                                  const double threshold,
-                                  const int verbose) {
+int segment(const stufflib_args args[const static 1]) {
+  if (stufflib_args_count_positional(args) != 3) {
+    STUFFLIB_PRINT_ERROR("too few arguments to segment");
+    return 0;
+  }
+
+  int ok = 0;
+
+  stufflib_png_image src = {0};
+  stufflib_png_image dst = {0};
+  stufflib_unionfind segments = {0};
+  size_t* segment_sizes = 0;
+  double* segment_sums = 0;
+
+  const char* const png_src_path = stufflib_args_get_positional(args, 1);
+  const char* const png_dst_path = stufflib_args_get_positional(args, 2);
+  const size_t threshold_percent =
+      stufflib_args_parse_uint(args, "--threshold-percent", 10);
+  const int verbose = stufflib_args_parse_flag(args, "-v");
+
+  if (verbose) {
+    printf("read %s\n", png_src_path);
+  }
+  src = stufflib_png_read_image(png_src_path);
+  if (!src.data.size) {
+    STUFFLIB_PRINT_ERROR("failed reading PNG image %s", png_src_path);
+    goto done;
+  }
+  if (verbose) {
+    printf("segmenting, threshold %zu%%\n", threshold_percent);
+  }
+
   // padded
   const size_t width = src.header.width + 2;
   const size_t height = src.header.height + 2;
   const size_t bytes_per_px = 3;
-  const double distance_threshold = stufflib_math_clamp(0, threshold, 1);
+  const double distance_threshold =
+      stufflib_math_clamp(0, (double)(threshold_percent) / 100, 1);
 
-  stufflib_unionfind segments = {0};
-  size_t* segment_sizes = calloc(width * height, sizeof(size_t));
-  double* segment_sums = calloc(bytes_per_px * width * height, sizeof(double));
-  assert(stufflib_unionfind_init(&segments, width * height));
-  assert(segment_sizes);
-  assert(segment_sums);
+  if (!stufflib_unionfind_init(&segments, width * height)) {
+    STUFFLIB_PRINT_ERROR(
+        "failed initializing union_find structure for segments");
+    goto done;
+  }
+  segment_sizes = calloc(width * height, sizeof(size_t));
+  if (!segment_sizes) {
+    STUFFLIB_PRINT_ERROR("failed allocating memory for segment sizes");
+    goto done;
+  }
+  segment_sums = calloc(bytes_per_px * width * height, sizeof(double));
+  if (!segment_sums) {
+    STUFFLIB_PRINT_ERROR("failed allocating memory for segment sums");
+    goto done;
+  }
+
   for (size_t row = 0; row < height; ++row) {
     for (size_t col = 0; col < width; ++col) {
       const unsigned char* pixel = stufflib_png_image_get_pixel(&src, row, col);
@@ -117,10 +157,6 @@ static stufflib_png_image segment(const stufflib_png_image src,
     }
   }
 
-  free(segment_sizes);
-  free(segment_sums);
-
-  stufflib_png_image dst = {0};
   stufflib_png_image_copy(&dst, &src);
   for (size_t row = 0; row < height; ++row) {
     for (size_t col = 0; col < width; ++col) {
@@ -135,47 +171,115 @@ static stufflib_png_image segment(const stufflib_png_image src,
           stufflib_png_image_get_pixel(&src, src_row, src_col));
     }
   }
-  stufflib_unionfind_destroy(&segments);
-  return dst;
-}
-
-int main(int argc, char* const argv[argc + 1]) {
-  if (!(argc == 3 || argc == 4 || argc == 5)) {
-    STUFFLIB_PRINT_ERROR(
-        "usage: %s png_src_path png_dst_path [--threshold-percent=N] [-v]",
-        argv[0]);
-    return EXIT_FAILURE;
-  }
-
-  stufflib_args* args = stufflib_args_from_argv(argc, argv);
-
-  const char* png_src_path = stufflib_args_get_positional(args, 0);
-  const char* png_dst_path = stufflib_args_get_positional(args, 1);
-  const size_t threshold =
-      stufflib_args_parse_uint(args, "--threshold-percent", 10);
-  const int verbose = stufflib_args_parse_flag(args, "-v");
-
-  stufflib_args_destroy(args);
-  args = 0;
-
-  if (verbose) {
-    printf("read %s\n", png_src_path);
-  }
-  stufflib_png_image img = stufflib_png_read_image(png_src_path);
-  if (!img.data.size) {
-    return EXIT_FAILURE;
-  }
-  if (verbose) {
-    printf("segmenting, threshold %zu%%\n", threshold);
-  }
-  stufflib_png_image res = segment(img, (double)(threshold) / 100, verbose);
 
   if (verbose) {
     printf("write %s\n", png_dst_path);
   }
-  int ok = stufflib_png_write_image(res, png_dst_path);
+  if (!stufflib_png_write_image(dst, png_dst_path)) {
+    STUFFLIB_PRINT_ERROR("failed writing PNG image %s", png_dst_path);
+    goto done;
+  }
 
+  ok = 1;
+
+done:
+  stufflib_unionfind_destroy(&segments);
+  free(segment_sizes);
+  free(segment_sums);
+  stufflib_png_image_destroy(src);
+  stufflib_png_image_destroy(dst);
+  return ok;
+}
+
+int png_info(const stufflib_args args[const static 1]) {
+  if (stufflib_args_count_positional(args) != 2) {
+    STUFFLIB_PRINT_ERROR("too few arguments to png_info");
+    return 0;
+  }
+  int ok = 0;
+  stufflib_png_image img = {0};
+  const char* const png_path = stufflib_args_get_positional(args, 1);
+  img = stufflib_png_read_image(png_path);
+  if (!img.data.size) {
+    STUFFLIB_PRINT_ERROR("failed reading PNG image %s", png_path);
+    goto done;
+  }
+  printf("file: %s\n", png_path);
+  stufflib_png_dump_img_meta(stdout, img);
+  printf("filters:\n");
+  stufflib_png_dump_filter_freq(stdout, img.filter);
+  ok = 1;
+done:
   stufflib_png_image_destroy(img);
-  stufflib_png_image_destroy(res);
+  return ok;
+}
+
+int png_dump_raw(const stufflib_args args[const static 1]) {
+  if (stufflib_args_count_positional(args) != 2) {
+    STUFFLIB_PRINT_ERROR("too few arguments to png_dump_raw");
+    return 0;
+  }
+
+  int ok = 0;
+
+  const char* const png_path = stufflib_args_get_positional(args, 1);
+  stufflib_png_chunks img_chunks = stufflib_png_read_chunks(png_path);
+  if (!img_chunks.count) {
+    STUFFLIB_PRINT_ERROR("failed reading PNG IDAT chunks from %s", png_path);
+    goto done;
+  }
+
+  for (size_t i = 0; i < img_chunks.count; ++i) {
+    const stufflib_png_chunk chunk = img_chunks.chunks[i];
+    if (chunk.type == stufflib_png_IDAT) {
+      fwrite(chunk.data.data,
+             sizeof(chunk.data.data[0]),
+             chunk.data.size,
+             stdout);
+    }
+  }
+
+  ok = 1;
+
+done:
+  stufflib_png_chunks_destroy(img_chunks);
+  return ok;
+}
+
+void print_usage(const stufflib_args args[const static 1]) {
+  fprintf(
+      stderr,
+      ("usage:"
+       "\n"
+       "   %s segment png_src_path png_dst_path [--threshold-percent=N] [-v]"
+       "\n"
+       "   %s png_info png_path"
+       "\n"
+       "   %s png_dump_raw png_path"
+       "\n"),
+      args->program,
+      args->program,
+      args->program);
+}
+
+int main(int argc, char* const argv[argc + 1]) {
+  stufflib_args* args = stufflib_args_from_argv(argc, argv);
+  int ok = 0;
+  const char* command = stufflib_args_get_positional(args, 0);
+  if (command) {
+    if (strcmp(command, "segment") == 0) {
+      ok = segment(args);
+    } else if (strcmp(command, "png_info") == 0) {
+      ok = png_info(args);
+    } else if (strcmp(command, "png_dump_raw") == 0) {
+      ok = png_dump_raw(args);
+    } else {
+      STUFFLIB_PRINT_ERROR("unknown command %s", command);
+    }
+  }
+  if (!ok) {
+    print_usage(args);
+  }
+  stufflib_args_destroy(args);
   return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
