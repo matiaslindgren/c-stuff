@@ -119,16 +119,4 @@ void stufflib_misc_data_fdump(FILE stream[const static 1],
   fprintf(stream, "\n");
 }
 
-// https://en.wikipedia.org/wiki/Adler-32
-uint32_t stufflib_misc_adler32(const stufflib_data data) {
-  const uint32_t mod_adler = 65521;
-  uint32_t a = 1;
-  uint32_t b = 0;
-  for (size_t index = 0; index < data.size; ++index) {
-    a = (a + data.data[index]) % mod_adler;
-    b = (b + a) % mod_adler;
-  }
-  return (b << 16) | a;
-}
-
 #endif  // _STUFFLIB_MISC_H_INCLUDED

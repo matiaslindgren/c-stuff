@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "stufflib_hash.h"
 #include "stufflib_huffman.h"
 #include "stufflib_macros.h"
 #include "stufflib_misc.h"
@@ -382,7 +383,7 @@ size_t stufflib_inflate(stufflib_data dst, const stufflib_data src) {
 
   /* const size_t src_adler32 = _next_n_bits(state, 32); */
   /* const size_t dst_adler32 = */
-  /*     stufflib_misc_adler32(state->dst.size, state->dst.data); */
+  /*     stufflib_hash_adler32(state->dst.size, state->dst.data); */
   /* if (dst_adler32 != src_adler32) { */
   /*   STUFFLIB_PRINT_ERROR("output stream adler32 %zu not equal to expected
    * %zu", */
@@ -435,10 +436,10 @@ size_t stufflib_deflate_uncompressed(stufflib_data dst,
     src_pos += block_len;
   }
 
-  const unsigned char* adler32 =
-      stufflib_misc_encode_big_endian(4,
-                                      (unsigned char[4]){0},
-                                      stufflib_misc_adler32(src));
+  const unsigned char* adler32 = stufflib_misc_encode_big_endian(
+      4,
+      (unsigned char[4]){0},
+      stufflib_hash_adler32(src.size, src.data));
   memcpy(dst.data + dst_pos, adler32, 4);
   dst_pos += 4;
 
