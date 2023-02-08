@@ -36,10 +36,8 @@ Decode and inspect a PNG image.
 ```
 #### `stdout`:
 ```
-file: ./docs/img/tokyo.png
-  filter length: 500
-  data length: 756012
-  data begin: 0x7f7b36214800
+FILE: ./docs/img/tokyo.png
+HEADER:
   width: 500
   height: 500
   bit depth: 8
@@ -47,13 +45,16 @@ file: ./docs/img/tokyo.png
   compression: 0
   filter: 0
   interlace: 0
-filters:
-   filter        count
-     None            0
-      Sub           31
-       Up            0
-  Average          228
-    Paeth          241
+DATA:
+  data length: 756012
+  data begin: 0x7fd7aab90800
+  filters: 500
+FILTERS:
+  None: 0
+  Sub: 31
+  Up: 0
+  Average: 228
+  Paeth: 241
 ```
 
 ### Image segmentation
@@ -253,7 +254,7 @@ you
 ```
 #### `stdout`:
 ```
-33
+59
 ```
 
 #### Slice lines
