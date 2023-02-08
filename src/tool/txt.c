@@ -203,12 +203,18 @@ done:
 
 void print_usage(const stufflib_args args[const static 1]) {
   fprintf(stderr,
-          ("usage:\n"
-           "  %s concat path [paths...]\n"
-           "  %s count pattern path\n"
-           "  %s replace old_str new_str path\n"
-           "  %s slicelines begin end path\n"
-           "  %s count_words path\n"),
+          ("usage:"
+           "\n"
+           "  %s concat path [paths...]"
+           "\n"
+           "  %s count pattern path"
+           "\n"
+           "  %s replace old_str new_str path"
+           "\n"
+           "  %s slicelines begin end path"
+           "\n"
+           "  %s count_words path"
+           "\n"),
           args->program,
           args->program,
           args->program,

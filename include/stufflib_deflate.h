@@ -136,8 +136,8 @@ static size_t _next_bit(_deflate_state state[static 1]) {
 
 static size_t _next_n_bits(_deflate_state state[static 1], const size_t count) {
   size_t res = 0;
-  for (size_t i = 0; i < count; ++i) {
-    res |= _next_bit(state) << i;
+  for (size_t bit = 0; bit < count; ++bit) {
+    res |= _next_bit(state) << bit;
   }
   return res;
 }

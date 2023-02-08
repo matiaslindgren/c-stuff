@@ -5,6 +5,7 @@
 //    http://www.libpng.org/pub/png/spec/1.2/PNG-Contents.html,
 //    accessed 2023-01-18
 #include <inttypes.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -140,6 +141,10 @@ void stufflib_png_chunks_destroy(stufflib_png_chunks chunks) {
   free(chunks.chunks);
 }
 
+void stufflib_png_header_destroy(stufflib_png_header header) {
+  // no-op
+}
+
 void stufflib_png_image_destroy(stufflib_png_image image) {
   stufflib_misc_data_destroy(&image.data);
   stufflib_misc_data_destroy(&image.filter);
@@ -198,11 +203,16 @@ void stufflib_png_dump_header(FILE stream[const static 1],
   fprintf(stream, "  interlace: %u\n", header.interlace);
 }
 
-void stufflib_png_dump_img_meta(FILE stream[const static 1],
-                                const stufflib_png_image image) {
-  fprintf(stream, "  filter length: %zu\n", image.filter.size);
+void stufflib_png_dump_img_data_info(FILE stream[const static 1],
+                                     const stufflib_png_image image) {
   fprintf(stream, "  data length: %zu\n", image.data.size);
   fprintf(stream, "  data begin: %p\n", image.data.data);
+  fprintf(stream, "  filters: %zu\n", image.filter.size);
+}
+
+void stufflib_png_dump_img_meta(FILE stream[const static 1],
+                                const stufflib_png_image image) {
+  stufflib_png_dump_img_data_info(stream, image);
   stufflib_png_dump_header(stream, image.header);
 }
 
@@ -212,10 +222,9 @@ void stufflib_png_dump_filter_freq(FILE stream[const static 1],
   for (size_t i = 0; i < filter.size; ++i) {
     ++freq[filter.data[i]];
   }
-  fprintf(stream, "  %7s %12s\n", "filter", "count");
   for (size_t filter = 0; filter < stufflib_png_num_filter_types; ++filter) {
     const char* filter_name = stufflib_png_filter_types[filter];
-    fprintf(stream, "  %7s %12zu\n", filter_name, freq[filter]);
+    fprintf(stream, "  %s: %zu\n", filter_name, freq[filter]);
   }
 }
 
@@ -227,7 +236,7 @@ void _stufflib_png_dump_chunk(const stufflib_png_chunk chunk) {
 }
 
 enum stufflib_png_chunk_type _stufflib_png_find_chunk_type(
-    const char* type_id) {
+    const char type_id[const static 1]) {
   for (unsigned type = 1; type < stufflib_png_num_chunk_types; ++type) {
     if (strncmp(type_id, stufflib_png_chunk_types[type], 4) == 0) {
       return type;
@@ -293,8 +302,12 @@ error:
 }
 
 stufflib_png_header stufflib_png_parse_header(const stufflib_png_chunk chunk) {
-  assert(chunk.type == stufflib_png_IHDR);
-  unsigned char* data = chunk.data.data;
+  if (chunk.type != stufflib_png_IHDR) {
+    const char* type_str = stufflib_png_chunk_types[chunk.type];
+    STUFFLIB_PRINT_ERROR("cannot parse %s chunk as IHDR", type_str);
+    return (stufflib_png_header){0};
+  }
+  unsigned char* const data = chunk.data.data;
   return (stufflib_png_header){
       .width = stufflib_misc_parse_big_endian(4, data),
       .height = stufflib_misc_parse_big_endian(4, data + 4),
@@ -316,11 +329,23 @@ uint32_t stufflib_png_chunk_compute_crc32(
   return crc32_chunk ^ 0xffffffff;
 }
 
-stufflib_png_chunks stufflib_png_read_chunks(const char* filename) {
-  FILE* fp = fopen(filename, "r");
+int stufflib_png_has_signature(const unsigned char buf[const static 8]) {
+  return buf[0] == 0x89 && buf[1] == 0x50 && buf[2] == 0x4e && buf[3] == 0x47 &&
+         buf[4] == 0x0d && buf[5] == 0x0a && buf[6] == 0x1a && buf[7] == 0x0a;
+}
+
+stufflib_png_chunks stufflib_png_read_n_chunks(
+    const char filename[const static 1],
+    const size_t count) {
+  int ok = 0;
+
+  FILE* fp = 0;
+  stufflib_png_chunk* chunks = 0;
+
+  fp = fopen(filename, "r");
   if (!fp) {
     STUFFLIB_PRINT_ERROR("cannot open %s", filename);
-    goto error;
+    goto done;
   }
 
   // check for 8 byte file header containing 'PNG' in ascii
@@ -329,49 +354,62 @@ stufflib_png_chunks stufflib_png_read_chunks(const char* filename) {
     unsigned char buf[header_len];
     if (fread(buf, 1, header_len, fp) != header_len) {
       STUFFLIB_PRINT_ERROR("failed reading PNG header");
-      goto error;
+      goto done;
     }
-    if (!(buf[1] == 'P' && buf[2] == 'N' && buf[3] == 'G')) {
+    if (!stufflib_png_has_signature(buf)) {
       STUFFLIB_PRINT_ERROR("not a PNG image");
-      goto error;
+      goto done;
     }
   }
 
-  size_t count = 0;
-  stufflib_png_chunk* chunks = 0;
+  size_t read_count = 0;
+  stufflib_png_chunk chunk = {0};
 
-  while (!count || chunks[count - 1].type != stufflib_png_IEND) {
-    stufflib_png_chunk chunk = stufflib_png_read_next_chunk(fp);
+  while (read_count < count &&
+         (!read_count || chunk.type != stufflib_png_IEND)) {
+    chunk = stufflib_png_read_next_chunk(fp);
     if (chunk.type == stufflib_png_null_chunk) {
-      free(chunks);
       STUFFLIB_PRINT_ERROR("unknown chunk");
-      goto corrupted_image_error;
+      goto done;
     }
     if (chunk.crc32 != stufflib_png_chunk_compute_crc32(&chunk)) {
-      free(chunks);
       STUFFLIB_PRINT_ERROR("mismatching crc32");
-      goto corrupted_image_error;
+      goto done;
     }
-    chunks = realloc(chunks, (count + 1) * sizeof(stufflib_png_chunk));
-    assert(chunks);
-    chunks[count++] = chunk;
+    stufflib_png_chunk* tmp =
+        realloc(chunks, (read_count + 1) * sizeof(stufflib_png_chunk));
+    if (!tmp) {
+      STUFFLIB_PRINT_ERROR(
+          "failed resizing chunks array during read PNG chunks");
+      goto done;
+    }
+    chunks = tmp;
+    chunks[read_count++] = chunk;
   }
 
-  fclose(fp);
-  return (stufflib_png_chunks){.count = count, .chunks = chunks};
+  ok = 1;
 
-corrupted_image_error:
-  STUFFLIB_PRINT_ERROR("cannot read file as PNG: %s", filename);
-error:
+done:
   if (fp) {
     fclose(fp);
   }
-  return (stufflib_png_chunks){0};
+  if (!ok) {
+    free(chunks);
+    return (stufflib_png_chunks){0};
+  }
+  return (stufflib_png_chunks){.count = read_count, .chunks = chunks};
 }
 
-stufflib_png_header stufflib_png_read_header(const char* filename) {
-  stufflib_png_chunks chunks = stufflib_png_read_chunks(filename);
-  if (!chunks.count) {
+stufflib_png_chunks stufflib_png_read_chunks(
+    const char filename[const static 1]) {
+  return stufflib_png_read_n_chunks(filename, SIZE_MAX);
+}
+
+stufflib_png_header stufflib_png_read_header(
+    const char filename[const static 1]) {
+  stufflib_png_chunks chunks = stufflib_png_read_n_chunks(filename, 1);
+  if (chunks.count != 1) {
+    STUFFLIB_PRINT_ERROR("failed reading IHDR chunk from %s", filename);
     return (stufflib_png_header){0};
   }
   stufflib_png_header header = stufflib_png_parse_header(chunks.chunks[0]);
@@ -526,7 +564,8 @@ int stufflib_png_unapply_filter(stufflib_png_image image[static 1]) {
   return 1;
 }
 
-stufflib_png_image stufflib_png_read_image(const char* filename) {
+stufflib_png_image stufflib_png_read_image(
+    const char filename[const static 1]) {
   stufflib_png_image image = {0};
   stufflib_data idat = {0};
 
@@ -628,7 +667,7 @@ int stufflib_png_chunk_fwrite_header(FILE stream[const static 1],
 }
 
 int stufflib_png_chunk_fwrite(FILE stream[const static 1],
-                              const char* chunk_type,
+                              const char chunk_type[const static 1],
                               const stufflib_data data[const static 1]) {
   if (data->size > ((size_t)1 << 31)) {
     STUFFLIB_PRINT_ERROR("will not write too large %s chunk of size %zu",
@@ -676,7 +715,7 @@ done:
 }
 
 int stufflib_png_write_image(const stufflib_png_image image,
-                             const char* filename) {
+                             const char filename[const static 1]) {
   int write_ok = 0;
   stufflib_data packed_data = {0};
   stufflib_data idat = {0};

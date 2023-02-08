@@ -23,7 +23,7 @@ Simple PNG decoder implemented without dependencies.
 ./out/tool/img png_dump_raw png_path
 ```
 
-### Get PNG info
+### PNG info
 
 Decode and inspect a PNG image.
 
