@@ -12,15 +12,15 @@ make -j test
 
 ## PNG tools
 
-Source: [`./src/tool/img.c`](./src/tool/img.c)
+Source: [`./src/tool/png.c`](./src/tool/png.c)
 
 Simple PNG decoder implemented without dependencies.
 
 ### Usage
 ```
-./out/tool/img png_info png_path
-./out/tool/img segment png_src_path png_dst_path [--threshold-percent=N] [-v]
-./out/tool/img png_dump_raw png_path
+./out/tool/png info png_path
+./out/tool/png dump_raw png_path block_type [block_types...]
+./out/tool/png segment png_src_path png_dst_path [--threshold-percent=N] [-v]
 ```
 
 ### PNG info
@@ -32,11 +32,21 @@ Decode and inspect a PNG image.
 ![](/docs/img/tokyo.png)
 
 ```
-./out/tool/img png_info ./docs/img/tokyo.png
+./out/tool/png info ./docs/img/tokyo.png
 ```
 #### `stdout`:
 ```
 FILE: ./docs/img/tokyo.png
+CHUNKS:
+  IHDR: 1
+  IDAT: 13
+  IEND: 1
+  bKGD: 1
+  cHRM: 1
+  gAMA: 1
+  pHYs: 1
+  tEXt: 11
+  tIME: 1
 HEADER:
   width: 500
   height: 500
@@ -47,23 +57,23 @@ HEADER:
   interlace: 0
 DATA:
   data length: 756012
-  data begin: 0x7fd7aab90800
+  data begin: 0x7fab58847800
   filters: 500
 FILTERS:
-  None: 0
   Sub: 31
-  Up: 0
   Average: 228
   Paeth: 241
 ```
 
 ### Image segmentation
 
+Apply mean segmentation on PNG images.
+
 Merges adjacent image segments by comparing the Euclidian distance between the average RGB-pixel of each segment, where each RGB-pixel (3 bytes) is interpreted as a vector of length 3: `[R, G, B]`.
 
 #### Threshold 10%
 ```
-./out/tool/img segment \
+./out/tool/png segment \
   --threshold-percent=10 \
   ./docs/img/tokyo.png \
   ./docs/img/tokyo_segmented_10p.png
@@ -72,7 +82,7 @@ Merges adjacent image segments by comparing the Euclidian distance between the a
 
 #### Threshold 20%
 ```
-./out/tool/img segment \
+./out/tool/png segment \
   --threshold-percent=20 \
   ./docs/img/tokyo.png \
   ./docs/img/tokyo_segmented_20p.png
@@ -81,7 +91,7 @@ Merges adjacent image segments by comparing the Euclidian distance between the a
 
 #### Threshold 30%
 ```
-./out/tool/img segment \
+./out/tool/png segment \
   --threshold-percent=30 \
   ./docs/img/tokyo.png \
   ./docs/img/tokyo_segmented_30p.png
@@ -89,21 +99,25 @@ Merges adjacent image segments by comparing the Euclidian distance between the a
 ![](/docs/img/tokyo_segmented_30p.png)
 
 
-### Dump raw IDAT stream
+### Dump raw chunks
 
-Decode a PNG image and write the decoded binary stream to stdout.
+Decode a PNG image into chunks and write raw chunk data to stdout.
+Use positional arguments to filter a subset of chunk types.
 
-#### Example: single red pixel
+#### Example: dump IHDR and IDAT contents of a single red pixel
 
 This example requires `xxd`.
 
 ```
-./out/tool/img png_dump_raw ./test-data/ff0000-1x1-rgb-fixed.png | xxd -b
+./out/tool/png dump_raw ./test-data/ff0000-1x1-rgb-fixed.png IHDR IDAT | xxd -b
 ```
 #### `stdout`:
 ```
-00000000: 00001000 00011101 01100011 11111000 11001111 11000000  ..c...
-00000006: 00000000 00000000 00000011 00000001 00000001 00000000  ......
+00000000: 00000000 00000000 00000000 00000001 00000000 00000000  ......
+00000006: 00000000 00000001 00001000 00000010 00000000 00000000  ......
+0000000c: 00000000 00001000 00011101 01100011 11111000 11001111  ...c..
+00000012: 11000000 00000000 00000000 00000011 00000001 00000001  ......
+00000018: 00000000                                               .
 ```
 
 ## Sorting

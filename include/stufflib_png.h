@@ -223,8 +223,24 @@ void stufflib_png_dump_filter_freq(FILE stream[const static 1],
     ++freq[filter.data[i]];
   }
   for (size_t filter = 0; filter < stufflib_png_num_filter_types; ++filter) {
-    const char* filter_name = stufflib_png_filter_types[filter];
-    fprintf(stream, "  %s: %zu\n", filter_name, freq[filter]);
+    if (freq[filter]) {
+      const char* filter_name = stufflib_png_filter_types[filter];
+      fprintf(stream, "  %s: %zu\n", filter_name, freq[filter]);
+    }
+  }
+}
+
+void stufflib_png_dump_chunk_type_freq(FILE stream[const static 1],
+                                       const stufflib_png_chunks chunks) {
+  size_t freq[stufflib_png_num_chunk_types] = {0};
+  for (size_t i = 0; i < chunks.count; ++i) {
+    ++freq[chunks.chunks[i].type];
+  }
+  for (size_t type = 0; type < stufflib_png_num_chunk_types; ++type) {
+    if (freq[type]) {
+      const char* type_name = stufflib_png_chunk_types[type];
+      fprintf(stream, "  %s: %zu\n", type_name, freq[type]);
+    }
   }
 }
 
