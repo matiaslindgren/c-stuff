@@ -273,7 +273,7 @@ you
 
 #### Slice lines
 ```
-./out/tool/txt slicelines 218 243 ./src/tool/txt.c
+./out/tool/txt slicelines 224 250 ./src/tool/txt.c
 ```
 #### `stdout`:
 ```
@@ -314,24 +314,24 @@ Tokenisation is simply "split at whitespace".
 ```
 #### `stdout`:
 ```
-167 =
-110 {
-99 }
-71 const
-49 if
+177 =
+122 {
+111 }
+81 const
+54 if
 45 +
-40 size_t
-34 return
-30 goto
-24 0;
-23 char*
-22 unsigned
-22 STUFFLIB_PRINT_ERROR("failed
+42 size_t
+37 return
+31 goto
+28 0;
+23 STUFFLIB_PRINT_ERROR("failed
+23 unsigned
+20 static
 20 *
-19 error;
 19 "
-17 for
-16 int
-15 1,
-15 !=
+19 for
+19 ==
+19 char*
+18 int
+17 !=
 ```
