@@ -36,7 +36,6 @@ Decode and inspect a PNG image.
 ```
 #### `stdout`:
 ```
-FILE: ./docs/img/tokyo.png
 CHUNKS:
   IHDR: 1
   IDAT: 13

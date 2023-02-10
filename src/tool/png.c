@@ -68,7 +68,6 @@ int info(const stufflib_args args[const static 1]) {
   stufflib_png_image img = {0};
 
   const char* const png_path = stufflib_args_get_positional(args, 1);
-  printf("FILE: %s\n", png_path);
 
   chunks = stufflib_png_read_chunks(png_path);
   printf("CHUNKS:\n");
