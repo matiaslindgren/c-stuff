@@ -15,21 +15,20 @@ struct stufflib_args {
   char* const** optional;
 };
 
-stufflib_args* stufflib_args_from_argv(const int argc,
-                                       char* const argv[argc + 1]) {
+stufflib_args stufflib_args_from_argv(const int argc,
+                                      char* const argv[argc + 1]) {
   size_t num_required = 0;
   for (size_t i = 1; i < argc; ++i) {
     num_required += argv[i][0] != '-';
   }
   size_t num_optional = argc - 1 - num_required;
 
-  stufflib_args* args = calloc(1, sizeof(stufflib_args));
   char* const** required = calloc(num_required + 1, sizeof(char*));
   char* const** optional = calloc(num_optional + 1, sizeof(char*));
-  if (!args || !required || !optional) {
+  if (!required || !optional) {
     STUFFLIB_PRINT_ERROR("failed allocating memory during args parse");
     assert(0);
-    return 0;
+    return (stufflib_args){0};
   }
 
   {
@@ -44,20 +43,17 @@ stufflib_args* stufflib_args_from_argv(const int argc,
     }
   }
 
-  *args = (stufflib_args){
+  return (stufflib_args){
       .program = argv[0],
       .required = required,
       .optional = optional,
   };
-  return args;
 }
 
 void stufflib_args_destroy(stufflib_args args[const static 1]) {
-  if (args) {
-    free(args->required);
-    free(args->optional);
-  }
-  free(args);
+  free(args->required);
+  free(args->optional);
+  *args = (stufflib_args){0};
 }
 
 char* const stufflib_args_get_positional(

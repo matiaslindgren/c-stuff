@@ -19,8 +19,8 @@
 
 #define STUFFLIB_TEST_MAIN(...)                                         \
   int main(int argc, char* const argv[argc + 1]) {                      \
-    stufflib_args* args = stufflib_args_from_argv(argc, argv);          \
-    const int verbose = stufflib_args_parse_flag(args, "-v");           \
+    stufflib_args args = stufflib_args_from_argv(argc, argv);           \
+    const int verbose = stufflib_args_parse_flag(&args, "-v");          \
     int (*tests[])(const int) = {__VA_ARGS__};                          \
     char** test_names = stufflib_str_split(#__VA_ARGS__, ", ");         \
     assert(test_names);                                                 \
@@ -34,7 +34,7 @@
         STUFFLIB_PRINT_ERROR("test %s (%zu) failed", test_names[t], t); \
       }                                                                 \
     }                                                                   \
-    stufflib_args_destroy(args);                                        \
+    stufflib_args_destroy(&args);                                       \
     stufflib_str_chunks_destroy(test_names);                            \
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;                            \
   }

@@ -153,23 +153,23 @@ void print_usage(const stufflib_args args[const static 1]) {
 }
 
 int main(int argc, char* const argv[argc + 1]) {
-  stufflib_args* args = stufflib_args_from_argv(argc, argv);
+  stufflib_args args = stufflib_args_from_argv(argc, argv);
   int ok = 0;
-  const char* command = stufflib_args_get_positional(args, 0);
+  const char* command = stufflib_args_get_positional(&args, 0);
   if (command) {
     if (strcmp(command, "segment") == 0) {
-      ok = segment(args);
+      ok = segment(&args);
     } else if (strcmp(command, "info") == 0) {
-      ok = info(args);
+      ok = info(&args);
     } else if (strcmp(command, "dump_raw") == 0) {
-      ok = dump_raw(args);
+      ok = dump_raw(&args);
     } else {
       STUFFLIB_PRINT_ERROR("unknown command %s", command);
     }
   }
   if (!ok) {
-    print_usage(args);
+    print_usage(&args);
   }
-  stufflib_args_destroy(args);
+  stufflib_args_destroy(&args);
   return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

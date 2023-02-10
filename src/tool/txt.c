@@ -223,27 +223,27 @@ void print_usage(const stufflib_args args[const static 1]) {
 }
 
 int main(int argc, char* const argv[argc + 1]) {
-  stufflib_args* args = stufflib_args_from_argv(argc, argv);
+  stufflib_args args = stufflib_args_from_argv(argc, argv);
   int ok = 0;
-  const char* command = stufflib_args_get_positional(args, 0);
+  const char* command = stufflib_args_get_positional(&args, 0);
   if (command) {
     if (strcmp(command, "concat") == 0) {
-      ok = concat(args);
+      ok = concat(&args);
     } else if (strcmp(command, "count") == 0) {
-      ok = count(args);
+      ok = count(&args);
     } else if (strcmp(command, "replace") == 0) {
-      ok = replace(args);
+      ok = replace(&args);
     } else if (strcmp(command, "slicelines") == 0) {
-      ok = slicelines(args);
+      ok = slicelines(&args);
     } else if (strcmp(command, "count_words") == 0) {
-      ok = count_words(args);
+      ok = count_words(&args);
     } else {
       STUFFLIB_PRINT_ERROR("unknown command %s", command);
     }
   }
   if (!ok) {
-    print_usage(args);
+    print_usage(&args);
   }
-  stufflib_args_destroy(args);
+  stufflib_args_destroy(&args);
   return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -32,23 +32,22 @@ char** sort_doubles(const size_t count, char* lines[count]) {
 int main(int argc, char* const argv[argc + 1]) {
   int ok = 0;
 
-  stufflib_args* args = 0;
   char** lines = 0;
 
-  args = stufflib_args_from_argv(argc, argv);
-  if (stufflib_args_count_positional(args) != 2) {
-    print_usage(args);
+  stufflib_args args = stufflib_args_from_argv(argc, argv);
+  if (stufflib_args_count_positional(&args) != 2) {
+    print_usage(&args);
     goto done;
   }
-  const char* sort_as = stufflib_args_get_positional(args, 0);
+  const char* sort_as = stufflib_args_get_positional(&args, 0);
   const int sort_as_numeric = strcmp(sort_as, "numeric") == 0;
   const int sort_as_strings = strcmp(sort_as, "strings") == 0;
   if (!(sort_as_numeric || sort_as_strings)) {
-    print_usage(args);
+    print_usage(&args);
     goto done;
   }
 
-  const char* path = stufflib_args_get_positional(args, 1);
+  const char* path = stufflib_args_get_positional(&args, 1);
   lines = stufflib_io_slurp_lines(path, "\n");
   if (!lines) {
     goto done;
@@ -68,7 +67,7 @@ int main(int argc, char* const argv[argc + 1]) {
     }
   }
 
-  const int reverse = stufflib_args_parse_flag(args, "--reverse");
+  const int reverse = stufflib_args_parse_flag(&args, "--reverse");
   for (size_t i = 0; i < num_lines; ++i) {
     const size_t index = reverse ? num_lines - (i + 1) : i;
     printf("%s\n", lines[index]);
@@ -77,9 +76,7 @@ int main(int argc, char* const argv[argc + 1]) {
   ok = 1;
 
 done:
-  if (args) {
-    stufflib_args_destroy(args);
-  }
+  stufflib_args_destroy(&args);
   if (lines) {
     stufflib_str_chunks_destroy(lines);
   }
