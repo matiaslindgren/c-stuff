@@ -5,6 +5,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v2
+    - run: make -j
+    - run: make clean
     - run: make -j test_debug
     - run: make clean
     - run: make -j test_release
