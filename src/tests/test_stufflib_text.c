@@ -96,7 +96,7 @@ int test_init_from_str() {
 }
 
 int test_init_from_file() {
-  const char* const path = "./src/test/test_stufflib_text.c";
+  const char* const path = "./src/tests/test_stufflib_text.c";
   stufflib_text* text = stufflib_text_from_file(path);
   assert(text);
   assert(text->str);
