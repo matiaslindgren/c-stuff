@@ -21,6 +21,7 @@ OUT_DIR         := out
 OUT_DIR_DEBUG   := $(OUT_DIR)/debug
 OUT_DIR_RELEASE := $(OUT_DIR)/release
 
+HEADERS     := $(wildcard include/*.h)
 TOOLS_SRC   := $(wildcard src/tools/*.c)
 TESTS_SRC   := $(wildcard src/tests/*.c)
 TOOLS_FILES := $(notdir $(basename $(TOOLS_SRC)))
@@ -61,10 +62,10 @@ $(TOOLS_DIR_DEBUG) $(TESTS_DIR_DEBUG): $(OUT_DIR_DEBUG)
 $(TOOLS_DIR_RELEASE) $(TESTS_DIR_RELEASE): $(OUT_DIR_RELEASE)
 	mkdir $@
 
-$(TOOLS_DEBUG) $(TESTS_DEBUG): $(OUT_DIR_DEBUG)/%: src/%.c $(wildcard ./include/*.h) | $(TOOLS_DIR_DEBUG) $(TESTS_DIR_DEBUG)
+$(TOOLS_DEBUG) $(TESTS_DEBUG): $(OUT_DIR_DEBUG)/%: src/%.c $(HEADERS) | $(TOOLS_DIR_DEBUG) $(TESTS_DIR_DEBUG)
 	$(CC) $(CFLAGS_DEBUG) -I./include -o $@ $< $(LFLAGS)
 
-$(TOOLS_RELEASE) $(TESTS_RELEASE): $(OUT_DIR_RELEASE)/%: src/%.c $(wildcard ./include/*.h) | $(TOOLS_DIR_RELEASE) $(TESTS_DIR_RELEASE)
+$(TOOLS_RELEASE) $(TESTS_RELEASE): $(OUT_DIR_RELEASE)/%: src/%.c $(HEADERS) | $(TOOLS_DIR_RELEASE) $(TESTS_DIR_RELEASE)
 	$(CC) $(CFLAGS_RELEASE) -I./include -o $@ $< $(LFLAGS)
 
 RUN_DEBUG_TESTS   := $(addprefix run_debug_,$(TESTS_FILES))
