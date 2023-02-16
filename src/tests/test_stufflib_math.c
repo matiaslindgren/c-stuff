@@ -186,7 +186,7 @@ int test_numerical_diff(const int verbose) {
   return 1;
 }
 
-int test_double_almost() {
+int test_double_almost(const int verbose) {
   if (!stufflib_math_double_almost(1, 1.5, 1)) {
     return 0;
   }
@@ -196,7 +196,7 @@ int test_double_almost() {
   return 1;
 }
 
-int test_round_up_pow2() {
+int test_round_up_pow2(const int verbose) {
   assert(stufflib_math_next_power_of_two(0) == 1);
   assert(stufflib_math_next_power_of_two(1) == 2);
   assert(stufflib_math_next_power_of_two(2) == 4);

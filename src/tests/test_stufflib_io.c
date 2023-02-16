@@ -5,7 +5,7 @@
 #include "stufflib_io.h"
 #include "stufflib_test.h"
 
-int test_file_size() {
+int test_file_size(const int verbose) {
   assert(stufflib_io_file_size("./test-data/empty") == 0);
   assert(stufflib_io_file_size("./test-data/one.txt") == 1);
   assert(stufflib_io_file_size("./test-data/hello.txt") == 11);
@@ -13,7 +13,7 @@ int test_file_size() {
   return 1;
 }
 
-int test_file_slurp() {
+int test_file_slurp(const int verbose) {
   {
     char* const str = stufflib_io_slurp_file("./test-data/empty");
     assert(strcmp(str, "") == 0);

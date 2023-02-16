@@ -5,7 +5,7 @@
 #include "stufflib_rand.h"
 #include "stufflib_test.h"
 
-int test_rand_fill() {
+int test_rand_fill(const int verbose) {
   const size_t n = 1000;
   double x[n];
   stufflib_rand_fill_double(n, x, 0);
@@ -23,7 +23,7 @@ int test_rand_fill() {
   return 1;
 }
 
-int test_rand_set_zero() {
+int test_rand_set_zero(const int verbose) {
   const size_t n = 1000;
   double x[n];
   for (size_t i = 0; i < n; ++i) {

@@ -5,7 +5,7 @@
 #include "stufflib_str.h"
 #include "stufflib_test.h"
 
-int test_no_splits() {
+int test_no_splits(const int verbose) {
   char** chunks = stufflib_str_split("abc", " ");
   assert(strcmp(chunks[0], "abc") == 0);
   assert(chunks[1] == 0);
@@ -13,7 +13,7 @@ int test_no_splits() {
   return 1;
 }
 
-int test_1_split() {
+int test_1_split(const int verbose) {
   char** chunks = stufflib_str_split("abc", "b");
   assert(strcmp(chunks[0], "a") == 0);
   assert(strcmp(chunks[1], "c") == 0);
@@ -22,7 +22,7 @@ int test_1_split() {
   return 1;
 }
 
-int test_2_splits() {
+int test_2_splits(const int verbose) {
   char** chunks = stufflib_str_split("1\n2\n3", "\n");
   assert(strcmp(chunks[0], "1") == 0);
   assert(strcmp(chunks[1], "2") == 0);
@@ -32,7 +32,7 @@ int test_2_splits() {
   return 1;
 }
 
-int test_slice() {
+int test_slice(const int verbose) {
   char* chunks[] = {
       "one",
       "two",
@@ -91,7 +91,7 @@ int test_slice() {
   return 1;
 }
 
-int test_split_set() {
+int test_split_set(const int verbose) {
   char** chunks = stufflib_str_split_any("abcdeefgghhiiikkij",
                                          4,
                                          (const char*[]){"c", "e", "f", "i"});
@@ -106,7 +106,7 @@ int test_split_set() {
   return 1;
 }
 
-int test_split_whitespace() {
+int test_split_whitespace(const int verbose) {
   char** chunks =
       stufflib_str_split_whitespace("ab c\td  e \t\t f\ng\n\nhi\n\nj k \tl");
   const char* expected[] = {

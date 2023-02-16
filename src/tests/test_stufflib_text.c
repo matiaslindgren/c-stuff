@@ -5,7 +5,7 @@
 #include "stufflib_test.h"
 #include "stufflib_text.h"
 
-int test_size() {
+int test_size(const int verbose) {
   stufflib_text text = (stufflib_text){.str = calloc(1, 1), .length = 0};
 
   assert(text.str);
@@ -21,7 +21,7 @@ int test_size() {
   return 1;
 }
 
-int test_count() {
+int test_count(const int verbose) {
   stufflib_text text = (stufflib_text){.str = calloc(1, 1), .length = 0};
 
   assert(text.str);
@@ -38,7 +38,7 @@ int test_count() {
   return 1;
 }
 
-int test_append_str() {
+int test_append_str(const int verbose) {
   stufflib_text text = (stufflib_text){.str = calloc(1, 1), .length = 0};
 
   stufflib_text_append_str(&text, "hello", 5);
@@ -66,7 +66,7 @@ int test_append_str() {
   return 1;
 }
 
-int test_split() {
+int test_split(const int verbose) {
   stufflib_text text = (stufflib_text){.str = "\n\n\n", .length = 3};
 
   stufflib_text* lines = stufflib_text_split(&text, "\n");
@@ -83,7 +83,7 @@ int test_split() {
   stufflib_text_destroy(lines);
   return 1;
 }
-int test_init_from_str() {
+int test_init_from_str(const int verbose) {
   stufflib_text* text = stufflib_text_from_str("hello");
 
   assert(text);
@@ -95,7 +95,7 @@ int test_init_from_str() {
   return 1;
 }
 
-int test_init_from_file() {
+int test_init_from_file(const int verbose) {
   const char* const path = "./src/tests/test_stufflib_text.c";
   stufflib_text* text = stufflib_text_from_file(path);
   assert(text);
@@ -106,7 +106,7 @@ int test_init_from_file() {
   return 1;
 }
 
-int test_init_from_file_and_splitlines() {
+int test_init_from_file_and_splitlines(const int verbose) {
   const char* const path = "./test-data/numbers.txt";
   stufflib_text* text = stufflib_text_from_file(path);
   assert(text);
