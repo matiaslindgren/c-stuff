@@ -1,21 +1,4 @@
 SHELL := /bin/sh
-CC    := clang
-
-CFLAGS_DEBUG := \
-	-std=c17 \
-	-Wall \
-	-Werror \
-	-O2 \
-	-g \
-	-fsanitize=address,undefined
-
-CFLAGS_RELEASE := \
-	-std=c17 \
-	-Wall \
-	-Werror \
-	-O3
-
-LFLAGS := -lm
 
 OUT_DIR         := out
 OUT_DIR_DEBUG   := $(OUT_DIR)/debug
@@ -36,6 +19,23 @@ TOOLS_DEBUG   := $(addprefix $(TOOLS_DIR_DEBUG)/,$(TOOLS_FILES))
 TESTS_DEBUG   := $(addprefix $(TESTS_DIR_DEBUG)/,$(TESTS_FILES))
 TOOLS_RELEASE := $(addprefix $(TOOLS_DIR_RELEASE)/,$(TOOLS_FILES))
 TESTS_RELEASE := $(addprefix $(TESTS_DIR_RELEASE)/,$(TESTS_FILES))
+
+CLANG ?= clang-15
+
+CSTD := c2x
+CFLAGS_DEBUG := \
+	-std=$(CSTD) \
+	-Wall \
+	-Werror \
+	-O2 \
+	-g \
+	-fsanitize=address,undefined
+CFLAGS_RELEASE := \
+	-std=$(CSTD) \
+	-Wall \
+	-Werror \
+	-O3
+LFLAGS := -lm
 
 .PHONY: all
 all: debug release
@@ -63,10 +63,10 @@ $(TOOLS_DIR_RELEASE) $(TESTS_DIR_RELEASE): $(OUT_DIR_RELEASE)
 	mkdir $@
 
 $(TOOLS_DEBUG) $(TESTS_DEBUG): $(OUT_DIR_DEBUG)/%: src/%.c $(HEADERS) | $(TOOLS_DIR_DEBUG) $(TESTS_DIR_DEBUG)
-	$(CC) $(CFLAGS_DEBUG) -I./include -o $@ $< $(LFLAGS)
+	$(CLANG) $(CFLAGS_DEBUG) -I./include -o $@ $< $(LFLAGS)
 
 $(TOOLS_RELEASE) $(TESTS_RELEASE): $(OUT_DIR_RELEASE)/%: src/%.c $(HEADERS) | $(TOOLS_DIR_RELEASE) $(TESTS_DIR_RELEASE)
-	$(CC) $(CFLAGS_RELEASE) -I./include -o $@ $< $(LFLAGS)
+	$(CLANG) $(CFLAGS_RELEASE) -I./include -o $@ $< $(LFLAGS)
 
 RUN_DEBUG_TESTS   := $(addprefix run_debug_,$(TESTS_FILES))
 RUN_RELEASE_TESTS := $(addprefix run_release_,$(TESTS_FILES))
