@@ -1,0 +1,26 @@
+SHELL := /bin/sh
+
+LLVM_SRC_URL := https://github.com/llvm/llvm-project/releases/download/llvmorg-15.0.7/llvm-project-15.0.7.src.tar.xz
+LLVM_OUT     := ./llvm-build
+
+llvm-project.tar.xz:
+	curl --output $@ --location $(LLVM_SRC_URL)
+	curl --output $@.sig --location $(LLVM_SRC_URL).sig
+	gpg --verify $@.sig $@
+
+llvm-project: llvm-project.tar.xz
+	mkdir -p $@
+	cp $< $@/
+	tar --directory $@ --strip-components 1 -xf $@/$<
+	rm $@/$<
+
+$(LLVM_OUT): llvm-project
+	mkdir -p $@
+	cd $@ && cmake \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;compiler-rt" \
+		-G "Unix Makefiles" \
+		-DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" \
+		../llvm-project/llvm
+	make --directory=$@ -j
+	make --directory=$@ -j check-all
