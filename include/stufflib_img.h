@@ -49,8 +49,7 @@ int stufflib_img_segment_rgb(stufflib_png_image dst[const static 1],
     }
   }
 
-  for (size_t iteration = 0, num_merges = SIZE_MAX; num_merges > 0;
-       ++iteration) {
+  for (size_t num_merges = SIZE_MAX; num_merges > 0;) {
     num_merges = 0;
     for (size_t row = 2; row < height - 1; ++row) {
       for (size_t col = 2; col < width - 1; ++col) {
