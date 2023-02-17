@@ -5,7 +5,7 @@
 #include "stufflib_test.h"
 #include "stufflib_text.h"
 
-int test_size(const int verbose) {
+bool test_size(const bool verbose) {
   stufflib_text text = (stufflib_text){.str = calloc(1, 1), .length = 0};
 
   assert(text.str);
@@ -18,10 +18,10 @@ int test_size(const int verbose) {
   assert(stufflib_text_size(&text) == 5);
 
   free(text.str);
-  return 1;
+  return true;
 }
 
-int test_count(const int verbose) {
+bool test_count(const bool verbose) {
   stufflib_text text = (stufflib_text){.str = calloc(1, 1), .length = 0};
 
   assert(text.str);
@@ -35,10 +35,10 @@ int test_count(const int verbose) {
   assert(stufflib_text_count(&text) == 2);
 
   free(text.str);
-  return 1;
+  return true;
 }
 
-int test_append_str(const int verbose) {
+bool test_append_str(const bool verbose) {
   stufflib_text text = (stufflib_text){.str = calloc(1, 1), .length = 0};
 
   stufflib_text_append_str(&text, "hello", 5);
@@ -63,10 +63,10 @@ int test_append_str(const int verbose) {
   assert(stufflib_text_count(&text) == 1);
 
   free(text.str);
-  return 1;
+  return true;
 }
 
-int test_split(const int verbose) {
+bool test_split(const bool verbose) {
   stufflib_text text = (stufflib_text){.str = "\n\n\n", .length = 3};
 
   stufflib_text* lines = stufflib_text_split(&text, "\n");
@@ -81,9 +81,9 @@ int test_split(const int verbose) {
   }
 
   stufflib_text_destroy(lines);
-  return 1;
+  return true;
 }
-int test_init_from_str(const int verbose) {
+bool test_init_from_str(const bool verbose) {
   stufflib_text* text = stufflib_text_from_str("hello");
 
   assert(text);
@@ -92,10 +92,10 @@ int test_init_from_str(const int verbose) {
   assert(!text->next);
 
   stufflib_text_destroy(text);
-  return 1;
+  return true;
 }
 
-int test_init_from_file(const int verbose) {
+bool test_init_from_file(const bool verbose) {
   const char* const path = "./src/tests/test_stufflib_text.c";
   stufflib_text* text = stufflib_text_from_file(path);
   assert(text);
@@ -103,10 +103,10 @@ int test_init_from_file(const int verbose) {
   assert(text->length == stufflib_io_file_size(path));
   assert(!text->next);
   stufflib_text_destroy(text);
-  return 1;
+  return true;
 }
 
-int test_init_from_file_and_splitlines(const int verbose) {
+bool test_init_from_file_and_splitlines(const bool verbose) {
   const char* const path = "./test-data/numbers.txt";
   stufflib_text* text = stufflib_text_from_file(path);
   assert(text);
@@ -126,7 +126,7 @@ int test_init_from_file_and_splitlines(const int verbose) {
 
   stufflib_text_destroy(text);
   stufflib_text_destroy(lines);
-  return 1;
+  return true;
 }
 
 STUFFLIB_TEST_MAIN(test_size,

@@ -30,9 +30,9 @@ char** sort_doubles(const size_t count, char* lines[count]) {
 }
 
 int main(int argc, char* const argv[argc + 1]) {
-  int ok = 0;
+  bool ok = false;
 
-  char** lines = 0;
+  char** lines = nullptr;
 
   stufflib_args args = stufflib_args_from_argv(argc, argv);
   if (stufflib_args_count_positional(&args) != 2) {
@@ -40,8 +40,8 @@ int main(int argc, char* const argv[argc + 1]) {
     goto done;
   }
   const char* sort_as = stufflib_args_get_positional(&args, 0);
-  const int sort_as_numeric = strcmp(sort_as, "numeric") == 0;
-  const int sort_as_strings = strcmp(sort_as, "strings") == 0;
+  const bool sort_as_numeric = strcmp(sort_as, "numeric") == 0;
+  const bool sort_as_strings = strcmp(sort_as, "strings") == 0;
   if (!(sort_as_numeric || sort_as_strings)) {
     print_usage(&args);
     goto done;
@@ -67,13 +67,13 @@ int main(int argc, char* const argv[argc + 1]) {
     }
   }
 
-  const int reverse = stufflib_args_parse_flag(&args, "--reverse");
+  const bool reverse = stufflib_args_parse_flag(&args, "--reverse");
   for (size_t i = 0; i < num_lines; ++i) {
     const size_t index = reverse ? num_lines - (i + 1) : i;
     printf("%s\n", lines[index]);
   }
 
-  ok = 1;
+  ok = true;
 
 done:
   stufflib_args_destroy(&args);

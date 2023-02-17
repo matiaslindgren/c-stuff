@@ -15,16 +15,16 @@
     fprintf(stderr, "error (%s@L%ld): ", fname, lineno); \
     fprintf(stderr, __VA_ARGS__);                        \
     fprintf(stderr, "\n");                               \
-  } while (0)
+  } while (false)
 
 #define STUFFLIB_TEST_MAIN(...)                                         \
   int main(int argc, char* const argv[argc + 1]) {                      \
     stufflib_args args = stufflib_args_from_argv(argc, argv);           \
-    const int verbose = stufflib_args_parse_flag(&args, "-v");          \
-    int (*tests[])(const int) = {__VA_ARGS__};                          \
+    const bool verbose = stufflib_args_parse_flag(&args, "-v");         \
+    bool (*tests[])(const bool) = {__VA_ARGS__};                        \
     char** test_names = stufflib_str_split(#__VA_ARGS__, ", ");         \
     assert(test_names);                                                 \
-    int ok = 1;                                                         \
+    bool ok = true;                                                     \
     for (size_t t = 0; ok && t < STUFFLIB_ARRAY_LEN(tests); ++t) {      \
       if (verbose) {                                                    \
         printf("%s\n", test_names[t]);                                  \

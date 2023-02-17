@@ -32,7 +32,7 @@ stufflib_text* stufflib_text_split_at(stufflib_text head[const static 1],
   for (size_t i = 0; i < index; ++i) {
     if (!text) {
       STUFFLIB_PRINT_ERROR("index %zu out of bounds", index);
-      return 0;
+      return nullptr;
     }
     text = text->next;
   }
@@ -67,14 +67,14 @@ size_t stufflib_text_count(const stufflib_text head[const static 1]) {
   return count;
 }
 
-int stufflib_text_append_str(stufflib_text text[const static 1],
-                             const char str[const static 1],
-                             const size_t length) {
+bool stufflib_text_append_str(stufflib_text text[const static 1],
+                              const char str[const static 1],
+                              const size_t length) {
   {
     char* tmp = realloc(text->str, text->length + length + 1);
     if (!tmp) {
       STUFFLIB_PRINT_ERROR("failed reallocating text->str during append str");
-      return 0;
+      return false;
     }
     text->str = tmp;
   }
@@ -83,7 +83,7 @@ int stufflib_text_append_str(stufflib_text text[const static 1],
     text->length += length;
   }
   text->str[text->length] = 0;
-  return 1;
+  return true;
 }
 
 int stufflib_text_fprint(FILE stream[const static 1],
@@ -104,7 +104,7 @@ char* stufflib_text_to_str(const stufflib_text head[const static 1]) {
   char* str = calloc(stufflib_text_size(head) + 1, 1);
   if (!str) {
     STUFFLIB_PRINT_ERROR("failed allocating str");
-    return 0;
+    return nullptr;
   }
   char* pos = str;
   for (const stufflib_text* text = head; text; text = text->next) {
@@ -116,9 +116,9 @@ char* stufflib_text_to_str(const stufflib_text head[const static 1]) {
 
 stufflib_text* stufflib_text_split(const stufflib_text head[const static 1],
                                    const char separator[const static 1]) {
-  stufflib_text* root = 0;
-  char** chunks = 0;
-  char* full_str = 0;
+  stufflib_text* root = nullptr;
+  char** chunks = nullptr;
+  char* full_str = nullptr;
 
   full_str = stufflib_text_to_str(head);
   if (!full_str) {
@@ -166,7 +166,7 @@ error:
   if (root) {
     stufflib_text_destroy(root);
   }
-  return 0;
+  return nullptr;
 }
 
 stufflib_text* stufflib_text_from_str(const char str[const static 1]) {
@@ -185,15 +185,15 @@ error:
   if (text) {
     stufflib_text_destroy(text);
   }
-  return 0;
+  return nullptr;
 }
 
 stufflib_text* stufflib_text_replace(const stufflib_text head[const static 1],
                                      const char old_str[const static 1],
                                      const char new_str[const static 1]) {
-  stufflib_text* root = 0;
+  stufflib_text* root = nullptr;
 
-  stufflib_text* prev = 0;
+  stufflib_text* prev = nullptr;
   for (const stufflib_text* src = head; src; src = src->next) {
     stufflib_text* dst = calloc(1, sizeof(stufflib_text));
     if (!dst) {
@@ -235,7 +235,7 @@ stufflib_text* stufflib_text_replace(const stufflib_text head[const static 1],
 
 error:
   stufflib_text_destroy(root);
-  return 0;
+  return nullptr;
 }
 
 size_t stufflib_text_count_matches(const stufflib_text head[const static 1],
@@ -280,7 +280,7 @@ error:
   if (text) {
     stufflib_text_destroy(text);
   }
-  return 0;
+  return nullptr;
 }
 
 #endif  // _STUFFLIB_TEXT_H_INCLUDED

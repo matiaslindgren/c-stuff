@@ -77,13 +77,13 @@ error:
   if (content) {
     free(content);
   }
-  return 0;
+  return nullptr;
 }
 
 char** stufflib_io_slurp_lines(const char fname[const static 1],
                                const char line_ending[const static 1]) {
-  char* file_content = 0;
-  char** lines = 0;
+  char* file_content = nullptr;
+  char** lines = nullptr;
 
   file_content = stufflib_io_slurp_file(fname);
   if (!file_content) {
@@ -115,7 +115,7 @@ error:
   if (lines) {
     stufflib_str_chunks_destroy(lines);
   }
-  return 0;
+  return nullptr;
 }
 
 #endif  // _STUFFLIB_IO_H_INCLUDED

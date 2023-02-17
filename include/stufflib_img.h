@@ -6,14 +6,14 @@
 #include "stufflib_png.h"
 #include "stufflib_unionfind.h"
 
-int stufflib_img_segment_rgb(stufflib_png_image dst[const static 1],
-                             const stufflib_png_image src[const static 1],
-                             const size_t threshold_percent) {
-  int ok = 0;
+bool stufflib_img_segment_rgb(stufflib_png_image dst[const static 1],
+                              const stufflib_png_image src[const static 1],
+                              const size_t threshold_percent) {
+  bool ok = false;
 
   stufflib_unionfind segments = {0};
-  size_t* segment_sizes = 0;
-  double* segment_sums = 0;
+  size_t* segment_sizes = nullptr;
+  double* segment_sums = nullptr;
 
   // padded
   const size_t width = src->header.width + 2;
@@ -135,7 +135,7 @@ int stufflib_img_segment_rgb(stufflib_png_image dst[const static 1],
     }
   }
 
-  ok = 1;
+  ok = true;
 
 done:
   stufflib_unionfind_destroy(&segments);

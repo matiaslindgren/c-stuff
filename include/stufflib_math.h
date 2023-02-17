@@ -10,9 +10,9 @@ double stufflib_math_diff(stufflib_math_function* f, double x) {
   return (f(x + h) - f(x)) / h;
 }
 
-int stufflib_math_double_almost(const double lhs,
-                                const double rhs,
-                                const double eps) {
+bool stufflib_math_double_almost(const double lhs,
+                                 const double rhs,
+                                 const double eps) {
   // TODO improve, test around 0 within [-eps, eps]
   return fabs(lhs - rhs) < eps;
 }
@@ -29,13 +29,13 @@ size_t stufflib_math_next_power_of_two(const size_t x1) {
   return x2;
 }
 
-int stufflib_math_is_prime(size_t x) {
+bool stufflib_math_is_prime(size_t x) {
   for (size_t i = 2; i * i < x; ++i) {
     if (x % i == 0) {
-      return 0;
+      return false;
     }
   }
-  return 1;
+  return true;
 }
 
 size_t stufflib_math_next_prime(size_t x) {
@@ -48,13 +48,13 @@ size_t stufflib_math_next_prime(size_t x) {
 
 size_t* stufflib_math_factorize(size_t n) {
   if (n == 0 || n == 1) {
-    return 0;
+    return nullptr;
   }
 
   size_t capacity = 4;
   size_t* factors = calloc(capacity, sizeof(size_t));
   if (!factors) {
-    return 0;
+    return nullptr;
   }
 
   size_t num_factors = 0;
@@ -92,7 +92,7 @@ size_t* stufflib_math_factorize(size_t n) {
 
 error:
   free(factors);
-  return 0;
+  return nullptr;
 }
 
 double* stufflib_math_linalg_scalar_vmul(const double a,

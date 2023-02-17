@@ -5,17 +5,17 @@ int _check_roots(const stufflib_unionfind uf, size_t expected_roots[static 1]) {
   for (size_t i = 0; i < uf.count; ++i) {
     const size_t root = stufflib_unionfind_find_root(&uf, i);
     if (root != expected_roots[i]) {
-      return 0;
+      return false;
     }
   }
-  return 1;
+  return true;
 }
 
-int test_union_until_single_set(const int verbose) {
+bool test_union_until_single_set(const bool verbose) {
   stufflib_unionfind uf = {0};
   if (!stufflib_unionfind_init(&uf, 10)) {
     STUFFLIB_PRINT_ERROR("unable to allocate union find structure");
-    return 0;
+    return false;
   }
 
   size_t expected_roots[10] = {0};
@@ -73,14 +73,14 @@ int test_union_until_single_set(const int verbose) {
   assert(_check_roots(uf, expected_roots));
 
   stufflib_unionfind_destroy(&uf);
-  return 1;
+  return true;
 }
 
-int test_union_self(const int verbose) {
+bool test_union_self(const bool verbose) {
   stufflib_unionfind uf = {0};
   if (!stufflib_unionfind_init(&uf, 3)) {
     STUFFLIB_PRINT_ERROR("unable to allocate union find structure");
-    return 0;
+    return false;
   }
 
   size_t expected_roots[3] = {0};
@@ -112,7 +112,7 @@ int test_union_self(const int verbose) {
   assert(_check_roots(uf, expected_roots));
 
   stufflib_unionfind_destroy(&uf);
-  return 1;
+  return true;
 }
 
 STUFFLIB_TEST_MAIN(test_union_until_single_set, test_union_self)

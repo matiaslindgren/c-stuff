@@ -5,34 +5,34 @@
 #include "stufflib_str.h"
 #include "stufflib_test.h"
 
-int test_no_splits(const int verbose) {
+bool test_no_splits(const bool verbose) {
   char** chunks = stufflib_str_split("abc", " ");
   assert(strcmp(chunks[0], "abc") == 0);
   assert(chunks[1] == 0);
   stufflib_str_chunks_destroy(chunks);
-  return 1;
+  return true;
 }
 
-int test_1_split(const int verbose) {
+bool test_1_split(const bool verbose) {
   char** chunks = stufflib_str_split("abc", "b");
   assert(strcmp(chunks[0], "a") == 0);
   assert(strcmp(chunks[1], "c") == 0);
   assert(chunks[2] == 0);
   stufflib_str_chunks_destroy(chunks);
-  return 1;
+  return true;
 }
 
-int test_2_splits(const int verbose) {
+bool test_2_splits(const bool verbose) {
   char** chunks = stufflib_str_split("1\n2\n3", "\n");
   assert(strcmp(chunks[0], "1") == 0);
   assert(strcmp(chunks[1], "2") == 0);
   assert(strcmp(chunks[2], "3") == 0);
   assert(chunks[3] == 0);
   stufflib_str_chunks_destroy(chunks);
-  return 1;
+  return true;
 }
 
-int test_slice(const int verbose) {
+bool test_slice(const bool verbose) {
   char* chunks[] = {
       "one",
       "two",
@@ -88,10 +88,10 @@ int test_slice(const int verbose) {
     stufflib_str_chunks_destroy(slice);
   }
 
-  return 1;
+  return true;
 }
 
-int test_split_set(const int verbose) {
+bool test_split_set(const bool verbose) {
   char** chunks = stufflib_str_split_any("abcdeefgghhiiikkij",
                                          4,
                                          (const char*[]){"c", "e", "f", "i"});
@@ -103,10 +103,10 @@ int test_split_set(const int verbose) {
   }
   assert(chunks[num_chunks] == 0);
   stufflib_str_chunks_destroy(chunks);
-  return 1;
+  return true;
 }
 
-int test_split_whitespace(const int verbose) {
+bool test_split_whitespace(const bool verbose) {
   char** chunks =
       stufflib_str_split_whitespace("ab c\td  e \t\t f\ng\n\nhi\n\nj k \tl");
   const char* expected[] = {
@@ -135,7 +135,7 @@ int test_split_whitespace(const int verbose) {
   }
   assert(chunks[num_chunks] == 0);
   stufflib_str_chunks_destroy(chunks);
-  return 1;
+  return true;
 }
 
 STUFFLIB_TEST_MAIN(test_no_splits,

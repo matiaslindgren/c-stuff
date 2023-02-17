@@ -5,15 +5,15 @@
 #include "stufflib_io.h"
 #include "stufflib_test.h"
 
-int test_file_size(const int verbose) {
+bool test_file_size(const bool verbose) {
   assert(stufflib_io_file_size("./test-data/empty") == 0);
   assert(stufflib_io_file_size("./test-data/one.txt") == 1);
   assert(stufflib_io_file_size("./test-data/hello.txt") == 11);
   assert(stufflib_io_file_size("./test-data/asan.png") == 24733);
-  return 1;
+  return true;
 }
 
-int test_file_slurp(const int verbose) {
+bool test_file_slurp(const bool verbose) {
   {
     char* const str = stufflib_io_slurp_file("./test-data/empty");
     assert(strcmp(str, "") == 0);
@@ -29,7 +29,7 @@ int test_file_slurp(const int verbose) {
     assert(strcmp(str, "hello\nthere") == 0);
     free(str);
   }
-  return 1;
+  return true;
 }
 
 STUFFLIB_TEST_MAIN(test_file_size, test_file_slurp)

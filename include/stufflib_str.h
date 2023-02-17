@@ -48,7 +48,7 @@ error:
   if (dst_chunks) {
     stufflib_str_chunks_destroy(dst_chunks);
   }
-  return 0;
+  return nullptr;
 }
 
 // TODO flat
@@ -59,7 +59,7 @@ char** stufflib_str_split_any(const char str[const static 1],
     assert(strlen(separators[i]));
   }
 
-  char** chunks = 0;
+  char** chunks = nullptr;
   size_t num_chunks = 0;
 
   for (const char* chunk = str; chunk;) {
@@ -74,7 +74,7 @@ char** stufflib_str_split_any(const char str[const static 1],
     }
     chunks[num_chunks + 1] = 0;
 
-    const char* chunk_end = 0;
+    const char* chunk_end = nullptr;
     size_t min_chunk_len = SIZE_MAX;
     size_t separator_len = 0;
     for (size_t i = 0; i < num_separators; ++i) {
@@ -105,7 +105,7 @@ char** stufflib_str_split_any(const char str[const static 1],
 
 error:
   stufflib_str_chunks_destroy(chunks);
-  return 0;
+  return nullptr;
 }
 
 char** stufflib_str_split(const char str[const static 1],

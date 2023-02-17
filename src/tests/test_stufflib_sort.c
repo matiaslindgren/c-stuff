@@ -9,7 +9,7 @@
 #include "stufflib_sort.h"
 #include "stufflib_test.h"
 
-int test_compare_doubles(const int verbose) {
+bool test_compare_doubles(const bool verbose) {
   (void)verbose;
   double* a = calloc(2, sizeof(double));
   double* b = calloc(2, sizeof(double));
@@ -35,10 +35,10 @@ int test_compare_doubles(const int verbose) {
 
   free(a);
   free(b);
-  return 1;
+  return true;
 }
 
-int test_sort_doubles(stufflib_sort_double* sort_doubles, const int verbose) {
+bool test_sort_doubles(stufflib_sort_double* sort_doubles, const bool verbose) {
   const size_t num_tests_per_size = 5;
   const size_t array_sizes[] = {1, 2, 10, 1000, 10000, 100000};
 
@@ -48,7 +48,7 @@ int test_sort_doubles(stufflib_sort_double* sort_doubles, const int verbose) {
     double* x = calloc(n, sizeof(double));
     if (!x) {
       fprintf(stderr, "failed allocating memory for test data of len %zu\n", n);
-      return 0;
+      return false;
     }
 
     for (size_t test = 0; test < num_tests_per_size; ++test) {
@@ -59,7 +59,7 @@ int test_sort_doubles(stufflib_sort_double* sort_doubles, const int verbose) {
       if (!sort_doubles(n, x)) {
         fprintf(stderr, "sort failed\n");
         free(x);
-        return 0;
+        return false;
       }
       clock_t end_time = clock();
       double sort_msec =
@@ -69,7 +69,7 @@ int test_sort_doubles(stufflib_sort_double* sort_doubles, const int verbose) {
         if (x[i - 1] > x[i]) {
           fprintf(stderr, "array of %zu doubles is not sorted after sort\n", n);
           free(x);
-          return 0;
+          return false;
         }
       }
 
@@ -81,7 +81,7 @@ int test_sort_doubles(stufflib_sort_double* sort_doubles, const int verbose) {
     free(x);
   }
 
-  return 1;
+  return true;
 }
 
 double* _stdlib_qsort_double(const size_t count, double src[count]) {
@@ -89,28 +89,28 @@ double* _stdlib_qsort_double(const size_t count, double src[count]) {
   return src;
 }
 
-int test_quicksort_doubles(const int verbose) {
+bool test_quicksort_doubles(const bool verbose) {
   if (verbose) {
     printf("test quicksort doubles\n");
   }
   return test_sort_doubles(stufflib_sort_quicksort_double, verbose);
 }
 
-int test_mergesort_doubles(const int verbose) {
+bool test_mergesort_doubles(const bool verbose) {
   if (verbose) {
     printf("test mergesort doubles\n");
   }
   return test_sort_doubles(stufflib_sort_mergesort_double, verbose);
 }
 
-int test_qsort_doubles(const int verbose) {
+bool test_qsort_doubles(const bool verbose) {
   if (verbose) {
     printf("test stdlib qsort doubles\n");
   }
   return test_sort_doubles(_stdlib_qsort_double, verbose);
 }
 
-int test_compare_strings(const int verbose) {
+bool test_compare_strings(const bool verbose) {
   (void)verbose;
   const char* a[] = {"hello", "there"};
   const char* b[] = {"ok", " "};
@@ -130,10 +130,10 @@ int test_compare_strings(const int verbose) {
   assert(stufflib_sort_compare_str((void*)(&a[1]), (void*)(&b[0])) == 1);
   assert(stufflib_sort_compare_str((void*)(&a[1]), (void*)(&b[1])) == 1);
 
-  return 1;
+  return true;
 }
 
-int test_sort_strings(stufflib_sort_str* sort_strings, const int verbose) {
+bool test_sort_strings(stufflib_sort_str* sort_strings, const bool verbose) {
   const size_t n = 5;
 
   char** s = calloc(n, sizeof(char*));
@@ -147,7 +147,7 @@ int test_sort_strings(stufflib_sort_str* sort_strings, const int verbose) {
   if (!sort_strings(n, s)) {
     fprintf(stderr, "sort failed\n");
     free(s);
-    return 0;
+    return false;
   }
   clock_t end_time = clock();
   double sort_msec = 1e3 * ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
@@ -156,7 +156,7 @@ int test_sort_strings(stufflib_sort_str* sort_strings, const int verbose) {
     if (strcmp(s[i - 1], s[i]) > 0) {
       fprintf(stderr, "array of %zu strings is not sorted after sort\n", n);
       free(s);
-      return 0;
+      return false;
     }
   }
 
@@ -166,7 +166,7 @@ int test_sort_strings(stufflib_sort_str* sort_strings, const int verbose) {
   }
 
   free(s);
-  return 1;
+  return true;
 }
 
 char** _stdlib_qsort_str(const size_t count, char* src[count]) {
@@ -174,21 +174,21 @@ char** _stdlib_qsort_str(const size_t count, char* src[count]) {
   return src;
 }
 
-int test_quicksort_strings(const int verbose) {
+bool test_quicksort_strings(const bool verbose) {
   if (verbose) {
     printf("test quicksort strings\n");
   }
   return test_sort_strings(stufflib_sort_quicksort_str, verbose);
 }
 
-int test_mergesort_strings(const int verbose) {
+bool test_mergesort_strings(const bool verbose) {
   if (verbose) {
     printf("test mergesort strings\n");
   }
   return test_sort_strings(stufflib_sort_mergesort_str, verbose);
 }
 
-int test_qsort_strings(const int verbose) {
+bool test_qsort_strings(const bool verbose) {
   if (verbose) {
     printf("test stdlib qsort strings\n");
   }
@@ -216,8 +216,8 @@ int _compare_named_vec3(const void* a, const void* b) {
   return res;
 }
 
-int test_sort_named_vec3(_sort_named_vec3* _sort_named_vec3,
-                         const int verbose) {
+bool test_sort_named_vec3(_sort_named_vec3* _sort_named_vec3,
+                          const bool verbose) {
   _named_vec3 items[] = {
       {-1, 0,   0,  "f"},
       {-1, 0,   1,  "e"},
@@ -242,7 +242,7 @@ int test_sort_named_vec3(_sort_named_vec3* _sort_named_vec3,
   clock_t start_time = clock();
   if (!_sort_named_vec3(n, items)) {
     fprintf(stderr, "sort failed\n");
-    return 0;
+    return false;
   }
   clock_t end_time = clock();
   double sort_msec = 1e3 * ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
@@ -259,7 +259,7 @@ int test_sort_named_vec3(_sort_named_vec3* _sort_named_vec3,
     printf("%5zu %8zu %6.1f\n", test + 1, n, sort_msec);
   }
 
-  return 1;
+  return true;
 }
 
 _named_vec3* _mergesort_named_vec3s(const size_t count,
@@ -284,21 +284,21 @@ _named_vec3* _stdlib_qsort_named_vec3s(const size_t count,
   return src;
 }
 
-int test_quicksort_custom_obj(const int verbose) {
+bool test_quicksort_custom_obj(const bool verbose) {
   if (verbose) {
     printf("test quicksort custom_obj\n");
   }
   return test_sort_named_vec3(_quicksort_named_vec3s, verbose);
 }
 
-int test_mergesort_custom_obj(const int verbose) {
+bool test_mergesort_custom_obj(const bool verbose) {
   if (verbose) {
     printf("test mergesort custom objects\n");
   }
   return test_sort_named_vec3(_mergesort_named_vec3s, verbose);
 }
 
-int test_qsort_custom_obj(const int verbose) {
+bool test_qsort_custom_obj(const bool verbose) {
   if (verbose) {
     printf("test stdlib qsort custom objects\n");
   }

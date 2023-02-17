@@ -5,14 +5,14 @@
 #include "stufflib_hashmap.h"
 #include "stufflib_text.h"
 
-int concat(const stufflib_args args[const static 1]) {
+bool concat(const stufflib_args args[const static 1]) {
   if (stufflib_args_count_positional(args) < 2) {
     STUFFLIB_PRINT_ERROR("too few arguments to concat");
-    return 0;
+    return false;
   }
 
-  int ok = 0;
-  stufflib_text* text = 0;
+  bool ok = false;
+  stufflib_text* text = nullptr;
 
   for (size_t i = 1;; ++i) {
     const char* path = stufflib_args_get_positional(args, i);
@@ -38,7 +38,7 @@ int concat(const stufflib_args args[const static 1]) {
     goto done;
   }
 
-  ok = 1;
+  ok = true;
 
 done:
   if (text) {
@@ -47,13 +47,13 @@ done:
   return ok;
 }
 
-int count(const stufflib_args args[const static 1]) {
+bool count(const stufflib_args args[const static 1]) {
   if (stufflib_args_count_positional(args) != 3) {
     STUFFLIB_PRINT_ERROR("too few arguments to count");
-    return 0;
+    return false;
   }
 
-  int ok = 0;
+  bool ok = false;
 
   const char* pattern = stufflib_args_get_positional(args, 1);
   const char* path = stufflib_args_get_positional(args, 2);
@@ -67,7 +67,7 @@ int count(const stufflib_args args[const static 1]) {
     goto done;
   }
 
-  ok = 1;
+  ok = true;
 
 done:
   if (text) {
@@ -76,13 +76,13 @@ done:
   return ok;
 }
 
-int replace(const stufflib_args args[const static 1]) {
+bool replace(const stufflib_args args[const static 1]) {
   if (stufflib_args_count_positional(args) != 4) {
     STUFFLIB_PRINT_ERROR("too few arguments to replace");
-    return 0;
+    return false;
   }
 
-  int ok = 0;
+  bool ok = false;
 
   const char* old_str = stufflib_args_get_positional(args, 1);
   const char* new_str = stufflib_args_get_positional(args, 2);
@@ -103,7 +103,7 @@ int replace(const stufflib_args args[const static 1]) {
     goto done;
   }
 
-  ok = 1;
+  ok = true;
 
 done:
   if (text) {
@@ -112,13 +112,13 @@ done:
   return ok;
 }
 
-int slicelines(const stufflib_args args[const static 1]) {
+bool slicelines(const stufflib_args args[const static 1]) {
   if (stufflib_args_count_positional(args) != 4) {
     STUFFLIB_PRINT_ERROR("too few arguments to slicelines");
-    return 0;
+    return false;
   }
 
-  int ok = 0;
+  bool ok = false;
 
   const size_t begin = strtoull(stufflib_args_get_positional(args, 1), 0, 10);
   const size_t end = strtoull(stufflib_args_get_positional(args, 2), 0, 10);
@@ -136,7 +136,7 @@ int slicelines(const stufflib_args args[const static 1]) {
     }
   }
 
-  ok = 1;
+  ok = true;
 
 done:
   if (lines) {
@@ -145,15 +145,15 @@ done:
   return ok;
 }
 
-int count_words(const stufflib_args args[const static 1]) {
+bool count_words(const stufflib_args args[const static 1]) {
   if (stufflib_args_count_positional(args) != 2) {
     STUFFLIB_PRINT_ERROR("too few arguments to count_words");
-    return 0;
+    return false;
   }
 
-  int ok = 0;
-  char* file_content = 0;
-  char** words = 0;
+  bool ok = false;
+  char* file_content = nullptr;
+  char** words = nullptr;
   stufflib_hashmap word_counts = {0};
 
   const char* path = stufflib_args_get_positional(args, 1);
@@ -188,7 +188,7 @@ int count_words(const stufflib_args args[const static 1]) {
     }
   }
 
-  ok = 1;
+  ok = true;
 
 done:
   if (file_content) {
@@ -224,7 +224,7 @@ void print_usage(const stufflib_args args[const static 1]) {
 
 int main(int argc, char* const argv[argc + 1]) {
   stufflib_args args = stufflib_args_from_argv(argc, argv);
-  int ok = 0;
+  bool ok = false;
   const char* command = stufflib_args_get_positional(&args, 0);
   if (command) {
     if (strcmp(command, "concat") == 0) {

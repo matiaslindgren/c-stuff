@@ -7,13 +7,13 @@
 #include "stufflib_macros.h"
 #include "stufflib_png.h"
 
-int segment(const stufflib_args args[const static 1]) {
+bool segment(const stufflib_args args[const static 1]) {
   if (stufflib_args_count_positional(args) != 3) {
     STUFFLIB_PRINT_ERROR("too few arguments to PNG segment");
-    return 0;
+    return false;
   }
 
-  int ok = 0;
+  bool ok = false;
 
   stufflib_png_image src = {0};
   stufflib_png_image dst = {0};
@@ -22,7 +22,7 @@ int segment(const stufflib_args args[const static 1]) {
   const char* const png_dst_path = stufflib_args_get_positional(args, 2);
   const size_t threshold_percent =
       stufflib_args_parse_uint(args, "--threshold-percent", 10);
-  const int verbose = stufflib_args_parse_flag(args, "-v");
+  const bool verbose = stufflib_args_parse_flag(args, "-v");
 
   if (verbose) {
     printf("read %s\n", png_src_path);
@@ -48,7 +48,7 @@ int segment(const stufflib_args args[const static 1]) {
     goto done;
   }
 
-  ok = 1;
+  ok = true;
 
 done:
   stufflib_png_image_destroy(src);
@@ -56,13 +56,13 @@ done:
   return ok;
 }
 
-int info(const stufflib_args args[const static 1]) {
+bool info(const stufflib_args args[const static 1]) {
   if (stufflib_args_count_positional(args) != 2) {
     STUFFLIB_PRINT_ERROR("too few arguments to PNG info");
-    return 0;
+    return false;
   }
 
-  int ok = 0;
+  bool ok = false;
 
   stufflib_png_chunks chunks = {0};
   stufflib_png_image img = {0};
@@ -79,7 +79,7 @@ int info(const stufflib_args args[const static 1]) {
 
   if (!stufflib_png_is_supported(header)) {
     printf("PNG contains unsupported features, not reading IDAT chunks\n");
-    ok = 1;
+    ok = true;
     goto done;
   }
 
@@ -88,7 +88,7 @@ int info(const stufflib_args args[const static 1]) {
   stufflib_png_dump_img_data_info(stdout, img);
   printf("FILTERS:\n");
   stufflib_png_dump_filter_freq(stdout, img.filter);
-  ok = 1;
+  ok = true;
 
 done:
   stufflib_png_chunks_destroy(chunks);
@@ -96,13 +96,13 @@ done:
   return ok;
 }
 
-int dump_raw(const stufflib_args args[const static 1]) {
+bool dump_raw(const stufflib_args args[const static 1]) {
   if (stufflib_args_count_positional(args) < 3) {
     STUFFLIB_PRINT_ERROR("too few arguments to PNG dump_raw");
-    return 0;
+    return false;
   }
 
-  int ok = 0;
+  bool ok = false;
 
   const char* const png_path = stufflib_args_get_positional(args, 1);
   stufflib_png_chunks img_chunks = stufflib_png_read_chunks(png_path);
@@ -128,7 +128,7 @@ int dump_raw(const stufflib_args args[const static 1]) {
     }
   }
 
-  ok = 1;
+  ok = true;
 
 done:
   stufflib_png_chunks_destroy(img_chunks);
@@ -153,7 +153,7 @@ void print_usage(const stufflib_args args[const static 1]) {
 
 int main(int argc, char* const argv[argc + 1]) {
   stufflib_args args = stufflib_args_from_argv(argc, argv);
-  int ok = 0;
+  bool ok = false;
   const char* command = stufflib_args_get_positional(&args, 0);
   if (command) {
     if (strcmp(command, "segment") == 0) {

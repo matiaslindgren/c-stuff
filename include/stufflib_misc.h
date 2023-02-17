@@ -76,14 +76,14 @@ stufflib_data stufflib_misc_data_new(const size_t size) {
   };
 }
 
-int stufflib_misc_data_copy(stufflib_data dst[restrict static 1],
-                            const stufflib_data src[restrict static 1]) {
+bool stufflib_misc_data_copy(stufflib_data dst[restrict static 1],
+                             const stufflib_data src[restrict static 1]) {
   *dst = stufflib_misc_data_new(src->size);
   if (!dst->size) {
-    return 0;
+    return false;
   }
   memcpy(dst->data, src->data, dst->size);
-  return 1;
+  return true;
 }
 
 void stufflib_misc_data_destroy(stufflib_data data[static 1]) {
@@ -95,7 +95,7 @@ stufflib_data* stufflib_misc_concat(stufflib_data dst[static 1],
                                     const stufflib_data src[static 1]) {
   unsigned char* tmp = realloc(dst->data, dst->size + src->size);
   if (!tmp) {
-    return 0;
+    return nullptr;
   }
   dst->data = tmp;
   memcpy(dst->data + dst->size, src->data, src->size);

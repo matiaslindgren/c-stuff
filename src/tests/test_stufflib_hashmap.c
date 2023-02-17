@@ -5,7 +5,7 @@
 #include "stufflib_macros.h"
 #include "stufflib_test.h"
 
-int test_empty(const int verbose) {
+bool test_empty(const bool verbose) {
   stufflib_hashmap* map = stufflib_hashmap_init(&(stufflib_hashmap){0}, 0);
   assert(map);
   assert(map->size == 0);
@@ -26,10 +26,10 @@ int test_empty(const int verbose) {
   }
 
   stufflib_hashmap_destroy(map);
-  return 1;
+  return true;
 }
 
-int test_insert_single_element(const int verbose) {
+bool test_insert_single_element(const bool verbose) {
   stufflib_hashmap* map = stufflib_hashmap_init(&(stufflib_hashmap){0}, 1);
   assert(map);
   assert(map->size == 0);
@@ -50,10 +50,10 @@ int test_insert_single_element(const int verbose) {
   assert(stufflib_hashmap_get(map, "hello")->value == 1);
 
   stufflib_hashmap_destroy(map);
-  return 1;
+  return true;
 }
 
-int test_insert_two_elements_resizes(const int verbose) {
+bool test_insert_two_elements_resizes(const bool verbose) {
   stufflib_hashmap* map = stufflib_hashmap_init(&(stufflib_hashmap){0}, 1);
   assert(map);
 
@@ -71,10 +71,10 @@ int test_insert_two_elements_resizes(const int verbose) {
   assert(map->capacity == 4);
 
   stufflib_hashmap_destroy(map);
-  return 1;
+  return true;
 }
 
-int test_update_single_element(const int verbose) {
+bool test_update_single_element(const bool verbose) {
   stufflib_hashmap* map = stufflib_hashmap_init(&(stufflib_hashmap){0}, 1);
   assert(map);
 
@@ -88,10 +88,10 @@ int test_update_single_element(const int verbose) {
   assert(stufflib_hashmap_get(map, "hello")->value == 10);
 
   stufflib_hashmap_destroy(map);
-  return 1;
+  return true;
 }
 
-int test_multiple_resizes_retain_nodes(const int verbose) {
+bool test_multiple_resizes_retain_nodes(const bool verbose) {
   stufflib_hashmap* map = stufflib_hashmap_init(&(stufflib_hashmap){0}, 1);
   assert(map);
   const char* keys[] = {
@@ -148,7 +148,7 @@ int test_multiple_resizes_retain_nodes(const int verbose) {
   assert(map->size == n);
   assert(map->capacity == expected_capacities[n]);
   stufflib_hashmap_destroy(map);
-  return 1;
+  return true;
 }
 
 STUFFLIB_TEST_MAIN(test_empty,

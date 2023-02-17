@@ -150,16 +150,16 @@ void stufflib_png_image_destroy(stufflib_png_image image) {
   stufflib_misc_data_destroy(&image.filter);
 }
 
-int stufflib_png_image_copy(stufflib_png_image dst[restrict static 1],
-                            const stufflib_png_image src[restrict static 1]) {
+bool stufflib_png_image_copy(stufflib_png_image dst[restrict static 1],
+                             const stufflib_png_image src[restrict static 1]) {
   dst->header = src->header;
   if (!stufflib_misc_data_copy(&dst->data, &src->data)) {
-    return 0;
+    return false;
   }
   if (!stufflib_misc_data_copy(&dst->filter, &src->filter)) {
-    return 0;
+    return false;
   }
-  return 1;
+  return true;
 }
 
 unsigned char* stufflib_png_image_get_pixel(
@@ -182,7 +182,7 @@ void stufflib_png_image_set_pixel(stufflib_png_image image[static 1],
          stufflib_png_bytes_per_pixel[image->header.color_type]);
 }
 
-int stufflib_png_is_supported(const stufflib_png_header header) {
+bool stufflib_png_is_supported(const stufflib_png_header header) {
   return (header.compression == 0 && header.filter == 0 &&
           header.interlace == 0 &&
           (header.color_type == stufflib_png_rgb ||
@@ -345,7 +345,7 @@ uint32_t stufflib_png_chunk_compute_crc32(
   return crc32_chunk ^ 0xffffffff;
 }
 
-int stufflib_png_has_signature(const unsigned char buf[const static 8]) {
+bool stufflib_png_has_signature(const unsigned char buf[const static 8]) {
   return buf[0] == 0x89 && buf[1] == 0x50 && buf[2] == 0x4e && buf[3] == 0x47 &&
          buf[4] == 0x0d && buf[5] == 0x0a && buf[6] == 0x1a && buf[7] == 0x0a;
 }
@@ -353,10 +353,10 @@ int stufflib_png_has_signature(const unsigned char buf[const static 8]) {
 stufflib_png_chunks stufflib_png_read_n_chunks(
     const char filename[const static 1],
     const size_t count) {
-  int ok = 0;
+  bool ok = false;
 
-  FILE* fp = 0;
-  stufflib_png_chunk* chunks = 0;
+  FILE* fp = nullptr;
+  stufflib_png_chunk* chunks = nullptr;
 
   fp = fopen(filename, "r");
   if (!fp) {
@@ -403,7 +403,7 @@ stufflib_png_chunks stufflib_png_read_n_chunks(
     chunks[read_count++] = chunk;
   }
 
-  ok = 1;
+  ok = true;
 
 done:
   if (fp) {
@@ -478,7 +478,8 @@ error:
   return (stufflib_data){0};
 }
 
-int stufflib_png_unpack_and_pad_image_data(stufflib_png_image image[static 1]) {
+bool stufflib_png_unpack_and_pad_image_data(
+    stufflib_png_image image[static 1]) {
   stufflib_data filter = {0};
   stufflib_data padded = {0};
 
@@ -514,15 +515,15 @@ int stufflib_png_unpack_and_pad_image_data(stufflib_png_image image[static 1]) {
   image->filter = filter;
   stufflib_misc_data_destroy(&image->data);
   image->data = padded;
-  return 1;
+  return true;
 
 error:
   stufflib_misc_data_destroy(&filter);
   stufflib_misc_data_destroy(&padded);
-  return 0;
+  return false;
 }
 
-int stufflib_png_unapply_filter(stufflib_png_image image[static 1]) {
+bool stufflib_png_unapply_filter(stufflib_png_image image[static 1]) {
   const size_t width = image->header.width;
   const size_t height = image->header.height;
   const size_t bytes_per_px =
@@ -571,13 +572,13 @@ int stufflib_png_unapply_filter(stufflib_png_image image[static 1]) {
           default: {
             STUFFLIB_PRINT_ERROR("filter not implemented %s",
                                  stufflib_png_filter_types[filter]);
-            return 0;
+            return false;
           } break;
         }
       }
     }
   }
-  return 1;
+  return true;
 }
 
 stufflib_png_image stufflib_png_read_image(
@@ -646,15 +647,15 @@ error:
   return (stufflib_png_image){0};
 }
 
-int stufflib_png_chunk_fwrite_header(FILE stream[const static 1],
-                                     const stufflib_png_header header) {
+bool stufflib_png_chunk_fwrite_header(FILE stream[const static 1],
+                                      const stufflib_png_header header) {
   const unsigned char png_signature[8] = {137, 80, 78, 71, 13, 10, 26, 10};
   if (fwrite(png_signature, 1, 8, stream) != 8) {
-    return 0;
+    return false;
   }
   const unsigned char chunk_len[] = {0, 0, 0, 0xd};
   if (fwrite(chunk_len, 1, 4, stream) != 4) {
-    return 0;
+    return false;
   }
   unsigned char ihdr_data[4 + 13] = {0};
   memcpy(ihdr_data, "IHDR", 4);
@@ -670,35 +671,35 @@ int stufflib_png_chunk_fwrite_header(FILE stream[const static 1],
   memcpy(ihdr_data + 15, &header.filter, 1);
   memcpy(ihdr_data + 16, &header.interlace, 1);
   if (fwrite(ihdr_data, 1, 17, stream) != 17) {
-    return 0;
+    return false;
   }
   const unsigned char* crc32 = stufflib_misc_encode_big_endian(
       4,
       (unsigned char[4]){0},
       stufflib_hash_crc32_bytes(STUFFLIB_ARRAY_LEN(ihdr_data), ihdr_data));
   if (fwrite(crc32, 1, 4, stream) != 4) {
-    return 0;
+    return false;
   }
-  return 1;
+  return true;
 }
 
-int stufflib_png_chunk_fwrite(FILE stream[const static 1],
-                              const char chunk_type[const static 1],
-                              const stufflib_data data[const static 1]) {
+bool stufflib_png_chunk_fwrite(FILE stream[const static 1],
+                               const char chunk_type[const static 1],
+                               const stufflib_data data[const static 1]) {
   if (data->size > ((size_t)1 << 31)) {
     STUFFLIB_PRINT_ERROR("will not write too large %s chunk of size %zu",
                          chunk_type,
                          data->size);
-    return 0;
+    return false;
   }
   stufflib_data crc_data = stufflib_misc_data_new(data->size + 4);
   if (!crc_data.size) {
     STUFFLIB_PRINT_ERROR("failed allocating CRC32 buffer for %s chunk",
                          chunk_type);
-    return 0;
+    return false;
   }
 
-  int ok = 0;
+  bool ok = false;
 
   const unsigned char* chunk_len =
       stufflib_misc_encode_big_endian(4, (unsigned char[4]){0}, data->size);
@@ -723,19 +724,19 @@ int stufflib_png_chunk_fwrite(FILE stream[const static 1],
     goto done;
   }
 
-  ok = 1;
+  ok = true;
 
 done:
   stufflib_misc_data_destroy(&crc_data);
   return ok;
 }
 
-int stufflib_png_write_image(const stufflib_png_image image,
-                             const char filename[const static 1]) {
-  int write_ok = 0;
+bool stufflib_png_write_image(const stufflib_png_image image,
+                              const char filename[const static 1]) {
+  bool write_ok = false;
   stufflib_data packed_data = {0};
   stufflib_data idat = {0};
-  FILE* fp = 0;
+  FILE* fp = nullptr;
 
   fp = fopen(filename, "w");
   if (!fp) {
@@ -769,7 +770,7 @@ int stufflib_png_write_image(const stufflib_png_image image,
     goto done;
   }
 
-  write_ok = 1;
+  write_ok = true;
 
 done:
   if (fp) {

@@ -4,7 +4,7 @@
 #include "stufflib_misc.h"
 #include "stufflib_test.h"
 
-int test_single_byte(const int verbose) {
+bool test_single_byte(const bool verbose) {
   for (uint8_t i = 0; i < 10; ++i) {
     unsigned char data[] = {
         i,
@@ -24,10 +24,10 @@ int test_single_byte(const int verbose) {
     }[i];
     assert(crc32 == expected);
   }
-  return 1;
+  return true;
 }
 
-int test_two_bytes_big_endian(const int verbose) {
+bool test_two_bytes_big_endian(const bool verbose) {
   for (uint16_t i = 0x100; i < 0x100 + 10; ++i) {
     unsigned char data[] = {
         (i & 0xff00) >> 8,
@@ -48,10 +48,10 @@ int test_two_bytes_big_endian(const int verbose) {
     }[i - 0x100];
     assert(crc32 == expected);
   }
-  return 1;
+  return true;
 }
 
-int test_small_strings(const int verbose) {
+bool test_small_strings(const bool verbose) {
   const char* inputs[] = {
       "",
       "0",
@@ -74,7 +74,7 @@ int test_small_strings(const int verbose) {
     }[i];
     assert(crc32 == expected);
   }
-  return 1;
+  return true;
 }
 
 STUFFLIB_TEST_MAIN(test_single_byte,

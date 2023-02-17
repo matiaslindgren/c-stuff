@@ -161,7 +161,7 @@ static void _inflate_block(
     _deflate_state state[static 1]) {
   const size_t end_of_block = 256;
 
-  while (1) {
+  while (true) {
     const size_t symbol = _decode_next_code(literal_tree, state);
     if (symbol < end_of_block) {
       assert(state->dst_pos < state->dst.size);
@@ -191,7 +191,7 @@ static void _inflate_block(
   }
 }
 
-int stufflib_inflate_uncompressed_block(_deflate_state state[static 1]) {
+bool stufflib_inflate_uncompressed_block(_deflate_state state[static 1]) {
   size_t src_byte_pos = state->src_bit / CHAR_BIT + 1;
   const size_t block_len =
       stufflib_misc_parse_lil_endian(2, state->src.data + src_byte_pos);
@@ -203,11 +203,11 @@ int stufflib_inflate_uncompressed_block(_deflate_state state[static 1]) {
 
   if ((~block_len & STUFFLIB_ONES(2)) != block_len_check) {
     STUFFLIB_PRINT_ERROR("corrupted zlib block, ~LEN != NLEN");
-    return 0;
+    return false;
   }
   if (block_len > state->src.size - src_byte_pos) {
     STUFFLIB_PRINT_ERROR("corrupted zlib block, LEN too large");
-    return 0;
+    return false;
   }
 
   memcpy(state->dst.data + state->dst_pos,
@@ -218,10 +218,10 @@ int stufflib_inflate_uncompressed_block(_deflate_state state[static 1]) {
   state->dst_pos += block_len;
   state->src_bit = src_byte_pos * CHAR_BIT;
 
-  return 1;
+  return true;
 }
 
-int stufflib_inflate_dynamic_block(_deflate_state state[static 1]) {
+bool stufflib_inflate_dynamic_block(_deflate_state state[static 1]) {
   const size_t num_lengths = 257 + _next_n_bits(state, 5);
   const size_t num_distances = 1 + _next_n_bits(state, 5);
   const size_t num_length_lengths = 4 + _next_n_bits(state, 4);
@@ -298,19 +298,19 @@ int stufflib_inflate_dynamic_block(_deflate_state state[static 1]) {
   _inflate_block(&literal_tree, &distance_tree, state);
   stufflib_huffman_destroy(&literal_tree);
   stufflib_huffman_destroy(&distance_tree);
-  return 1;
+  return true;
 
 error:
-  return 0;
+  return false;
 }
 
-int stufflib_inflate_fixed_block(_deflate_state state[static 1]) {
+bool stufflib_inflate_fixed_block(_deflate_state state[static 1]) {
   stufflib_huffman_tree literal_tree = _make_fixed_literal_tree();
   stufflib_huffman_tree distance_tree = _make_fixed_distance_tree();
   _inflate_block(&literal_tree, &distance_tree, state);
   stufflib_huffman_destroy(&literal_tree);
   stufflib_huffman_destroy(&distance_tree);
-  return 1;
+  return true;
 }
 
 size_t stufflib_inflate(stufflib_data dst, const stufflib_data src) {
@@ -347,8 +347,8 @@ size_t stufflib_inflate(stufflib_data dst, const stufflib_data src) {
       .src_bit = 2 * CHAR_BIT,
   };
 
-  for (int is_final_block = 0; !is_final_block;) {
-    is_final_block = _next_bit(state);
+  for (bool is_final_block = false; !is_final_block;) {
+    is_final_block = (bool)_next_bit(state);
     enum block_type {
       no_compression = 0,
       fixed_huffman_trees = 1,
@@ -412,10 +412,10 @@ size_t stufflib_deflate_uncompressed(stufflib_data dst,
   dst.data[dst_pos++] = cmf;
   dst.data[dst_pos++] = 31 - (cmf * 256) % 31;
 
-  for (int is_final_block = 0; !is_final_block;) {
+  for (bool is_final_block = false; !is_final_block;) {
     assert(src_pos < src.size);
-    is_final_block = src_pos + block_size >= src.size;
-    dst.data[dst_pos++] = is_final_block & 1;
+    is_final_block = (src_pos + block_size) >= src.size;
+    dst.data[dst_pos++] = (int)is_final_block & 1;
 
     const size_t dist_to_end = src.size - src_pos;
     const uint16_t block_len =

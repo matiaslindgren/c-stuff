@@ -4,7 +4,7 @@
 #include "stufflib_args.h"
 #include "stufflib_test.h"
 
-int test_parse_positional(const int verbose) {
+bool test_parse_positional(const bool verbose) {
   char* const argv[] = {
       "bin/path",
       "arg1",
@@ -24,10 +24,10 @@ int test_parse_positional(const int verbose) {
   assert(stufflib_args_count_positional(&args) == 1);
 
   stufflib_args_destroy(&args);
-  return 1;
+  return true;
 }
 
-int test_parse_one_flag(const int verbose) {
+bool test_parse_one_flag(const bool verbose) {
   char* const argv[] = {
       "bin/path",
       "-x",
@@ -62,10 +62,10 @@ int test_parse_one_flag(const int verbose) {
   assert(stufflib_args_count_positional(&args) == 0);
 
   stufflib_args_destroy(&args);
-  return 1;
+  return true;
 }
 
-int test_parse_positional_after_optional(const int verbose) {
+bool test_parse_positional_after_optional(const bool verbose) {
   char* const argv[] = {
       "bin/path",
       "-v",
@@ -90,10 +90,10 @@ int test_parse_positional_after_optional(const int verbose) {
   assert(stufflib_args_count_positional(&args) == 1);
 
   stufflib_args_destroy(&args);
-  return 1;
+  return true;
 }
 
-int test_parse_two_flags(const int verbose) {
+bool test_parse_two_flags(const bool verbose) {
   char* const argv[] = {
       "bin/path",
       "-w",
@@ -133,10 +133,10 @@ int test_parse_two_flags(const int verbose) {
   assert(stufflib_args_count_positional(&args) == 0);
 
   stufflib_args_destroy(&args);
-  return 1;
+  return true;
 }
 
-int test_parse_uint(const int verbose) {
+bool test_parse_uint(const bool verbose) {
   char* const argv[] = {
       "bin/path",
       "-w=1",
@@ -183,7 +183,7 @@ int test_parse_uint(const int verbose) {
   assert(stufflib_args_count_positional(&args) == 0);
 
   stufflib_args_destroy(&args);
-  return 1;
+  return true;
 }
 
 STUFFLIB_TEST_MAIN(test_parse_positional,

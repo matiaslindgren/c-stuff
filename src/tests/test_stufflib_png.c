@@ -5,7 +5,7 @@
 #include "stufflib_png.h"
 #include "stufflib_test.h"
 
-int test_read_single_pixel_chunks(const int verbose) {
+bool test_read_single_pixel_chunks(const bool verbose) {
   for (size_t i = 0; i < 3; ++i) {
     const char* png_path = (const char*[]){
         "./test-data/ff0000-1x1-rgb-nocomp.png",
@@ -25,10 +25,10 @@ int test_read_single_pixel_chunks(const int verbose) {
     assert(chunks.chunks[2].data.size == 0);
     stufflib_png_chunks_destroy(chunks);
   }
-  return 1;
+  return true;
 }
 
-int test_read_large_image_with_many_chunks(const int verbose) {
+bool test_read_large_image_with_many_chunks(const bool verbose) {
   const char* png_path = "./test-data/asan.png";
   if (verbose) {
     printf("%s\n", png_path);
@@ -47,10 +47,10 @@ int test_read_large_image_with_many_chunks(const int verbose) {
   assert(chunks.chunks[i + 1].type == stufflib_png_IEND);
   assert(chunks.chunks[i + 1].data.size == 0);
   stufflib_png_chunks_destroy(chunks);
-  return 1;
+  return true;
 }
 
-int test_read_single_pixel_header(const int verbose) {
+bool test_read_single_pixel_header(const bool verbose) {
   for (size_t i = 0; i < 3; ++i) {
     const char* png_path = (const char*[]){
         "./test-data/ff0000-1x1-rgb-nocomp.png",
@@ -62,7 +62,7 @@ int test_read_single_pixel_header(const int verbose) {
     }
     stufflib_png_header pixel = stufflib_png_read_header(png_path);
     if (!pixel.width) {
-      return 0;
+      return false;
     }
     if (verbose) {
       stufflib_png_dump_header(stdout, pixel);
@@ -72,10 +72,10 @@ int test_read_single_pixel_header(const int verbose) {
     assert(pixel.bit_depth == 8);
     assert(pixel.color_type == stufflib_png_rgb);
   }
-  return 1;
+  return true;
 }
 
-int test_read_img_header(const int verbose) {
+bool test_read_img_header(const bool verbose) {
   {
     const char* png_path = "./test-data/white-square-rgba-dynamic.png";
     if (verbose) {
@@ -83,7 +83,7 @@ int test_read_img_header(const int verbose) {
     }
     stufflib_png_header white_square = stufflib_png_read_header(png_path);
     if (!white_square.width) {
-      return 0;
+      return false;
     }
     if (verbose) {
       stufflib_png_dump_header(stdout, white_square);
@@ -101,7 +101,7 @@ int test_read_img_header(const int verbose) {
     }
     stufflib_png_header github_squares = stufflib_png_read_header(png_path);
     if (!github_squares.width) {
-      return 0;
+      return false;
     }
     if (verbose) {
       stufflib_png_dump_header(stdout, github_squares);
@@ -119,7 +119,7 @@ int test_read_img_header(const int verbose) {
     }
     stufflib_png_header github_profile = stufflib_png_read_header(png_path);
     if (!github_profile.width) {
-      return 0;
+      return false;
     }
     if (verbose) {
       stufflib_png_dump_header(stdout, github_profile);
@@ -137,7 +137,7 @@ int test_read_img_header(const int verbose) {
     }
     stufflib_png_header asan = stufflib_png_read_header(png_path);
     if (!asan.width) {
-      return 0;
+      return false;
     }
     if (verbose) {
       stufflib_png_dump_header(stdout, asan);
@@ -148,19 +148,19 @@ int test_read_img_header(const int verbose) {
     assert(asan.color_type == stufflib_png_rgb);
   }
 
-  return 1;
+  return true;
 }
 
 static inline int _test_read_single_pixel(const char* png_path,
                                           const size_t on_index,
-                                          const int verbose) {
+                                          const bool verbose) {
   if (verbose) {
     printf("%s\n", png_path);
   }
   stufflib_png_image pixel = stufflib_png_read_image(png_path);
   if (!pixel.data.size) {
     STUFFLIB_PRINT_ERROR("failed reading PNG image %s", png_path);
-    return 0;
+    return false;
   }
   if (verbose) {
     stufflib_png_dump_img_meta(stdout, pixel);
@@ -178,10 +178,10 @@ static inline int _test_read_single_pixel(const char* png_path,
   }
 
   stufflib_png_image_destroy(pixel);
-  return 1;
+  return true;
 }
 
-int test_read_single_pixel_no_compression(const int verbose) {
+bool test_read_single_pixel_no_compression(const bool verbose) {
   for (size_t on_pixel = 0; on_pixel < 3; ++on_pixel) {
     const char* png_path = (const char*[]){
         "./test-data/ff0000-1x1-rgb-nocomp.png",
@@ -189,13 +189,13 @@ int test_read_single_pixel_no_compression(const int verbose) {
         "./test-data/0000ff-1x1-rgb-nocomp.png",
     }[on_pixel];
     if (!_test_read_single_pixel(png_path, on_pixel, verbose)) {
-      return 0;
+      return false;
     }
   }
-  return 1;
+  return true;
 }
 
-int test_read_single_pixel_with_fixed_compression(const int verbose) {
+bool test_read_single_pixel_with_fixed_compression(const bool verbose) {
   for (size_t on_pixel = 0; on_pixel < 3; ++on_pixel) {
     const char* png_path = (const char*[]){
         "./test-data/ff0000-1x1-rgb-fixed.png",
@@ -203,20 +203,20 @@ int test_read_single_pixel_with_fixed_compression(const int verbose) {
         "./test-data/0000ff-1x1-rgb-fixed.png",
     }[on_pixel];
     if (!_test_read_single_pixel(png_path, on_pixel, verbose)) {
-      return 0;
+      return false;
     }
   }
-  return 1;
+  return true;
 }
 
-int test_read_rgba_image_with_dynamic_compression(const int verbose) {
+bool test_read_rgba_image_with_dynamic_compression(const bool verbose) {
   const char* png_path = "./test-data/white-square-rgba-dynamic.png";
   if (verbose) {
     printf("%s\n", png_path);
   }
   stufflib_png_image white_square = stufflib_png_read_image(png_path);
   if (!white_square.data.size) {
-    return 0;
+    return false;
   }
   if (verbose) {
     stufflib_png_dump_img_meta(stdout, white_square);
@@ -239,10 +239,10 @@ int test_read_rgba_image_with_dynamic_compression(const int verbose) {
     }
   }
   stufflib_png_image_destroy(white_square);
-  return 1;
+  return true;
 }
 
-int test_read_small_images_with_dynamic_compression(const int verbose) {
+bool test_read_small_images_with_dynamic_compression(const bool verbose) {
   for (size_t i = 0; i < 3; ++i) {
     const char* png_path = (const char*[]){
         "./test-data/0099ee-80x160-rgb-dynamic.png",
@@ -260,7 +260,7 @@ int test_read_small_images_with_dynamic_compression(const int verbose) {
     stufflib_png_image img = stufflib_png_read_image(png_path);
     if (!img.data.size) {
       STUFFLIB_PRINT_ERROR("failed reading PNG image %s", png_path);
-      return 0;
+      return false;
     }
     if (verbose) {
       stufflib_png_dump_img_meta(stdout, img);
@@ -282,10 +282,10 @@ int test_read_small_images_with_dynamic_compression(const int verbose) {
     }
     stufflib_png_image_destroy(img);
   }
-  return 1;
+  return true;
 }
 
-int test_read_large_images_with_dynamic_compression(const int verbose) {
+bool test_read_large_images_with_dynamic_compression(const bool verbose) {
   {
     const char* png_path = "./test-data/aabbcc-1600x1600-rgb-dynamic.png";
     if (verbose) {
@@ -294,7 +294,7 @@ int test_read_large_images_with_dynamic_compression(const int verbose) {
     stufflib_png_image square = stufflib_png_read_image(png_path);
     if (!square.data.size) {
       STUFFLIB_PRINT_ERROR("failed reading PNG image %s", png_path);
-      return 0;
+      return false;
     }
     if (verbose) {
       stufflib_png_dump_img_meta(stdout, square);
@@ -324,7 +324,7 @@ int test_read_large_images_with_dynamic_compression(const int verbose) {
     stufflib_png_image asan = stufflib_png_read_image(png_path);
     if (!asan.data.size) {
       STUFFLIB_PRINT_ERROR("failed reading PNG image %s", png_path);
-      return 0;
+      return false;
     }
     if (verbose) {
       stufflib_png_dump_img_meta(stdout, asan);
@@ -339,17 +339,17 @@ int test_read_large_images_with_dynamic_compression(const int verbose) {
     assert(asan.data.size == 3 * (width + 2) * (height + 2));
     stufflib_png_image_destroy(asan);
   }
-  return 1;
+  return true;
 }
 
-int _test_read_write_read(const int verbose, const char* img0_path) {
+int _test_read_write_read(const bool verbose, const char* img0_path) {
   if (verbose) {
     printf("%s\n", img0_path);
   }
   stufflib_png_image img0 = stufflib_png_read_image(img0_path);
   if (!img0.data.size) {
     STUFFLIB_PRINT_ERROR("failed reading PNG image %s", img0_path);
-    return 0;
+    return false;
   }
   if (verbose) {
     stufflib_png_dump_img_meta(stdout, img0);
@@ -364,17 +364,17 @@ int _test_read_write_read(const int verbose, const char* img0_path) {
             img1.data.size,
             img0.data.size,
             img0_path);
-    return 0;
+    return false;
   }
   if (verbose) {
     stufflib_png_dump_img_meta(stdout, img1);
   }
   stufflib_png_image_destroy(img1);
   stufflib_png_image_destroy(img0);
-  return 1;
+  return true;
 }
 
-int test_read_write_read_single_pixel(const int verbose) {
+bool test_read_write_read_single_pixel(const bool verbose) {
   const char* paths[] = {
       "./test-data/ff0000-1x1-rgb-nocomp.png",
       "./test-data/00ff00-1x1-rgb-nocomp.png",
@@ -383,13 +383,13 @@ int test_read_write_read_single_pixel(const int verbose) {
   for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(paths); ++i) {
     const char* png_path = paths[i];
     if (!_test_read_write_read(verbose, png_path)) {
-      return 0;
+      return false;
     }
   }
-  return 1;
+  return true;
 }
 
-int test_read_write_read_small(const int verbose) {
+bool test_read_write_read_small(const bool verbose) {
   const char* paths[] = {
       "./test-data/0099ee-80x160-rgb-dynamic.png",
       "./test-data/cc1177-80x160-rgb-dynamic.png",
@@ -398,13 +398,13 @@ int test_read_write_read_small(const int verbose) {
   for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(paths); ++i) {
     const char* png_path = paths[i];
     if (!_test_read_write_read(verbose, png_path)) {
-      return 0;
+      return false;
     }
   }
-  return 1;
+  return true;
 }
 
-int test_read_write_read_large(const int verbose) {
+bool test_read_write_read_large(const bool verbose) {
   const char* paths[] = {
       "./test-data/aabbcc-1600x1600-rgb-dynamic.png",
       "./test-data/github-profile-rgb-dynamic.png",
@@ -413,10 +413,10 @@ int test_read_write_read_large(const int verbose) {
   for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(paths); ++i) {
     const char* png_path = paths[i];
     if (!_test_read_write_read(verbose, png_path)) {
-      return 0;
+      return false;
     }
   }
-  return 1;
+  return true;
 }
 
 STUFFLIB_TEST_MAIN(test_read_single_pixel_chunks,

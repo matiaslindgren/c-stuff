@@ -6,7 +6,7 @@
 #include "stufflib_rand.h"
 #include "stufflib_test.h"
 
-void _check_factorization(int verbose, size_t x, size_t* factors) {
+void _check_factorization(const bool verbose, size_t x, size_t* factors) {
   assert(factors);
   if (verbose) {
     printf("%zd factors:\n", x);
@@ -16,7 +16,7 @@ void _check_factorization(int verbose, size_t x, size_t* factors) {
   }
 }
 
-int test_factorize_primes(const int verbose) {
+bool test_factorize_primes(const bool verbose) {
   const size_t primes[] = {2, 3, 5, 7, 11, 13, 17};
   for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(primes); ++i) {
     size_t* f = stufflib_math_factorize(primes[i]);
@@ -25,10 +25,10 @@ int test_factorize_primes(const int verbose) {
     assert(f[1] == 0);
     free(f);
   }
-  return 1;
+  return true;
 }
 
-int test_factorize_4(const int verbose) {
+bool test_factorize_4(const bool verbose) {
   const size_t n = 4;
   size_t* f = stufflib_math_factorize(n);
   _check_factorization(verbose, n, f);
@@ -36,10 +36,10 @@ int test_factorize_4(const int verbose) {
   assert(f[1] == 2);
   assert(f[2] == 0);
   free(f);
-  return 1;
+  return true;
 }
 
-int test_factorize_25(const int verbose) {
+bool test_factorize_25(const bool verbose) {
   const size_t n = 25;
   size_t* f = stufflib_math_factorize(n);
   _check_factorization(verbose, n, f);
@@ -47,10 +47,10 @@ int test_factorize_25(const int verbose) {
   assert(f[1] == 5);
   assert(f[2] == 0);
   free(f);
-  return 1;
+  return true;
 }
 
-int test_factorize_30(const int verbose) {
+bool test_factorize_30(const bool verbose) {
   const size_t n = 30;
   size_t* f = stufflib_math_factorize(n);
   _check_factorization(verbose, n, f);
@@ -59,10 +59,10 @@ int test_factorize_30(const int verbose) {
   assert(f[2] == 5);
   assert(f[3] == 0);
   free(f);
-  return 1;
+  return true;
 }
 
-int test_factorize_864(const int verbose) {
+bool test_factorize_864(const bool verbose) {
   const size_t n = 864;
   size_t* f = stufflib_math_factorize(n);
   _check_factorization(verbose, n, f);
@@ -76,10 +76,10 @@ int test_factorize_864(const int verbose) {
   assert(f[7] == 3);
   assert(f[8] == 0);
   free(f);
-  return 1;
+  return true;
 }
 
-int test_factorize_2022(const int verbose) {
+bool test_factorize_2022(const bool verbose) {
   const size_t n = 2022;
   size_t* f = stufflib_math_factorize(n);
   _check_factorization(verbose, n, f);
@@ -88,10 +88,10 @@ int test_factorize_2022(const int verbose) {
   assert(f[2] == 337);
   assert(f[3] == 0);
   free(f);
-  return 1;
+  return true;
 }
 
-int test_factorize_202212(const int verbose) {
+bool test_factorize_202212(const bool verbose) {
   const size_t n = 202212;
   size_t* f = stufflib_math_factorize(n);
   _check_factorization(verbose, n, f);
@@ -103,10 +103,10 @@ int test_factorize_202212(const int verbose) {
   assert(f[5] == 137);
   assert(f[6] == 0);
   free(f);
-  return 1;
+  return true;
 }
 
-int test_factorize_20221210(const int verbose) {
+bool test_factorize_20221210(const bool verbose) {
   const size_t n = 20221210;
   size_t* f = stufflib_math_factorize(n);
   _check_factorization(verbose, n, f);
@@ -116,10 +116,10 @@ int test_factorize_20221210(const int verbose) {
   assert(f[3] == 20021);
   assert(f[4] == 0);
   free(f);
-  return 1;
+  return true;
 }
 
-int test_linalg(const int verbose) {
+bool test_linalg(const bool verbose) {
   const double cmp_eps = 1e-16;
 
   const double v1[] = {1, 2, 3, 4};
@@ -139,12 +139,12 @@ int test_linalg(const int verbose) {
   assert(stufflib_math_double_almost(res[1], 0, cmp_eps));
   assert(stufflib_math_double_almost(res[2], -48, cmp_eps));
 
-  return 1;
+  return true;
 }
 
 double pow2(double x) { return pow(x, 2); }
 
-int test_numerical_diff(const int verbose) {
+bool test_numerical_diff(const bool verbose) {
   const size_t n = 10000;
   double x[n];
   stufflib_rand_fill_double(n, x, 10);
@@ -183,20 +183,20 @@ int test_numerical_diff(const int verbose) {
     assert(stufflib_math_double_almost(d_pow2_x, 2 * x[i], 1e-3));
   }
 
-  return 1;
+  return true;
 }
 
-int test_double_almost(const int verbose) {
+bool test_double_almost(const bool verbose) {
   if (!stufflib_math_double_almost(1, 1.5, 1)) {
-    return 0;
+    return false;
   }
   if (stufflib_math_double_almost(1, 1.5, 0.1)) {
-    return 0;
+    return false;
   }
-  return 1;
+  return true;
 }
 
-int test_round_up_pow2(const int verbose) {
+bool test_round_up_pow2(const bool verbose) {
   assert(stufflib_math_next_power_of_two(0) == 1);
   assert(stufflib_math_next_power_of_two(1) == 2);
   assert(stufflib_math_next_power_of_two(2) == 4);
@@ -210,7 +210,7 @@ int test_round_up_pow2(const int verbose) {
   assert(stufflib_math_next_power_of_two(0xff) == 0x100);
   assert(stufflib_math_next_power_of_two(0xffff) == 0x10000);
   assert(stufflib_math_next_power_of_two(0xffffffff) == 0x100000000);
-  return 1;
+  return true;
 }
 
 STUFFLIB_TEST_MAIN(test_factorize_primes,

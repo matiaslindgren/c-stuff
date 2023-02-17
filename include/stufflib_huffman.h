@@ -13,19 +13,19 @@ struct stufflib_huffman_tree {
   size_t** symbols;
 };
 
-int stufflib_huffman_init(stufflib_huffman_tree tree[static 1],
-                          const size_t max_symbol,
-                          const size_t code_lengths[const max_symbol + 1]) {
+bool stufflib_huffman_init(stufflib_huffman_tree tree[static 1],
+                           const size_t max_symbol,
+                           const size_t code_lengths[const max_symbol + 1]) {
   if (!max_symbol) {
     *tree = (stufflib_huffman_tree){0};
-    return 1;
+    return true;
   }
 
-  size_t* code_length_count = 0;
-  size_t* next_code = 0;
-  size_t* codes = 0;
-  size_t* max_codes = 0;
-  size_t** symbols = 0;
+  size_t* code_length_count = nullptr;
+  size_t* next_code = nullptr;
+  size_t* codes = nullptr;
+  size_t* max_codes = nullptr;
+  size_t** symbols = nullptr;
 
   const size_t max_code_len =
       stufflib_misc_vmax_size_t(max_symbol + 1, code_lengths);
@@ -132,9 +132,9 @@ void stufflib_huffman_destroy(stufflib_huffman_tree tree[const static 1]) {
   stufflib_huffman_init(tree, 0, 0);
 }
 
-int stufflib_huffman_contains(const stufflib_huffman_tree tree[const static 1],
-                              const size_t code,
-                              const size_t code_len) {
+bool stufflib_huffman_contains(const stufflib_huffman_tree tree[const static 1],
+                               const size_t code,
+                               const size_t code_len) {
   return code_len > 0 && code <= tree->max_codes[code_len - 1] &&
          tree->symbols[code_len - 1][code];
 }

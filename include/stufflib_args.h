@@ -64,7 +64,7 @@ char* const stufflib_args_get_positional(
       return *args->required[i];
     }
   }
-  return 0;
+  return nullptr;
 }
 
 size_t stufflib_args_count_positional(
@@ -76,15 +76,15 @@ size_t stufflib_args_count_positional(
   return count;
 }
 
-int stufflib_args_parse_flag(const stufflib_args args[const static 1],
-                             const char arg[const static 1]) {
+bool stufflib_args_parse_flag(const stufflib_args args[const static 1],
+                              const char arg[const static 1]) {
   for (size_t i = 0; args->optional[i]; ++i) {
     char* const opt = *args->optional[i];
     if (strcmp(opt, arg) == 0) {
-      return 1;
+      return true;
     }
   }
-  return 0;
+  return false;
 }
 
 size_t stufflib_args_parse_uint(const stufflib_args args[const static 1],
