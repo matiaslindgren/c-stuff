@@ -44,4 +44,4 @@ int test_rand_set_zero(const int verbose) {
   return 1;
 }
 
-STUFFLIB_TEST_MAIN(test_rand_fill, test_rand_set_zero);
+STUFFLIB_TEST_MAIN(test_rand_fill, test_rand_set_zero)

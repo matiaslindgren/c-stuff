@@ -206,7 +206,7 @@ void stufflib_png_dump_header(FILE stream[const static 1],
 void stufflib_png_dump_img_data_info(FILE stream[const static 1],
                                      const stufflib_png_image image) {
   fprintf(stream, "  data length: %zu\n", image.data.size);
-  fprintf(stream, "  data begin: %p\n", image.data.data);
+  fprintf(stream, "  data begin: %p\n", (void*)image.data.data);
   fprintf(stream, "  filters: %zu\n", image.filter.size);
 }
 

@@ -155,4 +155,4 @@ STUFFLIB_TEST_MAIN(test_empty,
                    test_insert_single_element,
                    test_insert_two_elements_resizes,
                    test_update_single_element,
-                   test_multiple_resizes_retain_nodes);
+                   test_multiple_resizes_retain_nodes)

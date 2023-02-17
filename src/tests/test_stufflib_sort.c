@@ -315,4 +315,4 @@ STUFFLIB_TEST_MAIN(test_compare_doubles,
                    test_qsort_strings,
                    test_quicksort_custom_obj,
                    test_mergesort_custom_obj,
-                   test_qsort_custom_obj);
+                   test_qsort_custom_obj)

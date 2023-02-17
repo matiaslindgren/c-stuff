@@ -32,4 +32,4 @@ int test_file_slurp(const int verbose) {
   return 1;
 }
 
-STUFFLIB_TEST_MAIN(test_file_size, test_file_slurp);
+STUFFLIB_TEST_MAIN(test_file_size, test_file_slurp)

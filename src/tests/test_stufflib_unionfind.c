@@ -115,4 +115,4 @@ int test_union_self(const int verbose) {
   return 1;
 }
 
-STUFFLIB_TEST_MAIN(test_union_until_single_set, test_union_self);
+STUFFLIB_TEST_MAIN(test_union_until_single_set, test_union_self)

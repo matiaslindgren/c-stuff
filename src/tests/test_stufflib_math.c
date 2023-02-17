@@ -224,4 +224,4 @@ STUFFLIB_TEST_MAIN(test_factorize_primes,
                    test_double_almost,
                    test_numerical_diff,
                    test_linalg,
-                   test_round_up_pow2);
+                   test_round_up_pow2)

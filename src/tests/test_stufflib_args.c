@@ -190,4 +190,4 @@ STUFFLIB_TEST_MAIN(test_parse_positional,
                    test_parse_one_flag,
                    test_parse_positional_after_optional,
                    test_parse_two_flags,
-                   test_parse_uint);
+                   test_parse_uint)

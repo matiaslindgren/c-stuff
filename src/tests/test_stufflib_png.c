@@ -430,4 +430,4 @@ STUFFLIB_TEST_MAIN(test_read_single_pixel_chunks,
                    test_read_large_images_with_dynamic_compression,
                    test_read_write_read_single_pixel,
                    test_read_write_read_small,
-                   test_read_write_read_large);
+                   test_read_write_read_large)
