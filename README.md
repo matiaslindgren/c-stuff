@@ -3,18 +3,12 @@
 Useless library/toolkit/scribble that reimplements solved problems for the sake of learning.
 Contains mostly over-engineered solutions to the programming challenges suggested by Jens Gustedt in [Modern C](https://gustedt.gitlabpages.inria.fr/modern-c/).
 
+## Requirements
+
+* `make`
+* `clang-16`, see the [LLVM docs](https://apt.llvm.org/) on how to install pre-release versions of Clang
+
 ## Building
-
-### Download, build, and test Clang 15
-
-If you have `clang-15` on your path, skip this step.
-
-```sh
-make --makefile Makefile.llvm ./llvm-build
-export CLANG=./llvm-build/bin/clang-15
-```
-
-### Build and test stufflib
 
 ```sh
 make -j

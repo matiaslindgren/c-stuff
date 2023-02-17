@@ -1,10 +1,14 @@
 on: push
 
 jobs:
+  install-clang:
+    runs-on: ubuntu-22.04
+    steps:
+    - run: sudo add-apt-repository --yes 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-16 main'
+    - run: sudo add-apt-repository --yes 'deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-16 main'
+    - run: sudo apt update --yes && sudo apt install --yes clang-16
   test:
     runs-on: ubuntu-22.04
-    env:
-      CLANG: clang-14
     steps:
     - uses: actions/checkout@v2
     - run: make -j

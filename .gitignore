@@ -1,8 +1,4 @@
-out
+build
 test-data-sizes.txt
 hello.txt
 there.txt
-llvm-build
-llvm-project
-*.tar.xz
-*.tar.xz.sig

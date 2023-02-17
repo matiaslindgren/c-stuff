@@ -20,7 +20,7 @@ TESTS_DEBUG   := $(addprefix $(TESTS_DIR_DEBUG)/,$(TESTS_FILES))
 TOOLS_RELEASE := $(addprefix $(TOOLS_DIR_RELEASE)/,$(TOOLS_FILES))
 TESTS_RELEASE := $(addprefix $(TESTS_DIR_RELEASE)/,$(TESTS_FILES))
 
-CLANG ?= clang-15
+CLANG ?= clang-16
 
 CSTD := c2x
 CFLAGS_DEBUG := \
