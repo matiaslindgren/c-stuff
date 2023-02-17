@@ -1,7 +1,7 @@
 SHELL := /bin/sh
 
 LLVM_SRC_URL := https://github.com/llvm/llvm-project/releases/download/llvmorg-15.0.7/llvm-project-15.0.7.src.tar.xz
-LLVM_OUT     := ./llvm-build
+LLVM_BUILD   := ./llvm-build
 
 llvm-project.tar.xz:
 	curl --output $@ --location $(LLVM_SRC_URL)
@@ -14,7 +14,7 @@ llvm-project: llvm-project.tar.xz
 	tar --directory $@ --strip-components 1 -xf $@/$<
 	rm $@/$<
 
-$(LLVM_OUT): llvm-project
+$(LLVM_BUILD): llvm-project
 	mkdir -p $@
 	cd $@ && cmake \
 		-DCMAKE_BUILD_TYPE=Release \

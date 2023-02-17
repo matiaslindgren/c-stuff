@@ -1,8 +1,8 @@
 SHELL := /bin/sh
 
-OUT_DIR         := out
-OUT_DIR_DEBUG   := $(OUT_DIR)/debug
-OUT_DIR_RELEASE := $(OUT_DIR)/release
+BUILD_DIR         := build
+BUILD_DIR_DEBUG   := $(BUILD_DIR)/debug
+BUILD_DIR_RELEASE := $(BUILD_DIR)/release
 
 HEADERS     := $(wildcard include/*.h)
 TOOLS_SRC   := $(wildcard src/tools/*.c)
@@ -10,10 +10,10 @@ TESTS_SRC   := $(wildcard src/tests/*.c)
 TOOLS_FILES := $(notdir $(basename $(TOOLS_SRC)))
 TESTS_FILES := $(notdir $(basename $(TESTS_SRC)))
 
-TOOLS_DIR_DEBUG   := $(OUT_DIR_DEBUG)/tools
-TESTS_DIR_DEBUG   := $(OUT_DIR_DEBUG)/tests
-TOOLS_DIR_RELEASE := $(OUT_DIR_RELEASE)/tools
-TESTS_DIR_RELEASE := $(OUT_DIR_RELEASE)/tests
+TOOLS_DIR_DEBUG   := $(BUILD_DIR_DEBUG)/tools
+TESTS_DIR_DEBUG   := $(BUILD_DIR_DEBUG)/tests
+TOOLS_DIR_RELEASE := $(BUILD_DIR_RELEASE)/tools
+TESTS_DIR_RELEASE := $(BUILD_DIR_RELEASE)/tests
 
 TOOLS_DEBUG   := $(addprefix $(TOOLS_DIR_DEBUG)/,$(TOOLS_FILES))
 TESTS_DEBUG   := $(addprefix $(TESTS_DIR_DEBUG)/,$(TESTS_FILES))
@@ -48,24 +48,24 @@ release: $(TOOLS_RELEASE) $(TESTS_RELEASE)
 
 .PHONY: clean
 clean:
-	$(RM) -r $(OUT_DIR)
+	$(RM) -r $(BUILD_DIR)
 
-$(OUT_DIR):
+$(BUILD_DIR):
 	mkdir $@
 
-$(OUT_DIR_DEBUG) $(OUT_DIR_RELEASE): $(OUT_DIR)
+$(BUILD_DIR_DEBUG) $(BUILD_DIR_RELEASE): $(BUILD_DIR)
 	mkdir $@
 
-$(TOOLS_DIR_DEBUG) $(TESTS_DIR_DEBUG): $(OUT_DIR_DEBUG)
+$(TOOLS_DIR_DEBUG) $(TESTS_DIR_DEBUG): $(BUILD_DIR_DEBUG)
 	mkdir $@
 
-$(TOOLS_DIR_RELEASE) $(TESTS_DIR_RELEASE): $(OUT_DIR_RELEASE)
+$(TOOLS_DIR_RELEASE) $(TESTS_DIR_RELEASE): $(BUILD_DIR_RELEASE)
 	mkdir $@
 
-$(TOOLS_DEBUG) $(TESTS_DEBUG): $(OUT_DIR_DEBUG)/%: src/%.c $(HEADERS) | $(TOOLS_DIR_DEBUG) $(TESTS_DIR_DEBUG)
+$(TOOLS_DEBUG) $(TESTS_DEBUG): $(BUILD_DIR_DEBUG)/%: src/%.c $(HEADERS) | $(TOOLS_DIR_DEBUG) $(TESTS_DIR_DEBUG)
 	$(CLANG) $(CFLAGS_DEBUG) -I./include -o $@ $< $(LFLAGS)
 
-$(TOOLS_RELEASE) $(TESTS_RELEASE): $(OUT_DIR_RELEASE)/%: src/%.c $(HEADERS) | $(TOOLS_DIR_RELEASE) $(TESTS_DIR_RELEASE)
+$(TOOLS_RELEASE) $(TESTS_RELEASE): $(BUILD_DIR_RELEASE)/%: src/%.c $(HEADERS) | $(TOOLS_DIR_RELEASE) $(TESTS_DIR_RELEASE)
 	$(CLANG) $(CFLAGS_RELEASE) -I./include -o $@ $< $(LFLAGS)
 
 RUN_DEBUG_TESTS   := $(addprefix run_debug_,$(TESTS_FILES))

@@ -30,9 +30,9 @@ Simple PNG decoder implemented without dependencies.
 
 ### Usage
 ```
-./out/release/tools/png info png_path
-./out/release/tools/png dump_raw png_path block_type [block_types...]
-./out/release/tools/png segment png_src_path png_dst_path [--threshold-percent=N] [-v]
+./build/release/tools/png info png_path
+./build/release/tools/png dump_raw png_path block_type [block_types...]
+./build/release/tools/png segment png_src_path png_dst_path [--threshold-percent=N] [-v]
 ```
 
 ### PNG info
@@ -44,7 +44,7 @@ Decode and inspect a PNG image.
 ![](/docs/img/tokyo.png)
 
 ```
-./out/release/tools/png info ./docs/img/tokyo.png
+./build/release/tools/png info ./docs/img/tokyo.png
 ```
 #### `stdout`:
 ```
@@ -84,7 +84,7 @@ Merges adjacent image segments by comparing the Euclidian distance between the a
 
 #### Threshold 10%
 ```
-./out/release/tools/png segment \
+./build/release/tools/png segment \
   --threshold-percent=10 \
   ./docs/img/tokyo.png \
   ./docs/img/tokyo_segmented_10p.png
@@ -93,7 +93,7 @@ Merges adjacent image segments by comparing the Euclidian distance between the a
 
 #### Threshold 20%
 ```
-./out/release/tools/png segment \
+./build/release/tools/png segment \
   --threshold-percent=20 \
   ./docs/img/tokyo.png \
   ./docs/img/tokyo_segmented_20p.png
@@ -102,7 +102,7 @@ Merges adjacent image segments by comparing the Euclidian distance between the a
 
 #### Threshold 30%
 ```
-./out/release/tools/png segment \
+./build/release/tools/png segment \
   --threshold-percent=30 \
   ./docs/img/tokyo.png \
   ./docs/img/tokyo_segmented_30p.png
@@ -120,7 +120,7 @@ Use positional arguments to filter a subset of chunk types.
 This example requires `xxd`.
 
 ```
-./out/release/tools/png dump_raw ./test-data/ff0000-1x1-rgb-fixed.png IHDR IDAT | xxd -b
+./build/release/tools/png dump_raw ./test-data/ff0000-1x1-rgb-fixed.png IHDR IDAT | xxd -b
 ```
 #### `stdout`:
 ```
@@ -139,7 +139,7 @@ Simple and slow line sorting.
 
 ### Usage
 ```
-./out/release/tools/sort { numeric | strings } path
+./build/release/tools/sort { numeric | strings } path
 ```
 
 ### Example
@@ -151,7 +151,7 @@ find ./test-data -printf '%s\n' > test-data-sizes.txt
 
 #### Sort lines as numbers
 ```
-./out/release/tools/sort numeric ./test-data-sizes.txt
+./build/release/tools/sort numeric ./test-data-sizes.txt
 ```
 #### `stdout`:
 ```
@@ -179,7 +179,7 @@ find ./test-data -printf '%s\n' > test-data-sizes.txt
 
 #### Sort lines as strings
 ```
-./out/release/tools/sort strings ./test-data-sizes.txt
+./build/release/tools/sort strings ./test-data-sizes.txt
 ```
 #### `stdout`:
 ```
@@ -207,7 +207,7 @@ find ./test-data -printf '%s\n' > test-data-sizes.txt
 
 #### Sort lines as numbers in descending order
 ```
-./out/release/tools/sort numeric --reverse ./test-data-sizes.txt
+./build/release/tools/sort numeric --reverse ./test-data-sizes.txt
 ```
 #### `stdout`:
 ```
@@ -239,11 +239,11 @@ Source: [`./src/tools/txt.c`](./src/tools/txt.c)
 
 ### Usage
 ```
-./out/release/tools/txt concat path [paths...]
-./out/release/tools/txt count pattern path
-./out/release/tools/txt replace old_str new_str path
-./out/release/tools/txt slicelines begin end path
-./out/release/tools/txt count_words path
+./build/release/tools/txt concat path [paths...]
+./build/release/tools/txt count pattern path
+./build/release/tools/txt replace old_str new_str path
+./build/release/tools/txt slicelines begin end path
+./build/release/tools/txt count_words path
 ```
 
 ### Example
@@ -256,7 +256,7 @@ echo there > there.txt
 
 #### Concatenate
 ```
-./out/release/tools/txt concat ./hello.txt ./there.txt
+./build/release/tools/txt concat ./hello.txt ./there.txt
 ```
 #### `stdout`:
 ```
@@ -266,7 +266,7 @@ there
 
 #### Replace
 ```
-./out/release/tools/txt replace hello you ./hello.txt
+./build/release/tools/txt replace hello you ./hello.txt
 ```
 #### `stdout`:
 ```
@@ -275,7 +275,7 @@ you
 
 #### Count pattern occurrence
 ```
-./out/release/tools/txt count '##' ./README.md
+./build/release/tools/txt count '##' ./README.md
 ```
 #### `stdout`:
 ```
@@ -284,7 +284,7 @@ you
 
 #### Slice lines
 ```
-./out/release/tools/txt slicelines 224 250 ./src/tools/txt.c
+./build/release/tools/txt slicelines 224 250 ./src/tools/txt.c
 ```
 #### `stdout`:
 ```
@@ -319,9 +319,9 @@ int main(int argc, char* const argv[argc + 1]) {
 
 Tokenisation is simply "split at whitespace".
 ```
-./out/release/tools/txt count_words ./include/stufflib_png.h \
-  | ./out/release/tools/sort numeric --reverse /dev/stdin \
-  | ./out/release/tools/txt slicelines 0 20 /dev/stdin
+./build/release/tools/txt count_words ./include/stufflib_png.h \
+  | ./build/release/tools/sort numeric --reverse /dev/stdin \
+  | ./build/release/tools/txt slicelines 0 20 /dev/stdin
 ```
 #### `stdout`:
 ```
