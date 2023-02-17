@@ -17,12 +17,14 @@ typedef double* stufflib_sort_double(const size_t, double*);
 typedef char** stufflib_sort_str(const size_t, char**);
 
 void _stufflib_sort_mergesort_merge(const size_t size,
-                                    void* restrict src,
-                                    void* restrict dst,
+                                    void* restrict src_raw,
+                                    void* restrict dst_raw,
                                     const size_t begin,
                                     const size_t mid,
                                     const size_t end,
                                     stufflib_sort_compare* const compare) {
+  unsigned char* src = (unsigned char*)(src_raw);
+  unsigned char* dst = (unsigned char*)(dst_raw);
   size_t lhs = begin;
   size_t rhs = mid;
   size_t out = begin;
@@ -83,13 +85,15 @@ void* stufflib_sort_mergesort(void* src,
 
 size_t _stufflib_sort_hoare_partition(const size_t count,
                                       const size_t size,
-                                      void* src,
-                                      void* tmp,
+                                      void* restrict src_raw,
+                                      void* restrict tmp_raw,
                                       const size_t lo,
                                       const size_t hi,
                                       stufflib_sort_compare* const compare) {
-  void* pivot = tmp;
-  void* swap_tmp = tmp + size;
+  unsigned char* src = (unsigned char*)(src_raw);
+  unsigned char* tmp = (unsigned char*)(tmp_raw);
+  unsigned char* pivot = tmp;
+  unsigned char* swap_tmp = tmp + size;
 
   const size_t pivot_idx = stufflib_misc_midpoint(lo, hi);
   memcpy(pivot, src + pivot_idx * size, size);
@@ -135,22 +139,12 @@ void* stufflib_sort_quicksort(void* src,
   assert(count);
   assert(size);
   assert(src);
-  // 2 extra slots at the end for
-  // 0: pivot
-  // 1: swap space
-  void* tmp = malloc((count + 2) * size);
+  // pivot and swap space
+  void* tmp = calloc(2, size);
   if (!tmp) {
     return 0;
   }
-  memcpy(tmp, src, count * size);
-  _stufflib_sort_quicksort(count,
-                           size,
-                           tmp,
-                           tmp + count * size,
-                           0,
-                           count - 1,
-                           compare);
-  memcpy(src, tmp, count * size);
+  _stufflib_sort_quicksort(count, size, src, tmp, 0, count - 1, compare);
   free(tmp);
   return src;
 }
