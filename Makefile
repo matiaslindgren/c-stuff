@@ -26,6 +26,7 @@ CSTD := c2x
 CFLAGS_DEBUG := \
 	-std=$(CSTD) \
 	-Wall \
+	-Wpedantic \
 	-Werror \
 	-O2 \
 	-g \
@@ -33,6 +34,7 @@ CFLAGS_DEBUG := \
 CFLAGS_RELEASE := \
 	-std=$(CSTD) \
 	-Wall \
+	-Wpedantic \
 	-Werror \
 	-O3
 LFLAGS := -lm
