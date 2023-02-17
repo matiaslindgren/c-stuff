@@ -22,22 +22,12 @@ TESTS_RELEASE := $(addprefix $(TESTS_DIR_RELEASE)/,$(TESTS_FILES))
 
 CLANG ?= clang-16
 
-CSTD := c2x
-CFLAGS_DEBUG := \
-	-std=$(CSTD) \
-	-Wall \
-	-Wpedantic \
-	-Werror \
-	-O2 \
-	-g \
-	-fsanitize=address,undefined
-CFLAGS_RELEASE := \
-	-std=$(CSTD) \
-	-Wall \
-	-Wpedantic \
-	-Werror \
-	-O3
-LFLAGS := -lm
+CSTANDARD := -std=c2x
+CWARNINGS := -Wall -Wpedantic -Werror
+LFLAGS    := -lm
+
+CFLAGS_DEBUG   := $(CSTANDARD) $(CWARNINGS) -O2 -g -fsanitize=address,undefined
+CFLAGS_RELEASE := $(CSTANDARD) $(CWARNINGS) -O3
 
 .PHONY: all
 all: debug release
