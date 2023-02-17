@@ -273,7 +273,7 @@ you
 ```
 #### `stdout`:
 ```
-59
+60
 ```
 
 #### Slice lines
@@ -284,7 +284,7 @@ you
 ```
 int main(int argc, char* const argv[argc + 1]) {
   stufflib_args args = stufflib_args_from_argv(argc, argv);
-  int ok = 0;
+  bool ok = false;
   const char* command = stufflib_args_get_positional(&args, 0);
   if (command) {
     if (strcmp(command, "concat") == 0) {
@@ -328,15 +328,15 @@ Tokenisation is simply "split at whitespace".
 42 size_t
 37 return
 31 goto
-28 0;
 23 STUFFLIB_PRINT_ERROR("failed
 23 unsigned
 20 static
 20 *
+19 ==
 19 "
 19 for
-19 ==
 19 char*
-18 int
 17 !=
+16 <
+16 chunk
 ```
