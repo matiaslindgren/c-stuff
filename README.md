@@ -6,7 +6,7 @@ Contains mostly over-engineered solutions to the programming challenges suggeste
 ## Requirements
 
 * `make`
-* `clang-16`, see the [LLVM docs](https://apt.llvm.org/) on how to install pre-release versions of Clang
+* `clang-16`, see the [LLVM docs](https://apt.llvm.org/) or stufflib's [CI config](./.github/workflows/c.yml) on how to install pre-release versions of Clang.
 
 ## Building
 
