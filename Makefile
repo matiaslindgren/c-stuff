@@ -67,6 +67,9 @@ RUN_RELEASE_TESTS := $(addprefix run_release_,$(TESTS_FILES))
 test_debug: $(RUN_DEBUG_TESTS)
 .PHONY: test_release
 test_release: $(RUN_RELEASE_TESTS)
+.PHONY: test_tools
+test_tools:
+	@bash -c 'timeout --kill-after=2m 1m ./tests/test_tools.bash'
 
 .PHONY: $(RUN_DEBUG_TESTS)
 $(RUN_DEBUG_TESTS): run_debug_%: $(TESTS_DIR_DEBUG)/%

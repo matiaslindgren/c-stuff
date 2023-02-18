@@ -14,6 +14,7 @@ Contains mostly over-engineered solutions to the programming challenges suggeste
 make -j
 make -j test_debug
 make -j test_release
+make test_tools
 ```
 
 ## PNG tools
