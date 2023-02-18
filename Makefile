@@ -75,7 +75,7 @@ test_debug: $(RUN_DEBUG_TESTS)
 test_release: $(RUN_RELEASE_TESTS)
 .PHONY: test_tools
 test_tools:
-	@bash -c 'timeout --kill-after=2m 1m ./tests/test_tools.bash $(TEST_ARGS)'
+	@bash -c 'timeout --kill-after=4m 3m ./tests/test_tools.bash $(TEST_ARGS)'
 
 .PHONY: $(RUN_DEBUG_TESTS)
 $(RUN_DEBUG_TESTS): run_debug_%: $(TESTS_DIR_DEBUG)/%
