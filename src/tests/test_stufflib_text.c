@@ -107,7 +107,7 @@ bool test_init_from_file(const bool verbose) {
 }
 
 bool test_init_from_file_and_splitlines(const bool verbose) {
-  const char* const path = "./test-data/numbers.txt";
+  const char* const path = "./test-data/txt/numbers.txt";
   stufflib_text* text = stufflib_text_from_file(path);
   assert(text);
   assert(text->str);

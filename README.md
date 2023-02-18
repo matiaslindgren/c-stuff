@@ -122,7 +122,7 @@ Use positional arguments to filter a subset of chunk types.
 This example requires `xxd`.
 
 ```
-./build/release/tools/png dump_raw ./test-data/ff0000-1x1-rgb-fixed.png IHDR IDAT | xxd -b
+./build/release/tools/png dump_raw ./test-data/png/ff0000-1x1-rgb-fixed.png IHDR IDAT | xxd -b
 ```
 #### `stdout`:
 ```
@@ -148,7 +148,7 @@ Simple line sorting.
 
 Create data (on macOS, use `gfind`) by calculating the size of each input file used during testing:
 ```
-find ./test-data -printf '%s\n' > test-data-sizes.txt
+find ./test-data/png -printf '%s\n' > test-data-sizes.txt
 ```
 
 #### Sort lines as numbers

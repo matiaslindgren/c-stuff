@@ -115,7 +115,7 @@ png_chunk_types=(
 function test_png_tool {
   local png_tool=$1
 
-  for input in $(find ${self_dir}/../test-data -name '*.png'); do
+  for input in $(find ${self_dir}/../test-data/png -name '*.png'); do
     local info_output=${test_dir}/stufflib_output.json
     $png_tool info $input > $info_output
     for chunk_type in ${png_chunk_types[*]}; do
