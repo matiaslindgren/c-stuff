@@ -1,16 +1,22 @@
 #!/usr/bin/env bash
 set -ue
 
-required_programs=(
+if [ $# -eq 1 ]; then
+  if [ "$1" == "-v" ]; then
+    set -x
+  fi
+fi
+
+required_commands=(
   'python3'
   'sort'
   'grep'
   'cmp'
 )
 ok=1
-for program in ${required_programs[*]}; do
-  if [ -z $(type -p $program) ]; then
-    printf "required program '%s' not found on path\n" $program
+for command in ${required_commands[*]}; do
+  if [ -z $(type -p $command) ]; then
+    printf "required command '%s' not found on path\n" $command
     ok=0
   fi
 done

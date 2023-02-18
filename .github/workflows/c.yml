@@ -9,6 +9,8 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-22.04
+    env:
+      STUFFLIB_TEST_VERBOSE: 1
     steps:
     - name: trust LLVM apt repositories
       run: wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
