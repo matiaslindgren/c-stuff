@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "stufflib_data.h"
 #include "stufflib_deflate.h"
 #include "stufflib_hash.h"
 #include "stufflib_macros.h"
@@ -131,7 +132,7 @@ struct stufflib_png_image {
 };
 
 void stufflib_png_chunk_destroy(stufflib_png_chunk chunk) {
-  stufflib_misc_data_destroy(&chunk.data);
+  stufflib_data_destroy(&chunk.data);
 }
 
 void stufflib_png_chunks_destroy(stufflib_png_chunks chunks) {
@@ -146,17 +147,17 @@ void stufflib_png_header_destroy(stufflib_png_header header) {
 }
 
 void stufflib_png_image_destroy(stufflib_png_image image) {
-  stufflib_misc_data_destroy(&image.data);
-  stufflib_misc_data_destroy(&image.filter);
+  stufflib_data_destroy(&image.data);
+  stufflib_data_destroy(&image.filter);
 }
 
 bool stufflib_png_image_copy(stufflib_png_image dst[restrict static 1],
                              const stufflib_png_image src[restrict static 1]) {
   dst->header = src->header;
-  if (!stufflib_misc_data_copy(&dst->data, &src->data)) {
+  if (!stufflib_data_copy(&dst->data, &src->data)) {
     return false;
   }
-  if (!stufflib_misc_data_copy(&dst->filter, &src->filter)) {
+  if (!stufflib_data_copy(&dst->filter, &src->filter)) {
     return false;
   }
   return true;
@@ -458,7 +459,7 @@ stufflib_data stufflib_png_pack_image_data(
   const size_t bytes_per_px =
       stufflib_png_bytes_per_pixel[image->header.color_type];
 
-  packed = stufflib_misc_data_new(stufflib_png_data_size(image->header));
+  packed = stufflib_data_new(stufflib_png_data_size(image->header));
   if (!packed.size) {
     STUFFLIB_PRINT_ERROR("failed allocating packed image data buffer");
     goto error;
@@ -478,7 +479,7 @@ stufflib_data stufflib_png_pack_image_data(
   return packed;
 
 error:
-  stufflib_misc_data_destroy(&packed);
+  stufflib_data_destroy(&packed);
   return (stufflib_data){0};
 }
 
@@ -492,12 +493,12 @@ bool stufflib_png_unpack_and_pad_image_data(
   const size_t bytes_per_px =
       stufflib_png_bytes_per_pixel[image->header.color_type];
 
-  filter = stufflib_misc_data_new(height);
+  filter = stufflib_data_new(height);
   if (!filter.size) {
     STUFFLIB_PRINT_ERROR("failed allocating scanline filter buffer");
     goto error;
   }
-  padded = stufflib_misc_data_new(bytes_per_px * (width + 2) * (height + 2));
+  padded = stufflib_data_new(bytes_per_px * (width + 2) * (height + 2));
   if (!padded.size) {
     STUFFLIB_PRINT_ERROR("failed allocating buffer for padded image data");
     goto error;
@@ -517,13 +518,13 @@ bool stufflib_png_unpack_and_pad_image_data(
   }
 
   image->filter = filter;
-  stufflib_misc_data_destroy(&image->data);
+  stufflib_data_destroy(&image->data);
   image->data = padded;
   return true;
 
 error:
-  stufflib_misc_data_destroy(&filter);
-  stufflib_misc_data_destroy(&padded);
+  stufflib_data_destroy(&filter);
+  stufflib_data_destroy(&padded);
   return false;
 }
 
@@ -613,7 +614,7 @@ stufflib_png_image stufflib_png_read_image(
   for (size_t i = 1; i < chunks.count; ++i) {
     const stufflib_png_chunk chunk = chunks.chunks[i];
     if (chunk.type == stufflib_png_IDAT) {
-      if (!stufflib_misc_concat(&idat, &chunk.data)) {
+      if (!stufflib_data_concat(&idat, &chunk.data)) {
         STUFFLIB_PRINT_ERROR("failed concatenating IDAT block");
         goto error;
       }
@@ -621,7 +622,7 @@ stufflib_png_image stufflib_png_read_image(
   }
   // TODO parse PLTE if header.color_type == stufflib_png_indexed
 
-  image.data = stufflib_misc_data_new(stufflib_png_data_size(image.header));
+  image.data = stufflib_data_new(stufflib_png_data_size(image.header));
   if (!image.data.size) {
     STUFFLIB_PRINT_ERROR("failed allocating output buffer");
     goto error;
@@ -641,12 +642,12 @@ stufflib_png_image stufflib_png_read_image(
   }
 
   stufflib_png_chunks_destroy(chunks);
-  stufflib_misc_data_destroy(&idat);
+  stufflib_data_destroy(&idat);
   return image;
 
 error:
   stufflib_png_chunks_destroy(chunks);
-  stufflib_misc_data_destroy(&idat);
+  stufflib_data_destroy(&idat);
   stufflib_png_image_destroy(image);
   return (stufflib_png_image){0};
 }
@@ -696,7 +697,7 @@ bool stufflib_png_chunk_fwrite(FILE stream[const static 1],
                          data->size);
     return false;
   }
-  stufflib_data crc_data = stufflib_misc_data_new(data->size + 4);
+  stufflib_data crc_data = stufflib_data_new(data->size + 4);
   if (!crc_data.size) {
     STUFFLIB_PRINT_ERROR("failed allocating CRC32 buffer for %s chunk",
                          chunk_type);
@@ -731,7 +732,7 @@ bool stufflib_png_chunk_fwrite(FILE stream[const static 1],
   ok = true;
 
 done:
-  stufflib_misc_data_destroy(&crc_data);
+  stufflib_data_destroy(&crc_data);
   return ok;
 }
 
@@ -752,7 +753,7 @@ bool stufflib_png_write_image(const stufflib_png_image image,
     STUFFLIB_PRINT_ERROR("failed allocating buffer image data");
     goto done;
   }
-  idat = stufflib_misc_data_new(stufflib_png_idat_max_size(image.header));
+  idat = stufflib_data_new(stufflib_png_idat_max_size(image.header));
   if (!idat.size) {
     STUFFLIB_PRINT_ERROR("failed allocating buffer for IDAT chunks");
     goto done;
@@ -780,8 +781,8 @@ done:
   if (fp) {
     fclose(fp);
   }
-  stufflib_misc_data_destroy(&idat);
-  stufflib_misc_data_destroy(&packed_data);
+  stufflib_data_destroy(&idat);
+  stufflib_data_destroy(&packed_data);
   return write_ok;
 }
 

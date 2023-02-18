@@ -2,6 +2,7 @@
 #define _STUFFLIB_HASHMAP_H_INCLUDED
 #include <assert.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "stufflib_hash.h"
 #include "stufflib_macros.h"

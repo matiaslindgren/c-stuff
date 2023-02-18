@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "stufflib_data.h"
 #include "stufflib_hash.h"
 #include "stufflib_huffman.h"
 #include "stufflib_macros.h"
