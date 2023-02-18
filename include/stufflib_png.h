@@ -192,22 +192,40 @@ bool stufflib_png_is_supported(const stufflib_png_header header) {
 
 void stufflib_png_dump_header(FILE stream[const static 1],
                               const stufflib_png_header header) {
-  fprintf(stream, "  width: %zu\n", header.width);
-  fprintf(stream, "  height: %zu\n", header.height);
-  fprintf(stream, "  bit depth: %u\n", header.bit_depth);
+  fprintf(stream, "{");
+  fprintf(stream, "\"width\":%zu,", header.width);
+  fprintf(stream, "\"height\":%zu,", header.height);
+  fprintf(stream, "\"bit depth\":%u,", header.bit_depth);
   fprintf(stream,
-          "  color type: %s\n",
+          "\"color type\":\"%s\",",
           stufflib_png_color_types[header.color_type]);
-  fprintf(stream, "  compression: %u\n", header.compression);
-  fprintf(stream, "  filter: %u\n", header.filter);
-  fprintf(stream, "  interlace: %u\n", header.interlace);
+  fprintf(stream, "\"compression\":%u,", header.compression);
+  fprintf(stream, "\"filter\":%u,", header.filter);
+  fprintf(stream, "\"interlace\":%u", header.interlace);
+  fprintf(stream, "}");
 }
 
 void stufflib_png_dump_img_data_info(FILE stream[const static 1],
                                      const stufflib_png_image image) {
-  fprintf(stream, "  data length: %zu\n", image.data.size);
-  fprintf(stream, "  data begin: %p\n", (void*)image.data.data);
-  fprintf(stream, "  filters: %zu\n", image.filter.size);
+  fprintf(stream, "{");
+  fprintf(stream, "\"length\":%zu,", image.data.size);
+  fprintf(stream, "\"filters\":{");
+  size_t freq[stufflib_png_num_filter_types] = {0};
+  for (size_t i = 0; i < image.filter.size; ++i) {
+    ++freq[image.filter.data[i]];
+  }
+  bool did_print = false;
+  for (size_t filter = 0; filter < stufflib_png_num_filter_types; ++filter) {
+    if (freq[filter]) {
+      const char* filter_name = stufflib_png_filter_types[filter];
+      if (did_print) {
+        fprintf(stream, ",");
+      }
+      fprintf(stream, "\"%s\":%zu", filter_name, freq[filter]);
+      did_print = true;
+    }
+  }
+  fprintf(stream, "}}");
 }
 
 void stufflib_png_dump_img_meta(FILE stream[const static 1],
@@ -216,42 +234,28 @@ void stufflib_png_dump_img_meta(FILE stream[const static 1],
   stufflib_png_dump_header(stream, image.header);
 }
 
-void stufflib_png_dump_filter_freq(FILE stream[const static 1],
-                                   const stufflib_data filter) {
-  size_t freq[stufflib_png_num_filter_types] = {0};
-  for (size_t i = 0; i < filter.size; ++i) {
-    ++freq[filter.data[i]];
-  }
-  for (size_t filter = 0; filter < stufflib_png_num_filter_types; ++filter) {
-    if (freq[filter]) {
-      const char* filter_name = stufflib_png_filter_types[filter];
-      fprintf(stream, "  %s: %zu\n", filter_name, freq[filter]);
-    }
-  }
-}
-
 void stufflib_png_dump_chunk_type_freq(FILE stream[const static 1],
                                        const stufflib_png_chunks chunks) {
+  fprintf(stream, "{");
   size_t freq[stufflib_png_num_chunk_types] = {0};
   for (size_t i = 0; i < chunks.count; ++i) {
     ++freq[chunks.chunks[i].type];
   }
+  bool did_print = false;
   for (size_t type = 0; type < stufflib_png_num_chunk_types; ++type) {
     if (freq[type]) {
       const char* type_name = stufflib_png_chunk_types[type];
-      fprintf(stream, "  %s: %zu\n", type_name, freq[type]);
+      if (did_print) {
+        fprintf(stream, ",");
+      }
+      fprintf(stream, "\"%s\":%zu", type_name, freq[type]);
+      did_print = true;
     }
   }
+  fprintf(stream, "}");
 }
 
-void _stufflib_png_dump_chunk(const stufflib_png_chunk chunk) {
-  printf("%s: %zu bytes crc32: %" PRIu32 "\n",
-         stufflib_png_chunk_types[chunk.type],
-         chunk.data.size,
-         chunk.crc32);
-}
-
-enum stufflib_png_chunk_type _stufflib_png_find_chunk_type(
+enum stufflib_png_chunk_type stufflib_png_find_chunk_type(
     const char type_id[const static 1]) {
   for (unsigned type = 1; type < stufflib_png_num_chunk_types; ++type) {
     if (strncmp(type_id, stufflib_png_chunk_types[type], 4) == 0) {
@@ -286,7 +290,7 @@ stufflib_png_chunk stufflib_png_read_next_chunk(FILE fp[const static 1]) {
       STUFFLIB_PRINT_ERROR("failed reading PNG chunk type");
       goto error;
     }
-    chunk.type = _stufflib_png_find_chunk_type(chunk_type);
+    chunk.type = stufflib_png_find_chunk_type(chunk_type);
   }
 
   if (chunk.data.size) {

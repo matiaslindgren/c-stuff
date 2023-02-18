@@ -14,6 +14,7 @@ required_commands=(
   'cmp'
   'cut'
   'find'
+  'jq'
 )
 ok=1
 for command in ${required_commands[*]}; do
@@ -57,7 +58,6 @@ for _ in range(${test_size}):
   if ! cmp --print-bytes $output $expect; then
     printf "'%s' failed to sort input as strings\n" $sort_tool
     return 1
-
   fi
 
   LC_ALL=C sort --general-numeric-sort $input > $expect
@@ -88,34 +88,56 @@ if ! test_sort_tool ${build_dir}/release/tools/sort '10**6' '10**6'; then
   exit 1
 fi
 
+png_chunk_types=(
+  'IHDR'
+  'PLTE'
+  'IDAT'
+  'IEND'
+  'bKGD'
+  'cHRM'
+  'dSIG'
+  'eXIf'
+  'gAMA'
+  'hIST'
+  'iCCP'
+  'iTXt'
+  'pHYs'
+  'sBIT'
+  'sPLT'
+  'sRGB'
+  'sTER'
+  'tEXt'
+  'tIME'
+  'tRNS'
+  'zTXt'
+)
+
 function test_png_tool {
   local png_tool=$1
+
   for input in $(find ${self_dir}/../test-data -name '*.png'); do
-    local info_output=${test_dir}/stufflib_output.txt
+    local info_output=${test_dir}/stufflib_output.json
     $png_tool info $input > $info_output
-    local chunk_counts=$(python3 -c "
-with open('$info_output') as f:
-  sections = f.read().split('\n\n')
-assert sections and sections[0].startswith('CHUNKS'), 'first section should be CHUNKS'
-for line in sections[0].splitlines()[1:]:
-  chunk, count = line.strip().split(':')
-  print(chunk, int(count), sep=':')
-  ")
-    if [ $? -ne 0 ]; then
-      return 1;
-    fi
-    for line in $chunk_counts; do
-      local chunk=$(printf "$line" | cut -f1 -d':')
-      local count=$(printf "$line" | cut -f2 -d':')
-      local grep_count=$(grep --count $chunk $input)
-      if [ $? -ne 0 ]; then
-        return 1;
-      fi
-      if [ $grep_count -ne $count ]; then
+    for chunk_type in ${png_chunk_types[*]}; do
+      local grep_count=$(grep --count $chunk_type $input)
+      local info_count=$(jq ".chunks.${chunk_type} // 0" $info_output)
+      if [ $info_count -ne $grep_count ]; then
         printf "grep says '%s' contains %d chunks of type %s, but stufflib png says %d\n" $input $grep_count $chunk $count
       fi
     done
   done
+
+  for segment_threshold in 10 20 30; do
+    local input=${self_dir}/../docs/img/tokyo.png
+    local expect=${self_dir}/../docs/img/tokyo_segmented_${segment_threshold}p.png
+    local output=${test_dir}/stufflib_output.png
+    $png_tool segment --threshold-percent=$segment_threshold $input $output
+    if ! cmp $output $expect; then
+      printf "'%s' failed to segment input with threshold %d\n" $png_tool $segment_threshold
+      return 1
+    fi
+  done
+
   return 0;
 }
 

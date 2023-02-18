@@ -69,15 +69,14 @@ bool info(const stufflib_args args[const static 1]) {
 
   const char* const png_path = stufflib_args_get_positional(args, 1);
 
+  printf("{");
   chunks = stufflib_png_read_chunks(png_path);
-  printf("CHUNKS:\n");
+  printf("\"chunks\":");
   stufflib_png_dump_chunk_type_freq(stdout, chunks);
-  printf("\n");
 
   stufflib_png_header header = stufflib_png_read_header(png_path);
-  printf("HEADER:\n");
+  printf(",\"header\":");
   stufflib_png_dump_header(stdout, header);
-  printf("\n");
 
   if (!stufflib_png_is_supported(header)) {
     printf("PNG contains unsupported features, not reading IDAT chunks\n");
@@ -86,14 +85,12 @@ bool info(const stufflib_args args[const static 1]) {
   }
 
   img = stufflib_png_read_image(png_path);
-  printf("DATA:\n");
+  printf(",\"data\":");
   stufflib_png_dump_img_data_info(stdout, img);
-  printf("\n");
-  printf("FILTERS:\n");
-  stufflib_png_dump_filter_freq(stdout, img.filter);
   ok = true;
 
 done:
+  printf("}\n");
   stufflib_png_chunks_destroy(chunks);
   stufflib_png_image_destroy(img);
   return ok;

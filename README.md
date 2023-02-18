@@ -32,43 +32,50 @@ Simple PNG decoder implemented without dependencies.
 
 ### PNG info
 
-Decode and inspect a PNG image.
+Decode and inspect a PNG image. Outputs JSON.
+
+This example requires `jq` for formatting the output.
+If you don't want to install `jq`, remove `| jq .` from the below example to get the unformatted JSON on a single line.
 
 #### Input
 
 ![](/docs/img/tokyo.png)
 
 ```
-./build/release/tools/png info ./docs/img/tokyo.png
+./build/release/tools/png info ./docs/img/tokyo.png | jq .
 ```
 #### `stdout`:
 ```
-CHUNKS:
-  IHDR: 1
-  IDAT: 13
-  IEND: 1
-  bKGD: 1
-  cHRM: 1
-  gAMA: 1
-  pHYs: 1
-  tEXt: 11
-  tIME: 1
-HEADER:
-  width: 500
-  height: 500
-  bit depth: 8
-  color type: rgb
-  compression: 0
-  filter: 0
-  interlace: 0
-DATA:
-  data length: 756012
-  data begin: 0x7fab58847800
-  filters: 500
-FILTERS:
-  Sub: 31
-  Average: 228
-  Paeth: 241
+{
+  "chunks": {
+    "IHDR": 1,
+    "IDAT": 13,
+    "IEND": 1,
+    "bKGD": 1,
+    "cHRM": 1,
+    "gAMA": 1,
+    "pHYs": 1,
+    "tEXt": 11,
+    "tIME": 1
+  },
+  "header": {
+    "width": 500,
+    "height": 500,
+    "bit depth": 8,
+    "color type": "rgb",
+    "compression": 0,
+    "filter": 0,
+    "interlace": 0
+  },
+  "data": {
+    "length": 756012,
+    "filters": {
+      "Sub": 31,
+      "Average": 228,
+      "Paeth": 241
+    }
+  }
+}
 ```
 
 ### Image segmentation
