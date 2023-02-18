@@ -166,7 +166,7 @@ static void _inflate_block(
     const size_t symbol = _decode_next_code(literal_tree, state);
     if (symbol < end_of_block) {
       assert(state->dst_pos < state->dst.size);
-      state->dst.data[state->dst_pos++] = symbol & STUFFLIB_ONES(1);
+      state->dst.data[state->dst_pos++] = symbol & 0xff;
       continue;
     }
     if (symbol == end_of_block) {
@@ -202,7 +202,7 @@ bool stufflib_inflate_uncompressed_block(_deflate_state state[static 1]) {
       stufflib_misc_parse_lil_endian(2, state->src.data + src_byte_pos);
   src_byte_pos += 2;
 
-  if ((~block_len & STUFFLIB_ONES(2)) != block_len_check) {
+  if ((~block_len & 0xffff) != block_len_check) {
     STUFFLIB_PRINT_ERROR("corrupted zlib block, ~LEN != NLEN");
     return false;
   }
@@ -419,8 +419,7 @@ size_t stufflib_deflate_uncompressed(stufflib_data dst,
     dst.data[dst_pos++] = (int)is_final_block & 1;
 
     const size_t dist_to_end = src.size - src_pos;
-    const uint16_t block_len =
-        STUFFLIB_MIN(block_size, dist_to_end) & STUFFLIB_ONES(2);
+    const uint16_t block_len = STUFFLIB_MIN(block_size, dist_to_end) & 0xffff;
 
     const unsigned char* block_len_bytes =
         stufflib_misc_encode_lil_endian(2, (unsigned char[2]){0}, block_len);

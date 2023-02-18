@@ -6,8 +6,6 @@
 
 #define STUFFLIB_ARRAY_LEN(a) (sizeof(a) / sizeof((a)[0]))
 
-#define STUFFLIB_ONES(n) ((1 << ((n)*CHAR_BIT)) - 1)
-
 #define STUFFLIB_PRINT_ERROR(...)                        \
   do {                                                   \
     const char* const fname = __FILE__;                  \

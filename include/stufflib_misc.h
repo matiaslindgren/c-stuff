@@ -30,7 +30,7 @@ unsigned char* stufflib_misc_encode_lil_endian(const size_t size,
                                                const size_t value) {
   size_t tmp = value;
   for (size_t i = 0; i < size; ++i) {
-    dst[i] = tmp & STUFFLIB_ONES(1);
+    dst[i] = tmp & 0xff;
     tmp >>= CHAR_BIT;
   }
   return dst;
@@ -41,7 +41,7 @@ unsigned char* stufflib_misc_encode_big_endian(const size_t size,
                                                const size_t value) {
   size_t tmp = value;
   for (size_t i = size - 1; i < size; --i) {
-    dst[i] = tmp & STUFFLIB_ONES(1);
+    dst[i] = tmp & 0xff;
     tmp >>= CHAR_BIT;
   }
   return dst;
