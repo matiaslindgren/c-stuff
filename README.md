@@ -137,7 +137,7 @@ This example requires `xxd`.
 
 Source: [`./src/tools/sort.c`](./src/tools/sort.c)
 
-Simple and slow line sorting.
+Simple line sorting.
 
 ### Usage
 ```
