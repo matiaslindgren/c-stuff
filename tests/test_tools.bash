@@ -12,6 +12,8 @@ required_commands=(
   'sort'
   'grep'
   'cmp'
+  'cut'
+  'find'
 )
 ok=1
 for command in ${required_commands[*]}; do
@@ -68,7 +70,7 @@ for _ in range(${test_size}):
   return 0
 }
 
-printf "test sort\n"
+printf "test sort tool\n"
 
 if ! test_sort_tool ${build_dir}/debug/tools/sort 1 '10**3'; then
   exit 1
@@ -83,5 +85,45 @@ if ! test_sort_tool ${build_dir}/release/tools/sort 10 '10**6'; then
   exit 1
 fi
 if ! test_sort_tool ${build_dir}/release/tools/sort '10**6' '10**6'; then
+  exit 1
+fi
+
+function test_png_tool {
+  local png_tool=$1
+  for input in $(find ${self_dir}/../test-data -name '*.png'); do
+    local info_output=${test_dir}/stufflib_output.txt
+    $png_tool info $input > $info_output
+    local chunk_counts=$(python3 -c "
+with open('$info_output') as f:
+  sections = f.read().split('\n\n')
+assert sections and sections[0].startswith('CHUNKS'), 'first section should be CHUNKS'
+for line in sections[0].splitlines()[1:]:
+  chunk, count = line.strip().split(':')
+  print(chunk, int(count), sep=':')
+  ")
+    if [ $? -ne 0 ]; then
+      return 1;
+    fi
+    for line in $chunk_counts; do
+      local chunk=$(printf "$line" | cut -f1 -d':')
+      local count=$(printf "$line" | cut -f2 -d':')
+      local grep_count=$(grep --count $chunk $input)
+      if [ $? -ne 0 ]; then
+        return 1;
+      fi
+      if [ $grep_count -ne $count ]; then
+        printf "grep says '%s' contains %d chunks of type %s, but stufflib png says %d\n" $input $grep_count $chunk $count
+      fi
+    done
+  done
+  return 0;
+}
+
+printf "test png tool\n"
+
+if ! test_png_tool ${build_dir}/debug/tools/png; then
+  exit 1
+fi
+if ! test_png_tool ${build_dir}/release/tools/png; then
   exit 1
 fi
