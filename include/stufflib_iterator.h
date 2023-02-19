@@ -12,6 +12,7 @@ typedef bool stufflib_iterator_end(stufflib_iterator*);
 
 struct stufflib_iterator {
   size_t index;
+  size_t pos;
   void* begin;
   stufflib_iterator_get* get;
   stufflib_iterator_advance* advance;

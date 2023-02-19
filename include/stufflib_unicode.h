@@ -174,6 +174,7 @@ void stufflib_unicode_iter_advance(stufflib_iterator iter[const static 1]) {
   const size_t codepoint_width =
       stufflib_unicode_codepoint_width(data->size - iter->index, item);
   iter->index += STUFFLIB_MAX(1, codepoint_width);
+  iter->pos += 1;
 }
 
 bool stufflib_unicode_iter_end(stufflib_iterator iter[const static 1]) {
@@ -184,7 +185,6 @@ bool stufflib_unicode_iter_end(stufflib_iterator iter[const static 1]) {
 stufflib_iterator stufflib_unicode_iter(
     const stufflib_data data[const static 1]) {
   return (stufflib_iterator){
-      .index = 0,
       .begin = (void*)data,
       .get = stufflib_unicode_iter_get,
       .advance = stufflib_unicode_iter_advance,
@@ -193,13 +193,11 @@ stufflib_iterator stufflib_unicode_iter(
 }
 
 size_t stufflib_unicode_length(const stufflib_data data[const static 1]) {
-  size_t length = 0;
-  for (stufflib_iterator iter = stufflib_unicode_iter(data);
-       !stufflib_unicode_iter_end(&iter);
-       stufflib_unicode_iter_advance(&iter)) {
-    ++length;
+  stufflib_iterator iter = stufflib_unicode_iter(data);
+  while (!stufflib_unicode_iter_end(&iter)) {
+    stufflib_unicode_iter_advance(&iter);
   }
-  return length;
+  return iter.pos;
 }
 
 #endif  // _STUFFLIB_UNICODE_H_INCLUDED

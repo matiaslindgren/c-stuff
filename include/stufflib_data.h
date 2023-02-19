@@ -75,6 +75,7 @@ void* stufflib_data_iter_get(stufflib_iterator iter[const static 1],
 
 void stufflib_data_iter_advance(stufflib_iterator iter[const static 1]) {
   ++(iter->index);
+  ++(iter->pos);
 }
 
 bool stufflib_data_iter_end(stufflib_iterator iter[const static 1]) {
@@ -84,7 +85,6 @@ bool stufflib_data_iter_end(stufflib_iterator iter[const static 1]) {
 
 stufflib_iterator stufflib_data_iter(const stufflib_data data[const static 1]) {
   return (stufflib_iterator){
-      .index = 0,
       .begin = (void*)data,
       .get = stufflib_data_iter_get,
       .advance = stufflib_data_iter_advance,
