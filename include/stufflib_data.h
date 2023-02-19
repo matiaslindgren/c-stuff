@@ -66,9 +66,11 @@ void stufflib_data_fdump(FILE stream[const static 1],
   fprintf(stream, "\n");
 }
 
-const void* stufflib_data_iter_get(stufflib_iterator iter[const static 1]) {
+void* stufflib_data_iter_get(stufflib_iterator iter[const static 1],
+                             void* value) {
   stufflib_data* data = (stufflib_data*)(iter->begin);
-  return data->data + iter->index;
+  ((unsigned char*)value)[0] = data->data[iter->index];
+  return value;
 }
 
 void stufflib_data_iter_advance(stufflib_iterator iter[const static 1]) {

@@ -6,13 +6,12 @@
 typedef struct stufflib_iterator stufflib_iterator;
 struct stufflib_iterator;
 
-typedef const void* stufflib_iterator_get(stufflib_iterator*);
+typedef void* stufflib_iterator_get(stufflib_iterator*, void*);
 typedef void stufflib_iterator_advance(stufflib_iterator*);
 typedef bool stufflib_iterator_end(stufflib_iterator*);
 
 struct stufflib_iterator {
   size_t index;
-  size_t item_size;
   void* begin;
   stufflib_iterator_get* get;
   stufflib_iterator_advance* advance;
