@@ -32,13 +32,16 @@ size_t stufflib_unicode_codepoint_width(const size_t size,
     byte3_f,
     byte4_f,
     end,
+    ill_formed,
   } state = start;
 
   size_t width = 0;
 
-  for (; state != end && width < 4 && width < size; ++width) {
-    const unsigned char byte = bytes[width];
-    switch (state) {
+  while (state != ill_formed && state != end && width < 4 && width < size) {
+    const unsigned char byte = bytes[width++];
+    enum decode_state current_state = state;
+    state = ill_formed;
+    switch (current_state) {
       case start: {
         if (byte <= 0x7f) {
           // 1-byte ASCII
@@ -118,10 +121,18 @@ size_t stufflib_unicode_codepoint_width(const size_t size,
       } break;
       case end: {
       } break;
+      default: {
+        goto error;
+      }
     }
   }
 
-  return state == end ? width : 0;
+  if (state == end) {
+    return width;
+  }
+
+error:
+  return 0;
 }
 
 char32_t stufflib_unicode_codepoint_from_utf8(
