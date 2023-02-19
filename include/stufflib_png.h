@@ -606,7 +606,6 @@ stufflib_png_image stufflib_png_read_image(
                         "    filter=0\n"
                         "  instead, header is:\n"),
                        filename);
-    stufflib_png_dump_header(stderr, image.header);
     goto error;
   }
 

@@ -79,7 +79,8 @@ bool info(const stufflib_args args[const static 1]) {
   stufflib_png_dump_header(stdout, header);
 
   if (!stufflib_png_is_supported(header)) {
-    printf("PNG contains unsupported features, not reading IDAT chunks\n");
+    STUFFLIB_LOG_ERROR(
+        "PNG contains unsupported features, not reading IDAT chunks");
     ok = true;
     goto done;
   }
