@@ -21,3 +21,4 @@
 - [ ] separate tests from other headers
 - [ ] refactor entire stufflib into components, compile as static library, link manually
 - [ ] benchmark utf-8 decoder
+- [ ] implement log levels and replace `STUFFLIB_LOG` macros as no-ops if level too low
