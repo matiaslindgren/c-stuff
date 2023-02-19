@@ -73,6 +73,25 @@ size_t decoded_lengths[] = {
 };
 // clang-format on
 
+bool test_validate_utf8(const bool verbose) {
+  stufflib_data invalid_utf8[] = {
+      {.size = 1,                   .data = (unsigned char[]){0x80}},
+      {.size = 2,             .data = (unsigned char[]){0xc0, 0x80}},
+      {.size = 2,             .data = (unsigned char[]){0xe0, 0x80}},
+      {.size = 2,             .data = (unsigned char[]){0xf0, 0x80}},
+      {.size = 3,       .data = (unsigned char[]){0xf0, 0x80, 0x80}},
+      {.size = 4, .data = (unsigned char[]){0xff, 0x80, 0x80, 0x80}},
+      {.size = 5,       .data = (unsigned char[]){0, 1, 2, 0xf4, 0}},
+  };
+  for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(invalid_utf8); ++i) {
+    assert(!stufflib_unicode_is_valid_utf8(invalid_utf8 + i));
+  }
+  for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(hello_utf8); ++i) {
+    assert(stufflib_unicode_is_valid_utf8(hello_utf8 + i));
+  }
+  return true;
+}
+
 bool test_decode_codepoints(const bool verbose) {
   size_t codepoint_pos = 0;
   for (size_t i_str = 0; i_str < STUFFLIB_ARRAY_LEN(hello_utf8); ++i_str) {
@@ -209,7 +228,8 @@ bool test_decode_utf8_files(const bool verbose) {
   return true;
 }
 
-STUFFLIB_TEST_MAIN(test_decode_codepoints,
+STUFFLIB_TEST_MAIN(test_validate_utf8,
+                   test_decode_codepoints,
                    test_unicode_iterator,
                    test_unicode_length,
                    test_decode_utf8_files)

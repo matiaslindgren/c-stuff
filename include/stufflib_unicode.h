@@ -156,6 +156,20 @@ char32_t stufflib_unicode_codepoint_from_utf8(
   }
 }
 
+bool stufflib_unicode_is_valid_utf8(const stufflib_data data[const static 1]) {
+  size_t byte_pos = 0;
+  while (byte_pos < data->size) {
+    const size_t codepoint_width =
+        stufflib_unicode_codepoint_width(data->size - byte_pos,
+                                         data->data + byte_pos);
+    if (codepoint_width == 0) {
+      return false;
+    }
+    byte_pos += codepoint_width;
+  }
+  return byte_pos == data->size;
+}
+
 void* stufflib_unicode_iter_get(stufflib_iterator iter[const static 1],
                                 void* dst) {
   const stufflib_data* data = (const stufflib_data*)(iter->begin);
