@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "stufflib_iterator.h"
 #include "stufflib_macros.h"
 
 typedef struct stufflib_data stufflib_data;
@@ -63,6 +64,30 @@ void stufflib_data_fdump(FILE stream[const static 1],
     fprintf(stream, "%02x", data.data[i]);
   }
   fprintf(stream, "\n");
+}
+
+const void* stufflib_data_iter_get(stufflib_iterator iter[const static 1]) {
+  stufflib_data* data = (stufflib_data*)(iter->begin);
+  return data->data + iter->index;
+}
+
+void stufflib_data_iter_advance(stufflib_iterator iter[const static 1]) {
+  ++(iter->index);
+}
+
+bool stufflib_data_iter_end(stufflib_iterator iter[const static 1]) {
+  const stufflib_data* data = (const stufflib_data*)(iter->begin);
+  return iter->index == data->size;
+}
+
+stufflib_iterator stufflib_data_iter(const stufflib_data data[const static 1]) {
+  return (stufflib_iterator){
+      .index = 0,
+      .begin = (void*)data,
+      .get = stufflib_data_iter_get,
+      .advance = stufflib_data_iter_advance,
+      .end = stufflib_data_iter_end,
+  };
 }
 
 #endif  // _STUFFLIB_DATA_H_INCLUDED
