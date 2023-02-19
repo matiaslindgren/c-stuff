@@ -5,6 +5,7 @@
 #include "stufflib_iterator.h"
 #include "stufflib_macros.h"
 #include "stufflib_test.h"
+#include "stufflib_unicode.h"
 
 bool test_data(const bool verbose) {
   stufflib_data data = {
@@ -15,18 +16,18 @@ bool test_data(const bool verbose) {
   stufflib_iterator iter = stufflib_data_iter(&data);
   for (; !stufflib_data_iter_end(&iter); stufflib_data_iter_advance(&iter)) {
     assert(iter.index == i);
-    const unsigned char* value = stufflib_data_iter_get(&iter);
-    assert(value);
-    assert(*value == data.data[i]);
+    unsigned char value = 0;
+    assert(stufflib_data_iter_get(&iter, &value));
+    assert(value == data.data[i]);
     ++i;
   }
   assert(iter.index == data.size);
   return true;
 }
 
-const void* stufflib_cstr_iter_get(stufflib_iterator iter[const static 1]) {
-  const char* str = (const char*)(iter->begin);
-  return str + iter->index;
+void* stufflib_cstr_iter_get(stufflib_iterator iter[const static 1], void* ch) {
+  ((char*)ch)[0] = ((char*)iter->begin)[iter->index];
+  return ch;
 }
 
 void stufflib_cstr_iter_advance(stufflib_iterator iter[const static 1]) {
@@ -34,11 +35,10 @@ void stufflib_cstr_iter_advance(stufflib_iterator iter[const static 1]) {
 }
 
 bool stufflib_cstr_iter_end(stufflib_iterator iter[const static 1]) {
-  const char* str = (const char*)(iter->begin);
-  return str[iter->index] == 0;
+  return ((char*)iter->begin)[iter->index] == 0;
 }
 
-stufflib_iterator stufflib_cstr_iter(const char str[const static 1]) {
+stufflib_iterator stufflib_cstr_iter(char str[const static 1]) {
   return (stufflib_iterator){
       .index = 0,
       .begin = (void*)str,
@@ -49,7 +49,7 @@ stufflib_iterator stufflib_cstr_iter(const char str[const static 1]) {
 }
 
 bool test_cstr(const bool verbose) {
-  const char* strings[] = {
+  char* strings[] = {
       "",
       " ",
       "hello there",
@@ -61,13 +61,13 @@ bool test_cstr(const bool verbose) {
   };
   for (size_t i_str = 0; i_str < STUFFLIB_ARRAY_LEN(strings); ++i_str) {
     size_t i = 0;
-    const char* str = strings[i_str];
+    char* str = strings[i_str];
     stufflib_iterator iter = stufflib_cstr_iter(str);
     for (; !stufflib_cstr_iter_end(&iter); stufflib_cstr_iter_advance(&iter)) {
       assert(iter.index == i);
-      const char* value = stufflib_cstr_iter_get(&iter);
-      assert(value);
-      assert(*value == str[i]);
+      char ch = 0;
+      assert(stufflib_cstr_iter_get(&iter, &ch));
+      assert(ch == str[i]);
       ++i;
     }
     assert(iter.index == strlen(str));
