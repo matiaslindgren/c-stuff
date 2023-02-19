@@ -180,7 +180,7 @@ bool test_decode_utf8_files(const bool verbose) {
       }
       FILE* fp = fopen(input_path, "rb");
       if (!fp) {
-        STUFFLIB_PRINT_ERROR("cannot open %s", input_path);
+        STUFFLIB_LOG_ERROR("cannot open %s", input_path);
         continue;
       }
       utf8_data.size = fread(utf8_data.data, 1, 20000, fp);
@@ -200,7 +200,7 @@ bool test_decode_utf8_files(const bool verbose) {
               languages[i]);
       FILE* fp = fopen(codepoints_path, "rb");
       if (!fp) {
-        STUFFLIB_PRINT_ERROR("cannot open %s", codepoints_path);
+        STUFFLIB_LOG_ERROR("cannot open %s", codepoints_path);
         continue;
       }
       char buf[1000] = {0};

@@ -26,7 +26,7 @@ stufflib_args stufflib_args_from_argv(const int argc,
   char* const** required = calloc(num_required + 1, sizeof(char*));
   char* const** optional = calloc(num_optional + 1, sizeof(char*));
   if (!required || !optional) {
-    STUFFLIB_PRINT_ERROR("failed allocating memory during args parse");
+    STUFFLIB_LOG_ERROR("failed allocating memory during args parse");
     assert(0);
     return (stufflib_args){0};
   }

@@ -11,7 +11,7 @@ size_t stufflib_io_file_size(const char fname[const static 1]) {
 
   FILE* fp = fopen(fname, "r");
   if (!fp) {
-    STUFFLIB_PRINT_ERROR("cannot open %s", fname);
+    STUFFLIB_LOG_ERROR("cannot open %s", fname);
     goto done;
   }
 
@@ -22,7 +22,7 @@ size_t stufflib_io_file_size(const char fname[const static 1]) {
     }
   }
   if (ferror(fp)) {
-    STUFFLIB_PRINT_ERROR("failed reading from %s", fname);
+    STUFFLIB_LOG_ERROR("failed reading from %s", fname);
     goto done;
   }
 
@@ -37,11 +37,11 @@ char* stufflib_io_slurp_file(const char fname[const static 1]) {
   char* content = calloc(1, 1);
   FILE* fp = fopen(fname, "r");
   if (!content) {
-    STUFFLIB_PRINT_ERROR("failed allocating slurp buffer");
+    STUFFLIB_LOG_ERROR("failed allocating slurp buffer");
     goto error;
   }
   if (!fp) {
-    STUFFLIB_PRINT_ERROR("cannot open %s", fname);
+    STUFFLIB_LOG_ERROR("cannot open %s", fname);
     goto error;
   }
 
@@ -53,7 +53,7 @@ char* stufflib_io_slurp_file(const char fname[const static 1]) {
       {
         char* tmp = realloc(content, size + 1);
         if (!tmp) {
-          STUFFLIB_PRINT_ERROR("failed resizing slurp buffer");
+          STUFFLIB_LOG_ERROR("failed resizing slurp buffer");
           goto error;
         }
         content = tmp;
@@ -63,7 +63,7 @@ char* stufflib_io_slurp_file(const char fname[const static 1]) {
     }
   }
   if (ferror(fp)) {
-    STUFFLIB_PRINT_ERROR("failed reading from %s", fname);
+    STUFFLIB_LOG_ERROR("failed reading from %s", fname);
     goto error;
   }
 

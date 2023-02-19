@@ -31,7 +31,7 @@ static inline bool _realloc_nodes(stufflib_hashmap map[const static 1],
   stufflib_hashmap_node* new_nodes =
       calloc(new_capacity, sizeof(stufflib_hashmap_node));
   if (!new_nodes) {
-    STUFFLIB_PRINT_ERROR("failed allocating %zu hashmap nodes", new_capacity);
+    STUFFLIB_LOG_ERROR("failed allocating %zu hashmap nodes", new_capacity);
     return false;
   }
   map->nodes = new_nodes;
@@ -128,8 +128,8 @@ bool stufflib_hashmap_insert(stufflib_hashmap map[const static 1],
   if (stufflib_hashmap_load_factor(map) > STUFFLIB_HASHMAP_MAX_LOAD_FACTOR) {
     const size_t new_capacity = stufflib_math_next_power_of_two(map->capacity);
     if (!stufflib_hashmap_resize(map, new_capacity)) {
-      STUFFLIB_PRINT_ERROR("failed resizing hashmap to capacity %zu",
-                           new_capacity);
+      STUFFLIB_LOG_ERROR("failed resizing hashmap to capacity %zu",
+                         new_capacity);
       return false;
     }
   }

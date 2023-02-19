@@ -99,8 +99,7 @@ static stufflib_huffman_tree _make_fixed_literal_tree() {
   return tree;
 
 error:
-  STUFFLIB_PRINT_ERROR(
-      "failed building fixed literal huffman codes for DEFLATE");
+  STUFFLIB_LOG_ERROR("failed building fixed literal huffman codes for DEFLATE");
   return (stufflib_huffman_tree){0};
 }
 
@@ -122,7 +121,7 @@ static stufflib_huffman_tree _make_fixed_distance_tree() {
   return tree;
 
 error:
-  STUFFLIB_PRINT_ERROR(
+  STUFFLIB_LOG_ERROR(
       "failed building fixed distance huffman codes for DEFLATE");
   return (stufflib_huffman_tree){0};
 }
@@ -203,11 +202,11 @@ bool stufflib_inflate_uncompressed_block(_deflate_state state[static 1]) {
   src_byte_pos += 2;
 
   if ((~block_len & 0xffff) != block_len_check) {
-    STUFFLIB_PRINT_ERROR("corrupted zlib block, ~LEN != NLEN");
+    STUFFLIB_LOG_ERROR("corrupted zlib block, ~LEN != NLEN");
     return false;
   }
   if (block_len > state->src.size - src_byte_pos) {
-    STUFFLIB_PRINT_ERROR("corrupted zlib block, LEN too large");
+    STUFFLIB_LOG_ERROR("corrupted zlib block, LEN too large");
     return false;
   }
 
@@ -233,7 +232,7 @@ bool stufflib_inflate_dynamic_block(_deflate_state state[static 1]) {
 
   size_t* length_lengths = calloc(max_length_length + 1, sizeof(size_t));
   if (!length_lengths) {
-    STUFFLIB_PRINT_ERROR("failed allocating dynamic length_lengths");
+    STUFFLIB_LOG_ERROR("failed allocating dynamic length_lengths");
     goto error;
   }
   for (size_t i = 0; i < num_length_lengths; ++i) {
@@ -267,7 +266,7 @@ bool stufflib_inflate_dynamic_block(_deflate_state state[static 1]) {
       code_len = 0;
       num_repeats = 11 + _next_n_bits(state, 7);
     } else {
-      STUFFLIB_PRINT_ERROR("unexpected symbol %zu in dynamic block", symbol);
+      STUFFLIB_LOG_ERROR("unexpected symbol %zu in dynamic block", symbol);
       free(dynamic_code_lengths);
       goto error;
     }
@@ -316,26 +315,26 @@ bool stufflib_inflate_fixed_block(_deflate_state state[static 1]) {
 
 size_t stufflib_inflate(stufflib_data dst, const stufflib_data src) {
   if (src.size < 3) {
-    STUFFLIB_PRINT_ERROR("DEFLATE stream is too short");
+    STUFFLIB_LOG_ERROR("DEFLATE stream is too short");
     goto error;
   }
   if ((src.data[0] * 256 + src.data[1]) % 31) {
-    STUFFLIB_PRINT_ERROR("DEFLATE stream is corrupted");
+    STUFFLIB_LOG_ERROR("DEFLATE stream is corrupted");
     goto error;
   }
   const int cmethod = src.data[0] & 0x0F;
   if (cmethod != 8) {
-    STUFFLIB_PRINT_ERROR("unexpected compression method %d != 8", cmethod);
+    STUFFLIB_LOG_ERROR("unexpected compression method %d != 8", cmethod);
     goto error;
   }
   const int cinfo = (src.data[0] & 0xF0) >> 4;
   if (cinfo > 7) {
-    STUFFLIB_PRINT_ERROR("too large compression info %d > 7", cinfo);
+    STUFFLIB_LOG_ERROR("too large compression info %d > 7", cinfo);
     goto error;
   }
   const int fdict = (src.data[1] & 0x20) >> 5;
   if (fdict) {
-    STUFFLIB_PRINT_ERROR("dictionaries are not supported");
+    STUFFLIB_LOG_ERROR("dictionaries are not supported");
     goto error;
   }
 
@@ -359,24 +358,24 @@ size_t stufflib_inflate(stufflib_data dst, const stufflib_data src) {
     switch (type) {
       case no_compression: {
         if (!stufflib_inflate_uncompressed_block(state)) {
-          STUFFLIB_PRINT_ERROR("failed inflating uncompressed block");
+          STUFFLIB_LOG_ERROR("failed inflating uncompressed block");
           goto error;
         }
       } break;
       case dynamic_huffman_trees: {
         if (!stufflib_inflate_dynamic_block(state)) {
-          STUFFLIB_PRINT_ERROR("failed inflating dynamic block");
+          STUFFLIB_LOG_ERROR("failed inflating dynamic block");
           goto error;
         }
       } break;
       case fixed_huffman_trees: {
         if (!stufflib_inflate_fixed_block(state)) {
-          STUFFLIB_PRINT_ERROR("failed inflating fixed block");
+          STUFFLIB_LOG_ERROR("failed inflating fixed block");
           goto error;
         }
       } break;
       default: {
-        STUFFLIB_PRINT_ERROR("invalid block type %d", type);
+        STUFFLIB_LOG_ERROR("invalid block type %d", type);
         goto error;
       } break;
     }
@@ -386,7 +385,7 @@ size_t stufflib_inflate(stufflib_data dst, const stufflib_data src) {
   /* const size_t dst_adler32 = */
   /*     stufflib_hash_adler32(state->dst.size, state->dst.data); */
   /* if (dst_adler32 != src_adler32) { */
-  /*   STUFFLIB_PRINT_ERROR("output stream adler32 %zu not equal to expected
+  /*   STUFFLIB_LOG_ERROR("output stream adler32 %zu not equal to expected
    * %zu", */
   /*                        dst_adler32, */
   /*                        src_adler32); */

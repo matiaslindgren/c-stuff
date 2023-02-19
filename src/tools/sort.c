@@ -57,12 +57,12 @@ int main(int argc, char* const argv[argc + 1]) {
 
   if (sort_as_numeric) {
     if (!sort_doubles(num_lines, lines)) {
-      STUFFLIB_PRINT_ERROR("failed sorting input as numeric");
+      STUFFLIB_LOG_ERROR("failed sorting input as numeric");
       goto done;
     }
   } else {
     if (!stufflib_sort_quicksort_str(num_lines, lines)) {
-      STUFFLIB_PRINT_ERROR("failed sorting input as ascii");
+      STUFFLIB_LOG_ERROR("failed sorting input as ascii");
       goto done;
     }
   }

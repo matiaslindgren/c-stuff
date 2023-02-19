@@ -32,7 +32,7 @@ bool stufflib_huffman_init(stufflib_huffman_tree tree[static 1],
 
   code_length_count = calloc(max_code_len + 1, sizeof(size_t));
   if (!code_length_count) {
-    STUFFLIB_PRINT_ERROR("failed allocating code_length_count");
+    STUFFLIB_LOG_ERROR("failed allocating code_length_count");
     goto error;
   }
   for (size_t symbol = 0; symbol <= max_symbol; ++symbol) {
@@ -42,7 +42,7 @@ bool stufflib_huffman_init(stufflib_huffman_tree tree[static 1],
 
   next_code = calloc(max_code_len + 1, sizeof(size_t));
   if (!next_code) {
-    STUFFLIB_PRINT_ERROR("failed allocating next_code");
+    STUFFLIB_LOG_ERROR("failed allocating next_code");
     goto error;
   }
   {
@@ -55,7 +55,7 @@ bool stufflib_huffman_init(stufflib_huffman_tree tree[static 1],
 
   codes = calloc(max_symbol + 1, sizeof(size_t));
   if (!codes) {
-    STUFFLIB_PRINT_ERROR("failed allocating codes");
+    STUFFLIB_LOG_ERROR("failed allocating codes");
     goto error;
   }
   for (size_t symbol = 0; symbol <= max_symbol; ++symbol) {
@@ -68,7 +68,7 @@ bool stufflib_huffman_init(stufflib_huffman_tree tree[static 1],
 
   max_codes = calloc(max_code_len, sizeof(size_t));
   if (!max_codes) {
-    STUFFLIB_PRINT_ERROR("failed allocating max_codes");
+    STUFFLIB_LOG_ERROR("failed allocating max_codes");
     goto error;
   }
   for (size_t symbol = 0; symbol <= max_symbol; ++symbol) {
@@ -81,14 +81,14 @@ bool stufflib_huffman_init(stufflib_huffman_tree tree[static 1],
 
   symbols = calloc(max_code_len, sizeof(size_t*));
   if (!symbols) {
-    STUFFLIB_PRINT_ERROR("failed allocating symbols");
+    STUFFLIB_LOG_ERROR("failed allocating symbols");
     goto error;
   }
   for (size_t code_len = 1; code_len <= max_code_len; ++code_len) {
     const size_t max_code = max_codes[code_len - 1];
     if (!(symbols[code_len - 1] = calloc(max_code + 1, sizeof(size_t)))) {
-      STUFFLIB_PRINT_ERROR("failed allocating symbols for code_len %zu",
-                           code_len);
+      STUFFLIB_LOG_ERROR("failed allocating symbols for code_len %zu",
+                         code_len);
       goto error;
     }
   }

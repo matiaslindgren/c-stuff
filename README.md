@@ -306,7 +306,7 @@ int main(int argc, char* const argv[argc + 1]) {
     } else if (strcmp(command, "count_words") == 0) {
       ok = count_words(&args);
     } else {
-      STUFFLIB_PRINT_ERROR("unknown command %s", command);
+      STUFFLIB_LOG_ERROR("unknown command %s", command);
     }
   }
   if (!ok) {
@@ -336,7 +336,7 @@ Tokenisation is simply "split at whitespace".
 42 size_t
 37 return
 31 goto
-23 STUFFLIB_PRINT_ERROR("failed
+23 STUFFLIB_LOG_ERROR("failed
 23 unsigned
 20 static
 20 *

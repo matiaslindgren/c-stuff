@@ -159,7 +159,7 @@ static inline int _test_read_single_pixel(const char* png_path,
   }
   stufflib_png_image pixel = stufflib_png_read_image(png_path);
   if (!pixel.data.size) {
-    STUFFLIB_PRINT_ERROR("failed reading PNG image %s", png_path);
+    STUFFLIB_LOG_ERROR("failed reading PNG image %s", png_path);
     return false;
   }
   if (verbose) {
@@ -259,7 +259,7 @@ bool test_read_small_images_with_dynamic_compression(const bool verbose) {
     }
     stufflib_png_image img = stufflib_png_read_image(png_path);
     if (!img.data.size) {
-      STUFFLIB_PRINT_ERROR("failed reading PNG image %s", png_path);
+      STUFFLIB_LOG_ERROR("failed reading PNG image %s", png_path);
       return false;
     }
     if (verbose) {
@@ -293,7 +293,7 @@ bool test_read_large_images_with_dynamic_compression(const bool verbose) {
     }
     stufflib_png_image square = stufflib_png_read_image(png_path);
     if (!square.data.size) {
-      STUFFLIB_PRINT_ERROR("failed reading PNG image %s", png_path);
+      STUFFLIB_LOG_ERROR("failed reading PNG image %s", png_path);
       return false;
     }
     if (verbose) {
@@ -323,7 +323,7 @@ bool test_read_large_images_with_dynamic_compression(const bool verbose) {
     }
     stufflib_png_image asan = stufflib_png_read_image(png_path);
     if (!asan.data.size) {
-      STUFFLIB_PRINT_ERROR("failed reading PNG image %s", png_path);
+      STUFFLIB_LOG_ERROR("failed reading PNG image %s", png_path);
       return false;
     }
     if (verbose) {
@@ -348,7 +348,7 @@ int _test_read_write_read(const bool verbose, const char* img0_path) {
   }
   stufflib_png_image img0 = stufflib_png_read_image(img0_path);
   if (!img0.data.size) {
-    STUFFLIB_PRINT_ERROR("failed reading PNG image %s", img0_path);
+    STUFFLIB_LOG_ERROR("failed reading PNG image %s", img0_path);
     return false;
   }
   if (verbose) {

@@ -7,7 +7,7 @@
 
 bool concat(const stufflib_args args[const static 1]) {
   if (stufflib_args_count_positional(args) < 2) {
-    STUFFLIB_PRINT_ERROR("too few arguments to concat");
+    STUFFLIB_LOG_ERROR("too few arguments to concat");
     return false;
   }
 
@@ -49,7 +49,7 @@ done:
 
 bool count(const stufflib_args args[const static 1]) {
   if (stufflib_args_count_positional(args) != 3) {
-    STUFFLIB_PRINT_ERROR("too few arguments to count");
+    STUFFLIB_LOG_ERROR("too few arguments to count");
     return false;
   }
 
@@ -78,7 +78,7 @@ done:
 
 bool replace(const stufflib_args args[const static 1]) {
   if (stufflib_args_count_positional(args) != 4) {
-    STUFFLIB_PRINT_ERROR("too few arguments to replace");
+    STUFFLIB_LOG_ERROR("too few arguments to replace");
     return false;
   }
 
@@ -114,7 +114,7 @@ done:
 
 bool slicelines(const stufflib_args args[const static 1]) {
   if (stufflib_args_count_positional(args) != 4) {
-    STUFFLIB_PRINT_ERROR("too few arguments to slicelines");
+    STUFFLIB_LOG_ERROR("too few arguments to slicelines");
     return false;
   }
 
@@ -147,7 +147,7 @@ done:
 
 bool count_words(const stufflib_args args[const static 1]) {
   if (stufflib_args_count_positional(args) != 2) {
-    STUFFLIB_PRINT_ERROR("too few arguments to count_words");
+    STUFFLIB_LOG_ERROR("too few arguments to count_words");
     return false;
   }
 
@@ -238,7 +238,7 @@ int main(int argc, char* const argv[argc + 1]) {
     } else if (strcmp(command, "count_words") == 0) {
       ok = count_words(&args);
     } else {
-      STUFFLIB_PRINT_ERROR("unknown command %s", command);
+      STUFFLIB_LOG_ERROR("unknown command %s", command);
     }
   }
   if (!ok) {

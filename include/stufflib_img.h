@@ -23,18 +23,17 @@ bool stufflib_img_segment_rgb(stufflib_png_image dst[const static 1],
       stufflib_math_clamp(0, (double)(threshold_percent) / 100, 1);
 
   if (!stufflib_unionfind_init(&segments, width * height)) {
-    STUFFLIB_PRINT_ERROR(
-        "failed initializing union_find structure for segments");
+    STUFFLIB_LOG_ERROR("failed initializing union_find structure for segments");
     goto done;
   }
   segment_sizes = calloc(width * height, sizeof(size_t));
   if (!segment_sizes) {
-    STUFFLIB_PRINT_ERROR("failed allocating memory for segment sizes");
+    STUFFLIB_LOG_ERROR("failed allocating memory for segment sizes");
     goto done;
   }
   segment_sums = calloc(bytes_per_px * width * height, sizeof(double));
   if (!segment_sums) {
-    STUFFLIB_PRINT_ERROR("failed allocating memory for segment sums");
+    STUFFLIB_LOG_ERROR("failed allocating memory for segment sums");
     goto done;
   }
 

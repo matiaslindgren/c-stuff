@@ -29,7 +29,7 @@ char** stufflib_str_slice_chunks(char* src_chunks[const static 1],
   assert(end >= begin);
   char** dst_chunks = calloc(end - begin + 1, sizeof(char*));
   if (!dst_chunks) {
-    STUFFLIB_PRINT_ERROR("failed allocating new chunks during slice");
+    STUFFLIB_LOG_ERROR("failed allocating new chunks during slice");
     goto error;
   }
   for (size_t pos = begin; pos < end; ++pos) {
@@ -37,7 +37,7 @@ char** stufflib_str_slice_chunks(char* src_chunks[const static 1],
     const size_t dst_pos = pos - begin;
     dst_chunks[dst_pos] = calloc(chunk_len + 1, 1);
     if (!dst_chunks[dst_pos]) {
-      STUFFLIB_PRINT_ERROR("failed allocating new chunk during slice");
+      STUFFLIB_LOG_ERROR("failed allocating new chunk during slice");
       goto error;
     }
     memcpy(dst_chunks[dst_pos], src_chunks[pos], chunk_len);
@@ -66,8 +66,7 @@ char** stufflib_str_split_any(const char str[const static 1],
     {
       char** tmp = realloc(chunks, (num_chunks + 2) * (sizeof(char*)));
       if (!tmp) {
-        STUFFLIB_PRINT_ERROR(
-            "failed resizing result chunks array during split");
+        STUFFLIB_LOG_ERROR("failed resizing result chunks array during split");
         goto error;
       }
       chunks = tmp;
@@ -90,7 +89,7 @@ char** stufflib_str_split_any(const char str[const static 1],
     {
       char* tmp = calloc(chunk_len + 1, 1);
       if (!tmp) {
-        STUFFLIB_PRINT_ERROR("failed allocating chunk during split");
+        STUFFLIB_LOG_ERROR("failed allocating chunk during split");
         goto error;
       }
       chunks[num_chunks] = tmp;

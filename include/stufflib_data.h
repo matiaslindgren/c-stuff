@@ -25,7 +25,7 @@ bool stufflib_data_copy(stufflib_data dst[restrict static 1],
                         const stufflib_data src[restrict static 1]) {
   *dst = stufflib_data_new(src->size);
   if (!dst->size) {
-    STUFFLIB_PRINT_ERROR("failed allocating memory for stufflib_data copy");
+    STUFFLIB_LOG_ERROR("failed allocating memory for stufflib_data copy");
     return false;
   }
   memcpy(dst->data, src->data, dst->size);
@@ -41,7 +41,7 @@ stufflib_data* stufflib_data_concat(stufflib_data dst[static 1],
                                     const stufflib_data src[static 1]) {
   unsigned char* tmp = realloc(dst->data, dst->size + src->size);
   if (!tmp) {
-    STUFFLIB_PRINT_ERROR("failed allocating memory for stufflib_data concat");
+    STUFFLIB_LOG_ERROR("failed allocating memory for stufflib_data concat");
     return nullptr;
   }
   dst->data = tmp;

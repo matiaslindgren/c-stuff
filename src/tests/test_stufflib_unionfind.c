@@ -14,7 +14,7 @@ int _check_roots(const stufflib_unionfind uf, size_t expected_roots[static 1]) {
 bool test_union_until_single_set(const bool verbose) {
   stufflib_unionfind uf = {0};
   if (!stufflib_unionfind_init(&uf, 10)) {
-    STUFFLIB_PRINT_ERROR("unable to allocate union find structure");
+    STUFFLIB_LOG_ERROR("unable to allocate union find structure");
     return false;
   }
 
@@ -79,7 +79,7 @@ bool test_union_until_single_set(const bool verbose) {
 bool test_union_self(const bool verbose) {
   stufflib_unionfind uf = {0};
   if (!stufflib_unionfind_init(&uf, 3)) {
-    STUFFLIB_PRINT_ERROR("unable to allocate union find structure");
+    STUFFLIB_LOG_ERROR("unable to allocate union find structure");
     return false;
   }
 

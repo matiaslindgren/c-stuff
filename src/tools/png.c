@@ -9,7 +9,7 @@
 
 bool segment(const stufflib_args args[const static 1]) {
   if (stufflib_args_count_positional(args) != 3) {
-    STUFFLIB_PRINT_ERROR("too few arguments to PNG segment");
+    STUFFLIB_LOG_ERROR("too few arguments to PNG segment");
     return false;
   }
 
@@ -29,14 +29,14 @@ bool segment(const stufflib_args args[const static 1]) {
   }
   src = stufflib_png_read_image(png_src_path);
   if (!src.data.size) {
-    STUFFLIB_PRINT_ERROR("failed reading PNG image %s", png_src_path);
+    STUFFLIB_LOG_ERROR("failed reading PNG image %s", png_src_path);
     goto done;
   }
   if (verbose) {
     printf("segmenting, threshold %zu%%\n", threshold_percent);
   }
   if (!stufflib_img_segment_rgb(&dst, &src, threshold_percent)) {
-    STUFFLIB_PRINT_ERROR("failed segmenting PNG image %s", png_src_path);
+    STUFFLIB_LOG_ERROR("failed segmenting PNG image %s", png_src_path);
     goto done;
   }
 
@@ -44,7 +44,7 @@ bool segment(const stufflib_args args[const static 1]) {
     printf("write %s\n", png_dst_path);
   }
   if (!stufflib_png_write_image(dst, png_dst_path)) {
-    STUFFLIB_PRINT_ERROR("failed writing PNG image %s", png_dst_path);
+    STUFFLIB_LOG_ERROR("failed writing PNG image %s", png_dst_path);
     goto done;
   }
 
@@ -58,7 +58,7 @@ done:
 
 bool info(const stufflib_args args[const static 1]) {
   if (stufflib_args_count_positional(args) != 2) {
-    STUFFLIB_PRINT_ERROR("too few arguments to PNG info");
+    STUFFLIB_LOG_ERROR("too few arguments to PNG info");
     return false;
   }
 
@@ -98,7 +98,7 @@ done:
 
 bool dump_raw(const stufflib_args args[const static 1]) {
   if (stufflib_args_count_positional(args) < 3) {
-    STUFFLIB_PRINT_ERROR("too few arguments to PNG dump_raw");
+    STUFFLIB_LOG_ERROR("too few arguments to PNG dump_raw");
     return false;
   }
 
@@ -107,7 +107,7 @@ bool dump_raw(const stufflib_args args[const static 1]) {
   const char* const png_path = stufflib_args_get_positional(args, 1);
   stufflib_png_chunks img_chunks = stufflib_png_read_chunks(png_path);
   if (!img_chunks.count) {
-    STUFFLIB_PRINT_ERROR("failed reading PNG IDAT chunks from %s", png_path);
+    STUFFLIB_LOG_ERROR("failed reading PNG IDAT chunks from %s", png_path);
     goto done;
   }
 
@@ -163,7 +163,7 @@ int main(int argc, char* const argv[argc + 1]) {
     } else if (strcmp(command, "dump_raw") == 0) {
       ok = dump_raw(&args);
     } else {
-      STUFFLIB_PRINT_ERROR("unknown command %s", command);
+      STUFFLIB_LOG_ERROR("unknown command %s", command);
     }
   }
   if (!ok) {
