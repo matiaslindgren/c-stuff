@@ -9,7 +9,7 @@
 #include "stufflib_str.h"
 
 void print_usage(const stufflib_args args[const static 1]) {
-  fprintf(stderr, "usage: %s { numeric | strings } path\n", args->program);
+  fprintf(stderr, "usage: %s { numeric | ascii } path\n", args->program);
 }
 
 int compare_as_doubles(const void* lhs, const void* rhs) {
@@ -41,8 +41,8 @@ int main(int argc, char* const argv[argc + 1]) {
   }
   const char* sort_as = stufflib_args_get_positional(&args, 0);
   const bool sort_as_numeric = strcmp(sort_as, "numeric") == 0;
-  const bool sort_as_strings = strcmp(sort_as, "strings") == 0;
-  if (!(sort_as_numeric || sort_as_strings)) {
+  const bool sort_as_ascii = strcmp(sort_as, "ascii") == 0;
+  if (!(sort_as_numeric || sort_as_ascii)) {
     print_usage(&args);
     goto done;
   }
@@ -62,7 +62,7 @@ int main(int argc, char* const argv[argc + 1]) {
     }
   } else {
     if (!stufflib_sort_quicksort_str(num_lines, lines)) {
-      STUFFLIB_PRINT_ERROR("failed sorting input as strings");
+      STUFFLIB_PRINT_ERROR("failed sorting input as ascii");
       goto done;
     }
   }

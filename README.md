@@ -141,7 +141,7 @@ Simple line sorting.
 
 ### Usage
 ```
-./build/release/tools/sort { numeric | strings } path
+./build/release/tools/sort { numeric | ascii } path
 ```
 
 ### Example
@@ -179,9 +179,9 @@ find ./test-data/png -printf '%s\n' > test-data-sizes.txt
 24733
 ```
 
-#### Sort lines as strings
+#### Sort lines as ASCII strings
 ```
-./build/release/tools/sort strings ./test-data-sizes.txt
+./build/release/tools/sort ascii ./test-data-sizes.txt
 ```
 #### `stdout`:
 ```

@@ -54,9 +54,9 @@ for _ in range(${test_size}):
   " > $input
 
   LC_ALL=C sort $input > $expect
-  $sort_tool strings $input > $output
+  $sort_tool ascii $input > $output
   if ! cmp --print-bytes $output $expect; then
-    printf "'%s' failed to sort input as strings\n" $sort_tool
+    printf "'%s' failed to sort input as ascii strings\n" $sort_tool
     return 1
   fi
 
