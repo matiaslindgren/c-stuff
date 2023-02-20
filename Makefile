@@ -60,8 +60,9 @@ $(TOOLS_DEBUG) $(TESTS_DEBUG): $(BUILD_DIR_DEBUG)/%: src/%.c $(HEADERS) | $(TOOL
 $(TOOLS_RELEASE) $(TESTS_RELEASE): $(BUILD_DIR_RELEASE)/%: src/%.c $(HEADERS) | $(TOOLS_DIR_RELEASE) $(TESTS_DIR_RELEASE)
 	$(CLANG) $(CFLAGS_RELEASE) -I./include -o $@ $< $(LFLAGS)
 
-RUN_DEBUG_TESTS   := $(addprefix run_debug_,$(TESTS_FILES))
-RUN_RELEASE_TESTS := $(addprefix run_release_,$(TESTS_FILES))
+RUN_DEBUG_TESTS       := $(addprefix run_debug_,$(TESTS_FILES))
+RUN_RELEASE_TESTS     := $(addprefix run_release_,$(TESTS_FILES))
+RUN_INTEGRATION_TESTS := $(addprefix run_integration_test_,$(TOOLS_FILES))
 
 ifeq (${STUFFLIB_TEST_VERBOSE},1)
 	TEST_ARGS := -v
@@ -69,10 +70,15 @@ else
 	TEST_ARGS :=
 endif
 
+.PHONY: test
+test: run_debug_tests run_release_tests run_integration_tests
+
 .PHONY: run_debug_tests
 run_debug_tests: $(RUN_DEBUG_TESTS)
 .PHONY: run_release_tests
 run_release_tests: $(RUN_RELEASE_TESTS)
+.PHONY: run_integration_tests
+run_integration_tests: $(RUN_INTEGRATION_TESTS)
 
 .PHONY: $(RUN_DEBUG_TESTS)
 $(RUN_DEBUG_TESTS): run_debug_%: $(TESTS_DIR_DEBUG)/%
@@ -80,7 +86,6 @@ $(RUN_DEBUG_TESTS): run_debug_%: $(TESTS_DIR_DEBUG)/%
 .PHONY: $(RUN_RELEASE_TESTS)
 $(RUN_RELEASE_TESTS): run_release_%: $(TESTS_DIR_RELEASE)/%
 	./$< $(TEST_ARGS)
-
-.PHONY: run_integration_tests
-run_integration_tests: $(TOOLS_DEBUG) $(TOOLS_RELEASE)
-	timeout --kill-after=4m 3m ./scripts/test_tools.bash $(TEST_ARGS)
+.PHONY: $(RUN_INTEGRATION_TESTS)
+$(RUN_INTEGRATION_TESTS): run_integration_test_%: ./scripts/test_%_tool.bash $(TOOLS_DEBUG) $(TOOLS_RELEASE)
+	timeout --kill-after=4m 2m ./$< $(TEST_ARGS)

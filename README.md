@@ -12,7 +12,7 @@ Contains mostly over-engineered solutions to the programming challenges suggeste
 
 ```sh
 make -j
-make run_debug_tests run_release_tests run_integration_tests
+make -j test
 ```
 
 ## PNG tools
