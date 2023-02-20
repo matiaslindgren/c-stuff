@@ -70,9 +70,6 @@ else
 	TEST_ARGS :=
 endif
 
-.PHONY: test
-test: run_debug_tests run_release_tests run_integration_tests
-
 .PHONY: run_debug_tests
 run_debug_tests: $(RUN_DEBUG_TESTS)
 .PHONY: run_release_tests
