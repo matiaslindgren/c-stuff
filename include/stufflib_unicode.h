@@ -16,8 +16,25 @@
 
 const char32_t stufflib_unicode_error_value = UINT_LEAST32_MAX;
 
-size_t stufflib_unicode_codepoint_width(const size_t size,
-                                        const unsigned char bytes[const size]) {
+size_t stufflib_unicode_codepoint_width(const char32_t value) {
+  if (value < 0x000080) {
+    return 1;
+  }
+  if (value < 0x000800) {
+    return 2;
+  }
+  if (value < 0x010000) {
+    return 3;
+  }
+  if (value < 0x110000) {
+    return 4;
+  }
+  return 0;
+}
+
+size_t stufflib_unicode_codepoint_width_from_utf8(
+    const size_t size,
+    const unsigned char bytes[const size]) {
   // See Table 3-7 in Chapter 3
   enum decode_state {
     start = 0,
@@ -169,8 +186,8 @@ bool stufflib_unicode_is_valid_utf8(const stufflib_data data[const static 1]) {
   size_t byte_pos = 0;
   while (byte_pos < data->size) {
     const size_t codepoint_width =
-        stufflib_unicode_codepoint_width(data->size - byte_pos,
-                                         data->data + byte_pos);
+        stufflib_unicode_codepoint_width_from_utf8(data->size - byte_pos,
+                                                   data->data + byte_pos);
     if (codepoint_width == 0) {
       return false;
     }
@@ -183,7 +200,8 @@ size_t stufflib_unicode_iter_item_width(
     stufflib_iterator iter[const static 1]) {
   const stufflib_data* data = (const stufflib_data*)(iter->begin);
   const unsigned char* item = data->data + iter->index;
-  return stufflib_unicode_codepoint_width(data->size - iter->index, item);
+  return stufflib_unicode_codepoint_width_from_utf8(data->size - iter->index,
+                                                    item);
 }
 
 void stufflib_unicode_iter_advance(stufflib_iterator iter[const static 1]) {

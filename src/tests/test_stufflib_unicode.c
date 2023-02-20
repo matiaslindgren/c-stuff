@@ -100,19 +100,10 @@ bool test_decode_codepoints(const bool verbose) {
     while (byte_pos < utf8_data.size) {
       const char32_t expected_codepoint = decoded_strings[codepoint_pos];
       const size_t codepoint_width =
-          stufflib_unicode_codepoint_width(utf8_data.size - byte_pos,
-                                           utf8_data.data + byte_pos);
-      if (expected_codepoint < 0x000080) {
-        assert(codepoint_width == 1);
-      } else if (expected_codepoint < 0x000800) {
-        assert(codepoint_width == 2);
-      } else if (expected_codepoint < 0x010000) {
-        assert(codepoint_width == 3);
-      } else if (expected_codepoint < 0x110000) {
-        assert(codepoint_width == 4);
-      } else {
-        assert(codepoint_width == 0);
-      }
+          stufflib_unicode_codepoint_width_from_utf8(utf8_data.size - byte_pos,
+                                                     utf8_data.data + byte_pos);
+      assert(codepoint_width ==
+             stufflib_unicode_codepoint_width(expected_codepoint));
       const char32_t codepoint =
           stufflib_unicode_codepoint_from_utf8(codepoint_width,
                                                utf8_data.data + byte_pos);
@@ -138,8 +129,8 @@ bool test_unicode_iterator(const bool verbose) {
       const char32_t codepoint = stufflib_unicode_iter_decode_item(&iter);
       assert(codepoint == decoded_strings[codepoint_pos]);
       const size_t codepoint_width =
-          stufflib_unicode_codepoint_width(utf8_data.size - byte_pos,
-                                           utf8_data.data + byte_pos);
+          stufflib_unicode_codepoint_width_from_utf8(utf8_data.size - byte_pos,
+                                                     utf8_data.data + byte_pos);
       byte_pos += codepoint_width;
       ++str_len;
       ++codepoint_pos;
