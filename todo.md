@@ -18,10 +18,12 @@
 - [ ] benchmark sorting, especially edge cases
 - [ ] replace str lib with unicode strings
 - [ ] replace all c-strings with unicode
+- [ ] ensure unicode decode/encode conforms to standard
 - [ ] separate tests from other headers
 - [ ] refactor entire stufflib into components, compile as static library, link manually
 - [ ] benchmark utf-8 decoder
 - [ ] implement log levels and replace `STUFFLIB_LOG` macros as no-ops if level too low
+- [ ] `printf` for unicode (`wchar_t` and `wprintf`?)
 
 ## read
 - https://www.cl.cam.ac.uk/~mgk25/unicode.html
