@@ -6,7 +6,7 @@
 typedef struct stufflib_iterator stufflib_iterator;
 struct stufflib_iterator;
 
-typedef void* stufflib_iterator_get(stufflib_iterator*, void*);
+typedef void* stufflib_iterator_get(stufflib_iterator*);
 typedef void stufflib_iterator_advance(stufflib_iterator*);
 typedef bool stufflib_iterator_end(stufflib_iterator*);
 

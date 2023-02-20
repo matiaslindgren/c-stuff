@@ -135,8 +135,7 @@ bool test_unicode_iterator(const bool verbose) {
     for (; !stufflib_unicode_iter_end(&iter);
          stufflib_unicode_iter_advance(&iter)) {
       assert(iter.index == byte_pos);
-      char32_t codepoint = 0;
-      assert(stufflib_unicode_iter_get(&iter, &codepoint));
+      const char32_t codepoint = stufflib_unicode_iter_decode_item(&iter);
       assert(codepoint == decoded_strings[codepoint_pos]);
       const size_t codepoint_width =
           stufflib_unicode_codepoint_width(utf8_data.size - byte_pos,
@@ -218,8 +217,7 @@ bool test_decode_utf8_files(const bool verbose) {
          !stufflib_unicode_iter_end(&iter);
          stufflib_unicode_iter_advance(&iter)) {
       assert(codepoint_pos < str_len);
-      char32_t codepoint = 0;
-      assert(stufflib_unicode_iter_get(&iter, &codepoint));
+      const char32_t codepoint = stufflib_unicode_iter_decode_item(&iter);
       assert(codepoint == expected_codepoints[codepoint_pos]);
       ++codepoint_pos;
     }

@@ -16,18 +16,17 @@ bool test_data(const bool verbose) {
   stufflib_iterator iter = stufflib_data_iter(&data);
   for (; !stufflib_data_iter_end(&iter); stufflib_data_iter_advance(&iter)) {
     assert(iter.index == i);
-    unsigned char value = 0;
-    assert(stufflib_data_iter_get(&iter, &value));
-    assert(value == data.data[i]);
+    const unsigned char* item = stufflib_data_iter_get(&iter);
+    assert(item);
+    assert(*item == data.data[i]);
     ++i;
   }
   assert(iter.index == data.size);
   return true;
 }
 
-void* stufflib_cstr_iter_get(stufflib_iterator iter[const static 1], void* ch) {
-  ((char*)ch)[0] = ((char*)iter->begin)[iter->index];
-  return ch;
+void* stufflib_cstr_iter_get(stufflib_iterator iter[const static 1]) {
+  return ((char*)iter->begin) + iter->index;
 }
 
 void stufflib_cstr_iter_advance(stufflib_iterator iter[const static 1]) {
@@ -65,9 +64,9 @@ bool test_cstr(const bool verbose) {
     stufflib_iterator iter = stufflib_cstr_iter(str);
     for (; !stufflib_cstr_iter_end(&iter); stufflib_cstr_iter_advance(&iter)) {
       assert(iter.index == i);
-      char ch = 0;
-      assert(stufflib_cstr_iter_get(&iter, &ch));
-      assert(ch == str[i]);
+      const char* ch = stufflib_cstr_iter_get(&iter);
+      assert(ch);
+      assert(*ch == str[i]);
       ++i;
     }
     assert(iter.index == strlen(str));

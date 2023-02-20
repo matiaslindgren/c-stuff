@@ -186,18 +186,7 @@ size_t stufflib_unicode_iter_item_width(
   return stufflib_unicode_codepoint_width(data->size - iter->index, item);
 }
 
-void* stufflib_unicode_iter_get(stufflib_iterator iter[const static 1],
-                                void* dst) {
-  const size_t codepoint_width = stufflib_unicode_iter_item_width(iter);
-  const stufflib_data* data = (const stufflib_data*)(iter->begin);
-  const unsigned char* item = data->data + iter->index;
-  ((char32_t*)dst)[0] =
-      stufflib_unicode_codepoint_from_utf8(codepoint_width, item);
-  return dst;
-}
-
 void stufflib_unicode_iter_advance(stufflib_iterator iter[const static 1]) {
-  // TODO avoid doing twice with get
   // TODO find next valid code point instead of advance by 1
   const size_t codepoint_width = stufflib_unicode_iter_item_width(iter);
   iter->index += STUFFLIB_MAX(1, codepoint_width);
@@ -207,6 +196,17 @@ void stufflib_unicode_iter_advance(stufflib_iterator iter[const static 1]) {
 bool stufflib_unicode_iter_end(stufflib_iterator iter[const static 1]) {
   const stufflib_data* data = (const stufflib_data*)(iter->begin);
   return iter->index >= data->size;
+}
+
+void* stufflib_unicode_iter_get(stufflib_iterator iter[const static 1]) {
+  return stufflib_data_iter_get(iter);
+}
+
+char32_t stufflib_unicode_iter_decode_item(
+    stufflib_iterator iter[const static 1]) {
+  return stufflib_unicode_codepoint_from_utf8(
+      stufflib_unicode_iter_item_width(iter),
+      stufflib_unicode_iter_get(iter));
 }
 
 stufflib_iterator stufflib_unicode_iter(
