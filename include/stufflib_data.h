@@ -50,6 +50,19 @@ stufflib_data* stufflib_data_concat(stufflib_data dst[static 1],
   return dst;
 }
 
+stufflib_data stufflib_data_slice(const stufflib_data data[const static 1],
+                                  size_t begin,
+                                  size_t end) {
+  end = STUFFLIB_MIN(end, data->size);
+  if (begin >= end) {
+    return (stufflib_data){0};
+  }
+  return (stufflib_data){
+      .size = end - begin,
+      .data = data->data + begin,
+  };
+}
+
 void stufflib_data_fdump(FILE stream[const static 1],
                          const stufflib_data data,
                          const size_t bytes_per_line) {
