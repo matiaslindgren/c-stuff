@@ -100,7 +100,7 @@ size_t _stufflib_sort_hoare_partition(const size_t count,
 
   size_t lhs = lo - 1;
   size_t rhs = hi + 1;
-  while (1) {
+  while (true) {
     do {
       ++lhs;
     } while (compare(src + lhs * size, pivot) < 0);

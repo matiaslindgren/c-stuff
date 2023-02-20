@@ -69,13 +69,10 @@ else
 	TEST_ARGS :=
 endif
 
-.PHONY: test_debug
-test_debug: $(RUN_DEBUG_TESTS)
-.PHONY: test_release
-test_release: $(RUN_RELEASE_TESTS)
-.PHONY: test_tools
-test_tools:
-	@bash -c 'timeout --kill-after=4m 3m ./tests/test_tools.bash $(TEST_ARGS)'
+.PHONY: run_debug_tests
+run_debug_tests: $(RUN_DEBUG_TESTS)
+.PHONY: run_release_tests
+run_release_tests: $(RUN_RELEASE_TESTS)
 
 .PHONY: $(RUN_DEBUG_TESTS)
 $(RUN_DEBUG_TESTS): run_debug_%: $(TESTS_DIR_DEBUG)/%
@@ -83,3 +80,7 @@ $(RUN_DEBUG_TESTS): run_debug_%: $(TESTS_DIR_DEBUG)/%
 .PHONY: $(RUN_RELEASE_TESTS)
 $(RUN_RELEASE_TESTS): run_release_%: $(TESTS_DIR_RELEASE)/%
 	./$< $(TEST_ARGS)
+
+.PHONY: run_integration_tests
+run_integration_tests: $(TOOLS_DEBUG) $(TOOLS_RELEASE)
+	timeout --kill-after=4m 3m ./scripts/test_tools.bash $(TEST_ARGS)

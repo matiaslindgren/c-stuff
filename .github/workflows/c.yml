@@ -22,10 +22,10 @@ jobs:
       run: sudo apt update --yes && sudo apt install --yes clang-16
     - uses: actions/checkout@v2
     - run: make -j
-    - run: make test_debug
+    - run: make run_debug_tests
     - run: make clean
     - run: make -j
-    - run: make test_release
+    - run: make run_release_tests
     - run: make clean
     - run: make -j
-    - run: make test_tools
+    - run: make run_integration_tests

@@ -198,6 +198,7 @@ void* stufflib_unicode_iter_get(stufflib_iterator iter[const static 1],
 
 void stufflib_unicode_iter_advance(stufflib_iterator iter[const static 1]) {
   // TODO avoid doing twice with get
+  // TODO find next valid code point instead of advance by 1
   const size_t codepoint_width = stufflib_unicode_iter_item_width(iter);
   iter->index += STUFFLIB_MAX(1, codepoint_width);
   iter->pos += 1;
@@ -219,6 +220,9 @@ stufflib_iterator stufflib_unicode_iter(
 }
 
 size_t stufflib_unicode_length(const stufflib_data data[const static 1]) {
+  if (!stufflib_unicode_is_valid_utf8(data)) {
+    return 0;
+  }
   stufflib_iterator iter = stufflib_unicode_iter(data);
   while (!stufflib_unicode_iter_end(&iter)) {
     stufflib_unicode_iter_advance(&iter);

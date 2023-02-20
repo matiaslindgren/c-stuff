@@ -22,3 +22,8 @@
 - [ ] refactor entire stufflib into components, compile as static library, link manually
 - [ ] benchmark utf-8 decoder
 - [ ] implement log levels and replace `STUFFLIB_LOG` macros as no-ops if level too low
+
+## read
+- https://www.cl.cam.ac.uk/~mgk25/unicode.html
+- https://stackoverflow.com/questions/526430/c-programming-how-to-program-for-unicode
+- https://www.unicode.org/versions/Unicode15.0.0/

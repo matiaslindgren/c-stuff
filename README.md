@@ -8,13 +8,11 @@ Contains mostly over-engineered solutions to the programming challenges suggeste
 * `make`
 * `clang-16`, see the [LLVM docs](https://apt.llvm.org/) or stufflib's [CI config](./.github/workflows/c.yml) on how to install pre-release versions of Clang.
 
-## Building
+## Build and test
 
 ```sh
 make -j
-make -j test_debug
-make -j test_release
-make test_tools
+make run_debug_tests run_release_tests run_integration_tests
 ```
 
 ## PNG tools
