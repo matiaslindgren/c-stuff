@@ -59,8 +59,8 @@ stufflib_string stufflib_string_strstr(
         match = false;
         break;
       }
-      const char32_t lhs_item = stufflib_unicode_iter_decode_item(&lhs);
-      const char32_t rhs_item = stufflib_unicode_iter_decode_item(&rhs);
+      const wchar_t lhs_item = stufflib_unicode_iter_decode_item(&lhs);
+      const wchar_t rhs_item = stufflib_unicode_iter_decode_item(&rhs);
       match = lhs_item && rhs_item && lhs_item == rhs_item;
       stufflib_unicode_iter_advance(&lhs);
       stufflib_unicode_iter_advance(&rhs);

@@ -8,15 +8,22 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <uchar.h>
+#include <wchar.h>
 
 #include "stufflib_data.h"
 #include "stufflib_iterator.h"
 #include "stufflib_macros.h"
 
-const char32_t stufflib_unicode_error_value = UINT_LEAST32_MAX;
+#ifndef __STDC_ISO_10646__
+#error ”wchar_t wide characters have to be Unicode code points”
+#endif
+#ifdef __STDC_MB_MIGHT_NEQ_WC__
+#error ”basic character codes must agree on char and wchar_t”
+#endif
 
-size_t stufflib_unicode_codepoint_width(const char32_t value) {
+const wchar_t stufflib_unicode_error_value = WEOF;
+
+size_t stufflib_unicode_codepoint_width(const wchar_t value) {
   if (value < 0x000080) {
     return 1;
   }
@@ -150,30 +157,30 @@ error:
   return 0;
 }
 
-char32_t stufflib_unicode_codepoint_from_utf8(
+wchar_t stufflib_unicode_codepoint_from_utf8(
     const size_t width,
     const unsigned char bytes[const width]) {
   switch (width) {
     case 4: {
-      const char32_t byte1 = bytes[0] & 0x07;
-      const char32_t byte2 = bytes[1] & 0x3f;
-      const char32_t byte3 = bytes[2] & 0x3f;
-      const char32_t byte4 = bytes[3] & 0x3f;
+      const wchar_t byte1 = bytes[0] & 0x07;
+      const wchar_t byte2 = bytes[1] & 0x3f;
+      const wchar_t byte3 = bytes[2] & 0x3f;
+      const wchar_t byte4 = bytes[3] & 0x3f;
       return (byte1 << 18) | (byte2 << 12) | (byte3 << 6) | byte4;
     }
     case 3: {
-      const char32_t byte1 = bytes[0] & 0x0f;
-      const char32_t byte2 = bytes[1] & 0x3f;
-      const char32_t byte3 = bytes[2] & 0x3f;
+      const wchar_t byte1 = bytes[0] & 0x0f;
+      const wchar_t byte2 = bytes[1] & 0x3f;
+      const wchar_t byte3 = bytes[2] & 0x3f;
       return (byte1 << 12) | (byte2 << 6) | byte3;
     }
     case 2: {
-      const char32_t byte1 = bytes[0] & 0x1f;
-      const char32_t byte2 = bytes[1] & 0x3f;
+      const wchar_t byte1 = bytes[0] & 0x1f;
+      const wchar_t byte2 = bytes[1] & 0x3f;
       return (byte1 << 6) | byte2;
     }
     case 1: {
-      const char32_t byte1 = bytes[0] & 0x7f;
+      const wchar_t byte1 = bytes[0] & 0x7f;
       return byte1;
     }
     default: {
@@ -220,7 +227,7 @@ void* stufflib_unicode_iter_get(stufflib_iterator iter[const static 1]) {
   return stufflib_data_iter_get(iter);
 }
 
-char32_t stufflib_unicode_iter_decode_item(
+wchar_t stufflib_unicode_iter_decode_item(
     stufflib_iterator iter[const static 1]) {
   return stufflib_unicode_codepoint_from_utf8(
       stufflib_unicode_iter_item_width(iter),

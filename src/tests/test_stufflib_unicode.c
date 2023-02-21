@@ -30,7 +30,7 @@ stufflib_data hello_utf8[] = {
   {.size=18, .data=(unsigned char[]){0xe0,0xb8,0xaa,0xe0,0xb8,0xa7,0xe0,0xb8,0xb1,0xe0,0xb8,0xaa,0xe0,0xb8,0x94,0xe0,0xb8,0xb5}},
 };
 
-char32_t decoded_strings[] = {
+wchar_t decoded_strings[] = {
   // hello
   0x68,0x65,0x6c,0x6c,0x6f,
   // नमस्ते
@@ -98,13 +98,13 @@ bool test_decode_codepoints(const bool verbose) {
     stufflib_data utf8_data = hello_utf8[i_str];
     size_t byte_pos = 0;
     while (byte_pos < utf8_data.size) {
-      const char32_t expected_codepoint = decoded_strings[codepoint_pos];
+      const wchar_t expected_codepoint = decoded_strings[codepoint_pos];
       const size_t codepoint_width =
           stufflib_unicode_codepoint_width_from_utf8(utf8_data.size - byte_pos,
                                                      utf8_data.data + byte_pos);
       assert(codepoint_width ==
              stufflib_unicode_codepoint_width(expected_codepoint));
-      const char32_t codepoint =
+      const wchar_t codepoint =
           stufflib_unicode_codepoint_from_utf8(codepoint_width,
                                                utf8_data.data + byte_pos);
       assert(codepoint == expected_codepoint);
@@ -126,7 +126,7 @@ bool test_unicode_iterator(const bool verbose) {
     for (; !stufflib_unicode_iter_end(&iter);
          stufflib_unicode_iter_advance(&iter)) {
       assert(iter.index == byte_pos);
-      const char32_t codepoint = stufflib_unicode_iter_decode_item(&iter);
+      const wchar_t codepoint = stufflib_unicode_iter_decode_item(&iter);
       assert(codepoint == decoded_strings[codepoint_pos]);
       const size_t codepoint_width =
           stufflib_unicode_codepoint_width_from_utf8(utf8_data.size - byte_pos,
@@ -181,7 +181,7 @@ bool test_decode_utf8_files(const bool verbose) {
       assert(utf8_data.size > 0);
     }
 
-    char32_t expected_codepoints[10000] = {0};
+    wchar_t expected_codepoints[10000] = {0};
     size_t str_len = 0;
     {
       char codepoints_path[200] = {0};
@@ -208,7 +208,7 @@ bool test_decode_utf8_files(const bool verbose) {
          !stufflib_unicode_iter_end(&iter);
          stufflib_unicode_iter_advance(&iter)) {
       assert(codepoint_pos < str_len);
-      const char32_t codepoint = stufflib_unicode_iter_decode_item(&iter);
+      const wchar_t codepoint = stufflib_unicode_iter_decode_item(&iter);
       assert(codepoint == expected_codepoints[codepoint_pos]);
       ++codepoint_pos;
     }

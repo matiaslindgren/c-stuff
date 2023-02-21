@@ -2,6 +2,7 @@
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <wchar.h>
 
 #include "stufflib_data.h"
 #include "stufflib_string.h"
@@ -29,7 +30,7 @@ stufflib_data hello_utf8[] = {
   {.size=18, .data=(unsigned char[]){0xe0,0xb8,0xaa,0xe0,0xb8,0xa7,0xe0,0xb8,0xb1,0xe0,0xb8,0xaa,0xe0,0xb8,0x94,0xe0,0xb8,0xb5}},
 };
 
-char32_t decoded_strings[] = {
+wchar_t decoded_strings[] = {
   // hello
   0x68,0x65,0x6c,0x6c,0x6f,
   // नमस्ते
@@ -95,7 +96,7 @@ bool test_string_slice(const bool verbose) {
                  stufflib_unicode_iter(&(substr.utf8_data));
              !stufflib_unicode_iter_end(&iter);
              stufflib_unicode_iter_advance(&iter)) {
-          const char32_t codepoint = stufflib_unicode_iter_decode_item(&iter);
+          const wchar_t codepoint = stufflib_unicode_iter_decode_item(&iter);
           assert(codepoint == decoded_strings[decoded_pos + begin + iter.pos]);
           // TODO assert iterator slice address equals underlying string
         }
