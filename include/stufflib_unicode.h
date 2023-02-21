@@ -231,7 +231,7 @@ wchar_t stufflib_unicode_iter_decode_item(
     stufflib_iterator iter[const static 1]) {
   return stufflib_unicode_codepoint_from_utf8(
       stufflib_unicode_iter_item_width(iter),
-      stufflib_unicode_iter_get(iter));
+      iter->get(iter));
 }
 
 stufflib_iterator stufflib_unicode_iter(
@@ -249,8 +249,8 @@ size_t stufflib_unicode_length(const stufflib_data data[const static 1]) {
     return 0;
   }
   stufflib_iterator iter = stufflib_unicode_iter(data);
-  while (!stufflib_unicode_iter_end(&iter)) {
-    stufflib_unicode_iter_advance(&iter);
+  while (!iter.end(&iter)) {
+    iter.advance(&iter);
   }
   return iter.pos;
 }

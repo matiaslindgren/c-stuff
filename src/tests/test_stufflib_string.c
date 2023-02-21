@@ -94,8 +94,8 @@ bool test_string_slice(const bool verbose) {
         assert(substr.length == substr_len);
         for (stufflib_iterator iter =
                  stufflib_unicode_iter(&(substr.utf8_data));
-             !stufflib_unicode_iter_end(&iter);
-             stufflib_unicode_iter_advance(&iter)) {
+             !iter.end(&iter);
+             iter.advance(&iter)) {
           const wchar_t codepoint = stufflib_unicode_iter_decode_item(&iter);
           assert(codepoint == decoded_strings[decoded_pos + begin + iter.pos]);
           // TODO assert iterator slice address equals underlying string

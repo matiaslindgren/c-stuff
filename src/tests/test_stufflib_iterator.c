@@ -14,9 +14,9 @@ bool test_data(const bool verbose) {
   };
   size_t i = 0;
   stufflib_iterator iter = stufflib_data_iter(&data);
-  for (; !stufflib_data_iter_end(&iter); stufflib_data_iter_advance(&iter)) {
+  for (; !iter.end(&iter); iter.advance(&iter)) {
     assert(iter.index == i);
-    const unsigned char* item = stufflib_data_iter_get(&iter);
+    const unsigned char* item = iter.get(&iter);
     assert(item);
     assert(*item == data.data[i]);
     ++i;
@@ -62,9 +62,9 @@ bool test_cstr(const bool verbose) {
     size_t i = 0;
     char* str = strings[i_str];
     stufflib_iterator iter = stufflib_cstr_iter(str);
-    for (; !stufflib_cstr_iter_end(&iter); stufflib_cstr_iter_advance(&iter)) {
+    for (; !iter.end(&iter); iter.advance(&iter)) {
       assert(iter.index == i);
-      const char* ch = stufflib_cstr_iter_get(&iter);
+      const char* ch = iter.get(&iter);
       assert(ch);
       assert(*ch == str[i]);
       ++i;

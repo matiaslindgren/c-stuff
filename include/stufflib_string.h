@@ -30,12 +30,12 @@ stufflib_string stufflib_string_slice(const stufflib_string str[const static 1],
                                       const size_t begin,
                                       const size_t end) {
   stufflib_iterator begin_iter = stufflib_unicode_iter(&(str->utf8_data));
-  while (begin_iter.pos < begin && !stufflib_unicode_iter_end(&begin_iter)) {
-    stufflib_unicode_iter_advance(&begin_iter);
+  while (begin_iter.pos < begin && !begin_iter.end(&begin_iter)) {
+    begin_iter.advance(&begin_iter);
   }
   stufflib_iterator end_iter = begin_iter;
-  while (end_iter.pos < end && !stufflib_unicode_iter_end(&end_iter)) {
-    stufflib_unicode_iter_advance(&end_iter);
+  while (end_iter.pos < end && !end_iter.end(&end_iter)) {
+    end_iter.advance(&end_iter);
   }
   stufflib_data utf8_slice =
       stufflib_data_slice(&(str->utf8_data), begin_iter.index, end_iter.index);
@@ -46,24 +46,24 @@ stufflib_string stufflib_string_strstr(
     const stufflib_string str[const static 1],
     const stufflib_string substr[const static 1]) {
   for (stufflib_iterator str_iter = stufflib_unicode_iter(&(str->utf8_data));
-       !stufflib_unicode_iter_end(&str_iter);
-       stufflib_unicode_iter_advance(&str_iter)) {
+       !str_iter.end(&str_iter);
+       str_iter.advance(&str_iter)) {
     stufflib_iterator lhs = str_iter;
     stufflib_iterator rhs = stufflib_unicode_iter(&(substr->utf8_data));
     bool match = true;
     while (match) {
-      if (stufflib_unicode_iter_end(&rhs)) {
+      if (rhs.end(&rhs)) {
         break;
       }
-      if (stufflib_unicode_iter_end(&lhs)) {
+      if (lhs.end(&lhs)) {
         match = false;
         break;
       }
       const wchar_t lhs_item = stufflib_unicode_iter_decode_item(&lhs);
       const wchar_t rhs_item = stufflib_unicode_iter_decode_item(&rhs);
       match = lhs_item && rhs_item && lhs_item == rhs_item;
-      stufflib_unicode_iter_advance(&lhs);
-      stufflib_unicode_iter_advance(&rhs);
+      lhs.advance(&lhs);
+      rhs.advance(&rhs);
     }
     if (match) {
       stufflib_data utf8_slice =
@@ -77,8 +77,8 @@ stufflib_string stufflib_string_strstr(
 void stufflib_string_fprint(FILE stream[const static 1],
                             const stufflib_string str[const static 1]) {
   for (stufflib_iterator iter = stufflib_unicode_iter(&(str->utf8_data));
-       !stufflib_unicode_iter_end(&iter);
-       stufflib_unicode_iter_advance(&iter)) {
+       !iter.end(&iter);
+       iter.advance(&iter)) {
     const wchar_t item = stufflib_unicode_iter_decode_item(&iter);
     if (fwprintf(stream, L"%lc", item) < 0) {
       exit(1);
