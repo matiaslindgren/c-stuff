@@ -74,4 +74,16 @@ stufflib_string stufflib_string_strstr(
   return (stufflib_string){0};
 }
 
+void stufflib_string_fprint(FILE stream[const static 1],
+                            const stufflib_string str[const static 1]) {
+  for (stufflib_iterator iter = stufflib_unicode_iter(&(str->utf8_data));
+       !stufflib_unicode_iter_end(&iter);
+       stufflib_unicode_iter_advance(&iter)) {
+    const wchar_t item = stufflib_unicode_iter_decode_item(&iter);
+    if (fwprintf(stream, L"%lc", item) < 0) {
+      exit(1);
+    }
+  }
+}
+
 #endif  // _STUFFLIB_STRING_H_INCLUDED
