@@ -14,18 +14,16 @@ struct stufflib_string {
   stufflib_data utf8_data;
 };
 
-stufflib_string* stufflib_string_from_utf8(
-    stufflib_string str[const static 1],
+stufflib_string stufflib_string_from_utf8(
     const stufflib_data utf8_data[const static 1]) {
   if (!stufflib_unicode_is_valid_utf8(utf8_data)) {
     STUFFLIB_LOG_ERROR("cannot create string from invalid UTF-8 data");
-    return nullptr;
+    return (stufflib_string){0};
   }
-  *str = (stufflib_string){
+  return (stufflib_string){
       .length = stufflib_unicode_length(utf8_data),
       .utf8_data = *utf8_data,
   };
-  return str;
 }
 
 stufflib_string stufflib_string_slice(const stufflib_string str[const static 1],
@@ -39,12 +37,9 @@ stufflib_string stufflib_string_slice(const stufflib_string str[const static 1],
   while (end_iter.pos < end && !stufflib_unicode_iter_end(&end_iter)) {
     stufflib_unicode_iter_advance(&end_iter);
   }
-  return (stufflib_string){
-      .length = end_iter.pos - begin_iter.pos,
-      .utf8_data = stufflib_data_slice(&(str->utf8_data),
-                                       begin_iter.index,
-                                       end_iter.index),
-  };
+  stufflib_data utf8_slice =
+      stufflib_data_slice(&(str->utf8_data), begin_iter.index, end_iter.index);
+  return stufflib_string_from_utf8(&utf8_slice);
 }
 
 stufflib_string stufflib_string_strstr(
@@ -71,11 +66,9 @@ stufflib_string stufflib_string_strstr(
       stufflib_unicode_iter_advance(&rhs);
     }
     if (match) {
-      return (stufflib_string){
-          .length = str->length - str_iter.pos,
-          .utf8_data =
-              stufflib_data_slice(&(str->utf8_data), str_iter.index, SIZE_MAX),
-      };
+      stufflib_data utf8_slice =
+          stufflib_data_slice(&(str->utf8_data), str_iter.index, SIZE_MAX);
+      return stufflib_string_from_utf8(&utf8_slice);
     }
   }
   return (stufflib_string){0};

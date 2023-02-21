@@ -74,10 +74,10 @@ size_t decoded_lengths[] = {
 
 bool test_string_init(const bool verbose) {
   for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(hello_utf8); ++i) {
-    const stufflib_string* const str =
-        stufflib_string_from_utf8(&((stufflib_string){0}), hello_utf8 + i);
-    assert(str);
-    assert(str->length == decoded_lengths[i]);
+    stufflib_string str = stufflib_string_from_utf8(hello_utf8 + i);
+    assert(str.length == decoded_lengths[i]);
+    assert(str.utf8_data.size == hello_utf8[i].size);
+    assert(str.utf8_data.data == hello_utf8[i].data);
   }
   return true;
 }
@@ -85,8 +85,7 @@ bool test_string_init(const bool verbose) {
 bool test_string_slice(const bool verbose) {
   size_t decoded_pos = 0;
   for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(hello_utf8); ++i) {
-    const stufflib_string str =
-        *stufflib_string_from_utf8(&((stufflib_string){0}), hello_utf8 + i);
+    const stufflib_string str = stufflib_string_from_utf8(hello_utf8 + i);
     for (size_t substr_len = 0; substr_len <= str.length; ++substr_len) {
       for (size_t begin = 0; begin + substr_len <= str.length; ++begin) {
         const stufflib_string substr =
@@ -109,11 +108,9 @@ bool test_string_slice(const bool verbose) {
 
 bool test_string_strstr_no_match(const bool verbose) {
   for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(hello_utf8); ++i) {
-    const stufflib_string str =
-        *stufflib_string_from_utf8(&((stufflib_string){0}), hello_utf8 + i);
+    const stufflib_string str = stufflib_string_from_utf8(hello_utf8 + i);
     for (size_t j = i + 1; j < STUFFLIB_ARRAY_LEN(hello_utf8); ++j) {
-      const stufflib_string substr =
-          *stufflib_string_from_utf8(&((stufflib_string){0}), hello_utf8 + j);
+      const stufflib_string substr = stufflib_string_from_utf8(hello_utf8 + j);
       const stufflib_string match = stufflib_string_strstr(&str, &substr);
       assert(match.length == 0);
       assert(match.utf8_data.size == 0);
