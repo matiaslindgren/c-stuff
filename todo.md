@@ -24,6 +24,7 @@
 - [ ] benchmark utf-8 decoder
 - [ ] implement log levels and replace `STUFFLIB_LOG` macros as no-ops if level too low
 - [ ] `printf` for unicode (`wchar_t` and `wprintf`?)
+- [ ] try to replace `void*` casts with `_Generic`
 
 ## read
 - https://www.cl.cam.ac.uk/~mgk25/unicode.html
