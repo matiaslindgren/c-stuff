@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "stufflib_macros.h"
+#include "stufflib_memory.h"
 
 typedef struct stufflib_args stufflib_args;
 struct stufflib_args {
@@ -23,13 +24,8 @@ stufflib_args stufflib_args_from_argv(const int argc,
   }
   size_t num_optional = argc - 1 - num_required;
 
-  char* const** required = calloc(num_required + 1, sizeof(char*));
-  char* const** optional = calloc(num_optional + 1, sizeof(char*));
-  if (!required || !optional) {
-    STUFFLIB_LOG_ERROR("failed allocating memory during args parse");
-    assert(0);
-    return (stufflib_args){0};
-  }
+  char* const** required = stufflib_alloc(num_required + 1, sizeof(char*));
+  char* const** optional = stufflib_alloc(num_optional + 1, sizeof(char*));
 
   {
     char* const** req = required;

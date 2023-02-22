@@ -6,6 +6,7 @@
 
 #include "stufflib_iterator.h"
 #include "stufflib_macros.h"
+#include "stufflib_memory.h"
 
 typedef struct stufflib_data stufflib_data;
 struct stufflib_data {
@@ -14,22 +15,16 @@ struct stufflib_data {
 };
 
 stufflib_data stufflib_data_new(const size_t size) {
-  unsigned char* data = calloc(size, 1);
   return (stufflib_data){
-      .size = data ? size : 0,
-      .data = data,
+      .size = size,
+      .data = stufflib_alloc(size, 1),
   };
 }
 
-bool stufflib_data_copy(stufflib_data dst[restrict static 1],
+void stufflib_data_copy(stufflib_data dst[restrict static 1],
                         const stufflib_data src[restrict static 1]) {
   *dst = stufflib_data_new(src->size);
-  if (!dst->size) {
-    STUFFLIB_LOG_ERROR("failed allocating memory for stufflib_data copy");
-    return false;
-  }
   memcpy(dst->data, src->data, dst->size);
-  return true;
 }
 
 void stufflib_data_destroy(stufflib_data data[static 1]) {
@@ -39,11 +34,9 @@ void stufflib_data_destroy(stufflib_data data[static 1]) {
 
 stufflib_data* stufflib_data_concat(stufflib_data dst[static 1],
                                     const stufflib_data src[static 1]) {
-  unsigned char* tmp = realloc(dst->data, dst->size + src->size);
-  if (!tmp) {
-    STUFFLIB_LOG_ERROR("failed allocating memory for stufflib_data concat");
-    return nullptr;
-  }
+  // TODO
+  unsigned char* tmp =
+      stufflib_realloc(dst->data, dst->size, dst->size + src->size, 1);
   dst->data = tmp;
   memcpy(dst->data + dst->size, src->data, src->size);
   dst->size += src->size;

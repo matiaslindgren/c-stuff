@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "stufflib_memory.h"
+
 typedef struct stufflib_unionfind stufflib_unionfind;
 struct stufflib_unionfind {
   size_t count;
@@ -15,11 +17,7 @@ struct stufflib_unionfind {
 
 stufflib_unionfind* stufflib_unionfind_init(stufflib_unionfind uf[static 1],
                                             const size_t count) {
-  size_t* parents = calloc(count, sizeof(size_t));
-  if (!parents) {
-    *uf = (stufflib_unionfind){0};
-    return uf;
-  }
+  size_t* parents = stufflib_alloc(count, sizeof(size_t));
   for (size_t i = 0; i < count; ++i) {
     parents[i] = _STUFFLIB_UNIONFIND_ROOT;
   }

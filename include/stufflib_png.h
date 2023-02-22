@@ -14,6 +14,7 @@
 #include "stufflib_deflate.h"
 #include "stufflib_hash.h"
 #include "stufflib_macros.h"
+#include "stufflib_memory.h"
 #include "stufflib_misc.h"
 
 enum stufflib_png_chunk_type {
@@ -151,16 +152,11 @@ void stufflib_png_image_destroy(stufflib_png_image image) {
   stufflib_data_destroy(&image.filter);
 }
 
-bool stufflib_png_image_copy(stufflib_png_image dst[restrict static 1],
+void stufflib_png_image_copy(stufflib_png_image dst[restrict static 1],
                              const stufflib_png_image src[restrict static 1]) {
   dst->header = src->header;
-  if (!stufflib_data_copy(&dst->data, &src->data)) {
-    return false;
-  }
-  if (!stufflib_data_copy(&dst->filter, &src->filter)) {
-    return false;
-  }
-  return true;
+  stufflib_data_copy(&dst->data, &src->data);
+  stufflib_data_copy(&dst->filter, &src->filter);
 }
 
 unsigned char* stufflib_png_image_get_pixel(
@@ -295,10 +291,7 @@ stufflib_png_chunk stufflib_png_read_next_chunk(FILE fp[const static 1]) {
   }
 
   if (chunk.data.size) {
-    chunk.data.data = calloc(chunk.data.size, 1);
-    if (!chunk.data.data) {
-      goto error;
-    }
+    chunk.data.data = stufflib_alloc(chunk.data.size, 1);
     if (fread(chunk.data.data, 1, chunk.data.size, fp) != chunk.data.size) {
       STUFFLIB_LOG_ERROR("failed reading PNG chunk data");
       goto error;
@@ -397,13 +390,10 @@ stufflib_png_chunks stufflib_png_read_n_chunks(
       STUFFLIB_LOG_ERROR("mismatching crc32");
       goto done;
     }
-    stufflib_png_chunk* tmp =
-        realloc(chunks, (read_count + 1) * sizeof(stufflib_png_chunk));
-    if (!tmp) {
-      STUFFLIB_LOG_ERROR("failed resizing chunks array during read PNG chunks");
-      goto done;
-    }
-    chunks = tmp;
+    chunks = stufflib_realloc(chunks,
+                              read_count,
+                              read_count + 1,
+                              sizeof(stufflib_png_chunk));
     chunks[read_count++] = chunk;
   }
 
@@ -459,10 +449,6 @@ stufflib_data stufflib_png_pack_image_data(
       stufflib_png_bytes_per_pixel[image->header.color_type];
 
   packed = stufflib_data_new(stufflib_png_data_size(image->header));
-  if (!packed.size) {
-    STUFFLIB_LOG_ERROR("failed allocating packed image data buffer");
-    goto error;
-  }
 
   for (size_t row = 0; row < height; ++row) {
     const size_t filter_idx = bytes_per_px * row * width + row;
@@ -476,13 +462,9 @@ stufflib_data stufflib_png_pack_image_data(
   }
 
   return packed;
-
-error:
-  stufflib_data_destroy(&packed);
-  return (stufflib_data){0};
 }
 
-bool stufflib_png_unpack_and_pad_image_data(
+void stufflib_png_unpack_and_pad_image_data(
     stufflib_png_image image[static 1]) {
   stufflib_data filter = {0};
   stufflib_data padded = {0};
@@ -493,15 +475,7 @@ bool stufflib_png_unpack_and_pad_image_data(
       stufflib_png_bytes_per_pixel[image->header.color_type];
 
   filter = stufflib_data_new(height);
-  if (!filter.size) {
-    STUFFLIB_LOG_ERROR("failed allocating scanline filter buffer");
-    goto error;
-  }
   padded = stufflib_data_new(bytes_per_px * (width + 2) * (height + 2));
-  if (!padded.size) {
-    STUFFLIB_LOG_ERROR("failed allocating buffer for padded image data");
-    goto error;
-  }
 
   for (size_t row = 0; row < height; ++row) {
     const size_t idx_col0_raw = row * bytes_per_px * width + row;
@@ -519,12 +493,6 @@ bool stufflib_png_unpack_and_pad_image_data(
   image->filter = filter;
   stufflib_data_destroy(&image->data);
   image->data = padded;
-  return true;
-
-error:
-  stufflib_data_destroy(&filter);
-  stufflib_data_destroy(&padded);
-  return false;
 }
 
 bool stufflib_png_unapply_filter(stufflib_png_image image[static 1]) {
@@ -612,28 +580,18 @@ stufflib_png_image stufflib_png_read_image(
   for (size_t i = 1; i < chunks.count; ++i) {
     const stufflib_png_chunk chunk = chunks.chunks[i];
     if (chunk.type == stufflib_png_IDAT) {
-      if (!stufflib_data_concat(&idat, &chunk.data)) {
-        STUFFLIB_LOG_ERROR("failed concatenating IDAT block");
-        goto error;
-      }
+      stufflib_data_concat(&idat, &chunk.data);
     }
   }
   // TODO parse PLTE if header.color_type == stufflib_png_indexed
 
   image.data = stufflib_data_new(stufflib_png_data_size(image.header));
-  if (!image.data.size) {
-    STUFFLIB_LOG_ERROR("failed allocating output buffer");
-    goto error;
-  }
   const size_t num_decoded = stufflib_inflate(image.data, idat);
   if (num_decoded != image.data.size) {
     STUFFLIB_LOG_ERROR("failed decoding IDAT stream");
     goto error;
   }
-  if (!stufflib_png_unpack_and_pad_image_data(&image)) {
-    STUFFLIB_LOG_ERROR("failed padding decoded image");
-    goto error;
-  }
+  stufflib_png_unpack_and_pad_image_data(&image);
   if (!stufflib_png_unapply_filter(&image)) {
     STUFFLIB_LOG_ERROR("failed unfiltering decoded image");
     goto error;
@@ -696,11 +654,6 @@ bool stufflib_png_chunk_fwrite(FILE stream[const static 1],
     return false;
   }
   stufflib_data crc_data = stufflib_data_new(data->size + 4);
-  if (!crc_data.size) {
-    STUFFLIB_LOG_ERROR("failed allocating CRC32 buffer for %s chunk",
-                       chunk_type);
-    return false;
-  }
 
   bool ok = false;
 
@@ -747,18 +700,11 @@ bool stufflib_png_write_image(const stufflib_png_image image,
     goto done;
   }
   packed_data = stufflib_png_pack_image_data(&image);
-  if (!packed_data.size) {
-    STUFFLIB_LOG_ERROR("failed allocating buffer image data");
-    goto done;
-  }
   idat = stufflib_data_new(stufflib_png_idat_max_size(image.header));
-  if (!idat.size) {
-    STUFFLIB_LOG_ERROR("failed allocating buffer for IDAT chunks");
-    goto done;
-  }
 
-  idat.size = stufflib_deflate_uncompressed(idat, packed_data);
-  idat.data = realloc(idat.data, idat.size);
+  const size_t new_size = stufflib_deflate_uncompressed(idat, packed_data);
+  idat.data = stufflib_realloc(idat.data, idat.size, new_size, 1);
+  idat.size = new_size;
 
   if (!stufflib_png_chunk_fwrite_header(fp, image.header)) {
     STUFFLIB_LOG_ERROR("failed writing PNG header to %s", filename);

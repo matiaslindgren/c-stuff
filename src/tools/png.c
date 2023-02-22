@@ -35,10 +35,7 @@ bool segment(const stufflib_args args[const static 1]) {
   if (verbose) {
     printf("segmenting, threshold %zu%%\n", threshold_percent);
   }
-  if (!stufflib_img_segment_rgb(&dst, &src, threshold_percent)) {
-    STUFFLIB_LOG_ERROR("failed segmenting PNG image %s", png_src_path);
-    goto done;
-  }
+  stufflib_img_segment_rgb(&dst, &src, threshold_percent);
 
   if (verbose) {
     printf("write %s\n", png_dst_path);

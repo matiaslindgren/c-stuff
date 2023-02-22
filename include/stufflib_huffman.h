@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "stufflib_macros.h"
+#include "stufflib_memory.h"
 #include "stufflib_misc.h"
 
 typedef struct stufflib_huffman_tree stufflib_huffman_tree;
@@ -30,21 +31,13 @@ bool stufflib_huffman_init(stufflib_huffman_tree tree[static 1],
   const size_t max_code_len =
       stufflib_misc_vmax_size_t(max_symbol + 1, code_lengths);
 
-  code_length_count = calloc(max_code_len + 1, sizeof(size_t));
-  if (!code_length_count) {
-    STUFFLIB_LOG_ERROR("failed allocating code_length_count");
-    goto error;
-  }
+  code_length_count = stufflib_alloc(max_code_len + 1, sizeof(size_t));
   for (size_t symbol = 0; symbol <= max_symbol; ++symbol) {
     ++code_length_count[code_lengths[symbol]];
   }
   code_length_count[0] = 0;
 
-  next_code = calloc(max_code_len + 1, sizeof(size_t));
-  if (!next_code) {
-    STUFFLIB_LOG_ERROR("failed allocating next_code");
-    goto error;
-  }
+  next_code = stufflib_alloc(max_code_len + 1, sizeof(size_t));
   {
     size_t code = 0;
     for (size_t code_len = 1; code_len <= max_code_len; ++code_len) {
@@ -53,11 +46,7 @@ bool stufflib_huffman_init(stufflib_huffman_tree tree[static 1],
     }
   }
 
-  codes = calloc(max_symbol + 1, sizeof(size_t));
-  if (!codes) {
-    STUFFLIB_LOG_ERROR("failed allocating codes");
-    goto error;
-  }
+  codes = stufflib_alloc(max_symbol + 1, sizeof(size_t));
   for (size_t symbol = 0; symbol <= max_symbol; ++symbol) {
     const size_t code_len = code_lengths[symbol];
     if (code_len) {
@@ -66,11 +55,7 @@ bool stufflib_huffman_init(stufflib_huffman_tree tree[static 1],
     }
   }
 
-  max_codes = calloc(max_code_len, sizeof(size_t));
-  if (!max_codes) {
-    STUFFLIB_LOG_ERROR("failed allocating max_codes");
-    goto error;
-  }
+  max_codes = stufflib_alloc(max_code_len, sizeof(size_t));
   for (size_t symbol = 0; symbol <= max_symbol; ++symbol) {
     const size_t code = codes[symbol];
     const size_t code_len = code_lengths[symbol];
@@ -79,18 +64,10 @@ bool stufflib_huffman_init(stufflib_huffman_tree tree[static 1],
     }
   }
 
-  symbols = calloc(max_code_len, sizeof(size_t*));
-  if (!symbols) {
-    STUFFLIB_LOG_ERROR("failed allocating symbols");
-    goto error;
-  }
+  symbols = stufflib_alloc(max_code_len, sizeof(size_t*));
   for (size_t code_len = 1; code_len <= max_code_len; ++code_len) {
     const size_t max_code = max_codes[code_len - 1];
-    if (!(symbols[code_len - 1] = calloc(max_code + 1, sizeof(size_t)))) {
-      STUFFLIB_LOG_ERROR("failed allocating symbols for code_len %zu",
-                         code_len);
-      goto error;
-    }
+    symbols[code_len - 1] = stufflib_alloc(max_code + 1, sizeof(size_t));
   }
   for (size_t symbol = 0; symbol <= max_symbol; ++symbol) {
     const size_t code = codes[symbol];
@@ -103,18 +80,6 @@ bool stufflib_huffman_init(stufflib_huffman_tree tree[static 1],
   *tree = (stufflib_huffman_tree){.max_code_len = max_code_len,
                                   .max_codes = max_codes,
                                   .symbols = symbols};
-  goto done;
-
-error:
-  if (symbols) {
-    for (size_t code_len = 1; code_len <= max_code_len; ++code_len) {
-      free(symbols[code_len - 1]);
-    }
-    free(symbols);
-  }
-  free(max_codes);
-  *tree = (stufflib_huffman_tree){0};
-done:
   free(codes);
   free(next_code);
   free(code_length_count);

@@ -21,6 +21,7 @@
 #include "stufflib_hash.h"
 #include "stufflib_huffman.h"
 #include "stufflib_macros.h"
+#include "stufflib_memory.h"
 #include "stufflib_misc.h"
 
 typedef struct _length_codes _length_codes;
@@ -71,10 +72,7 @@ static _distance_codes _make_distance_codes() {
 
 static stufflib_huffman_tree _make_fixed_literal_tree() {
   const size_t max_literal = 287;
-  size_t* code_lengths = calloc(max_literal + 1, sizeof(size_t));
-  if (!code_lengths) {
-    goto error;
-  }
+  size_t* code_lengths = stufflib_alloc(max_literal + 1, sizeof(size_t));
   {
     size_t symbol = 0;
     for (; symbol < 144; ++symbol) {
@@ -105,10 +103,7 @@ error:
 
 static stufflib_huffman_tree _make_fixed_distance_tree() {
   const size_t max_dist = 31;
-  size_t* code_lengths = calloc(max_dist + 1, sizeof(size_t));
-  if (!code_lengths) {
-    goto error;
-  }
+  size_t* code_lengths = stufflib_alloc(max_dist + 1, sizeof(size_t));
   for (size_t symbol = 0; symbol <= max_dist; ++symbol) {
     code_lengths[symbol] = 5;
   }
@@ -230,11 +225,8 @@ bool stufflib_inflate_dynamic_block(_deflate_state state[static 1]) {
       {16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
   static const size_t max_length_length = 18;
 
-  size_t* length_lengths = calloc(max_length_length + 1, sizeof(size_t));
-  if (!length_lengths) {
-    STUFFLIB_LOG_ERROR("failed allocating dynamic length_lengths");
-    goto error;
-  }
+  size_t* length_lengths =
+      stufflib_alloc(max_length_length + 1, sizeof(size_t));
   for (size_t i = 0; i < num_length_lengths; ++i) {
     length_lengths[length_order[i]] = _next_n_bits(state, 3);
   }
@@ -246,7 +238,7 @@ bool stufflib_inflate_dynamic_block(_deflate_state state[static 1]) {
   free(length_lengths);
 
   size_t* dynamic_code_lengths =
-      calloc(num_lengths + num_distances, sizeof(size_t));
+      stufflib_alloc(num_lengths + num_distances, sizeof(size_t));
   for (size_t i = 0; i < num_lengths + num_distances;) {
     const size_t symbol = _decode_next_code(&length_tree, state);
     assert(symbol != SIZE_MAX);

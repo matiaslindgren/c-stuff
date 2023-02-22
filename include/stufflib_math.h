@@ -3,6 +3,8 @@
 #include <math.h>
 #include <stdlib.h>
 
+#include "stufflib_memory.h"
+
 typedef double stufflib_math_function(double);
 
 double stufflib_math_diff(stufflib_math_function* f, double x) {
@@ -52,24 +54,16 @@ size_t* stufflib_math_factorize(size_t n) {
   }
 
   size_t capacity = 4;
-  size_t* factors = calloc(capacity, sizeof(size_t));
-  if (!factors) {
-    return nullptr;
-  }
+  size_t* factors = stufflib_alloc(capacity, sizeof(size_t));
 
   size_t num_factors = 0;
   size_t k = stufflib_math_next_prime(1);
   while (k <= n) {
     if (n % k == 0) {
       if (num_factors >= capacity) {
+        factors =
+            stufflib_realloc(factors, capacity, 2 * capacity, sizeof(size_t));
         capacity *= 2;
-        {
-          size_t* resized = realloc(factors, capacity * sizeof(size_t));
-          if (!resized) {
-            goto error;
-          }
-          factors = resized;
-        }
       }
       factors[num_factors] = k;
       ++num_factors;
@@ -79,20 +73,10 @@ size_t* stufflib_math_factorize(size_t n) {
     }
   }
 
-  {
-    size_t* resized = realloc(factors, (num_factors + 1) * sizeof(size_t));
-    if (!resized) {
-      goto error;
-    }
-    factors = resized;
-  }
+  factors =
+      stufflib_realloc(factors, capacity, num_factors + 1, sizeof(size_t));
   factors[num_factors] = 0;
-
   return factors;
-
-error:
-  free(factors);
-  return nullptr;
 }
 
 double* stufflib_math_linalg_scalar_vmul(const double a,

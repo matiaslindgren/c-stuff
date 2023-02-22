@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "stufflib_memory.h"
 #include "stufflib_misc.h"
 
 typedef int stufflib_sort_compare(const void*, const void*);
@@ -72,10 +73,7 @@ void* stufflib_sort_mergesort(void* src,
                               stufflib_sort_compare* const compare) {
   assert(count);
   assert(src);
-  void* tmp = calloc(count, size);
-  if (!tmp) {
-    return nullptr;
-  }
+  void* tmp = stufflib_alloc(count, size);
   memcpy(tmp, src, count * size);
   _stufflib_sort_mergesort(size, src, tmp, 0, count, compare);
   memcpy(src, tmp, count * size);
@@ -140,10 +138,7 @@ void* stufflib_sort_quicksort(void* src,
   assert(size);
   assert(src);
   // pivot and swap space
-  void* tmp = calloc(2, size);
-  if (!tmp) {
-    return nullptr;
-  }
+  void* tmp = stufflib_alloc(2, size);
   _stufflib_sort_quicksort(count, size, src, tmp, 0, count - 1, compare);
   free(tmp);
   return src;

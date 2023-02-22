@@ -7,6 +7,7 @@
 #include "stufflib_hash.h"
 #include "stufflib_macros.h"
 #include "stufflib_math.h"
+#include "stufflib_memory.h"
 #include "stufflib_misc.h"
 
 #define STUFFLIB_HASHMAP_MAX_LOAD_FACTOR 0.5
@@ -26,26 +27,19 @@ struct stufflib_hashmap {
 
 static size_t stufflib_hashmap_num_collisions = 0;
 
-static inline bool _realloc_nodes(stufflib_hashmap map[const static 1],
+static inline void _realloc_nodes(stufflib_hashmap map[const static 1],
                                   const size_t new_capacity) {
   stufflib_hashmap_node* new_nodes =
-      calloc(new_capacity, sizeof(stufflib_hashmap_node));
-  if (!new_nodes) {
-    STUFFLIB_LOG_ERROR("failed allocating %zu hashmap nodes", new_capacity);
-    return false;
-  }
+      stufflib_alloc(new_capacity, sizeof(stufflib_hashmap_node));
   map->nodes = new_nodes;
   map->capacity = new_capacity;
-  return true;
 }
 
 stufflib_hashmap* stufflib_hashmap_init(stufflib_hashmap map[const static 1],
                                         const size_t capacity) {
   *map = (stufflib_hashmap){0};
   if (capacity) {
-    if (!_realloc_nodes(map, capacity)) {
-      return nullptr;
-    }
+    _realloc_nodes(map, capacity);
   }
   return map;
 }
@@ -93,9 +87,7 @@ bool stufflib_hashmap_resize(stufflib_hashmap map[const static 1],
   assert(new_capacity >= map->size);
   stufflib_hashmap_node* const old_nodes = map->nodes;
   const size_t old_capacity = map->capacity;
-  if (!_realloc_nodes(map, new_capacity)) {
-    return false;
-  }
+  _realloc_nodes(map, new_capacity);
   for (size_t i = 0; i < old_capacity; ++i) {
     const char* key = old_nodes[i].key;
     if (key) {

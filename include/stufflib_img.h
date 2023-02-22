@@ -6,11 +6,9 @@
 #include "stufflib_png.h"
 #include "stufflib_unionfind.h"
 
-bool stufflib_img_segment_rgb(stufflib_png_image dst[const static 1],
+void stufflib_img_segment_rgb(stufflib_png_image dst[const static 1],
                               const stufflib_png_image src[const static 1],
                               const size_t threshold_percent) {
-  bool ok = false;
-
   stufflib_unionfind segments = {0};
   size_t* segment_sizes = nullptr;
   double* segment_sums = nullptr;
@@ -22,20 +20,9 @@ bool stufflib_img_segment_rgb(stufflib_png_image dst[const static 1],
   const double distance_threshold =
       stufflib_math_clamp(0, (double)(threshold_percent) / 100, 1);
 
-  if (!stufflib_unionfind_init(&segments, width * height)) {
-    STUFFLIB_LOG_ERROR("failed initializing union_find structure for segments");
-    goto done;
-  }
-  segment_sizes = calloc(width * height, sizeof(size_t));
-  if (!segment_sizes) {
-    STUFFLIB_LOG_ERROR("failed allocating memory for segment sizes");
-    goto done;
-  }
-  segment_sums = calloc(bytes_per_px * width * height, sizeof(double));
-  if (!segment_sums) {
-    STUFFLIB_LOG_ERROR("failed allocating memory for segment sums");
-    goto done;
-  }
+  stufflib_unionfind_init(&segments, width * height);
+  segment_sizes = stufflib_alloc(width * height, sizeof(size_t));
+  segment_sums = stufflib_alloc(bytes_per_px * width * height, sizeof(double));
 
   for (size_t row = 0; row < height; ++row) {
     for (size_t col = 0; col < width; ++col) {
@@ -134,13 +121,9 @@ bool stufflib_img_segment_rgb(stufflib_png_image dst[const static 1],
     }
   }
 
-  ok = true;
-
-done:
   stufflib_unionfind_destroy(&segments);
   free(segment_sizes);
   free(segment_sums);
-  return ok;
 }
 
 #endif  // _STUFFLIB_IMG_H_INCLUDED
