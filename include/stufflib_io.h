@@ -2,120 +2,89 @@
 #define _STUFFLIB_IO_H_INCLUDED
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
+#include "stufflib_data.h"
+#include "stufflib_iterator.h"
 #include "stufflib_macros.h"
-#include "stufflib_str.h"
+#include "stufflib_memory.h"
+#include "stufflib_misc.h"
 
-size_t stufflib_io_file_size(const char fname[const static 1]) {
-  size_t size = 0;
+#define STUFFLIB_FILE_BUFFER_CAPACITY 4096
 
-  FILE* fp = fopen(fname, "r");
-  if (!fp) {
-    STUFFLIB_LOG_ERROR("cannot open %s", fname);
+typedef struct stufflib_file_buffer stufflib_file_buffer;
+struct stufflib_file_buffer {
+  const char* filename;
+  FILE* restrict file;
+  size_t capacity;
+  stufflib_data data;
+};
+
+void stufflib_file_iter_read_data(stufflib_file_buffer buffer[const static 1]) {
+  buffer->data.size = fread(buffer->data.data,
+                            sizeof(unsigned char),
+                            buffer->capacity,
+                            buffer->file);
+  if (ferror(buffer->file)) {
+    STUFFLIB_LOG_ERROR("failed reading %zu bytes from %s",
+                       buffer->capacity,
+                       buffer->filename);
+  }
+}
+
+void* stufflib_file_iter_get_item(stufflib_iterator iter[const static 1]) {
+  stufflib_file_buffer* buffer = (stufflib_file_buffer*)(iter->data);
+  return &(buffer->data);
+}
+
+void stufflib_file_iter_advance(stufflib_iterator iter[const static 1]) {
+  stufflib_file_buffer* buffer = (stufflib_file_buffer*)(iter->data);
+  stufflib_file_iter_read_data(buffer);
+  iter->index += buffer->data.size;
+  iter->pos += 1;
+}
+
+bool stufflib_file_iter_is_done(stufflib_iterator iter[const static 1]) {
+  stufflib_file_buffer* buffer = (stufflib_file_buffer*)(iter->data);
+  return ferror(buffer->file) != 0 || buffer->data.size == 0;
+}
+
+stufflib_iterator stufflib_file_iter_open(const char filename[const static 1]) {
+  stufflib_iterator iter = (stufflib_iterator){
+      .get_item = stufflib_file_iter_get_item,
+      .advance = stufflib_file_iter_advance,
+      .is_done = stufflib_file_iter_is_done,
+  };
+
+  FILE* restrict file = fopen(filename, "rb");
+  if (!file) {
     goto done;
   }
 
-  {
-    int chr = 0;
-    while ((chr = fgetc(fp)) != EOF) {
-      ++size;
-    }
-  }
-  if (ferror(fp)) {
-    STUFFLIB_LOG_ERROR("failed reading from %s", fname);
-    goto done;
-  }
+  stufflib_file_buffer* buffer =
+      stufflib_alloc(1, sizeof(stufflib_file_buffer));
+  *buffer = (stufflib_file_buffer){
+      .file = file,
+      .filename = filename,
+      .capacity = STUFFLIB_FILE_BUFFER_CAPACITY,
+      .data = stufflib_data_new(STUFFLIB_FILE_BUFFER_CAPACITY),
+  };
+  stufflib_file_iter_read_data(buffer);
+  iter.data = buffer;
 
 done:
-  if (fp) {
-    fclose(fp);
-  }
-  return size;
+  return iter;
 }
 
-char* stufflib_io_slurp_file(const char fname[const static 1]) {
-  char* content = calloc(1, 1);
-  FILE* fp = fopen(fname, "r");
-  if (!content) {
-    STUFFLIB_LOG_ERROR("failed allocating slurp buffer");
-    goto error;
+void stufflib_file_iter_close(stufflib_iterator iter[const static 1]) {
+  if (!iter->data) {
+    return;
   }
-  if (!fp) {
-    STUFFLIB_LOG_ERROR("cannot open %s", fname);
-    goto error;
-  }
-
-  {
-    size_t size = 0;
-    int chr = 0;
-    while ((chr = fgetc(fp)) != EOF) {
-      ++size;
-      {
-        char* tmp = realloc(content, size + 1);
-        if (!tmp) {
-          STUFFLIB_LOG_ERROR("failed resizing slurp buffer");
-          goto error;
-        }
-        content = tmp;
-      }
-      content[size - 1] = chr;
-      content[size] = 0;
-    }
-  }
-  if (ferror(fp)) {
-    STUFFLIB_LOG_ERROR("failed reading from %s", fname);
-    goto error;
-  }
-
-  fclose(fp);
-  return content;
-
-error:
-  if (fp) {
-    fclose(fp);
-  }
-  if (content) {
-    free(content);
-  }
-  return nullptr;
-}
-
-char** stufflib_io_slurp_lines(const char fname[const static 1],
-                               const char line_ending[const static 1]) {
-  char* file_content = nullptr;
-  char** lines = nullptr;
-
-  file_content = stufflib_io_slurp_file(fname);
-  if (!file_content) {
-    goto error;
-  }
-
-  lines = stufflib_str_split(file_content, line_ending);
-  if (!lines) {
-    goto error;
-  }
-
-  const size_t num_lines = stufflib_str_chunks_count(lines);
-  if (strcmp(lines[num_lines - 1], "") == 0) {
-    char** tmp = stufflib_str_slice_chunks(lines, 0, num_lines - 1);
-    if (!tmp) {
-      goto error;
-    }
-    stufflib_str_chunks_destroy(lines);
-    lines = tmp;
-  }
-
-  free(file_content);
-  return lines;
-
-error:
-  if (file_content) {
-    free(file_content);
-  }
-  if (lines) {
-    stufflib_str_chunks_destroy(lines);
-  }
-  return nullptr;
+  stufflib_file_buffer* buffer = (stufflib_file_buffer*)(iter->data);
+  fclose(buffer->file);
+  stufflib_data_destroy(&buffer->data);
+  free(iter->data);
+  iter->data = nullptr;
 }
 
 #endif  // _STUFFLIB_IO_H_INCLUDED
