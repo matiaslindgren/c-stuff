@@ -72,8 +72,8 @@ void stufflib_data_fdump(FILE stream[const static 1],
   fprintf(stream, "\n");
 }
 
-void* stufflib_data_iter_get(stufflib_iterator iter[const static 1]) {
-  return ((stufflib_data*)iter->begin)->data + iter->index;
+void* stufflib_data_iter_get_item(stufflib_iterator iter[const static 1]) {
+  return ((stufflib_data*)iter->data)->data + iter->index;
 }
 
 void stufflib_data_iter_advance(stufflib_iterator iter[const static 1]) {
@@ -81,17 +81,17 @@ void stufflib_data_iter_advance(stufflib_iterator iter[const static 1]) {
   ++(iter->pos);
 }
 
-bool stufflib_data_iter_end(stufflib_iterator iter[const static 1]) {
-  const stufflib_data* data = (const stufflib_data*)(iter->begin);
+bool stufflib_data_iter_is_done(stufflib_iterator iter[const static 1]) {
+  const stufflib_data* data = (const stufflib_data*)(iter->data);
   return iter->index == data->size;
 }
 
 stufflib_iterator stufflib_data_iter(const stufflib_data data[const static 1]) {
   return (stufflib_iterator){
-      .begin = (void*)data,
-      .get = stufflib_data_iter_get,
+      .data = (void*)data,
+      .get_item = stufflib_data_iter_get_item,
       .advance = stufflib_data_iter_advance,
-      .end = stufflib_data_iter_end,
+      .is_done = stufflib_data_iter_is_done,
   };
 }
 

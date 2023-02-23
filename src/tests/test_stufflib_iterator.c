@@ -14,9 +14,9 @@ bool test_data(const bool verbose) {
   };
   size_t i = 0;
   stufflib_iterator iter = stufflib_data_iter(&data);
-  for (; !iter.end(&iter); iter.advance(&iter)) {
+  for (; !iter.is_done(&iter); iter.advance(&iter)) {
     assert(iter.index == i);
-    const unsigned char* item = iter.get(&iter);
+    const unsigned char* item = iter.get_item(&iter);
     assert(item);
     assert(*item == data.data[i]);
     ++i;
@@ -25,25 +25,25 @@ bool test_data(const bool verbose) {
   return true;
 }
 
-void* stufflib_cstr_iter_get(stufflib_iterator iter[const static 1]) {
-  return ((char*)iter->begin) + iter->index;
+void* stufflib_cstr_iter_get_item(stufflib_iterator iter[const static 1]) {
+  return ((char*)iter->data) + iter->index;
 }
 
 void stufflib_cstr_iter_advance(stufflib_iterator iter[const static 1]) {
   ++(iter->index);
 }
 
-bool stufflib_cstr_iter_end(stufflib_iterator iter[const static 1]) {
-  return ((char*)iter->begin)[iter->index] == 0;
+bool stufflib_cstr_iter_is_done(stufflib_iterator iter[const static 1]) {
+  return ((char*)iter->data)[iter->index] == 0;
 }
 
 stufflib_iterator stufflib_cstr_iter(char str[const static 1]) {
   return (stufflib_iterator){
       .index = 0,
-      .begin = (void*)str,
-      .get = stufflib_cstr_iter_get,
+      .data = (void*)str,
+      .get_item = stufflib_cstr_iter_get_item,
       .advance = stufflib_cstr_iter_advance,
-      .end = stufflib_cstr_iter_end,
+      .is_done = stufflib_cstr_iter_is_done,
   };
 }
 
@@ -62,9 +62,9 @@ bool test_cstr(const bool verbose) {
     size_t i = 0;
     char* str = strings[i_str];
     stufflib_iterator iter = stufflib_cstr_iter(str);
-    for (; !iter.end(&iter); iter.advance(&iter)) {
+    for (; !iter.is_done(&iter); iter.advance(&iter)) {
       assert(iter.index == i);
-      const char* ch = iter.get(&iter);
+      const char* ch = iter.get_item(&iter);
       assert(ch);
       assert(*ch == str[i]);
       ++i;

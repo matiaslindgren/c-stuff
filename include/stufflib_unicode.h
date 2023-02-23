@@ -203,9 +203,9 @@ bool stufflib_unicode_is_valid_utf8(const stufflib_data data[const static 1]) {
   return byte_pos == data->size;
 }
 
-size_t stufflib_unicode_iter_item_width(
+size_t stufflib_unicode_iter_get_item_width(
     stufflib_iterator iter[const static 1]) {
-  const stufflib_data* data = (const stufflib_data*)(iter->begin);
+  const stufflib_data* data = (const stufflib_data*)(iter->data);
   const unsigned char* item = data->data + iter->index;
   return stufflib_unicode_codepoint_width_from_utf8(data->size - iter->index,
                                                     item);
@@ -213,34 +213,34 @@ size_t stufflib_unicode_iter_item_width(
 
 void stufflib_unicode_iter_advance(stufflib_iterator iter[const static 1]) {
   // TODO find next valid code point instead of advance by 1
-  const size_t codepoint_width = stufflib_unicode_iter_item_width(iter);
+  const size_t codepoint_width = stufflib_unicode_iter_get_item_width(iter);
   iter->index += STUFFLIB_MAX(1, codepoint_width);
   iter->pos += 1;
 }
 
-bool stufflib_unicode_iter_end(stufflib_iterator iter[const static 1]) {
-  const stufflib_data* data = (const stufflib_data*)(iter->begin);
+bool stufflib_unicode_iter_is_done(stufflib_iterator iter[const static 1]) {
+  const stufflib_data* data = (const stufflib_data*)(iter->data);
   return iter->index >= data->size;
 }
 
-void* stufflib_unicode_iter_get(stufflib_iterator iter[const static 1]) {
-  return stufflib_data_iter_get(iter);
+void* stufflib_unicode_iter_get_item(stufflib_iterator iter[const static 1]) {
+  return stufflib_data_iter_get_item(iter);
 }
 
 wchar_t stufflib_unicode_iter_decode_item(
     stufflib_iterator iter[const static 1]) {
   return stufflib_unicode_codepoint_from_utf8(
-      stufflib_unicode_iter_item_width(iter),
-      iter->get(iter));
+      stufflib_unicode_iter_get_item_width(iter),
+      iter->get_item(iter));
 }
 
 stufflib_iterator stufflib_unicode_iter(
     const stufflib_data data[const static 1]) {
   return (stufflib_iterator){
-      .begin = (void*)data,
-      .get = stufflib_unicode_iter_get,
+      .data = (void*)data,
+      .get_item = stufflib_unicode_iter_get_item,
       .advance = stufflib_unicode_iter_advance,
-      .end = stufflib_unicode_iter_end,
+      .is_done = stufflib_unicode_iter_is_done,
   };
 }
 
@@ -249,7 +249,7 @@ size_t stufflib_unicode_length(const stufflib_data data[const static 1]) {
     return 0;
   }
   stufflib_iterator iter = stufflib_unicode_iter(data);
-  while (!iter.end(&iter)) {
+  while (!iter.is_done(&iter)) {
     iter.advance(&iter);
   }
   return iter.pos;
