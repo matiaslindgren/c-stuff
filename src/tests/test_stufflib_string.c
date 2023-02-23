@@ -94,7 +94,7 @@ bool test_string_slice(const bool verbose) {
         assert(substr.length == substr_len);
         for (stufflib_iterator iter =
                  stufflib_unicode_iter(&(substr.utf8_data));
-             !iter.end(&iter);
+             !iter.is_done(&iter);
              iter.advance(&iter)) {
           const wchar_t codepoint = stufflib_unicode_iter_decode_item(&iter);
           assert(codepoint == decoded_strings[decoded_pos + begin + iter.pos]);
@@ -121,6 +121,38 @@ bool test_string_strstr_no_match(const bool verbose) {
   return true;
 }
 
+bool test_init_from_file(const bool verbose) {
+  const char* languages[] = {
+      "ar", "bg",  "cs", "de",  "el", "fa", "fi", "fr",  "he",  "hi", "is",
+      "ja", "ka",  "ki", "ko",  "ku", "lt", "lv", "nah", "nqo", "pl", "pt",
+      "ru", "shi", "sl", "szl", "ta", "tr", "uk", "vep", "vi",  "zh",
+  };
+  for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(languages); ++i) {
+    char input_path[200] = {0};
+    sprintf(input_path, "./test-data/txt/wikipedia/water_%s.txt", languages[i]);
+    if (verbose) {
+      printf("%s\n", input_path);
+    }
+
+    char length_path[200] = {0};
+    sprintf(length_path,
+            "./test-data/txt/wikipedia/water_%s_length.txt",
+            languages[i]);
+    FILE* restrict fp = fopen(length_path, "rb");
+    assert(fp);
+    char tmp[200] = {0};
+    assert(fread(tmp, 1, 200, fp));
+    fclose(fp);
+    const size_t expected_str_length = strtoull(tmp, 0, 10);
+
+    stufflib_string str = stufflib_string_from_file(input_path);
+    assert(str.length == expected_str_length);
+    stufflib_string_delete(&str);
+  }
+  return true;
+}
+
 STUFFLIB_TEST_MAIN(test_string_init,
                    test_string_slice,
-                   test_string_strstr_no_match)
+                   test_string_strstr_no_match,
+                   test_init_from_file)
