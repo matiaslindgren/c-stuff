@@ -53,6 +53,18 @@ bool test_create(const bool verbose) {
   return true;
 }
 
+bool test_create_empty(const bool verbose) {
+  stufflib_data data = stufflib_data_create(0);
+  assert(data.size == 0);
+  assert(data.owned);
+  assert(!data.data);
+  stufflib_data_delete(&data);
+  assert(data.size == 0);
+  assert(!data.owned);
+  assert(data.data == nullptr);
+  return true;
+}
+
 bool test_copy_view(const bool verbose) {
   unsigned char x[] = {1, 2, 3, 4};
   const size_t n = STUFFLIB_ARRAY_LEN(x);
@@ -94,6 +106,27 @@ bool test_concat_views(const bool verbose) {
   for (size_t i = 0; i < n2; ++i) {
     assert(data2.data + i != data3.data + n1 + i);
     assert(data2.data[i] == data3.data[n1 + i]);
+  }
+  stufflib_data_delete(&data3);
+  return true;
+}
+
+bool test_concat_empty(const bool verbose) {
+  unsigned char x1[] = {1, 2, 3, 4};
+  const size_t n1 = STUFFLIB_ARRAY_LEN(x1);
+  stufflib_data data1 = stufflib_data_view(n1, x1);
+  stufflib_data data2 = stufflib_data_create(0);
+  stufflib_data data3 = stufflib_data_concat(&data1, &data2);
+  assert(!data1.owned);
+  assert(data2.owned);
+  assert(data3.owned);
+  assert(data1.data == x1);
+  assert(data2.data == nullptr);
+  assert(data3.data != x1);
+  assert(data3.size == data1.size);
+  for (size_t i = 0; i < n1; ++i) {
+    assert(data1.data + i != data3.data + i);
+    assert(data1.data[i] == data3.data[i]);
   }
   stufflib_data_delete(&data3);
   return true;
@@ -153,8 +186,10 @@ bool test_iter(const bool verbose) {
 STUFFLIB_TEST_MAIN(test_view_one,
                    test_view_array,
                    test_create,
+                   test_create_empty,
                    test_copy_view,
                    test_concat_views,
+                   test_concat_empty,
                    test_slice,
                    test_slice_past_end,
                    test_iter)

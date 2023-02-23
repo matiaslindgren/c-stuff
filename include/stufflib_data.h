@@ -27,16 +27,15 @@ stufflib_data stufflib_data_view(const size_t size, unsigned char data[size]) {
 }
 
 stufflib_data stufflib_data_create(const size_t size) {
-  assert(size);
   return (stufflib_data){
       .owned = true,
       .size = size,
-      .data = stufflib_alloc(size, 1),
+      .data = size ? stufflib_alloc(size, 1) : 0,
   };
 }
 
 void stufflib_data_delete(stufflib_data data[static 1]) {
-  if (data->owned && data->size) {
+  if (data->owned && data->data) {
     free(data->data);
   }
   *data = (stufflib_data){0};
@@ -44,7 +43,9 @@ void stufflib_data_delete(stufflib_data data[static 1]) {
 
 stufflib_data stufflib_data_copy(const stufflib_data src[const static 1]) {
   stufflib_data dst = stufflib_data_create(src->size);
-  memcpy(dst.data, src->data, dst.size);
+  if (dst.size) {
+    memcpy(dst.data, src->data, dst.size);
+  }
   return dst;
 }
 
@@ -52,9 +53,20 @@ stufflib_data stufflib_data_concat(
     const stufflib_data data1[const restrict static 1],
     const stufflib_data data2[const restrict static 1]) {
   stufflib_data dst = stufflib_data_create(data1->size + data2->size);
-  memcpy(dst.data, data1->data, data1->size);
-  memcpy(dst.data + data1->size, data2->data, data2->size);
+  if (data1->size) {
+    memcpy(dst.data, data1->data, data1->size);
+  }
+  if (data2->size) {
+    memcpy(dst.data + data1->size, data2->data, data2->size);
+  }
   return dst;
+}
+
+void stufflib_data_extend(stufflib_data dst[restrict static 1],
+                          const stufflib_data src[const restrict static 1]) {
+  stufflib_data tmp = stufflib_data_concat(dst, src);
+  stufflib_data_delete(dst);
+  *dst = tmp;
 }
 
 stufflib_data stufflib_data_slice(const stufflib_data data[const static 1],
