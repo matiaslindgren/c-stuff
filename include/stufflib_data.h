@@ -1,5 +1,6 @@
 #ifndef _STUFFLIB_DATA_H_INCLUDED
 #define _STUFFLIB_DATA_H_INCLUDED
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,50 +11,62 @@
 
 typedef struct stufflib_data stufflib_data;
 struct stufflib_data {
+  bool owned;
   size_t size;
   unsigned char* data;
 };
 
-stufflib_data stufflib_data_new(const size_t size) {
+stufflib_data stufflib_data_view(const size_t size, unsigned char data[size]) {
+  assert(size);
+  assert(data);
   return (stufflib_data){
+      .owned = false,
+      .size = size,
+      .data = data,
+  };
+}
+
+stufflib_data stufflib_data_create(const size_t size) {
+  assert(size);
+  return (stufflib_data){
+      .owned = true,
       .size = size,
       .data = stufflib_alloc(size, 1),
   };
 }
 
-void stufflib_data_copy(stufflib_data dst[restrict static 1],
-                        const stufflib_data src[restrict static 1]) {
-  *dst = stufflib_data_new(src->size);
-  memcpy(dst->data, src->data, dst->size);
-}
-
-void stufflib_data_destroy(stufflib_data data[static 1]) {
-  free(data->data);
+void stufflib_data_delete(stufflib_data data[static 1]) {
+  if (data->owned && data->size) {
+    free(data->data);
+  }
   *data = (stufflib_data){0};
 }
 
-stufflib_data* stufflib_data_concat(stufflib_data dst[static 1],
-                                    const stufflib_data src[static 1]) {
-  // TODO
-  unsigned char* tmp =
-      stufflib_realloc(dst->data, dst->size, dst->size + src->size, 1);
-  dst->data = tmp;
-  memcpy(dst->data + dst->size, src->data, src->size);
-  dst->size += src->size;
+stufflib_data stufflib_data_copy(const stufflib_data src[const static 1]) {
+  stufflib_data dst = stufflib_data_create(src->size);
+  memcpy(dst.data, src->data, dst.size);
+  return dst;
+}
+
+stufflib_data stufflib_data_concat(
+    const stufflib_data data1[const restrict static 1],
+    const stufflib_data data2[const restrict static 1]) {
+  stufflib_data dst = stufflib_data_create(data1->size + data2->size);
+  memcpy(dst.data, data1->data, data1->size);
+  memcpy(dst.data + data1->size, data2->data, data2->size);
   return dst;
 }
 
 stufflib_data stufflib_data_slice(const stufflib_data data[const static 1],
-                                  size_t begin,
-                                  size_t end) {
-  end = STUFFLIB_MIN(end, data->size);
+                                  const size_t begin,
+                                  const size_t end_or_max) {
+  const size_t end = STUFFLIB_MIN(end_or_max, data->size);
   if (begin >= end) {
     return (stufflib_data){0};
   }
-  return (stufflib_data){
-      .size = end - begin,
-      .data = data->data + begin,
-  };
+  const size_t slice_size = end - begin;
+  unsigned char* const slice_begin = data->data + begin;
+  return stufflib_data_view(slice_size, slice_begin);
 }
 
 void stufflib_data_fdump(FILE stream[const static 1],
@@ -73,7 +86,8 @@ void stufflib_data_fdump(FILE stream[const static 1],
 }
 
 void* stufflib_data_iter_get_item(stufflib_iterator iter[const static 1]) {
-  return ((stufflib_data*)iter->data)->data + iter->index;
+  stufflib_data* data = iter->data;
+  return data->data + iter->index;
 }
 
 void stufflib_data_iter_advance(stufflib_iterator iter[const static 1]) {
@@ -82,7 +96,7 @@ void stufflib_data_iter_advance(stufflib_iterator iter[const static 1]) {
 }
 
 bool stufflib_data_iter_is_done(stufflib_iterator iter[const static 1]) {
-  const stufflib_data* data = (const stufflib_data*)(iter->data);
+  const stufflib_data* data = iter->data;
   return iter->index == data->size;
 }
 

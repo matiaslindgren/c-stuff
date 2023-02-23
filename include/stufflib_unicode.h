@@ -205,7 +205,7 @@ bool stufflib_unicode_is_valid_utf8(const stufflib_data data[const static 1]) {
 
 size_t stufflib_unicode_iter_get_item_width(
     stufflib_iterator iter[const static 1]) {
-  const stufflib_data* data = (const stufflib_data*)(iter->data);
+  const stufflib_data* data = iter->data;
   const unsigned char* item = data->data + iter->index;
   return stufflib_unicode_codepoint_width_from_utf8(data->size - iter->index,
                                                     item);
@@ -219,7 +219,7 @@ void stufflib_unicode_iter_advance(stufflib_iterator iter[const static 1]) {
 }
 
 bool stufflib_unicode_iter_is_done(stufflib_iterator iter[const static 1]) {
-  const stufflib_data* data = (const stufflib_data*)(iter->data);
+  const stufflib_data* data = iter->data;
   return iter->index >= data->size;
 }
 

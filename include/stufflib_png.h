@@ -133,7 +133,7 @@ struct stufflib_png_image {
 };
 
 void stufflib_png_chunk_destroy(stufflib_png_chunk chunk) {
-  stufflib_data_destroy(&chunk.data);
+  stufflib_data_delete(&chunk.data);
 }
 
 void stufflib_png_chunks_destroy(stufflib_png_chunks chunks) {
@@ -148,15 +148,15 @@ void stufflib_png_header_destroy(stufflib_png_header header) {
 }
 
 void stufflib_png_image_destroy(stufflib_png_image image) {
-  stufflib_data_destroy(&image.data);
-  stufflib_data_destroy(&image.filter);
+  stufflib_data_delete(&(image.data));
+  stufflib_data_delete(&(mage.filter));
 }
 
 void stufflib_png_image_copy(stufflib_png_image dst[restrict static 1],
                              const stufflib_png_image src[restrict static 1]) {
   dst->header = src->header;
-  stufflib_data_copy(&dst->data, &src->data);
-  stufflib_data_copy(&dst->filter, &src->filter);
+  dst->data = stufflib_data_copy(&(src->data));
+  dst->filter = stufflib_data_copy(&(src->filter));
 }
 
 unsigned char* stufflib_png_image_get_pixel(
@@ -448,7 +448,7 @@ stufflib_data stufflib_png_pack_image_data(
   const size_t bytes_per_px =
       stufflib_png_bytes_per_pixel[image->header.color_type];
 
-  packed = stufflib_data_new(stufflib_png_data_size(image->header));
+  packed = stufflib_data_create(stufflib_png_data_size(image->header));
 
   for (size_t row = 0; row < height; ++row) {
     const size_t filter_idx = bytes_per_px * row * width + row;
@@ -474,8 +474,8 @@ void stufflib_png_unpack_and_pad_image_data(
   const size_t bytes_per_px =
       stufflib_png_bytes_per_pixel[image->header.color_type];
 
-  filter = stufflib_data_new(height);
-  padded = stufflib_data_new(bytes_per_px * (width + 2) * (height + 2));
+  filter = stufflib_data_create(height);
+  padded = stufflib_data_create(bytes_per_px * (width + 2) * (height + 2));
 
   for (size_t row = 0; row < height; ++row) {
     const size_t idx_col0_raw = row * bytes_per_px * width + row;
@@ -491,7 +491,7 @@ void stufflib_png_unpack_and_pad_image_data(
   }
 
   image->filter = filter;
-  stufflib_data_destroy(&image->data);
+  stufflib_data_delete(&image->data);
   image->data = padded;
 }
 
@@ -580,12 +580,14 @@ stufflib_png_image stufflib_png_read_image(
   for (size_t i = 1; i < chunks.count; ++i) {
     const stufflib_png_chunk chunk = chunks.chunks[i];
     if (chunk.type == stufflib_png_IDAT) {
-      stufflib_data_concat(&idat, &chunk.data);
+      stufflib_data tmp = stufflib_data_concat(&idat, &chunk.data);
+      stufflib_data_delete(&idat);
+      idat = tmp;
     }
   }
   // TODO parse PLTE if header.color_type == stufflib_png_indexed
 
-  image.data = stufflib_data_new(stufflib_png_data_size(image.header));
+  image.data = stufflib_data_create(stufflib_png_data_size(image.header));
   const size_t num_decoded = stufflib_inflate(image.data, idat);
   if (num_decoded != image.data.size) {
     STUFFLIB_LOG_ERROR("failed decoding IDAT stream");
@@ -598,12 +600,12 @@ stufflib_png_image stufflib_png_read_image(
   }
 
   stufflib_png_chunks_destroy(chunks);
-  stufflib_data_destroy(&idat);
+  stufflib_data_delete(&idat);
   return image;
 
 error:
   stufflib_png_chunks_destroy(chunks);
-  stufflib_data_destroy(&idat);
+  stufflib_data_delete(&idat);
   stufflib_png_image_destroy(image);
   return (stufflib_png_image){0};
 }
@@ -653,7 +655,7 @@ bool stufflib_png_chunk_fwrite(FILE stream[const static 1],
                        data->size);
     return false;
   }
-  stufflib_data crc_data = stufflib_data_new(data->size + 4);
+  stufflib_data crc_data = stufflib_data_create(data->size + 4);
 
   bool ok = false;
 
@@ -683,7 +685,7 @@ bool stufflib_png_chunk_fwrite(FILE stream[const static 1],
   ok = true;
 
 done:
-  stufflib_data_destroy(&crc_data);
+  stufflib_data_delete(&crc_data);
   return ok;
 }
 
@@ -700,7 +702,7 @@ bool stufflib_png_write_image(const stufflib_png_image image,
     goto done;
   }
   packed_data = stufflib_png_pack_image_data(&image);
-  idat = stufflib_data_new(stufflib_png_idat_max_size(image.header));
+  idat = stufflib_data_create(stufflib_png_idat_max_size(image.header));
 
   const size_t new_size = stufflib_deflate_uncompressed(idat, packed_data);
   idat.data = stufflib_realloc(idat.data, idat.size, new_size, 1);
@@ -725,8 +727,8 @@ done:
   if (fp) {
     fclose(fp);
   }
-  stufflib_data_destroy(&idat);
-  stufflib_data_destroy(&packed_data);
+  stufflib_data_delete(&idat);
+  stufflib_data_delete(&packed_data);
   return write_ok;
 }
 

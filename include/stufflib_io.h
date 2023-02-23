@@ -33,19 +33,19 @@ void stufflib_file_iter_read_data(stufflib_file_buffer buffer[const static 1]) {
 }
 
 void* stufflib_file_iter_get_item(stufflib_iterator iter[const static 1]) {
-  stufflib_file_buffer* buffer = (stufflib_file_buffer*)(iter->data);
+  stufflib_file_buffer* buffer = iter->data;
   return &(buffer->data);
 }
 
 void stufflib_file_iter_advance(stufflib_iterator iter[const static 1]) {
-  stufflib_file_buffer* buffer = (stufflib_file_buffer*)(iter->data);
+  stufflib_file_buffer* buffer = iter->data;
   stufflib_file_iter_read_data(buffer);
   iter->index += buffer->data.size;
   iter->pos += 1;
 }
 
 bool stufflib_file_iter_is_done(stufflib_iterator iter[const static 1]) {
-  stufflib_file_buffer* buffer = (stufflib_file_buffer*)(iter->data);
+  stufflib_file_buffer* buffer = iter->data;
   return ferror(buffer->file) != 0 || buffer->data.size == 0;
 }
 
@@ -67,7 +67,7 @@ stufflib_iterator stufflib_file_iter_open(const char filename[const static 1]) {
       .file = file,
       .filename = filename,
       .capacity = STUFFLIB_FILE_BUFFER_CAPACITY,
-      .data = stufflib_data_new(STUFFLIB_FILE_BUFFER_CAPACITY),
+      .data = stufflib_data_create(STUFFLIB_FILE_BUFFER_CAPACITY),
   };
   stufflib_file_iter_read_data(buffer);
   iter.data = buffer;
@@ -80,9 +80,9 @@ void stufflib_file_iter_close(stufflib_iterator iter[const static 1]) {
   if (!iter->data) {
     return;
   }
-  stufflib_file_buffer* buffer = (stufflib_file_buffer*)(iter->data);
+  stufflib_file_buffer* buffer = iter->data;
   fclose(buffer->file);
-  stufflib_data_destroy(&buffer->data);
+  stufflib_data_delete(&buffer->data);
   free(iter->data);
   iter->data = nullptr;
 }
