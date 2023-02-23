@@ -66,4 +66,8 @@ for lang, article in lang2article.items():
     codepoints = "\n".join(str(ord(ch)) for ch in content)
     out_path.write_text(codepoints, encoding="utf-8")
 
+    out_path = out_dir.joinpath(f"water_{lang}_length.txt")
+    print(f"writing {out_path}")
+    out_path.write_text(str(len(content)), encoding="utf-8")
+
     time.sleep(0.2)
