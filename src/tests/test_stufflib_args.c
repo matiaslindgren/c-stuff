@@ -1,8 +1,10 @@
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "stufflib_args.h"
-#include "stufflib_test.h"
+#include "stufflib_macros.h"
 
 bool test_parse_positional(const bool verbose) {
   char* const argv[] = {

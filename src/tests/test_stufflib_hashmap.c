@@ -1,9 +1,9 @@
 #include <assert.h>
 #include <string.h>
 
+#include "stufflib_args.h"
 #include "stufflib_hashmap.h"
 #include "stufflib_macros.h"
-#include "stufflib_test.h"
 
 bool test_empty(const bool verbose) {
   stufflib_hashmap* map = stufflib_hashmap_init(&(stufflib_hashmap){0}, 0);

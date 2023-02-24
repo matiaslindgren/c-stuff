@@ -5,9 +5,10 @@
 #include <string.h>
 #include <time.h>
 
+#include "stufflib_args.h"
+#include "stufflib_macros.h"
 #include "stufflib_rand.h"
 #include "stufflib_sort.h"
-#include "stufflib_test.h"
 
 bool test_compare_doubles(const bool verbose) {
   (void)verbose;

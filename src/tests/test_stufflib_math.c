@@ -1,10 +1,12 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
+#include "stufflib_args.h"
+#include "stufflib_macros.h"
 #include "stufflib_math.h"
 #include "stufflib_rand.h"
-#include "stufflib_test.h"
 
 void _check_factorization(const bool verbose, size_t x, size_t* factors) {
   assert(factors);

@@ -1,9 +1,12 @@
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
+#include "stufflib_args.h"
+#include "stufflib_macros.h"
 #include "stufflib_rand.h"
-#include "stufflib_test.h"
 
 bool test_rand_fill(const bool verbose) {
   const size_t n = 1000;

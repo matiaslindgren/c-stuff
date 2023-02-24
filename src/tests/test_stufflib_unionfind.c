@@ -1,4 +1,10 @@
-#include "stufflib_test.h"
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "stufflib_args.h"
+#include "stufflib_macros.h"
 #include "stufflib_unionfind.h"
 
 int _check_roots(const stufflib_unionfind uf, size_t expected_roots[static 1]) {

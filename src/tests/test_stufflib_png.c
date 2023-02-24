@@ -1,9 +1,11 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
+#include "stufflib_args.h"
+#include "stufflib_macros.h"
 #include "stufflib_png.h"
-#include "stufflib_test.h"
 
 bool test_read_single_pixel_chunks(const bool verbose) {
   for (size_t i = 0; i < 3; ++i) {

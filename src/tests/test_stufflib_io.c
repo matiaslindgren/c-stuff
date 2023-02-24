@@ -1,11 +1,12 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
+#include "stufflib_args.h"
 #include "stufflib_io.h"
 #include "stufflib_iterator.h"
 #include "stufflib_macros.h"
-#include "stufflib_test.h"
 
 bool test_create_file_iter_from_file(const bool verbose) {
   const char* files[] = {

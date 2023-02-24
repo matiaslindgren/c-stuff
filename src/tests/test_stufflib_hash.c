@@ -1,8 +1,12 @@
 #include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
+#include "stufflib_args.h"
 #include "stufflib_hash.h"
+#include "stufflib_macros.h"
 #include "stufflib_misc.h"
-#include "stufflib_test.h"
 
 bool test_single_byte(const bool verbose) {
   for (uint8_t i = 0; i < 10; ++i) {

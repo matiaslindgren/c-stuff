@@ -2,11 +2,13 @@
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <wchar.h>
 
+#include "stufflib_args.h"
 #include "stufflib_data.h"
+#include "stufflib_macros.h"
 #include "stufflib_string.h"
-#include "stufflib_test.h"
 
 // clang-format off
 stufflib_data hello_utf8[] = {

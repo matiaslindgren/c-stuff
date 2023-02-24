@@ -1,10 +1,12 @@
 #include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
+#include "stufflib_args.h"
 #include "stufflib_data.h"
 #include "stufflib_iterator.h"
 #include "stufflib_macros.h"
-#include "stufflib_test.h"
 #include "stufflib_unicode.h"
 
 bool test_data(const bool verbose) {

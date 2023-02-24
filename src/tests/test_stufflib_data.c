@@ -1,11 +1,13 @@
 #include <assert.h>
 #include <limits.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
+#include "stufflib_args.h"
 #include "stufflib_data.h"
 #include "stufflib_macros.h"
-#include "stufflib_test.h"
 
 bool test_view_one(const bool verbose) {
   unsigned char x = 1;
