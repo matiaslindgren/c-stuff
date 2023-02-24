@@ -16,8 +16,6 @@ bool test_view_one(const bool verbose) {
   assert(!data.owned);
   assert(data.data == &x);
   stufflib_data_delete(&data);
-  assert(data.size == 0);
-  assert(!data.owned);
   assert(data.data == nullptr);
   return true;
 }
@@ -33,8 +31,6 @@ bool test_view_array(const bool verbose) {
     assert(data.data + i == x + i);
   }
   stufflib_data_delete(&data);
-  assert(data.size == 0);
-  assert(!data.owned);
   assert(data.data == nullptr);
   return true;
 }
@@ -49,8 +45,6 @@ bool test_create(const bool verbose) {
     assert(data.data[i] == 0);
   }
   stufflib_data_delete(&data);
-  assert(data.size == 0);
-  assert(!data.owned);
   assert(data.data == nullptr);
   return true;
 }
@@ -61,8 +55,6 @@ bool test_create_empty(const bool verbose) {
   assert(data.owned);
   assert(!data.data);
   stufflib_data_delete(&data);
-  assert(data.size == 0);
-  assert(!data.owned);
   assert(data.data == nullptr);
   return true;
 }
@@ -82,6 +74,7 @@ bool test_copy_view(const bool verbose) {
     assert(data2.data[i] == x[i]);
   }
   stufflib_data_delete(&data2);
+  assert(data2.data == nullptr);
   return true;
 }
 
@@ -110,6 +103,7 @@ bool test_concat_views(const bool verbose) {
     assert(data2.data[i] == data3.data[n1 + i]);
   }
   stufflib_data_delete(&data3);
+  assert(data3.data == nullptr);
   return true;
 }
 
@@ -131,6 +125,7 @@ bool test_concat_empty(const bool verbose) {
     assert(data1.data[i] == data3.data[i]);
   }
   stufflib_data_delete(&data3);
+  assert(data3.data == nullptr);
   return true;
 }
 

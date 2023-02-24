@@ -18,7 +18,6 @@ struct stufflib_data {
 
 stufflib_data stufflib_data_view(const size_t size, unsigned char data[size]) {
   assert(size);
-  assert(data);
   return (stufflib_data){
       .owned = false,
       .size = size,
@@ -30,7 +29,7 @@ stufflib_data stufflib_data_create(const size_t size) {
   return (stufflib_data){
       .owned = true,
       .size = size,
-      .data = size ? stufflib_alloc(size, 1) : 0,
+      .data = size ? stufflib_alloc(size, sizeof(unsigned char)) : nullptr,
   };
 }
 

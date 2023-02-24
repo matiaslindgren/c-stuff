@@ -34,12 +34,12 @@ stufflib_string stufflib_string_from_utf8(
 
 stufflib_string stufflib_string_from_file(const char filename[const static 1]) {
   stufflib_data utf8_data = stufflib_data_create(0);
-  for (stufflib_iterator file_iter = stufflib_file_iter_open(filename);
-       !file_iter.is_done(&file_iter);
-       file_iter.advance(&file_iter)) {
+  stufflib_iterator file_iter = stufflib_file_iter_open(filename);
+  for (; !file_iter.is_done(&file_iter); file_iter.advance(&file_iter)) {
     stufflib_data* buffer = file_iter.get_item(&file_iter);
     stufflib_data_extend(&utf8_data, buffer);
   }
+  stufflib_file_iter_close(&file_iter);
   if (!stufflib_unicode_is_valid_utf8(&utf8_data)) {
     STUFFLIB_LOG_ERROR("cannot decode '%s' as UTF-8", filename);
     stufflib_data_delete(&utf8_data);

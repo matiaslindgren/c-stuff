@@ -149,7 +149,7 @@ void stufflib_png_header_destroy(stufflib_png_header header) {
 
 void stufflib_png_image_destroy(stufflib_png_image image) {
   stufflib_data_delete(&(image.data));
-  stufflib_data_delete(&(mage.filter));
+  stufflib_data_delete(&(image.filter));
 }
 
 void stufflib_png_image_copy(stufflib_png_image dst[restrict static 1],
@@ -291,7 +291,7 @@ stufflib_png_chunk stufflib_png_read_next_chunk(FILE fp[const static 1]) {
   }
 
   if (chunk.data.size) {
-    chunk.data.data = stufflib_alloc(chunk.data.size, 1);
+    chunk.data = stufflib_data_create(chunk.data.size);
     if (fread(chunk.data.data, 1, chunk.data.size, fp) != chunk.data.size) {
       STUFFLIB_LOG_ERROR("failed reading PNG chunk data");
       goto error;
@@ -580,9 +580,7 @@ stufflib_png_image stufflib_png_read_image(
   for (size_t i = 1; i < chunks.count; ++i) {
     const stufflib_png_chunk chunk = chunks.chunks[i];
     if (chunk.type == stufflib_png_IDAT) {
-      stufflib_data tmp = stufflib_data_concat(&idat, &chunk.data);
-      stufflib_data_delete(&idat);
-      idat = tmp;
+      stufflib_data_extend(&idat, &chunk.data);
     }
   }
   // TODO parse PLTE if header.color_type == stufflib_png_indexed
