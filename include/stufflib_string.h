@@ -2,6 +2,7 @@
 #define _STUFFLIB_STRING_H_INCLUDED
 #include <stdio.h>
 #include <stdlib.h>
+#include <wchar.h>
 
 #include "stufflib_data.h"
 #include "stufflib_io.h"
@@ -26,14 +27,20 @@ stufflib_string stufflib_string_from_utf8(
     STUFFLIB_LOG_ERROR("UTF-8 decode error, cannot initialize string");
     return (stufflib_string){0};
   }
+  const stufflib_data terminator = stufflib_data_view(1, (unsigned char[]){0});
   return (stufflib_string){
       .length = stufflib_unicode_length(utf8_data),
-      .utf8_data = *utf8_data,
+      .utf8_data = stufflib_data_concat(utf8_data, &terminator),
   };
 }
 
+stufflib_data stufflib_string_view_utf8_data(
+    const stufflib_string str[const static 1]) {
+  return stufflib_data_slice(&(str->utf8_data), 0, str->utf8_data.size - 1);
+}
+
 stufflib_string stufflib_string_from_file(const char filename[const static 1]) {
-  stufflib_data utf8_data = stufflib_data_create(0);
+  stufflib_data utf8_data = (stufflib_data){0};
   stufflib_iterator file_iter = stufflib_file_iter_open(filename);
   for (; !file_iter.is_done(&file_iter); file_iter.advance(&file_iter)) {
     stufflib_data* buffer = file_iter.get_item(&file_iter);
@@ -45,13 +52,32 @@ stufflib_string stufflib_string_from_file(const char filename[const static 1]) {
     stufflib_data_delete(&utf8_data);
     return (stufflib_string){0};
   }
-  return stufflib_string_from_utf8(&utf8_data);
+  stufflib_string file_content = stufflib_string_from_utf8(&utf8_data);
+  stufflib_data_delete(&utf8_data);
+  return file_content;
+}
+
+stufflib_string stufflib_string_concat(
+    const stufflib_string str1[const static 1],
+    const stufflib_string str2[const static 1]) {
+  const stufflib_data str1_data = stufflib_string_view_utf8_data(str1);
+  const stufflib_data str2_data = stufflib_string_view_utf8_data(str2);
+  const stufflib_data data = stufflib_data_concat(&str1_data, &str2_data);
+  return stufflib_string_from_utf8(&data);
+}
+
+void stufflib_string_extend(stufflib_string str1[const static 1],
+                            const stufflib_string str2[const static 1]) {
+  stufflib_string result = stufflib_string_concat(str1, str2);
+  stufflib_string_delete(str1);
+  *str1 = result;
 }
 
 stufflib_string stufflib_string_slice(const stufflib_string str[const static 1],
                                       const size_t begin,
                                       const size_t end) {
-  stufflib_iterator begin_iter = stufflib_unicode_iter(&(str->utf8_data));
+  const stufflib_data utf8_data = stufflib_string_view_utf8_data(str);
+  stufflib_iterator begin_iter = stufflib_unicode_iter(&utf8_data);
   while (begin_iter.pos < begin && !begin_iter.is_done(&begin_iter)) {
     begin_iter.advance(&begin_iter);
   }
@@ -67,11 +93,13 @@ stufflib_string stufflib_string_slice(const stufflib_string str[const static 1],
 stufflib_string stufflib_string_strstr(
     const stufflib_string str[const static 1],
     const stufflib_string substr[const static 1]) {
-  for (stufflib_iterator str_iter = stufflib_unicode_iter(&(str->utf8_data));
+  const stufflib_data str_utf8_data = stufflib_string_view_utf8_data(str);
+  const stufflib_data substr_utf8_data = stufflib_string_view_utf8_data(substr);
+  for (stufflib_iterator str_iter = stufflib_unicode_iter(&str_utf8_data);
        !str_iter.is_done(&str_iter);
        str_iter.advance(&str_iter)) {
     stufflib_iterator lhs = str_iter;
-    stufflib_iterator rhs = stufflib_unicode_iter(&(substr->utf8_data));
+    stufflib_iterator rhs = stufflib_unicode_iter(&substr_utf8_data);
     bool match = true;
     while (match) {
       if (rhs.is_done(&rhs)) {
@@ -96,16 +124,20 @@ stufflib_string stufflib_string_strstr(
   return (stufflib_string){0};
 }
 
-void stufflib_string_fprint(FILE stream[const static 1],
-                            const stufflib_string str[const static 1]) {
-  for (stufflib_iterator iter = stufflib_unicode_iter(&(str->utf8_data));
+int stufflib_string_fprint(FILE stream[const static 1],
+                           const stufflib_string str[const static 1],
+                           const wchar_t separator[const static 1]) {
+  const stufflib_data utf8_data = stufflib_string_view_utf8_data(str);
+  for (stufflib_iterator iter = stufflib_unicode_iter(&utf8_data);
        !iter.is_done(&iter);
        iter.advance(&iter)) {
     const wchar_t item = stufflib_unicode_iter_decode_item(&iter);
-    if (fwprintf(stream, L"%lc", item) < 0) {
-      exit(1);
+    const int ret = fwprintf(stream, L"%lc%ls", item, separator);
+    if (ret < 0) {
+      return ret;
     }
   }
+  return 0;
 }
 
 #endif  // _STUFFLIB_STRING_H_INCLUDED
