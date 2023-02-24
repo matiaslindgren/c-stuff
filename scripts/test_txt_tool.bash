@@ -26,13 +26,13 @@ function test_txt_tool {
       $txt_tool concat $lhs_path $rhs_path > $output
       cat $lhs_path $rhs_path > $expect
       if ! cmp $output $expect; then
-        printf "'%s' failed to concatenate 2 files\n" $png_tool
+        printf "'%s' failed to concatenate 2 files\n" $txt_tool
         return 1
       fi
       $txt_tool concat $lhs_path $rhs_path $lhs_path > $output
       cat $lhs_path $rhs_path $lhs_path > $expect
       if ! cmp $output $expect; then
-        printf "'%s' failed to concatenate 3 files\n" $png_tool
+        printf "'%s' failed to concatenate 3 files\n" $txt_tool
         return 1
       fi
     done

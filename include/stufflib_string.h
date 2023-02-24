@@ -62,8 +62,10 @@ stufflib_string stufflib_string_concat(
     const stufflib_string str2[const static 1]) {
   const stufflib_data str1_data = stufflib_string_view_utf8_data(str1);
   const stufflib_data str2_data = stufflib_string_view_utf8_data(str2);
-  const stufflib_data data = stufflib_data_concat(&str1_data, &str2_data);
-  return stufflib_string_from_utf8(&data);
+  stufflib_data data = stufflib_data_concat(&str1_data, &str2_data);
+  stufflib_string result = stufflib_string_from_utf8(&data);
+  stufflib_data_delete(&data);
+  return result;
 }
 
 void stufflib_string_extend(stufflib_string str1[const static 1],
