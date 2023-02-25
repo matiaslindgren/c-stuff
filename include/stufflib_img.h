@@ -122,8 +122,8 @@ void stufflib_img_segment_rgb(stufflib_png_image dst[const static 1],
   }
 
   stufflib_unionfind_destroy(&segments);
-  free(segment_sizes);
-  free(segment_sums);
+  stufflib_free(segment_sizes);
+  stufflib_free(segment_sums);
 }
 
 #endif  // _STUFFLIB_IMG_H_INCLUDED

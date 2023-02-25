@@ -80,19 +80,19 @@ bool stufflib_huffman_init(stufflib_huffman_tree tree[static 1],
   *tree = (stufflib_huffman_tree){.max_code_len = max_code_len,
                                   .max_codes = max_codes,
                                   .symbols = symbols};
-  free(codes);
-  free(next_code);
-  free(code_length_count);
+  stufflib_free(codes);
+  stufflib_free(next_code);
+  stufflib_free(code_length_count);
   return tree->max_code_len > 0;
 }
 
 void stufflib_huffman_destroy(stufflib_huffman_tree tree[const static 1]) {
   if (tree) {
     for (size_t code_len = 1; code_len <= tree->max_code_len; ++code_len) {
-      free(tree->symbols[code_len - 1]);
+      stufflib_free(tree->symbols[code_len - 1]);
     }
-    free(tree->max_codes);
-    free(tree->symbols);
+    stufflib_free(tree->max_codes);
+    stufflib_free(tree->symbols);
   }
   stufflib_huffman_init(tree, 0, 0);
 }

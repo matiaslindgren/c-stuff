@@ -46,7 +46,7 @@ stufflib_hashmap* stufflib_hashmap_init(stufflib_hashmap map[const static 1],
 
 void stufflib_hashmap_destroy(stufflib_hashmap map[const static 1]) {
   assert(map);
-  free(map->nodes);
+  stufflib_free(map->nodes);
   *map = (stufflib_hashmap){0};
 }
 
@@ -98,7 +98,7 @@ bool stufflib_hashmap_resize(stufflib_hashmap map[const static 1],
       };
     }
   }
-  free(old_nodes);
+  stufflib_free(old_nodes);
   return true;
 }
 

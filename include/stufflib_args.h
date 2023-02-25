@@ -47,8 +47,8 @@ stufflib_args stufflib_args_from_argv(const int argc,
 }
 
 void stufflib_args_destroy(stufflib_args args[const static 1]) {
-  free(args->required);
-  free(args->optional);
+  stufflib_free(args->required);
+  stufflib_free(args->optional);
   *args = (stufflib_args){0};
 }
 

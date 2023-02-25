@@ -35,7 +35,7 @@ stufflib_data stufflib_data_create(const size_t size) {
 
 void stufflib_data_delete(stufflib_data data[static 1]) {
   if (data->owned && data->data) {
-    free(data->data);
+    stufflib_free(data->data);
   }
   *data = (stufflib_data){0};
 }

@@ -83,7 +83,7 @@ void stufflib_file_iter_close(stufflib_iterator iter[const static 1]) {
   stufflib_file_buffer* buffer = iter->data;
   fclose(buffer->file);
   stufflib_data_delete(&buffer->data);
-  free(iter->data);
+  stufflib_free(iter->data);
   iter->data = nullptr;
 }
 

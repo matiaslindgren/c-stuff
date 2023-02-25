@@ -27,7 +27,7 @@ stufflib_unionfind* stufflib_unionfind_init(stufflib_unionfind uf[static 1],
 }
 
 void stufflib_unionfind_destroy(stufflib_unionfind uf[static 1]) {
-  free(uf->parents);
+  stufflib_free(uf->parents);
   *uf = (stufflib_unionfind){0};
 }
 

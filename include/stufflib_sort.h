@@ -77,7 +77,7 @@ void* stufflib_sort_mergesort(void* src,
   memcpy(tmp, src, count * size);
   _stufflib_sort_mergesort(size, src, tmp, 0, count, compare);
   memcpy(src, tmp, count * size);
-  free(tmp);
+  stufflib_free(tmp);
   return src;
 }
 
@@ -140,7 +140,7 @@ void* stufflib_sort_quicksort(void* src,
   // pivot and swap space
   void* tmp = stufflib_alloc(2, size);
   _stufflib_sort_quicksort(count, size, src, tmp, 0, count - 1, compare);
-  free(tmp);
+  stufflib_free(tmp);
   return src;
 }
 

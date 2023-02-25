@@ -90,10 +90,10 @@ static stufflib_huffman_tree _make_fixed_literal_tree() {
   }
   stufflib_huffman_tree tree = (stufflib_huffman_tree){0};
   if (!stufflib_huffman_init(&tree, max_literal, code_lengths)) {
-    free(code_lengths);
+    stufflib_free(code_lengths);
     goto error;
   }
-  free(code_lengths);
+  stufflib_free(code_lengths);
   return tree;
 
 error:
@@ -109,10 +109,10 @@ static stufflib_huffman_tree _make_fixed_distance_tree() {
   }
   stufflib_huffman_tree tree = (stufflib_huffman_tree){0};
   if (!stufflib_huffman_init(&tree, max_dist, code_lengths)) {
-    free(code_lengths);
+    stufflib_free(code_lengths);
     goto error;
   }
-  free(code_lengths);
+  stufflib_free(code_lengths);
   return tree;
 
 error:
@@ -232,10 +232,10 @@ bool stufflib_inflate_dynamic_block(_deflate_state state[static 1]) {
   }
   stufflib_huffman_tree length_tree = (stufflib_huffman_tree){0};
   if (!stufflib_huffman_init(&length_tree, max_length_length, length_lengths)) {
-    free(length_lengths);
+    stufflib_free(length_lengths);
     goto error;
   }
-  free(length_lengths);
+  stufflib_free(length_lengths);
 
   size_t* dynamic_code_lengths =
       stufflib_alloc(num_lengths + num_distances, sizeof(size_t));
@@ -259,7 +259,7 @@ bool stufflib_inflate_dynamic_block(_deflate_state state[static 1]) {
       num_repeats = 11 + _next_n_bits(state, 7);
     } else {
       STUFFLIB_LOG_ERROR("unexpected symbol %zu in dynamic block", symbol);
-      free(dynamic_code_lengths);
+      stufflib_free(dynamic_code_lengths);
       goto error;
     }
     for (size_t r = 0; r < num_repeats; ++r) {
@@ -274,18 +274,18 @@ bool stufflib_inflate_dynamic_block(_deflate_state state[static 1]) {
 
   stufflib_huffman_tree literal_tree = (stufflib_huffman_tree){0};
   if (!stufflib_huffman_init(&literal_tree, max_length, dynamic_code_lengths)) {
-    free(dynamic_code_lengths);
+    stufflib_free(dynamic_code_lengths);
     goto error;
   }
   stufflib_huffman_tree distance_tree = (stufflib_huffman_tree){0};
   if (!stufflib_huffman_init(&distance_tree,
                              max_distance,
                              dynamic_code_lengths + num_lengths)) {
-    free(dynamic_code_lengths);
+    stufflib_free(dynamic_code_lengths);
     stufflib_huffman_destroy(&literal_tree);
     goto error;
   }
-  free(dynamic_code_lengths);
+  stufflib_free(dynamic_code_lengths);
 
   _inflate_block(&literal_tree, &distance_tree, state);
   stufflib_huffman_destroy(&literal_tree);

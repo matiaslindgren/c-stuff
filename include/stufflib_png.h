@@ -140,7 +140,7 @@ void stufflib_png_chunks_destroy(stufflib_png_chunks chunks) {
   for (size_t i = 0; i < chunks.count; ++i) {
     stufflib_png_chunk_destroy(chunks.chunks[i]);
   }
-  free(chunks.chunks);
+  stufflib_free(chunks.chunks);
 }
 
 void stufflib_png_header_destroy(stufflib_png_header header) {
@@ -404,7 +404,7 @@ done:
     fclose(fp);
   }
   if (!ok) {
-    free(chunks);
+    stufflib_free(chunks);
     return (stufflib_png_chunks){0};
   }
   return (stufflib_png_chunks){.count = read_count, .chunks = chunks};

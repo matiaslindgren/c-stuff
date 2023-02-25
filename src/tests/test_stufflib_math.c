@@ -25,7 +25,7 @@ bool test_factorize_primes(const bool verbose) {
     _check_factorization(verbose, primes[i], f);
     assert(f[0] == primes[i]);
     assert(f[1] == 0);
-    free(f);
+    stufflib_free(f);
   }
   return true;
 }
@@ -37,7 +37,7 @@ bool test_factorize_4(const bool verbose) {
   assert(f[0] == 2);
   assert(f[1] == 2);
   assert(f[2] == 0);
-  free(f);
+  stufflib_free(f);
   return true;
 }
 
@@ -48,7 +48,7 @@ bool test_factorize_25(const bool verbose) {
   assert(f[0] == 5);
   assert(f[1] == 5);
   assert(f[2] == 0);
-  free(f);
+  stufflib_free(f);
   return true;
 }
 
@@ -60,7 +60,7 @@ bool test_factorize_30(const bool verbose) {
   assert(f[1] == 3);
   assert(f[2] == 5);
   assert(f[3] == 0);
-  free(f);
+  stufflib_free(f);
   return true;
 }
 
@@ -77,7 +77,7 @@ bool test_factorize_864(const bool verbose) {
   assert(f[6] == 3);
   assert(f[7] == 3);
   assert(f[8] == 0);
-  free(f);
+  stufflib_free(f);
   return true;
 }
 
@@ -89,7 +89,7 @@ bool test_factorize_2022(const bool verbose) {
   assert(f[1] == 3);
   assert(f[2] == 337);
   assert(f[3] == 0);
-  free(f);
+  stufflib_free(f);
   return true;
 }
 
@@ -104,7 +104,7 @@ bool test_factorize_202212(const bool verbose) {
   assert(f[4] == 41);
   assert(f[5] == 137);
   assert(f[6] == 0);
-  free(f);
+  stufflib_free(f);
   return true;
 }
 
@@ -117,7 +117,7 @@ bool test_factorize_20221210(const bool verbose) {
   assert(f[2] == 101);
   assert(f[3] == 20021);
   assert(f[4] == 0);
-  free(f);
+  stufflib_free(f);
   return true;
 }
 

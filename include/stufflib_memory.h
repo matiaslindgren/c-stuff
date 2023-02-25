@@ -50,4 +50,6 @@ void* stufflib_realloc(void* data,
   return new_data;
 }
 
+void stufflib_free(void* data) { free(data); }
+
 #endif  // _STUFFLIB_MEMORY_H_INCLUDED
