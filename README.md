@@ -261,7 +261,7 @@ Vatn er ólífrænn lyktar-, bragð- og nær litlaus vökvi sem er lífsnauðsyn
 
 #### Slice lines
 ```
-./build/release/tools/txt slicelines 279 304 ./src/tools/txt.c
+./build/release/tools/txt slicelines 296 321 ./src/tools/txt.c
 ```
 **`stdout`**:
 ```
