@@ -6,6 +6,8 @@
 #include "stufflib_args.h"
 #include "stufflib_io.h"
 #include "stufflib_sort.h"
+#include "stufflib_string.h"
+#include "stufflib_tokenizer.h"
 
 void print_usage(const stufflib_args args[const static 1]) {
   fprintf(stderr, "usage: %s { numeric | ascii } path\n", args->program);
@@ -31,7 +33,9 @@ char** sort_doubles(const size_t count, char* lines[count]) {
 int main(int argc, char* const argv[argc + 1]) {
   bool ok = false;
 
+  stufflib_string content = (stufflib_string){0};
   char** lines = nullptr;
+  size_t num_lines = 0;
 
   stufflib_args args = stufflib_args_from_argv(argc, argv);
   if (stufflib_args_count_positional(&args) != 2) {
@@ -47,12 +51,24 @@ int main(int argc, char* const argv[argc + 1]) {
   }
 
   const char* path = stufflib_args_get_positional(&args, 1);
-  lines = stufflib_io_slurp_lines(path, "\n");
-  if (!lines) {
-    goto done;
-  }
+  content = stufflib_string_from_file(path);
+  stufflib_data newline = stufflib_data_view(1, (unsigned char[]){'\n'});
 
-  const size_t num_lines = stufflib_str_chunks_count(lines);
+  stufflib_tokenizer newline_tokenizer =
+      stufflib_tokenizer_create(&(content.utf8_data), &newline);
+  for (stufflib_iterator iter = stufflib_tokenizer_iter(&newline_tokenizer);
+       !iter.is_done(&iter);
+       iter.advance(&iter)) {
+    // TODO less awful
+    stufflib_data* token = iter.get_item(&iter);
+    assert(token->size);
+    if (token->data[0] == 0) {
+      continue;
+    }
+    stufflib_string line = stufflib_string_from_utf8(token);
+    lines = stufflib_realloc(lines, num_lines, num_lines + 1, sizeof(char*));
+    lines[num_lines++] = (char*)line.utf8_data.data;
+  }
 
   if (sort_as_numeric) {
     if (!sort_doubles(num_lines, lines)) {
@@ -76,8 +92,10 @@ int main(int argc, char* const argv[argc + 1]) {
 
 done:
   stufflib_args_destroy(&args);
-  if (lines) {
-    stufflib_str_chunks_destroy(lines);
+  stufflib_string_delete(&content);
+  for (size_t i = 0; i < num_lines; ++i) {
+    stufflib_free(lines[i]);
   }
+  stufflib_free(lines);
   return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
