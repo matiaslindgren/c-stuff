@@ -346,3 +346,26 @@ struct it {
 3 ++codepoint_pos;
 3 // مرحبًا
 ```
+
+### Format metadata fields in a PNG `tEXt` block
+```
+./build/release/tools/png dump_raw ./docs/img/tokyo.png tEXt
+  | ./build/release/tools/txt replace date: \ndate= /dev/stdin
+  | ./build/release/tools/txt replace exif: \nexif= /dev/stdin
+  | ./build/release/tools/txt replace 0x00 ': ' /dev/stdin
+```
+**`stdout`**:
+```
+
+date=create: 2023-01-23T21:22:19+00:00
+date=modify: 2023-01-23T21:22:19+00:00
+exif=ColorSpace: 1
+exif=ComponentsConfiguration: 1, 2, 3, 0
+exif=ExifOffset: 90
+exif=ExifVersion: 48, 50, 50, 49
+exif=FlashPixVersion: 48, 49, 48, 48
+exif=PixelXDimension: 2100
+exif=PixelYDimension: 2100
+exif=SceneCaptureType: 0
+exif=YCbCrPositioning: 1: :
+```
