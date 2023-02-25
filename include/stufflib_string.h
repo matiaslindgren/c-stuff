@@ -35,26 +35,40 @@ stufflib_string stufflib_string_from_utf8(
   };
 }
 
+stufflib_string stufflib_string_from_cstr(const char str[const static 1]) {
+  stufflib_data data = stufflib_data_view(strlen(str), (unsigned char*)str);
+  return stufflib_string_from_utf8(&data);
+}
+
 stufflib_data stufflib_string_view_utf8_data(
     const stufflib_string str[const static 1]) {
   return stufflib_data_slice(&(str->utf8_data), 0, str->utf8_data.size - 1);
 }
 
 stufflib_string stufflib_string_from_file(const char filename[const static 1]) {
-  stufflib_data utf8_data = (stufflib_data){0};
   stufflib_iterator file_iter = stufflib_file_iter_open(filename);
+  if (file_iter.is_done(&file_iter)) {
+    STUFFLIB_LOG_ERROR("failed opening '%s'", filename);
+    return (stufflib_string){0};
+  }
+
+  stufflib_data utf8_data = (stufflib_data){0};
   for (; !file_iter.is_done(&file_iter); file_iter.advance(&file_iter)) {
     stufflib_data* buffer = file_iter.get_item(&file_iter);
     stufflib_data_extend(&utf8_data, buffer);
   }
+
   stufflib_file_iter_close(&file_iter);
+
   if (!stufflib_unicode_is_valid_utf8(&utf8_data)) {
     STUFFLIB_LOG_ERROR("cannot decode '%s' as UTF-8", filename);
     stufflib_data_delete(&utf8_data);
     return (stufflib_string){0};
   }
+
   stufflib_string file_content = stufflib_string_from_utf8(&utf8_data);
   stufflib_data_delete(&utf8_data);
+
   return file_content;
 }
 

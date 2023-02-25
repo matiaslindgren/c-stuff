@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,9 +11,15 @@
 #include "stufflib_tokenizer.h"
 
 bool concat(const stufflib_args args[const static 1]) {
-  if (stufflib_args_count_positional(args) < 2) {
-    STUFFLIB_LOG_ERROR("too few arguments to concat");
-    return false;
+  {
+    const size_t args_count = stufflib_args_count_positional(args) - 1;
+    const size_t expected_count = 1;
+    if (args_count < expected_count) {
+      STUFFLIB_LOG_ERROR("concat takes %zu or more arguments, not %zu",
+                         expected_count,
+                         args_count);
+      return false;
+    }
   }
 
   bool ok = false;
@@ -43,15 +50,24 @@ done:
 }
 
 bool count(const stufflib_args args[const static 1]) {
-  if (stufflib_args_count_positional(args) != 3) {
-    STUFFLIB_LOG_ERROR("too few arguments to count");
-    return false;
+  {
+    const size_t args_count = stufflib_args_count_positional(args) - 1;
+    const size_t expected_count = 2;
+    if (args_count != expected_count) {
+      STUFFLIB_LOG_ERROR("count takes %zu arguments, not %zu",
+                         expected_count,
+                         args_count);
+      return false;
+    }
   }
 
   bool ok = false;
 
   const char* path = stufflib_args_get_positional(args, 2);
   stufflib_string content = stufflib_string_from_file(path);
+  if (!content.length) {
+    goto done;
+  }
 
   const char* pattern_str = stufflib_args_get_positional(args, 1);
   stufflib_data pattern =
@@ -59,6 +75,7 @@ bool count(const stufflib_args args[const static 1]) {
 
   stufflib_tokenizer pattern_tokenizer =
       stufflib_tokenizer_create(&(content.utf8_data), &pattern);
+
   size_t n = 0;
   for (stufflib_iterator iter = stufflib_tokenizer_iter(&pattern_tokenizer);
        !iter.is_done(&iter);
@@ -80,22 +97,32 @@ done:
 }
 
 bool slicelines(const stufflib_args args[const static 1]) {
-  if (stufflib_args_count_positional(args) != 4) {
-    STUFFLIB_LOG_ERROR("too few arguments to slicelines");
-    return false;
+  {
+    const size_t args_count = stufflib_args_count_positional(args) - 1;
+    const size_t expected_count = 3;
+    if (args_count != expected_count) {
+      STUFFLIB_LOG_ERROR("slicelines takes %zu arguments, not %zu",
+                         expected_count,
+                         args_count);
+      return false;
+    }
   }
-
-  bool ok = false;
 
   const size_t begin = strtoull(stufflib_args_get_positional(args, 1), 0, 10);
   const size_t end = strtoull(stufflib_args_get_positional(args, 2), 0, 10);
   const char* path = stufflib_args_get_positional(args, 3);
 
-  stufflib_string content = stufflib_string_from_file(path);
-  stufflib_data newline = stufflib_data_view(1, (unsigned char[]){'\n'});
+  bool ok = false;
 
+  stufflib_string content = stufflib_string_from_file(path);
+  if (!content.length) {
+    goto done;
+  }
+
+  const stufflib_data newline = stufflib_data_view(1, (unsigned char[]){'\n'});
   stufflib_tokenizer newline_tokenizer =
       stufflib_tokenizer_create(&(content.utf8_data), &newline);
+
   size_t lineno = 1;
   for (stufflib_iterator iter = stufflib_tokenizer_iter(&newline_tokenizer);
        !iter.is_done(&iter);
@@ -118,48 +145,119 @@ done:
   return ok;
 }
 
-bool count_unicode(const stufflib_args args[const static 1]) {
-  if (stufflib_args_count_positional(args) != 2) {
-    STUFFLIB_LOG_ERROR("too few arguments to count_unicode");
+bool replace(const stufflib_args args[const static 1]) {
+  {
+    const size_t args_count = stufflib_args_count_positional(args) - 1;
+    const size_t expected_count = 3;
+    if (args_count != expected_count) {
+      STUFFLIB_LOG_ERROR("replace takes %zu arguments, not %zu",
+                         expected_count,
+                         args_count);
+      return false;
+    }
+  }
+
+  const char* pattern_str = stufflib_args_get_positional(args, 1);
+  const char* replacement_str = stufflib_args_get_positional(args, 2);
+  const char* path = stufflib_args_get_positional(args, 3);
+
+  if (strlen(pattern_str) == 0) {
+    // TODO allow empty pattern str to split at all codepoints
+    STUFFLIB_LOG_ERROR("pattern to replace cannot be empty");
     return false;
   }
 
   bool ok = false;
 
-  const char* path = stufflib_args_get_positional(args, 1);
   stufflib_string content = stufflib_string_from_file(path);
-  const stufflib_data utf8_data = stufflib_string_view_utf8_data(&content);
-
-  stufflib_hashmap* counts = stufflib_hashmap_init(&(stufflib_hashmap){0}, 1);
-  for (stufflib_iterator iter = stufflib_unicode_iter(&utf8_data);
-       !iter.is_done(&iter);
-       iter.advance(&iter)) {
-    const wchar_t item = stufflib_unicode_iter_decode_item(&iter);
-    if (item == L'\n' || item == L'\t' || item == L'\v' || item == L' ') {
-      continue;
-    }
-    stufflib_data codepoint =
-        stufflib_data_view(stufflib_unicode_iter_get_item_width(&iter),
-                           iter.get_item(&iter));
-    if (!stufflib_hashmap_contains(counts, &codepoint)) {
-      stufflib_hashmap_insert(counts, &codepoint, 0);
-    }
-    ++(stufflib_hashmap_get(counts, &codepoint)->value);
+  if (!content.length) {
+    goto done;
   }
 
-  for (stufflib_iterator iter = stufflib_hashmap_iter(counts);
-       !iter.is_done(&iter);
-       iter.advance(&iter)) {
-    stufflib_hashmap_node* node = iter.get_item(&iter);
-    if (fwprintf(stdout, L"%zu ", node->value) < 0) {
-      STUFFLIB_LOG_ERROR("failed printing unicode count");
+  stufflib_data pattern =
+      stufflib_data_view(strlen(pattern_str), (unsigned char*)pattern_str);
+  stufflib_string replacement = strlen(replacement_str)
+                                    ? stufflib_string_from_cstr(replacement_str)
+                                    : (stufflib_string){0};
+
+  stufflib_tokenizer pattern_tokenizer =
+      stufflib_tokenizer_create(&(content.utf8_data), &pattern);
+
+  stufflib_iterator iter = stufflib_tokenizer_iter(&pattern_tokenizer);
+  while (!iter.is_done(&iter)) {
+    stufflib_string line = stufflib_string_from_utf8(iter.get_item(&iter));
+    const int ret = stufflib_string_fprint(stdout, &line, L"", L"");
+    stufflib_string_delete(&line);
+    if (ret < 0) {
       goto done;
     }
-    stufflib_string key_str = stufflib_string_from_utf8(&(node->key));
+    iter.advance(&iter);
+    if (!iter.is_done(&iter) && replacement.length) {
+      if (stufflib_string_fprint(stdout, &replacement, L"", L"") < 0) {
+        goto done;
+      }
+    }
+  }
+
+  ok = true;
+
+done:
+  stufflib_string_delete(&content);
+  stufflib_string_delete(&replacement);
+  return ok;
+}
+
+bool linefreq(const stufflib_args args[const static 1]) {
+  {
+    const size_t args_count = stufflib_args_count_positional(args) - 1;
+    const size_t expected_count = 1;
+    if (args_count != expected_count) {
+      STUFFLIB_LOG_ERROR("linefreq takes %zu arguments, not %zu",
+                         expected_count,
+                         args_count);
+      return false;
+    }
+  }
+
+  const char* path = stufflib_args_get_positional(args, 1);
+
+  bool ok = false;
+
+  stufflib_hashmap freq = stufflib_hashmap_create();
+  stufflib_string content = stufflib_string_from_file(path);
+  if (!content.length) {
+    goto done;
+  }
+
+  const stufflib_data newline = stufflib_data_view(1, (unsigned char[]){'\n'});
+  stufflib_tokenizer newline_tokenizer =
+      stufflib_tokenizer_create(&(content.utf8_data), &newline);
+
+  for (stufflib_iterator line_iter =
+           stufflib_tokenizer_iter(&newline_tokenizer);
+       !line_iter.is_done(&line_iter);
+       line_iter.advance(&line_iter)) {
+    stufflib_data* line = line_iter.get_item(&line_iter);
+    if (!(line->size)) {
+      continue;
+    }
+    if (!stufflib_hashmap_contains(&freq, line)) {
+      stufflib_hashmap_insert(&freq, line, 0);
+    }
+    ++(stufflib_hashmap_get(&freq, line)->value);
+  }
+
+  for (stufflib_iterator freq_iter = stufflib_hashmap_iter(&freq);
+       !freq_iter.is_done(&freq_iter);
+       freq_iter.advance(&freq_iter)) {
+    stufflib_hashmap_slot* slot = freq_iter.get_item(&freq_iter);
+    if (fwprintf(stdout, L"%zu ", slot->value) < 0) {
+      goto done;
+    }
+    stufflib_string key_str = stufflib_string_from_utf8(&(slot->key));
     const int ret = stufflib_string_fprint(stdout, &key_str, L"", L"\n");
     stufflib_string_delete(&key_str);
     if (ret < 0) {
-      STUFFLIB_LOG_ERROR("failed printing unicode hashmap key");
       goto done;
     }
   }
@@ -168,7 +266,7 @@ bool count_unicode(const stufflib_args args[const static 1]) {
 
 done:
   stufflib_string_delete(&content);
-  stufflib_hashmap_destroy(counts);
+  stufflib_hashmap_delete(&freq);
   return ok;
 }
 
@@ -182,8 +280,11 @@ void print_usage(const stufflib_args args[const static 1]) {
            "\n"
            "  %s slicelines begin end path"
            "\n"
-           "  %s count_unicode path"
+           "  %s replace pattern replacement path"
+           "\n"
+           "  %s linefreq path"
            "\n"),
+          args->program,
           args->program,
           args->program,
           args->program,
@@ -191,6 +292,7 @@ void print_usage(const stufflib_args args[const static 1]) {
 }
 
 int main(int argc, char* const argv[argc + 1]) {
+  setlocale(LC_ALL, "");
   stufflib_args args = stufflib_args_from_argv(argc, argv);
   bool ok = false;
   const char* command = stufflib_args_get_positional(&args, 0);
@@ -201,8 +303,10 @@ int main(int argc, char* const argv[argc + 1]) {
       ok = count(&args);
     } else if (strcmp(command, "slicelines") == 0) {
       ok = slicelines(&args);
-    } else if (strcmp(command, "count_unicode") == 0) {
-      ok = count_unicode(&args);
+    } else if (strcmp(command, "replace") == 0) {
+      ok = replace(&args);
+    } else if (strcmp(command, "linefreq") == 0) {
+      ok = linefreq(&args);
     } else {
       STUFFLIB_LOG_ERROR("unknown command %s", command);
     }

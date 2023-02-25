@@ -46,7 +46,7 @@ void stufflib_file_iter_advance(stufflib_iterator iter[const static 1]) {
 
 bool stufflib_file_iter_is_done(stufflib_iterator iter[const static 1]) {
   stufflib_file_buffer* buffer = iter->data;
-  return ferror(buffer->file) != 0 || buffer->data.size == 0;
+  return !iter->data || ferror(buffer->file) != 0 || buffer->data.size == 0;
 }
 
 stufflib_iterator stufflib_file_iter_open(const char filename[const static 1]) {
