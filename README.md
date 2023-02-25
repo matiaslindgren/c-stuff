@@ -32,7 +32,7 @@ Simple PNG decoder implemented without dependencies.
 
 ### PNG info
 
-Decode and inspect a PNG image. Outputs JSON.
+Decode a PNG image and output information in JSON.
 
 This example requires `jq` for formatting the output.
 If you don't want to install `jq`, remove `| jq .` from the below example to get the unformatted JSON on a single line.
@@ -44,7 +44,7 @@ If you don't want to install `jq`, remove `| jq .` from the below example to get
 ```
 ./build/release/tools/png info ./docs/img/tokyo.png | jq .
 ```
-#### `stdout`:
+**`stdout`**:
 ```
 {
   "chunks": {
@@ -124,7 +124,7 @@ This example requires `xxd`.
 ```
 ./build/release/tools/png dump_raw ./test-data/png/ff0000-1x1-rgb-fixed.png IHDR IDAT | xxd -b
 ```
-#### `stdout`:
+**`stdout`**:
 ```
 00000000: 00000000 00000000 00000000 00000001 00000000 00000000  ......
 00000006: 00000000 00000001 00001000 00000010 00000000 00000000  ......
@@ -155,7 +155,7 @@ find ./test-data/png -printf '%s\n' > test-data-sizes.txt
 ```
 ./build/release/tools/sort numeric ./test-data-sizes.txt
 ```
-#### `stdout`:
+**`stdout`**:
 ```
 69
 69
@@ -179,7 +179,7 @@ find ./test-data/png -printf '%s\n' > test-data-sizes.txt
 ```
 ./build/release/tools/sort ascii ./test-data-sizes.txt
 ```
-#### `stdout`:
+**`stdout`**:
 ```
 11223
 1554
@@ -203,7 +203,7 @@ find ./test-data/png -printf '%s\n' > test-data-sizes.txt
 ```
 ./build/release/tools/sort numeric --reverse ./test-data-sizes.txt
 ```
-#### `stdout`:
+**`stdout`**:
 ```
 24733
 11223
@@ -241,7 +241,7 @@ Source: [`./src/tools/txt.c`](./src/tools/txt.c)
 ```
 ./build/release/tools/txt concat ./test-data/txt/wikipedia/water_{ja,is,hi,zh}.txt
 ```
-#### `stdout`:
+**`stdout`**:
 ```
 水（みず、（英: water、他言語呼称は「他言語での呼称」の項を参照）とは、化学式 H2O で表される、水素と酸素の化合物である。日本語においては特に湯と対比して用いられ、液体ではあるが温度が低く、かつ凝固して氷にはなっていない物を言う。また、液状の物全般を指す。
 Vatn er ólífrænn lyktar-, bragð- og nær litlaus vökvi sem er lífsnauðsynlegur öllum þekktum lífverum, þrátt fyrir að gefa þeim hvorki fæðu, orku né næringarefni. Vatnssameindin er samsett úr tveimur vetnisfrumeindum og einni súrefnisfrumeind sem tengjast með samgildistengi og hefur efnaformúluna H2O. Vatn er uppistaðan í vatnshvolfi jarðar. Orðið „vatn“ á við um efnið eins og það kemur fyrir við staðalhita og staðalþrýsting.
@@ -253,7 +253,7 @@ Vatn er ólífrænn lyktar-, bragð- og nær litlaus vökvi sem er lífsnauðsyn
 ```
 ./build/release/tools/txt count 'ある' README.md
 ```
-#### `stdout`:
+**`stdout`**:
 ```
 3
 ```
@@ -262,7 +262,7 @@ Vatn er ólífrænn lyktar-, bragð- og nær litlaus vökvi sem er lífsnauðsyn
 ```
 ./build/release/tools/txt slicelines 145 167 ./src/tools/txt.c
 ```
-#### `stdout`:
+**`stdout`**:
 ```
 int main(int argc, char* const argv[argc + 1]) {
   stufflib_args args = stufflib_args_from_argv(argc, argv);
@@ -297,7 +297,7 @@ Tokenisation is simply "split at whitespace".
   | ./build/release/tools/sort numeric --reverse /dev/stdin \
   | ./build/release/tools/txt slicelines 0 20 /dev/stdin
 ```
-#### `stdout`:
+**`stdout`**:
 ```
 177 =
 122 {
