@@ -229,11 +229,11 @@ Source: [`./src/tools/txt.c`](./src/tools/txt.c)
 
 ### Usage
 ```
-./build/debug/tools/txt concat path [paths...]
-./build/debug/tools/txt count pattern path
-./build/debug/tools/txt slicelines begin end path
-./build/debug/tools/txt replace pattern replacement path
-./build/debug/tools/txt linefreq path
+./build/release/tools/txt concat path [paths...]
+./build/release/tools/txt count pattern path
+./build/release/tools/txt slicelines begin end path
+./build/release/tools/txt replace pattern replacement path
+./build/release/tools/txt linefreq path
 ```
 
 ### Examples
