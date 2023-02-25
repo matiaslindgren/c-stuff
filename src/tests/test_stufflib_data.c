@@ -61,14 +61,43 @@ bool test_data_create_empty(const bool verbose) {
 
 bool test_data_create_from_hex(const bool verbose) {
   {
-    stufflib_data data = stufflib_data_from_str("\\x00");
+    stufflib_data data = stufflib_data_from_str("0x00");
     assert(data.size == 1);
     assert(data.owned);
     assert(data.data[0] == 0);
     stufflib_data_delete(&data);
   }
   {
-    stufflib_data data = stufflib_data_from_str("\\x010a0f00ff");
+    stufflib_data data = stufflib_data_from_str("0x1");
+    assert(data.size == 1);
+    assert(data.owned);
+    assert(data.data[0] == 1);
+    stufflib_data_delete(&data);
+  }
+  {
+    stufflib_data data = stufflib_data_from_str("0xf");
+    assert(data.size == 1);
+    assert(data.owned);
+    assert(data.data[0] == 0xf);
+    stufflib_data_delete(&data);
+  }
+  {
+    stufflib_data data = stufflib_data_from_str("0xaf");
+    assert(data.size == 1);
+    assert(data.owned);
+    assert(data.data[0] == 0xaf);
+    stufflib_data_delete(&data);
+  }
+  {
+    stufflib_data data = stufflib_data_from_str("0xaf0");
+    assert(data.size == 2);
+    assert(data.owned);
+    assert(data.data[0] == 0xaf);
+    assert(data.data[1] == 0);
+    stufflib_data_delete(&data);
+  }
+  {
+    stufflib_data data = stufflib_data_from_str("0x010a0f00ff");
     assert(data.size == 5);
     assert(data.owned);
     assert(data.data);

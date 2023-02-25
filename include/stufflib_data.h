@@ -51,7 +51,7 @@ stufflib_data stufflib_data_copy(const stufflib_data src[const static 1]) {
 stufflib_data stufflib_data_from_str(const char str[const static 1]) {
   const size_t num_chars = strlen(str);
   if (num_chars > 2 && strncmp(str, "0x", 2) == 0) {
-    const size_t num_bytes = STUFFLIB_MAX(1, (num_chars - 2) / 2);
+    const size_t num_bytes = STUFFLIB_MAX(1, ((num_chars - 2) + 1) / 2);
     stufflib_data dst = stufflib_data_create(num_bytes);
     for (size_t i = 0; i < dst.size; ++i) {
       const char byte[] = {str[2 * i + 2], str[2 * i + 3], 0};
