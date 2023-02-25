@@ -16,10 +16,10 @@ bool test_empty(const bool verbose) {
   assert(map.slots != nullptr);
 
   stufflib_data keys[] = {
-      stufflib_data_view(1, (unsigned char*)""),
-      stufflib_data_view(6, (unsigned char*)"hello"),
-      stufflib_data_view(2, (unsigned char*)" "),
-      stufflib_data_view(6, (unsigned char*)"there"),
+      stufflib_data_from_str(""),
+      stufflib_data_from_str("hello"),
+      stufflib_data_from_str(" "),
+      stufflib_data_from_str("there"),
   };
   for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(keys); ++i) {
     assert(!stufflib_hashmap_contains(&map, keys + i));
@@ -29,12 +29,15 @@ bool test_empty(const bool verbose) {
   }
 
   stufflib_hashmap_delete(&map);
+  for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(keys); ++i) {
+    stufflib_data_delete(keys + i);
+  }
   return true;
 }
 
 bool test_insert_single_element(const bool verbose) {
   stufflib_hashmap map = stufflib_hashmap_create();
-  stufflib_data key_hello = stufflib_data_view(6, (unsigned char*)"hello");
+  stufflib_data key_hello = stufflib_data_from_str("hello");
 
   assert(map.size == 0);
   assert(map.capacity == 2);
@@ -53,13 +56,14 @@ bool test_insert_single_element(const bool verbose) {
   assert(stufflib_hashmap_get(&map, &key_hello)->value == 1);
 
   stufflib_hashmap_delete(&map);
+  stufflib_data_delete(&key_hello);
   return true;
 }
 
 bool test_insert_two_elements_resizes(const bool verbose) {
   stufflib_hashmap map = stufflib_hashmap_create();
-  stufflib_data key_hello = stufflib_data_view(6, (unsigned char*)"hello");
-  stufflib_data key_there = stufflib_data_view(6, (unsigned char*)"there");
+  stufflib_data key_hello = stufflib_data_from_str("hello");
+  stufflib_data key_there = stufflib_data_from_str("there");
 
   assert(map.size == 0);
   assert(map.capacity == 2);
@@ -74,12 +78,14 @@ bool test_insert_two_elements_resizes(const bool verbose) {
   assert(map.capacity == 4);
 
   stufflib_hashmap_delete(&map);
+  stufflib_data_delete(&key_hello);
+  stufflib_data_delete(&key_there);
   return true;
 }
 
 bool test_update_single_element(const bool verbose) {
   stufflib_hashmap map = stufflib_hashmap_create();
-  stufflib_data key_hello = stufflib_data_view(6, (unsigned char*)"hello");
+  stufflib_data key_hello = stufflib_data_from_str("hello");
 
   stufflib_hashmap_insert(&map, &key_hello, 1);
   assert(stufflib_hashmap_contains(&map, &key_hello));
@@ -91,6 +97,7 @@ bool test_update_single_element(const bool verbose) {
   assert(stufflib_hashmap_get(&map, &key_hello)->value == 10);
 
   stufflib_hashmap_delete(&map);
+  stufflib_data_delete(&key_hello);
   return true;
 }
 
@@ -137,19 +144,19 @@ bool test_multiple_resizes_retain_slots(const bool verbose) {
   for (size_t i = 0; i < n; ++i) {
     assert(map.size == i);
     assert(map.capacity == expected_capacities[i]);
-    stufflib_data key1 =
-        stufflib_data_view(strlen(keys[i]) + 1, (unsigned char*)(keys[i]));
+    stufflib_data key1 = stufflib_data_from_str(keys[i]);
     assert(!stufflib_hashmap_contains(&map, &key1));
     assert(stufflib_hashmap_get(&map, &key1));
     assert(!(stufflib_hashmap_get(&map, &key1)->filled));
     for (size_t j = 0; j < i; ++j) {
-      stufflib_data key2 =
-          stufflib_data_view(strlen(keys[j]) + 1, (unsigned char*)(keys[j]));
+      stufflib_data key2 = stufflib_data_from_str(keys[j]);
       assert(stufflib_hashmap_contains(&map, &key2));
       assert(stufflib_hashmap_get(&map, &key2));
       assert(stufflib_hashmap_get(&map, &key2)->value == values[j]);
+      stufflib_data_delete(&key2);
     }
     stufflib_hashmap_insert(&map, &key1, values[i]);
+    stufflib_data_delete(&key1);
   }
   assert(map.size == n);
   assert(map.capacity == expected_capacities[n]);
@@ -173,9 +180,9 @@ bool test_slot_iterator(const bool verbose) {
   };
   const size_t n = STUFFLIB_ARRAY_LEN(keys);
   for (size_t i = 0; i < n; ++i) {
-    stufflib_data key =
-        stufflib_data_view(strlen(keys[i]) + 1, (unsigned char*)(keys[i]));
+    stufflib_data key = stufflib_data_from_str(keys[i]);
     stufflib_hashmap_insert(&map, &key, i);
+    stufflib_data_delete(&key);
   }
   stufflib_iterator iter = stufflib_hashmap_iter(&map);
   for (size_t i = 0; i < n; ++i) {

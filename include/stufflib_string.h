@@ -35,11 +35,6 @@ stufflib_string stufflib_string_from_utf8(
   };
 }
 
-stufflib_string stufflib_string_from_cstr(const char str[const static 1]) {
-  stufflib_data data = stufflib_data_view(strlen(str), (unsigned char*)str);
-  return stufflib_string_from_utf8(&data);
-}
-
 stufflib_data stufflib_string_view_utf8_data(
     const stufflib_string str[const static 1]) {
   return stufflib_data_slice(&(str->utf8_data), 0, str->utf8_data.size - 1);

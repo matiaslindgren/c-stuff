@@ -59,7 +59,8 @@ stufflib_data stufflib_data_from_str(const char str[const static 1]) {
     }
     return dst;
   }
-  stufflib_data str_view = stufflib_data_view(num_chars, (unsigned char*)str);
+  stufflib_data str_view =
+      stufflib_data_view(num_chars + 1, (unsigned char*)str);
   return stufflib_data_copy(&str_view);
 }
 
