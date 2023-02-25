@@ -47,10 +47,6 @@ stufflib_data stufflib_string_view_utf8_data(
 
 stufflib_string stufflib_string_from_file(const char filename[const static 1]) {
   stufflib_iterator file_iter = stufflib_file_iter_open(filename);
-  if (file_iter.is_done(&file_iter)) {
-    STUFFLIB_LOG_ERROR("failed opening '%s'", filename);
-    return (stufflib_string){0};
-  }
 
   stufflib_data utf8_data = (stufflib_data){0};
   for (; !file_iter.is_done(&file_iter); file_iter.advance(&file_iter)) {

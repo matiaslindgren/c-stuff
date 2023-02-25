@@ -61,18 +61,19 @@ bool count(const stufflib_args args[const static 1]) {
     }
   }
 
+  const char* pattern_str = stufflib_args_get_positional(args, 1);
+  if (strlen(pattern_str) == 0) {
+    STUFFLIB_LOG_ERROR("pattern to count cannot be empty");
+    return false;
+  }
+
   bool ok = false;
 
   const char* path = stufflib_args_get_positional(args, 2);
   stufflib_string content = stufflib_string_from_file(path);
-  if (!content.length) {
-    goto done;
-  }
 
-  const char* pattern_str = stufflib_args_get_positional(args, 1);
   stufflib_data pattern =
       stufflib_data_view(strlen(pattern_str), (unsigned char*)pattern_str);
-
   stufflib_tokenizer pattern_tokenizer =
       stufflib_tokenizer_create(&(content.utf8_data), &pattern);
 
