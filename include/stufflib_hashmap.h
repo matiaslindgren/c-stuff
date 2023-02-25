@@ -42,10 +42,16 @@ stufflib_hashmap stufflib_hashmap_create() {
   };
 }
 
-void stufflib_hashmap_delete(stufflib_hashmap map[const static 1]) {
-  if (map->slots) {
-    stufflib_free(map->slots);
+void stufflib_hashmap_delete_slots(const size_t capacity,
+                                   stufflib_hashmap_slot slots[capacity]) {
+  for (size_t i = 0; i < capacity; ++i) {
+    stufflib_data_delete(&(slots[i].key));
   }
+  stufflib_free(slots);
+}
+
+void stufflib_hashmap_delete(stufflib_hashmap map[const static 1]) {
+  stufflib_hashmap_delete_slots(map->capacity, map->slots);
   *map = (stufflib_hashmap){0};
 }
 
@@ -72,7 +78,7 @@ void stufflib_hashmap_set(stufflib_hashmap map[const static 1],
                           const size_t value) {
   *stufflib_hashmap_get(map, key) = (stufflib_hashmap_slot){
       .filled = true,
-      .key = *key,
+      .key = stufflib_data_copy(key),
       .value = value,
   };
 }
@@ -91,7 +97,7 @@ void stufflib_hashmap_resize(stufflib_hashmap map[const static 1],
       stufflib_hashmap_set(map, &slot.key, slot.value);
     }
   }
-  stufflib_free(old_slots);
+  stufflib_hashmap_delete_slots(old_capacity, old_slots);
 }
 
 double stufflib_hashmap_load_factor(stufflib_hashmap map[const static 1]) {

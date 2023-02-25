@@ -187,7 +187,6 @@ bool test_slot_iterator(const bool verbose) {
     assert(slot->filled);
     assert(slot->value >= 0);
     assert(slot->value < n);
-    assert((void*)(keys[slot->value]) == (void*)(slot->key.data));
     assert(strcmp(keys[slot->value], (char*)(slot->key.data)) == 0);
     iter.advance(&iter);
   }
