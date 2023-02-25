@@ -11,11 +11,16 @@
 #include "stufflib_memory.h"
 #include "stufflib_misc.h"
 
+#ifndef STUFFLIB_HASHMAP_MAX_LOAD_FACTOR
 #define STUFFLIB_HASHMAP_MAX_LOAD_FACTOR 0.5
+#endif
+#ifndef STUFFLIB_HASHMAP_INIT_CAPACITY
+#define STUFFLIB_HASHMAP_INIT_CAPACITY 64
+#endif
 
-typedef struct stufflib_hashmap_node stufflib_hashmap_node;
-struct stufflib_hashmap_node {
-  bool has_value;
+typedef struct stufflib_hashmap_slot stufflib_hashmap_slot;
+struct stufflib_hashmap_slot {
+  bool filled;
   stufflib_data key;
   size_t value;
 };
@@ -25,54 +30,38 @@ struct stufflib_hashmap {
   size_t size;
   size_t capacity;
   size_t num_collisions;
-  stufflib_hashmap_node* nodes;
+  stufflib_hashmap_slot* slots;
 };
 
-// TODO less awful
-static inline void _realloc_nodes(stufflib_hashmap map[const static 1],
-                                  const size_t new_capacity) {
-  stufflib_hashmap_node* new_nodes =
-      stufflib_alloc(new_capacity, sizeof(stufflib_hashmap_node));
-  map->nodes = new_nodes;
-  map->capacity = new_capacity;
+stufflib_hashmap stufflib_hashmap_create() {
+  const size_t capacity = STUFFLIB_HASHMAP_INIT_CAPACITY;
+  assert(capacity);
+  return (stufflib_hashmap){
+      .capacity = capacity,
+      .slots = stufflib_alloc(capacity, sizeof(stufflib_hashmap_slot)),
+  };
 }
 
-stufflib_hashmap* stufflib_hashmap_init(stufflib_hashmap map[const static 1],
-                                        const size_t capacity) {
-  *map = (stufflib_hashmap){0};
-  if (capacity) {
-    _realloc_nodes(map, capacity);
+void stufflib_hashmap_delete(stufflib_hashmap map[const static 1]) {
+  if (map->slots) {
+    stufflib_free(map->slots);
   }
-  return map;
-}
-
-void stufflib_hashmap_destroy(stufflib_hashmap map[const static 1]) {
-  assert(map);
-  stufflib_free(map->nodes);
   *map = (stufflib_hashmap){0};
 }
 
-double stufflib_hashmap_load_factor(stufflib_hashmap map[const static 1]) {
-  assert(map->capacity);
-  return (double)map->size / (double)map->capacity;
-}
-
-stufflib_hashmap_node* stufflib_hashmap_get(
+stufflib_hashmap_slot* stufflib_hashmap_get(
     stufflib_hashmap map[const static 1],
     stufflib_data key[const static 1]) {
-  if (!map->capacity) {
-    return nullptr;
-  }
   size_t index = stufflib_hash_crc32_bytes(key->size, key->data);
   for (size_t probe = 0;; ++probe) {
     // https://en.wikipedia.org/wiki/Quadratic_probing#Quadratic_function
     // accessed 2023-02-06
     index += (probe + probe * probe) / 2;
     index %= map->capacity;
-    stufflib_hashmap_node* node = map->nodes + index;
-    assert(node);
-    if (!node->has_value || stufflib_data_compare(&(node->key), key) == 0) {
-      return node;
+    stufflib_hashmap_slot* slot = map->slots + index;
+    assert(slot);
+    if (!slot->filled || stufflib_data_compare(&(slot->key), key) == 0) {
+      return slot;
     }
     ++(map->num_collisions);
   }
@@ -81,60 +70,58 @@ stufflib_hashmap_node* stufflib_hashmap_get(
 void stufflib_hashmap_set(stufflib_hashmap map[const static 1],
                           stufflib_data key[const static 1],
                           const size_t value) {
-  *stufflib_hashmap_get(map, key) = (stufflib_hashmap_node){
-      .has_value = true,
+  *stufflib_hashmap_get(map, key) = (stufflib_hashmap_slot){
+      .filled = true,
       .key = *key,
       .value = value,
   };
 }
 
-bool stufflib_hashmap_resize(stufflib_hashmap map[const static 1],
+void stufflib_hashmap_resize(stufflib_hashmap map[const static 1],
                              const size_t new_capacity) {
-  assert(new_capacity > 0);
+  assert(new_capacity);
   assert(new_capacity >= map->size);
-  stufflib_hashmap_node* const old_nodes = map->nodes;
+  stufflib_hashmap_slot* const old_slots = map->slots;
   const size_t old_capacity = map->capacity;
-  _realloc_nodes(map, new_capacity);
+  map->slots = stufflib_alloc(new_capacity, sizeof(stufflib_hashmap_slot));
+  map->capacity = new_capacity;
   for (size_t i = 0; i < old_capacity; ++i) {
-    if (old_nodes[i].has_value) {
-      stufflib_data key = old_nodes[i].key;
-      const size_t value = old_nodes[i].value;
-      stufflib_hashmap_set(map, &key, value);
+    stufflib_hashmap_slot slot = old_slots[i];
+    if (slot.filled) {
+      stufflib_hashmap_set(map, &slot.key, slot.value);
     }
   }
-  stufflib_free(old_nodes);
-  return true;
+  stufflib_free(old_slots);
+}
+
+double stufflib_hashmap_load_factor(stufflib_hashmap map[const static 1]) {
+  assert(map->capacity);
+  return (double)map->size / (double)map->capacity;
 }
 
 bool stufflib_hashmap_contains(stufflib_hashmap map[const static 1],
                                stufflib_data key[const static 1]) {
-  stufflib_hashmap_node* node = stufflib_hashmap_get(map, key);
-  return node != nullptr && node->has_value &&
-         stufflib_data_compare(&(node->key), key) == 0;
+  stufflib_hashmap_slot* slot = stufflib_hashmap_get(map, key);
+  return slot->filled && stufflib_data_compare(&(slot->key), key) == 0;
 }
 
-bool stufflib_hashmap_insert(stufflib_hashmap map[const static 1],
+void stufflib_hashmap_insert(stufflib_hashmap map[const static 1],
                              stufflib_data key[const static 1],
                              const size_t value) {
   assert(map->size < map->capacity);
   stufflib_hashmap_set(map, key, value);
-  ++map->size;
+  ++(map->size);
   if (stufflib_hashmap_load_factor(map) > STUFFLIB_HASHMAP_MAX_LOAD_FACTOR) {
     const size_t new_capacity = stufflib_math_next_power_of_two(map->capacity);
-    if (!stufflib_hashmap_resize(map, new_capacity)) {
-      STUFFLIB_LOG_ERROR("failed resizing hashmap to capacity %zu",
-                         new_capacity);
-      return false;
-    }
+    stufflib_hashmap_resize(map, new_capacity);
   }
-  return true;
 }
 
 size_t stufflib_hashmap_iter_find_next(stufflib_iterator iter[const static 1],
                                        const size_t begin) {
   const stufflib_hashmap* map = iter->data;
   size_t i = begin;
-  while (i < map->capacity && !(map->nodes[i].has_value)) {
+  while (i < map->capacity && !(map->slots[i].filled)) {
     ++i;
   }
   return i;
@@ -142,7 +129,7 @@ size_t stufflib_hashmap_iter_find_next(stufflib_iterator iter[const static 1],
 
 void* stufflib_hashmap_iter_get_item(stufflib_iterator iter[const static 1]) {
   stufflib_hashmap* map = iter->data;
-  return map->nodes + iter->index;
+  return map->slots + iter->index;
 }
 
 void stufflib_hashmap_iter_advance(stufflib_iterator iter[const static 1]) {
