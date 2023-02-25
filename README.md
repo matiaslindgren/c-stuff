@@ -25,9 +25,9 @@ Simple PNG decoder implemented without dependencies.
 
 ### Usage
 ```
-./build/release/tools/png info png_path
-./build/release/tools/png dump_raw png_path block_type [block_types...]
-./build/release/tools/png segment png_src_path png_dst_path [--threshold-percent=N] [-v]
+./build/debug/tools/png info png_path
+./build/debug/tools/png dump_raw png_path block_type [block_types...]
+./build/debug/tools/png segment png_src_path png_dst_path [--threshold-percent=N] [-v]
 ```
 
 ### PNG info
@@ -42,7 +42,7 @@ If you don't want to install `jq`, remove `| jq .` from the below example to get
 ![](/docs/img/tokyo.png)
 
 ```
-./build/release/tools/png info ./docs/img/tokyo.png | jq .
+./build/debug/tools/png info ./docs/img/tokyo.png | jq .
 ```
 **`stdout`**:
 ```
@@ -86,7 +86,7 @@ Merges adjacent image segments by comparing the Euclidian distance between the a
 
 #### Threshold 10%
 ```
-./build/release/tools/png segment \
+./build/debug/tools/png segment \
   --threshold-percent=10 \
   ./docs/img/tokyo.png \
   ./docs/img/tokyo_segmented_10p.png
@@ -95,7 +95,7 @@ Merges adjacent image segments by comparing the Euclidian distance between the a
 
 #### Threshold 20%
 ```
-./build/release/tools/png segment \
+./build/debug/tools/png segment \
   --threshold-percent=20 \
   ./docs/img/tokyo.png \
   ./docs/img/tokyo_segmented_20p.png
@@ -104,7 +104,7 @@ Merges adjacent image segments by comparing the Euclidian distance between the a
 
 #### Threshold 30%
 ```
-./build/release/tools/png segment \
+./build/debug/tools/png segment \
   --threshold-percent=30 \
   ./docs/img/tokyo.png \
   ./docs/img/tokyo_segmented_30p.png
@@ -122,7 +122,7 @@ Use positional arguments to filter a subset of chunk types.
 This example requires `xxd`.
 
 ```
-./build/release/tools/png dump_raw ./test-data/png/ff0000-1x1-rgb-fixed.png IHDR IDAT | xxd -b
+./build/debug/tools/png dump_raw ./test-data/png/ff0000-1x1-rgb-fixed.png IHDR IDAT | xxd -b
 ```
 **`stdout`**:
 ```
@@ -141,7 +141,7 @@ Simple line sorting.
 
 ### Usage
 ```
-./build/release/tools/sort { numeric | ascii } path
+./build/debug/tools/sort { numeric | ascii } path
 ```
 
 ### Example
@@ -153,7 +153,7 @@ find ./test-data/png -printf '%s\n' > test-data-sizes.txt
 
 #### Sort lines as numbers
 ```
-./build/release/tools/sort numeric ./test-data-sizes.txt
+./build/debug/tools/sort numeric ./test-data-sizes.txt
 ```
 **`stdout`**:
 ```
@@ -177,7 +177,7 @@ find ./test-data/png -printf '%s\n' > test-data-sizes.txt
 
 #### Sort lines as ASCII strings
 ```
-./build/release/tools/sort ascii ./test-data-sizes.txt
+./build/debug/tools/sort ascii ./test-data-sizes.txt
 ```
 **`stdout`**:
 ```
@@ -201,7 +201,7 @@ find ./test-data/png -printf '%s\n' > test-data-sizes.txt
 
 #### Sort lines as numbers in descending order
 ```
-./build/release/tools/sort numeric --reverse ./test-data-sizes.txt
+./build/debug/tools/sort numeric --reverse ./test-data-sizes.txt
 ```
 **`stdout`**:
 ```
@@ -229,18 +229,18 @@ Source: [`./src/tools/txt.c`](./src/tools/txt.c)
 
 ### Usage
 ```
-./build/release/tools/txt concat path [paths...]
-./build/release/tools/txt count pattern path
-./build/release/tools/txt slicelines begin end path
-./build/release/tools/txt replace pattern replacement path
-./build/release/tools/txt linefreq path
+./build/debug/tools/txt concat path [paths...]
+./build/debug/tools/txt count pattern path
+./build/debug/tools/txt slicelines begin end path
+./build/debug/tools/txt replace pattern replacement path
+./build/debug/tools/txt linefreq path
 ```
 
 ### Examples
 
 #### Concatenate
 ```
-./build/release/tools/txt concat ./test-data/txt/wikipedia/water_{ja,is,hi,zh}.txt
+./build/debug/tools/txt concat ./test-data/txt/wikipedia/water_{ja,is,hi,zh}.txt
 ```
 **`stdout`**:
 ```
@@ -252,7 +252,7 @@ Vatn er ólífrænn lyktar-, bragð- og nær litlaus vökvi sem er lífsnauðsyn
 
 #### Count pattern occurrence
 ```
-./build/release/tools/txt count 'ある' README.md
+./build/debug/tools/txt count 'ある' README.md
 ```
 **`stdout`**:
 ```
@@ -261,7 +261,7 @@ Vatn er ólífrænn lyktar-, bragð- og nær litlaus vökvi sem er lífsnauðsyn
 
 #### Slice lines
 ```
-./build/release/tools/txt slicelines 298 323 ./src/tools/txt.c
+./build/debug/tools/txt slicelines 298 323 ./src/tools/txt.c
 ```
 **`stdout`**:
 ```
@@ -295,7 +295,7 @@ int main(int argc, char* const argv[argc + 1]) {
 
 #### Replace pattern
 ```
-./build/release/tools/txt replace stufflib_iterator it ./include/stufflib_iterator.h
+./build/debug/tools/txt replace stufflib_iterator it ./include/stufflib_iterator.h
 ```
 **`stdout`**:
 ```
@@ -328,10 +328,10 @@ struct it {
 ### Find top 10 lines by frequency, ignore multiple spaces
 
 ```
-./build/release/tools/txt replace '  ' '' ./src/tests/test_stufflib_unicode.c \
-  | ./build/release/tools/txt linefreq /dev/stdin \
-  | ./build/release/tools/sort numeric --reverse /dev/stdin \
-  | ./build/release/tools/txt slicelines 0 10 /dev/stdin
+./build/debug/tools/txt replace '  ' '' ./src/tests/test_stufflib_unicode.c \
+  | ./build/debug/tools/txt linefreq /dev/stdin \
+  | ./build/debug/tools/sort numeric --reverse /dev/stdin \
+  | ./build/debug/tools/txt slicelines 0 10 /dev/stdin
 ```
 **`stdout`**:
 ```
@@ -349,10 +349,10 @@ struct it {
 
 ### Format metadata fields in a PNG `tEXt` block
 ```
-./build/release/tools/png dump_raw ./docs/img/tokyo.png tEXt \
-  | ./build/release/tools/txt replace date: \ndate= /dev/stdin \
-  | ./build/release/tools/txt replace exif: \nexif= /dev/stdin \
-  | ./build/release/tools/txt replace 0x00 ': ' /dev/stdin
+./build/debug/tools/png dump_raw ./docs/img/tokyo.png tEXt \
+  | ./build/debug/tools/txt replace date: \ndate= /dev/stdin \
+  | ./build/debug/tools/txt replace exif: \nexif= /dev/stdin \
+  | ./build/debug/tools/txt replace 0x00 ': ' /dev/stdin
 ```
 **`stdout`**:
 ```
