@@ -3,7 +3,9 @@
 #include <string.h>
 
 #include "stufflib_args.h"
+#include "stufflib_data.h"
 #include "stufflib_hashmap.h"
+#include "stufflib_iterator.h"
 #include "stufflib_string.h"
 #include "stufflib_tokenizer.h"
 
@@ -116,12 +118,58 @@ done:
   return ok;
 }
 
-bool count_words(const stufflib_args args[const static 1]) {
+bool count_unicode(const stufflib_args args[const static 1]) {
   if (stufflib_args_count_positional(args) != 2) {
-    STUFFLIB_LOG_ERROR("too few arguments to count_words");
+    STUFFLIB_LOG_ERROR("too few arguments to count_unicode");
     return false;
   }
-  return false;
+
+  bool ok = false;
+
+  const char* path = stufflib_args_get_positional(args, 1);
+  stufflib_string content = stufflib_string_from_file(path);
+  const stufflib_data utf8_data = stufflib_string_view_utf8_data(&content);
+
+  stufflib_hashmap* counts = stufflib_hashmap_init(&(stufflib_hashmap){0}, 1);
+  for (stufflib_iterator iter = stufflib_unicode_iter(&utf8_data);
+       !iter.is_done(&iter);
+       iter.advance(&iter)) {
+    const wchar_t item = stufflib_unicode_iter_decode_item(&iter);
+    if (item == L'\n' || item == L'\t' || item == L'\v' || item == L' ') {
+      continue;
+    }
+    stufflib_data codepoint =
+        stufflib_data_view(stufflib_unicode_iter_get_item_width(&iter),
+                           iter.get_item(&iter));
+    if (!stufflib_hashmap_contains(counts, &codepoint)) {
+      stufflib_hashmap_insert(counts, &codepoint, 0);
+    }
+    ++(stufflib_hashmap_get(counts, &codepoint)->value);
+  }
+
+  for (stufflib_iterator iter = stufflib_hashmap_iter(counts);
+       !iter.is_done(&iter);
+       iter.advance(&iter)) {
+    stufflib_hashmap_node* node = iter.get_item(&iter);
+    if (fwprintf(stdout, L"%zu ", node->value) < 0) {
+      STUFFLIB_LOG_ERROR("failed printing unicode count");
+      goto done;
+    }
+    stufflib_string key_str = stufflib_string_from_utf8(&(node->key));
+    const int ret = stufflib_string_fprint(stdout, &key_str, L"", L"\n");
+    stufflib_string_delete(&key_str);
+    if (ret < 0) {
+      STUFFLIB_LOG_ERROR("failed printing unicode hashmap key");
+      goto done;
+    }
+  }
+
+  ok = true;
+
+done:
+  stufflib_string_delete(&content);
+  stufflib_hashmap_destroy(counts);
+  return ok;
 }
 
 void print_usage(const stufflib_args args[const static 1]) {
@@ -134,7 +182,7 @@ void print_usage(const stufflib_args args[const static 1]) {
            "\n"
            "  %s slicelines begin end path"
            "\n"
-           "  %s count_words path"
+           "  %s count_unicode path"
            "\n"),
           args->program,
           args->program,
@@ -153,8 +201,8 @@ int main(int argc, char* const argv[argc + 1]) {
       ok = count(&args);
     } else if (strcmp(command, "slicelines") == 0) {
       ok = slicelines(&args);
-    } else if (strcmp(command, "count_words") == 0) {
-      ok = count_words(&args);
+    } else if (strcmp(command, "count_unicode") == 0) {
+      ok = count_unicode(&args);
     } else {
       STUFFLIB_LOG_ERROR("unknown command %s", command);
     }

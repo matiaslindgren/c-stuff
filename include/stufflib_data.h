@@ -94,6 +94,14 @@ stufflib_data stufflib_data_find(const stufflib_data data[const static 1],
   return (stufflib_data){0};
 }
 
+int stufflib_data_compare(const stufflib_data lhs[const restrict static 1],
+                          const stufflib_data rhs[const restrict static 1]) {
+  if (lhs->data && rhs->data) {
+    return memcmp(lhs->data, rhs->data, STUFFLIB_MIN(lhs->size, rhs->size));
+  }
+  return (!rhs->data) - (!lhs->data);
+}
+
 void stufflib_data_fdump(FILE stream[const static 1],
                          const stufflib_data data,
                          const size_t bytes_per_line) {

@@ -232,7 +232,7 @@ Source: [`./src/tools/txt.c`](./src/tools/txt.c)
 ./build/release/tools/txt concat path [paths...]
 ./build/release/tools/txt count pattern path
 ./build/release/tools/txt slicelines begin end path
-./build/release/tools/txt count_words path
+./build/release/tools/txt count_unicode path
 ```
 
 ### Examples
@@ -275,8 +275,8 @@ int main(int argc, char* const argv[argc + 1]) {
       ok = count(&args);
     } else if (strcmp(command, "slicelines") == 0) {
       ok = slicelines(&args);
-    } else if (strcmp(command, "count_words") == 0) {
-      ok = count_words(&args);
+    } else if (strcmp(command, "count_unicode") == 0) {
+      ok = count_unicode(&args);
     } else {
       STUFFLIB_LOG_ERROR("unknown command %s", command);
     }
@@ -287,36 +287,4 @@ int main(int argc, char* const argv[argc + 1]) {
   stufflib_args_destroy(&args);
   return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
-```
-
-#### Get top 20 words by frequency from `./include/stufflib_png.h`
-
-Tokenisation is simply "split at whitespace".
-```
-./build/release/tools/txt count_words ./include/stufflib_png.h \
-  | ./build/release/tools/sort numeric --reverse /dev/stdin \
-  | ./build/release/tools/txt slicelines 0 20 /dev/stdin
-```
-**`stdout`**:
-```
-177 =
-122 {
-111 }
-81 const
-54 if
-45 +
-42 size_t
-37 return
-31 goto
-23 STUFFLIB_LOG_ERROR("failed
-23 unsigned
-20 static
-20 *
-19 ==
-19 "
-19 for
-19 char*
-17 !=
-16 <
-16 chunk
 ```
