@@ -157,9 +157,6 @@ find ./test-data/png -printf '%s\n' > test-data-sizes.txt
 ```
 #### `stdout`:
 ```
-0
-1
-11
 69
 69
 69
@@ -171,7 +168,6 @@ find ./test-data/png -printf '%s\n' > test-data-sizes.txt
 237
 238
 238
-292
 1554
 2970
 4096
@@ -185,9 +181,6 @@ find ./test-data/png -printf '%s\n' > test-data-sizes.txt
 ```
 #### `stdout`:
 ```
-0
-1
-11
 11223
 1554
 160
@@ -195,7 +188,6 @@ find ./test-data/png -printf '%s\n' > test-data-sizes.txt
 238
 238
 24733
-292
 2970
 4096
 69
@@ -218,7 +210,6 @@ find ./test-data/png -printf '%s\n' > test-data-sizes.txt
 4096
 2970
 1554
-292
 238
 238
 237
@@ -230,9 +221,6 @@ find ./test-data/png -printf '%s\n' > test-data-sizes.txt
 69
 69
 69
-11
-1
-0
 ```
 
 ## Stream text editor
@@ -251,7 +239,7 @@ Source: [`./src/tools/txt.c`](./src/tools/txt.c)
 
 #### Concatenate
 ```
-./build/release/tools/txt concat ./test-data/txt/wikipedia/{water_ja,water_is,water_hi,water_zh}.txt
+./build/release/tools/txt concat ./test-data/txt/wikipedia/water_{ja,is,hi,zh}.txt
 ```
 #### `stdout`:
 ```
@@ -263,16 +251,16 @@ Vatn er ólífrænn lyktar-, bragð- og nær litlaus vökvi sem er lífsnauðsyn
 
 #### Count pattern occurrence
 ```
-./build/release/tools/txt count ある README.md
+./build/release/tools/txt count 'ある' README.md
 ```
 #### `stdout`:
 ```
-2
+3
 ```
 
 #### Slice lines
 ```
-./build/release/tools/txt slicelines 224 250 ./src/tools/txt.c
+./build/release/tools/txt slicelines 145 167 ./src/tools/txt.c
 ```
 #### `stdout`:
 ```
@@ -285,8 +273,6 @@ int main(int argc, char* const argv[argc + 1]) {
       ok = concat(&args);
     } else if (strcmp(command, "count") == 0) {
       ok = count(&args);
-    } else if (strcmp(command, "replace") == 0) {
-      ok = replace(&args);
     } else if (strcmp(command, "slicelines") == 0) {
       ok = slicelines(&args);
     } else if (strcmp(command, "count_words") == 0) {
