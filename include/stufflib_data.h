@@ -80,6 +80,20 @@ stufflib_data stufflib_data_slice(const stufflib_data data[const static 1],
   return stufflib_data_view(slice_size, slice_begin);
 }
 
+stufflib_data stufflib_data_find(const stufflib_data data[const static 1],
+                                 const stufflib_data pattern[const static 1]) {
+  if (data->size && pattern->size) {
+    for (size_t begin = 0; begin + pattern->size <= data->size; ++begin) {
+      unsigned char* subseq = data->data + begin;
+      if (memcmp(subseq, pattern->data, pattern->size) == 0) {
+        const size_t subseq_size = data->size - begin;
+        return stufflib_data_view(subseq_size, subseq);
+      }
+    }
+  }
+  return (stufflib_data){0};
+}
+
 void stufflib_data_fdump(FILE stream[const static 1],
                          const stufflib_data data,
                          const size_t bytes_per_line) {

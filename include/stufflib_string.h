@@ -92,40 +92,6 @@ stufflib_string stufflib_string_slice(const stufflib_string str[const static 1],
   return stufflib_string_from_utf8(&utf8_slice);
 }
 
-stufflib_string stufflib_string_strstr(
-    const stufflib_string str[const static 1],
-    const stufflib_string substr[const static 1]) {
-  const stufflib_data str_utf8_data = stufflib_string_view_utf8_data(str);
-  const stufflib_data substr_utf8_data = stufflib_string_view_utf8_data(substr);
-  for (stufflib_iterator str_iter = stufflib_unicode_iter(&str_utf8_data);
-       !str_iter.is_done(&str_iter);
-       str_iter.advance(&str_iter)) {
-    stufflib_iterator lhs = str_iter;
-    stufflib_iterator rhs = stufflib_unicode_iter(&substr_utf8_data);
-    bool match = true;
-    while (match) {
-      if (rhs.is_done(&rhs)) {
-        break;
-      }
-      if (lhs.is_done(&lhs)) {
-        match = false;
-        break;
-      }
-      const wchar_t lhs_item = stufflib_unicode_iter_decode_item(&lhs);
-      const wchar_t rhs_item = stufflib_unicode_iter_decode_item(&rhs);
-      match = lhs_item && rhs_item && lhs_item == rhs_item;
-      lhs.advance(&lhs);
-      rhs.advance(&rhs);
-    }
-    if (match) {
-      stufflib_data utf8_slice =
-          stufflib_data_slice(&(str->utf8_data), str_iter.index, SIZE_MAX);
-      return stufflib_string_from_utf8(&utf8_slice);
-    }
-  }
-  return (stufflib_string){0};
-}
-
 int stufflib_string_fprint(FILE stream[const static 1],
                            const stufflib_string str[const static 1],
                            const wchar_t separator[const static 1]) {
