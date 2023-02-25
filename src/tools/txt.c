@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "stufflib_args.h"
 #include "stufflib_hashmap.h"
-#include "stufflib_text.h"
+#include "stufflib_string.h"
+#include "stufflib_tokenizer.h"
 
 bool concat(const stufflib_args args[const static 1]) {
   if (stufflib_args_count_positional(args) < 2) {
@@ -12,38 +14,29 @@ bool concat(const stufflib_args args[const static 1]) {
   }
 
   bool ok = false;
-  stufflib_text* text = nullptr;
+  stufflib_string result = (stufflib_string){0};
 
   for (size_t i = 1;; ++i) {
     const char* path = stufflib_args_get_positional(args, i);
     if (!path) {
       break;
     }
-    stufflib_text* next = stufflib_text_from_file(path);
-    if (!next) {
+    stufflib_string content = stufflib_string_from_file(path);
+    if (!content.length) {
       goto done;
     }
-    if (text) {
-      text = stufflib_text_concat(text, next);
-    } else {
-      text = next;
-    }
+    stufflib_string_extend(&result, &content);
+    stufflib_string_delete(&content);
   }
 
-  if (!text) {
-    goto done;
-  }
-
-  if (stufflib_text_fprint(stdout, text, "") < 0) {
+  if (stufflib_string_fprint(stdout, &result, L"", L"") < 0) {
     goto done;
   }
 
   ok = true;
 
 done:
-  if (text) {
-    stufflib_text_destroy(text);
-  }
+  stufflib_string_delete(&result);
   return ok;
 }
 
@@ -55,14 +48,24 @@ bool count(const stufflib_args args[const static 1]) {
 
   bool ok = false;
 
-  const char* pattern = stufflib_args_get_positional(args, 1);
   const char* path = stufflib_args_get_positional(args, 2);
+  stufflib_string content = stufflib_string_from_file(path);
 
-  stufflib_text* text = stufflib_text_from_file(path);
-  if (!text) {
-    goto done;
+  const char* pattern_str = stufflib_args_get_positional(args, 1);
+  stufflib_data pattern =
+      stufflib_data_view(strlen(pattern_str), (unsigned char*)pattern_str);
+
+  stufflib_tokenizer pattern_tokenizer =
+      stufflib_tokenizer_create(&(content.utf8_data), &pattern);
+  size_t n = 0;
+  for (stufflib_iterator iter = stufflib_tokenizer_iter(&pattern_tokenizer);
+       !iter.is_done(&iter);
+       iter.advance(&iter)) {
+    ++n;
   }
-  const size_t n = stufflib_text_count_matches(text, pattern);
+  if (n) {
+    --n;
+  }
   if (printf("%zu\n", n) < 0) {
     goto done;
   }
@@ -70,45 +73,7 @@ bool count(const stufflib_args args[const static 1]) {
   ok = true;
 
 done:
-  if (text) {
-    stufflib_text_destroy(text);
-  }
-  return ok;
-}
-
-bool replace(const stufflib_args args[const static 1]) {
-  if (stufflib_args_count_positional(args) != 4) {
-    STUFFLIB_LOG_ERROR("too few arguments to replace");
-    return false;
-  }
-
-  bool ok = false;
-
-  const char* old_str = stufflib_args_get_positional(args, 1);
-  const char* new_str = stufflib_args_get_positional(args, 2);
-  const char* path = stufflib_args_get_positional(args, 3);
-
-  stufflib_text* text = stufflib_text_from_file(path);
-  if (!text) {
-    goto done;
-  }
-  stufflib_text* replaced = stufflib_text_replace(text, old_str, new_str);
-  stufflib_text_destroy(text);
-  text = replaced;
-  if (!replaced) {
-    goto done;
-  }
-
-  if (stufflib_text_fprint(stdout, text, "") < 0) {
-    goto done;
-  }
-
-  ok = true;
-
-done:
-  if (text) {
-    stufflib_text_destroy(text);
-  }
+  stufflib_string_delete(&content);
   return ok;
 }
 
@@ -124,24 +89,30 @@ bool slicelines(const stufflib_args args[const static 1]) {
   const size_t end = strtoull(stufflib_args_get_positional(args, 2), 0, 10);
   const char* path = stufflib_args_get_positional(args, 3);
 
-  char** lines = stufflib_io_slurp_lines(path, "\n");
-  if (!lines) {
-    goto done;
-  }
-  for (size_t pos = 0; lines[pos] && pos < end; ++pos) {
-    if (begin <= pos) {
-      if (printf("%s\n", lines[pos]) < 0) {
+  stufflib_string content = stufflib_string_from_file(path);
+  stufflib_data newline = stufflib_data_view(1, (unsigned char[]){'\n'});
+
+  stufflib_tokenizer newline_tokenizer =
+      stufflib_tokenizer_create(&(content.utf8_data), &newline);
+  size_t lineno = 1;
+  for (stufflib_iterator iter = stufflib_tokenizer_iter(&newline_tokenizer);
+       !iter.is_done(&iter);
+       iter.advance(&iter)) {
+    if (begin <= lineno && lineno <= end) {
+      stufflib_string line = stufflib_string_from_utf8(iter.get_item(&iter));
+      const int ret = stufflib_string_fprint(stdout, &line, L"", L"\n");
+      stufflib_string_delete(&line);
+      if (ret < 0) {
         goto done;
       }
     }
+    ++lineno;
   }
 
   ok = true;
 
 done:
-  if (lines) {
-    stufflib_str_chunks_destroy(lines);
-  }
+  stufflib_string_delete(&content);
   return ok;
 }
 
@@ -150,55 +121,7 @@ bool count_words(const stufflib_args args[const static 1]) {
     STUFFLIB_LOG_ERROR("too few arguments to count_words");
     return false;
   }
-
-  bool ok = false;
-  char* file_content = nullptr;
-  char** words = nullptr;
-  stufflib_hashmap word_counts = {0};
-
-  const char* path = stufflib_args_get_positional(args, 1);
-
-  file_content = stufflib_io_slurp_file(path);
-  if (!file_content) {
-    goto done;
-  }
-  words = stufflib_str_split_whitespace(file_content);
-  if (!words) {
-    goto done;
-  }
-  if (!stufflib_hashmap_init(&word_counts, 1 << 16)) {
-    goto done;
-  }
-
-  for (size_t i = 0; words[i]; ++i) {
-    if (strlen(words[i]) == 0) {
-      continue;
-    }
-    if (!stufflib_hashmap_contains(&word_counts, words[i])) {
-      stufflib_hashmap_insert(&word_counts, words[i], 0);
-    }
-    ++(stufflib_hashmap_get(&word_counts, words[i])->value);
-  }
-
-  for (size_t i = 0; i < word_counts.capacity; ++i) {
-    const char* key = word_counts.nodes[i].key;
-    if (key) {
-      const size_t value = word_counts.nodes[i].value;
-      printf("%zu %s\n", value, key);
-    }
-  }
-
-  ok = true;
-
-done:
-  if (file_content) {
-    free(file_content);
-  }
-  if (words) {
-    stufflib_str_chunks_destroy(words);
-  }
-  stufflib_hashmap_destroy(&word_counts);
-  return ok;
+  return false;
 }
 
 void print_usage(const stufflib_args args[const static 1]) {
@@ -209,13 +132,10 @@ void print_usage(const stufflib_args args[const static 1]) {
            "\n"
            "  %s count pattern path"
            "\n"
-           "  %s replace old_str new_str path"
-           "\n"
            "  %s slicelines begin end path"
            "\n"
            "  %s count_words path"
            "\n"),
-          args->program,
           args->program,
           args->program,
           args->program,
@@ -231,8 +151,6 @@ int main(int argc, char* const argv[argc + 1]) {
       ok = concat(&args);
     } else if (strcmp(command, "count") == 0) {
       ok = count(&args);
-    } else if (strcmp(command, "replace") == 0) {
-      ok = replace(&args);
     } else if (strcmp(command, "slicelines") == 0) {
       ok = slicelines(&args);
     } else if (strcmp(command, "count_words") == 0) {

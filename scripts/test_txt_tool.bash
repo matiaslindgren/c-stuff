@@ -38,6 +38,23 @@ function test_txt_tool {
     done
   done
 
+  for count_test in ./test-data/txt/empty:0 ./test-data/txt/one.txt:0 ./test-data/txt/hello.txt:1 ./test-data/txt/numbers.txt:100; do
+    local path=$(echo $count_test | cut -f1 -d:)
+    local newlines=$(echo $count_test | cut -f2 -d:)
+    local counted=$($txt_tool count $'\n' $path)
+    if [ "$counted" -ne "$newlines" ]; then
+      printf "'%s' counted %d newlines in '%s' but expected %d\n" $txt_tool $counted $path $newlines
+      return 1
+    fi
+  done
+
+  local path=./test-data/txt/wikipedia/water_ja.txt
+  local counted=$($txt_tool count は $path)
+  if [ "$counted" -ne 5 ]; then
+    printf "'%s' counted %d of 'は' in '%s' but expected %d\n" $txt_tool $counted $path 5
+    return 1
+  fi
+
   return 0;
 }
 

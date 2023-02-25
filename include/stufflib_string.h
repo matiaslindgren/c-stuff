@@ -1,5 +1,6 @@
 #ifndef _STUFFLIB_STRING_H_INCLUDED
 #define _STUFFLIB_STRING_H_INCLUDED
+#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <wchar.h>
@@ -94,7 +95,9 @@ stufflib_string stufflib_string_slice(const stufflib_string str[const static 1],
 
 int stufflib_string_fprint(FILE stream[const static 1],
                            const stufflib_string str[const static 1],
-                           const wchar_t separator[const static 1]) {
+                           const wchar_t separator[const static 1],
+                           const wchar_t newline[const static 1]) {
+  setlocale(LC_ALL, "");
   const stufflib_data utf8_data = stufflib_string_view_utf8_data(str);
   for (stufflib_iterator iter = stufflib_unicode_iter(&utf8_data);
        !iter.is_done(&iter);
@@ -105,7 +108,7 @@ int stufflib_string_fprint(FILE stream[const static 1],
       return ret;
     }
   }
-  return 0;
+  return fwprintf(stream, L"%ls", newline);
 }
 
 #endif  // _STUFFLIB_STRING_H_INCLUDED

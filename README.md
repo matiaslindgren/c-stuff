@@ -243,45 +243,31 @@ Source: [`./src/tools/txt.c`](./src/tools/txt.c)
 ```
 ./build/release/tools/txt concat path [paths...]
 ./build/release/tools/txt count pattern path
-./build/release/tools/txt replace old_str new_str path
 ./build/release/tools/txt slicelines begin end path
 ./build/release/tools/txt count_words path
 ```
 
-### Example
-
-Create 2 files:
-```
-echo hello > hello.txt
-echo there > there.txt
-```
+### Examples
 
 #### Concatenate
 ```
-./build/release/tools/txt concat ./hello.txt ./there.txt
+./build/release/tools/txt concat ./test-data/txt/wikipedia/{water_ja,water_is,water_hi,water_zh}.txt
 ```
 #### `stdout`:
 ```
-hello
-there
-```
-
-#### Replace
-```
-./build/release/tools/txt replace hello you ./hello.txt
-```
-#### `stdout`:
-```
-you
+水（みず、（英: water、他言語呼称は「他言語での呼称」の項を参照）とは、化学式 H2O で表される、水素と酸素の化合物である。日本語においては特に湯と対比して用いられ、液体ではあるが温度が低く、かつ凝固して氷にはなっていない物を言う。また、液状の物全般を指す。
+Vatn er ólífrænn lyktar-, bragð- og nær litlaus vökvi sem er lífsnauðsynlegur öllum þekktum lífverum, þrátt fyrir að gefa þeim hvorki fæðu, orku né næringarefni. Vatnssameindin er samsett úr tveimur vetnisfrumeindum og einni súrefnisfrumeind sem tengjast með samgildistengi og hefur efnaformúluna H2O. Vatn er uppistaðan í vatnshvolfi jarðar. Orðið „vatn“ á við um efnið eins og það kemur fyrir við staðalhita og staðalþrýsting.
+जल या पानी एक आम रासायनिक पदार्थ है जिसका अणु दो हाइड्रोजन परमाणु और एक प्राणवायु परमाणु से बना है - H2O। यह सारे प्राणियों के जीवन का आधार है। आमतौर पर जल शब्द का प्रयोग द्रव अवस्था के लिए उपयोग में लाया जाता है पर यह ठोस अवस्था (बर्फ) और गैसीय अवस्था (भाप या जल वाष्प) में भी पाया जाता है। पानी जल-आत्मीय सतहों पर तरल-क्रिस्टल के रूप में भी पाया जाता है।
+水是地球上最常见的物质之一，是由氢、氧两种元素經過化學反應後组成的无机化合物（分子式：H2O），在常温常压下为无色无味的透明液体。
 ```
 
 #### Count pattern occurrence
 ```
-./build/release/tools/txt count '##' ./README.md
+./build/release/tools/txt count ある README.md
 ```
 #### `stdout`:
 ```
-60
+2
 ```
 
 #### Slice lines
