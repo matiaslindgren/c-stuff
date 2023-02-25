@@ -261,7 +261,7 @@ Vatn er ólífrænn lyktar-, bragð- og nær litlaus vökvi sem er lífsnauðsyn
 
 #### Slice lines
 ```
-./build/release/tools/txt slicelines 296 321 ./src/tools/txt.c
+./build/release/tools/txt slicelines 298 323 ./src/tools/txt.c
 ```
 **`stdout`**:
 ```
@@ -328,9 +328,9 @@ struct it {
 ### Find top 10 lines by frequency, ignore multiple spaces
 
 ```
-./build/release/tools/txt replace '  ' '' ./src/tests/test_stufflib_unicode.c
-  | ./build/release/tools/txt linefreq /dev/stdin
-  | ./build/release/tools/sort numeric --reverse /dev/stdin
+./build/release/tools/txt replace '  ' '' ./src/tests/test_stufflib_unicode.c \
+  | ./build/release/tools/txt linefreq /dev/stdin \
+  | ./build/release/tools/sort numeric --reverse /dev/stdin \
   | ./build/release/tools/txt slicelines 0 10 /dev/stdin
 ```
 **`stdout`**:
@@ -349,9 +349,9 @@ struct it {
 
 ### Format metadata fields in a PNG `tEXt` block
 ```
-./build/release/tools/png dump_raw ./docs/img/tokyo.png tEXt
-  | ./build/release/tools/txt replace date: \ndate= /dev/stdin
-  | ./build/release/tools/txt replace exif: \nexif= /dev/stdin
+./build/release/tools/png dump_raw ./docs/img/tokyo.png tEXt \
+  | ./build/release/tools/txt replace date: \ndate= /dev/stdin \
+  | ./build/release/tools/txt replace exif: \nexif= /dev/stdin \
   | ./build/release/tools/txt replace 0x00 ': ' /dev/stdin
 ```
 **`stdout`**:

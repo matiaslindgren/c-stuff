@@ -176,7 +176,9 @@ bool replace(const stufflib_args args[const static 1]) {
   }
 
   stufflib_data pattern = stufflib_data_from_str(pattern_str);
-  stufflib_data replacement = stufflib_data_from_str(replacement_str);
+  stufflib_data replacement = strlen(replacement_str)
+                                  ? stufflib_data_from_str(replacement_str)
+                                  : (stufflib_data){0};
 
   stufflib_tokenizer pattern_tokenizer =
       stufflib_tokenizer_create(&(content.utf8_data), &pattern);
