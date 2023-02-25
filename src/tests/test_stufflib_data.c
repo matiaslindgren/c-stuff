@@ -59,6 +59,29 @@ bool test_data_create_empty(const bool verbose) {
   return true;
 }
 
+bool test_data_create_from_hex(const bool verbose) {
+  {
+    stufflib_data data = stufflib_data_from_str("\\x00");
+    assert(data.size == 1);
+    assert(data.owned);
+    assert(data.data[0] == 0);
+    stufflib_data_delete(&data);
+  }
+  {
+    stufflib_data data = stufflib_data_from_str("\\x010a0f00ff");
+    assert(data.size == 5);
+    assert(data.owned);
+    assert(data.data);
+    assert(data.data[0] == 0x01);
+    assert(data.data[1] == 0x0a);
+    assert(data.data[2] == 0x0f);
+    assert(data.data[3] == 0x00);
+    assert(data.data[4] == 0xff);
+    stufflib_data_delete(&data);
+  }
+  return true;
+}
+
 bool test_data_copy_view(const bool verbose) {
   unsigned char x[] = {1, 2, 3, 4};
   const size_t n = STUFFLIB_ARRAY_LEN(x);
@@ -201,6 +224,7 @@ STUFFLIB_TEST_MAIN(test_data_view_one,
                    test_data_view_array,
                    test_data_create,
                    test_data_create_empty,
+                   test_data_create_from_hex,
                    test_data_copy_view,
                    test_data_concat_views,
                    test_data_concat_empty,

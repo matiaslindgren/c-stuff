@@ -323,9 +323,9 @@ struct it {
 #endif  // _STUFFLIB_ITERATOR_H_INCLUDED
 ```
 
-### Combine commands by using `/dev/stdin` as input path
+## Combine commands by using `/dev/stdin` as input path
 
-#### Find top 10 lines by frequency, ignore multiple spaces
+### Find top 10 lines by frequency, ignore multiple spaces
 
 ```
 ./build/release/tools/txt replace '  ' '' ./src/tests/test_stufflib_unicode.c

@@ -175,11 +175,8 @@ bool replace(const stufflib_args args[const static 1]) {
     goto done;
   }
 
-  stufflib_data pattern =
-      stufflib_data_view(strlen(pattern_str), (unsigned char*)pattern_str);
-  stufflib_string replacement = strlen(replacement_str)
-                                    ? stufflib_string_from_cstr(replacement_str)
-                                    : (stufflib_string){0};
+  stufflib_data pattern = stufflib_data_from_str(pattern_str);
+  stufflib_data replacement = stufflib_data_from_str(replacement_str);
 
   stufflib_tokenizer pattern_tokenizer =
       stufflib_tokenizer_create(&(content.utf8_data), &pattern);
@@ -193,8 +190,11 @@ bool replace(const stufflib_args args[const static 1]) {
       goto done;
     }
     iter.advance(&iter);
-    if (!iter.is_done(&iter) && replacement.length) {
-      if (stufflib_string_fprint(stdout, &replacement, L"", L"") < 0) {
+    if (!iter.is_done(&iter) && replacement.size) {
+      stufflib_string repl = stufflib_string_from_utf8(&replacement);
+      const int ret = stufflib_string_fprint(stdout, &repl, L"", L"");
+      stufflib_string_delete(&repl);
+      if (ret < 0) {
         goto done;
       }
     }
@@ -204,7 +204,8 @@ bool replace(const stufflib_args args[const static 1]) {
 
 done:
   stufflib_string_delete(&content);
-  stufflib_string_delete(&replacement);
+  stufflib_data_delete(&pattern);
+  stufflib_data_delete(&replacement);
   return ok;
 }
 
