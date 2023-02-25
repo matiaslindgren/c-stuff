@@ -223,16 +223,17 @@ find ./test-data/png -printf '%s\n' > test-data-sizes.txt
 69
 ```
 
-## Stream text editor
+## Text tool
 
 Source: [`./src/tools/txt.c`](./src/tools/txt.c)
 
 ### Usage
 ```
-./build/release/tools/txt concat path [paths...]
-./build/release/tools/txt count pattern path
-./build/release/tools/txt slicelines begin end path
-./build/release/tools/txt count_unicode path
+./build/debug/tools/txt concat path [paths...]
+./build/debug/tools/txt count pattern path
+./build/debug/tools/txt slicelines begin end path
+./build/debug/tools/txt replace pattern replacement path
+./build/debug/tools/txt linefreq path
 ```
 
 ### Examples
@@ -260,11 +261,12 @@ Vatn er ólífrænn lyktar-, bragð- og nær litlaus vökvi sem er lífsnauðsyn
 
 #### Slice lines
 ```
-./build/release/tools/txt slicelines 145 167 ./src/tools/txt.c
+./build/release/tools/txt slicelines 279 304 ./src/tools/txt.c
 ```
 **`stdout`**:
 ```
 int main(int argc, char* const argv[argc + 1]) {
+  setlocale(LC_ALL, "");
   stufflib_args args = stufflib_args_from_argv(argc, argv);
   bool ok = false;
   const char* command = stufflib_args_get_positional(&args, 0);
@@ -275,8 +277,10 @@ int main(int argc, char* const argv[argc + 1]) {
       ok = count(&args);
     } else if (strcmp(command, "slicelines") == 0) {
       ok = slicelines(&args);
-    } else if (strcmp(command, "count_unicode") == 0) {
-      ok = count_unicode(&args);
+    } else if (strcmp(command, "replace") == 0) {
+      ok = replace(&args);
+    } else if (strcmp(command, "linefreq") == 0) {
+      ok = linefreq(&args);
     } else {
       STUFFLIB_LOG_ERROR("unknown command %s", command);
     }
@@ -287,4 +291,58 @@ int main(int argc, char* const argv[argc + 1]) {
   stufflib_args_destroy(&args);
   return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
+```
+
+#### Replace pattern
+```
+./build/release/tools/txt replace stufflib_iterator it ./include/stufflib_iterator.h
+```
+**`stdout`**:
+```
+#ifndef _STUFFLIB_ITERATOR_H_INCLUDED
+#define _STUFFLIB_ITERATOR_H_INCLUDED
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct it it;
+struct it;
+
+typedef void* it_get_item(it*);
+typedef void it_advance(it*);
+typedef bool it_is_done(it*);
+
+struct it {
+  size_t index;
+  size_t pos;
+  void* data;
+  it_get_item* get_item;
+  it_advance* advance;
+  it_is_done* is_done;
+};
+
+#endif  // _STUFFLIB_ITERATOR_H_INCLUDED
+```
+
+### Combine commands by using `/dev/stdin` as input path
+
+#### Find top 10 lines by frequency, ignore multiple spaces
+
+```
+./build/release/tools/txt replace '  ' '' ./src/tests/test_stufflib_unicode.c
+  | ./build/release/tools/txt linefreq /dev/stdin
+  | ./build/release/tools/sort numeric --reverse /dev/stdin
+  | ./build/release/tools/txt slicelines 0 10 /dev/stdin
+```
+**`stdout`**:
+```
+21 }
+6 };
+5 return true;
+4 6,
+3 // 안녕하세요
+3 size_t codepoint_pos = 0;
+3 // hello
+3 // привіт
+3 ++codepoint_pos;
+3 // مرحبًا
 ```
