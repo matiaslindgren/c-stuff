@@ -9,7 +9,7 @@
 #include "stufflib_data.h"
 #include "stufflib_macros.h"
 
-bool test_view_one(const bool verbose) {
+bool test_data_view_one(const bool verbose) {
   unsigned char x = 1;
   stufflib_data data = stufflib_data_view(1, &x);
   assert(data.size == 1);
@@ -20,7 +20,7 @@ bool test_view_one(const bool verbose) {
   return true;
 }
 
-bool test_view_array(const bool verbose) {
+bool test_data_view_array(const bool verbose) {
   unsigned char x[] = {1, 2, 3, 4};
   const size_t n = STUFFLIB_ARRAY_LEN(x);
   stufflib_data data = stufflib_data_view(n, x);
@@ -35,7 +35,7 @@ bool test_view_array(const bool verbose) {
   return true;
 }
 
-bool test_create(const bool verbose) {
+bool test_data_create(const bool verbose) {
   const size_t n = 10;
   stufflib_data data = stufflib_data_create(n);
   assert(data.size == n);
@@ -49,7 +49,7 @@ bool test_create(const bool verbose) {
   return true;
 }
 
-bool test_create_empty(const bool verbose) {
+bool test_data_create_empty(const bool verbose) {
   stufflib_data data = stufflib_data_create(0);
   assert(data.size == 0);
   assert(data.owned);
@@ -59,7 +59,7 @@ bool test_create_empty(const bool verbose) {
   return true;
 }
 
-bool test_copy_view(const bool verbose) {
+bool test_data_copy_view(const bool verbose) {
   unsigned char x[] = {1, 2, 3, 4};
   const size_t n = STUFFLIB_ARRAY_LEN(x);
   stufflib_data data1 = stufflib_data_view(n, x);
@@ -78,7 +78,7 @@ bool test_copy_view(const bool verbose) {
   return true;
 }
 
-bool test_concat_views(const bool verbose) {
+bool test_data_concat_views(const bool verbose) {
   unsigned char x1[] = {1, 2, 3, 4};
   unsigned char x2[] = {6, 7, 8, 9, 10, 11};
   const size_t n1 = STUFFLIB_ARRAY_LEN(x1);
@@ -107,7 +107,7 @@ bool test_concat_views(const bool verbose) {
   return true;
 }
 
-bool test_concat_empty(const bool verbose) {
+bool test_data_concat_empty(const bool verbose) {
   unsigned char x1[] = {1, 2, 3, 4};
   const size_t n1 = STUFFLIB_ARRAY_LEN(x1);
   stufflib_data data1 = stufflib_data_view(n1, x1);
@@ -129,7 +129,7 @@ bool test_concat_empty(const bool verbose) {
   return true;
 }
 
-bool test_slice(const bool verbose) {
+bool test_data_slice(const bool verbose) {
   unsigned char x[] = {1, 2, 3, 4, 5, 6};
   const size_t n = STUFFLIB_ARRAY_LEN(x);
   stufflib_data data = stufflib_data_view(n, x);
@@ -149,7 +149,7 @@ bool test_slice(const bool verbose) {
   return true;
 }
 
-bool test_slice_past_end(const bool verbose) {
+bool test_data_slice_past_end(const bool verbose) {
   unsigned char x[] = {1, 2, 3, 4, 5, 6};
   const size_t n = STUFFLIB_ARRAY_LEN(x);
   stufflib_data data = stufflib_data_view(n, x);
@@ -162,7 +162,24 @@ bool test_slice_past_end(const bool verbose) {
   return true;
 }
 
-bool test_iter(const bool verbose) {
+bool test_data_find(const bool verbose) {
+  unsigned char x1[] = {1, 2, 3, 1, 2, 3};
+  unsigned char x2[] = {2, 3};
+  const size_t n1 = STUFFLIB_ARRAY_LEN(x1);
+  const size_t n2 = STUFFLIB_ARRAY_LEN(x2);
+  stufflib_data data1 = stufflib_data_view(n1, x1);
+  stufflib_data data2 = stufflib_data_view(n2, x2);
+  stufflib_data empty = (stufflib_data){0};
+  assert(!stufflib_data_find(&data2, &data1).data);
+  assert(!stufflib_data_find(&data1, &empty).data);
+  assert(!stufflib_data_find(&empty, &data1).data);
+  assert(stufflib_data_find(&data1, &data1).data == x1);
+  assert(stufflib_data_find(&data2, &data2).data == x2);
+  assert(stufflib_data_find(&data1, &data2).data == x1 + 1);
+  return true;
+}
+
+bool test_data_iter(const bool verbose) {
   unsigned char x[] = {1, 2, 3, 4, 5, 6};
   const size_t n = STUFFLIB_ARRAY_LEN(x);
   stufflib_data data = stufflib_data_view(n, x);
@@ -180,13 +197,14 @@ bool test_iter(const bool verbose) {
   return true;
 }
 
-STUFFLIB_TEST_MAIN(test_view_one,
-                   test_view_array,
-                   test_create,
-                   test_create_empty,
-                   test_copy_view,
-                   test_concat_views,
-                   test_concat_empty,
-                   test_slice,
-                   test_slice_past_end,
-                   test_iter)
+STUFFLIB_TEST_MAIN(test_data_view_one,
+                   test_data_view_array,
+                   test_data_create,
+                   test_data_create_empty,
+                   test_data_copy_view,
+                   test_data_concat_views,
+                   test_data_concat_empty,
+                   test_data_slice,
+                   test_data_slice_past_end,
+                   test_data_find,
+                   test_data_iter)

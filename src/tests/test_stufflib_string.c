@@ -137,23 +137,6 @@ bool test_string_slice(const bool verbose) {
   return true;
 }
 
-bool test_string_strstr_no_match(const bool verbose) {
-  for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(hello_utf8); ++i) {
-    stufflib_string str = stufflib_string_from_utf8(hello_utf8 + i);
-    for (size_t j = i + 1; j < STUFFLIB_ARRAY_LEN(hello_utf8); ++j) {
-      stufflib_string substr = stufflib_string_from_utf8(hello_utf8 + j);
-      stufflib_string match = stufflib_string_strstr(&str, &substr);
-      assert(match.length == 0);
-      assert(match.utf8_data.size == 0);
-      assert(match.utf8_data.data == 0);
-      stufflib_string_delete(&match);
-      stufflib_string_delete(&substr);
-    }
-    stufflib_string_delete(&str);
-  }
-  return true;
-}
-
 bool test_init_from_file(const bool verbose) {
   const char* languages[] = {
       "ar", "bg",  "cs", "de",  "el", "fa", "fi", "fr",  "he",  "hi", "is",
@@ -188,5 +171,4 @@ bool test_init_from_file(const bool verbose) {
 STUFFLIB_TEST_MAIN(test_string_init,
                    test_string_utf8_view,
                    test_string_slice,
-                   test_string_strstr_no_match,
                    test_init_from_file)
