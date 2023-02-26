@@ -50,18 +50,30 @@ stufflib_data stufflib_data_copy(const stufflib_data src[const static 1]) {
 
 stufflib_data stufflib_data_from_str(const char str[const static 1]) {
   const size_t num_chars = strlen(str);
-  if (num_chars > 2 && strncmp(str, "0x", 2) == 0) {
-    const size_t num_bytes = STUFFLIB_MAX(1, ((num_chars - 2) + 1) / 2);
-    stufflib_data dst = stufflib_data_create(num_bytes);
-    for (size_t i = 0; i < dst.size; ++i) {
-      const char byte[] = {str[2 * i + 2], str[2 * i + 3], 0};
-      dst.data[i] = strtoul(byte, 0, 16);
-    }
-    return dst;
+  if (!num_chars) {
+    return stufflib_data_create(0);
   }
-  stufflib_data str_view =
-      stufflib_data_view(num_chars + 1, (unsigned char*)str);
+  unsigned char* data = (unsigned char*)str;
+  stufflib_data str_view = stufflib_data_view(num_chars, data);
   return stufflib_data_copy(&str_view);
+}
+
+bool stufflib_data_is_hexadecimal_str(const stufflib_data src[const static 1]) {
+  return src->size > 2 && memcmp(src->data, "0x", 2) == 0;
+}
+
+stufflib_data stufflib_data_parse_hex(const stufflib_data src[const static 1]) {
+  const size_t num_bytes = ((src->size - 2) + 1) / 2;
+  stufflib_data dst = stufflib_data_create(num_bytes);
+  for (size_t i_byte = 0; i_byte < dst.size; ++i_byte) {
+    const size_t i1 = 2 * i_byte + 2;
+    const size_t i2 = 2 * i_byte + 3;
+    const char char1 = src->data[i1];
+    const char char2 = i2 < src->size ? src->data[i2] : 0;
+    const char byte[] = {char1, char2, 0};
+    dst.data[i_byte] = strtoul(byte, 0, 16);
+  }
+  return dst;
 }
 
 stufflib_data stufflib_data_concat(

@@ -16,7 +16,6 @@ bool test_empty(const bool verbose) {
   assert(map.slots != nullptr);
 
   stufflib_data keys[] = {
-      stufflib_data_from_str(""),
       stufflib_data_from_str("hello"),
       stufflib_data_from_str(" "),
       stufflib_data_from_str("there"),
@@ -194,7 +193,7 @@ bool test_slot_iterator(const bool verbose) {
     assert(slot->filled);
     assert(slot->value >= 0);
     assert(slot->value < n);
-    assert(strcmp(keys[slot->value], (char*)(slot->key.data)) == 0);
+    assert(memcmp(keys[slot->value], slot->key.data, slot->key.size) == 0);
     iter.advance(&iter);
   }
   assert(iter.is_done(&iter));

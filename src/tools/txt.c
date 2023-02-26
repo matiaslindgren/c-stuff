@@ -176,9 +176,18 @@ bool replace(const stufflib_args args[const static 1]) {
   }
 
   stufflib_data pattern = stufflib_data_from_str(pattern_str);
-  stufflib_data replacement = strlen(replacement_str)
-                                  ? stufflib_data_from_str(replacement_str)
-                                  : (stufflib_data){0};
+  if (stufflib_data_is_hexadecimal_str(&pattern)) {
+    stufflib_data hex_pattern = stufflib_data_parse_hex(&pattern);
+    stufflib_data_delete(&pattern);
+    pattern = hex_pattern;
+  }
+
+  stufflib_data replacement = stufflib_data_from_str(replacement_str);
+  if (stufflib_data_is_hexadecimal_str(&replacement)) {
+    stufflib_data hex_replacement = stufflib_data_parse_hex(&replacement);
+    stufflib_data_delete(&replacement);
+    replacement = hex_replacement;
+  }
 
   stufflib_tokenizer pattern_tokenizer =
       stufflib_tokenizer_create(&(content.utf8_data), &pattern);
