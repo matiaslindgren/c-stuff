@@ -15,6 +15,7 @@ required_commands=(
   'cut'
   'find'
   'jq'
+  'wc'
 )
 ok=1
 for command in ${required_commands[*]}; do

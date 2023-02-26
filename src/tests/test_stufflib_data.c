@@ -59,54 +59,96 @@ bool test_data_create_empty(const bool verbose) {
   return true;
 }
 
-bool test_data_create_from_hex(const bool verbose) {
-  {
-    stufflib_data data = stufflib_data_from_str("0x00");
-    assert(data.size == 1);
-    assert(data.owned);
-    assert(data.data[0] == 0);
-    stufflib_data_delete(&data);
+bool test_data_create_from_cstr(const bool verbose) {
+  const char* strings[] = {
+      "000",
+      "0",
+      "",
+      "x0",
+      "0x",
+      "00x",
+  };
+  const size_t lengths[] = {
+      3,
+      1,
+      0,
+      2,
+      2,
+      3,
+  };
+  for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(strings); ++i) {
+    const char* cstr = strings[i];
+    stufflib_data str = stufflib_data_from_str(cstr);
+    assert(str.size == lengths[i]);
+    assert(str.owned);
+    if (str.size == 0) {
+      assert(!str.data);
+    } else {
+      assert(str.data);
+      assert(memcmp(str.data, cstr, str.size) == 0);
+    }
+    assert(!stufflib_data_is_hexadecimal_str(&str));
+    stufflib_data_delete(&str);
   }
-  {
-    stufflib_data data = stufflib_data_from_str("0x1");
-    assert(data.size == 1);
-    assert(data.owned);
-    assert(data.data[0] == 1);
-    stufflib_data_delete(&data);
-  }
-  {
-    stufflib_data data = stufflib_data_from_str("0xf");
-    assert(data.size == 1);
-    assert(data.owned);
-    assert(data.data[0] == 0xf);
-    stufflib_data_delete(&data);
-  }
-  {
-    stufflib_data data = stufflib_data_from_str("0xaf");
-    assert(data.size == 1);
-    assert(data.owned);
-    assert(data.data[0] == 0xaf);
-    stufflib_data_delete(&data);
-  }
-  {
-    stufflib_data data = stufflib_data_from_str("0xaf0");
-    assert(data.size == 2);
-    assert(data.owned);
-    assert(data.data[0] == 0xaf);
-    assert(data.data[1] == 0);
-    stufflib_data_delete(&data);
-  }
-  {
-    stufflib_data data = stufflib_data_from_str("0x010a0f00ff");
-    assert(data.size == 5);
-    assert(data.owned);
-    assert(data.data);
-    assert(data.data[0] == 0x01);
-    assert(data.data[1] == 0x0a);
-    assert(data.data[2] == 0x0f);
-    assert(data.data[3] == 0x00);
-    assert(data.data[4] == 0xff);
-    stufflib_data_delete(&data);
+  return true;
+}
+
+bool test_data_create_from_hexadecimal_cstr(const bool verbose) {
+  const char* strings[] = {
+      "0x00",
+      "0x1",
+      "0x0",
+      "0xf",
+      "0xff",
+      "0x0f0",
+      "0xff00ee",
+      "0x0123456789abcdef1",
+  };
+  const size_t str_lengths[] = {
+      4,
+      3,
+      3,
+      3,
+      4,
+      5,
+      8,
+      19,
+  };
+  const unsigned char* bytes[] = {
+      (unsigned char[]){0},
+      (unsigned char[]){1},
+      (unsigned char[]){0},
+      (unsigned char[]){0xf},
+      (unsigned char[]){0xff},
+      (unsigned char[]){0xf, 0},
+      (unsigned char[]){0xff, 0, 0xee},
+      (unsigned char[]){0x1, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 1},
+  };
+  const size_t data_lengths[] = {
+      1,
+      1,
+      1,
+      1,
+      1,
+      2,
+      3,
+      9,
+  };
+  for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(strings); ++i) {
+    const char* cstr = strings[i];
+    stufflib_data str = stufflib_data_from_str(cstr);
+    assert(str.size == str_lengths[i]);
+    assert(str.owned);
+    assert(str.data);
+    assert(memcmp(str.data, cstr, str.size) == 0);
+    assert(stufflib_data_is_hexadecimal_str(&str));
+    stufflib_data num = stufflib_data_parse_hex(&str);
+    assert(num.size == data_lengths[i]);
+    assert(num.owned);
+    assert(num.data);
+    assert(memcmp(num.data, bytes[i], num.size) == 0);
+    stufflib_data_delete(&num);
+    stufflib_data_delete(&str);
   }
   return true;
 }

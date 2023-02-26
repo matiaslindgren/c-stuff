@@ -16,11 +16,22 @@ build_dir=${self_dir}/../build
 function test_txt_tool {
   local txt_tool=$1
 
+  local wikifiles=(
+    ./test-data/txt/wikipedia/water_hi.txt
+    ./test-data/txt/wikipedia/water_is.txt
+    ./test-data/txt/wikipedia/water_ja.txt
+    ./test-data/txt/wikipedia/water_ko.txt
+    ./test-data/txt/wikipedia/water_ku.txt
+    ./test-data/txt/wikipedia/water_uk.txt
+    ./test-data/txt/wikipedia/water_vi.txt
+    ./test-data/txt/wikipedia/water_zh.txt
+  )
+
   local output=${test_dir}/stufflib_output.txt
   local expect=${test_dir}/concat_output.txt
 
-  for lhs in Makefile README.md LICENSE; do
-    for rhs in Makefile README.md LICENSE; do
+  for lhs in ${wikifiles[*]}; do
+    for rhs in ${wikifiles[*]}; do
       local lhs_path=${self_dir}/../${lhs}
       local rhs_path=${self_dir}/../${rhs}
       $txt_tool concat $lhs_path $rhs_path > $output
