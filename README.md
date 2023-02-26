@@ -11,10 +11,7 @@ Contains mostly over-engineered solutions to the programming challenges suggeste
 ## Build and test
 
 ```sh
-make -j
-make -j run_debug_tests
-make -j run_release_tests
-make -j run_integration_tests
+make -j && make run_debug_tests && make run_release_tests && make -j run_integration_tests
 ```
 
 ## PNG tools
@@ -261,7 +258,7 @@ Vatn er ólífrænn lyktar-, bragð- og nær litlaus vökvi sem er lífsnauðsyn
 
 #### Slice lines
 ```
-./build/debug/tools/txt slicelines 298 323 ./src/tools/txt.c
+./build/debug/tools/txt slicelines 307 332 ./src/tools/txt.c
 ```
 **`stdout`**:
 ```
