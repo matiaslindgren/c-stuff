@@ -13,7 +13,7 @@ Contains mostly over-engineered solutions to the programming challenges suggeste
 If you can't install Clang 16 using a package manager, you can compile LLVM from source.
 This requires CMake and patience.
 ```sh
-make --makefile Makefile.llvm ./llvm-build
+make --makefile llvm.Makefile
 export CLANG=./llvm-build/bin/clang
 ```
 
