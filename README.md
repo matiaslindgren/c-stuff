@@ -8,6 +8,15 @@ Contains mostly over-engineered solutions to the programming challenges suggeste
 * `make`
 * `clang-16`, see the [LLVM docs](https://apt.llvm.org/) or stufflib's [CI config](./.github/workflows/c.yml) on how to install pre-release versions of Clang.
 
+### (Optional) Download and build LLVM
+
+If you can't install Clang 16 using a package manager, you can compile LLVM from source.
+This requires CMake and patience.
+```sh
+make --makefile Makefile.llvm ./llvm-build
+export CLANG=./llvm-build/bin/clang
+```
+
 ## Build and test
 
 ```sh
