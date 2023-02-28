@@ -270,7 +270,7 @@ bool linefreq(const stufflib_args args[const static 1]) {
        !freq_iter.is_done(&freq_iter);
        freq_iter.advance(&freq_iter)) {
     stufflib_hashmap_slot* slot = freq_iter.get_item(&freq_iter);
-    if (fwprintf(stdout, L"%zu ", slot->value) < 0) {
+    if (printf("%zu ", slot->value) < 0) {
       goto done;
     }
     stufflib_string key_str = stufflib_string_from_utf8(&(slot->key));
