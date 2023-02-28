@@ -363,10 +363,10 @@ struct it {
 ```
 
 ### Format metadata fields in a PNG `tEXt` block
-```
+```sh
 ./build/debug/tools/png dump_raw ./docs/img/tokyo.png tEXt \
-  | ./build/debug/tools/txt replace date: \ndate= /dev/stdin \
-  | ./build/debug/tools/txt replace exif: \nexif= /dev/stdin \
+  | ./build/debug/tools/txt replace date: $'\n'date= /dev/stdin \
+  | ./build/debug/tools/txt replace exif: $'\n'exif= /dev/stdin \
   | ./build/debug/tools/txt replace 0x00 ': ' /dev/stdin
 ```
 **`stdout`**:
