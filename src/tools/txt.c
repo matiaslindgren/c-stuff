@@ -41,7 +41,7 @@ bool concat(const stufflib_args args[const static 1]) {
     }
   }
 
-  if (stufflib_string_fprint(stdout, &result, L"", L"") < 0) {
+  if (!stufflib_string_fprint(stdout, &result)) {
     goto done;
   }
 
@@ -133,9 +133,12 @@ bool slicelines(const stufflib_args args[const static 1]) {
        iter.advance(&iter)) {
     if (begin <= lineno && lineno <= end) {
       stufflib_string line = stufflib_string_from_utf8(iter.get_item(&iter));
-      const int ret = stufflib_string_fprint(stdout, &line, L"", L"\n");
+      bool write_ok = stufflib_string_fprint(stdout, &line);
       stufflib_string_delete(&line);
-      if (ret < 0) {
+      if (!write_ok) {
+        goto done;
+      }
+      if (printf("\n") < 0) {
         goto done;
       }
     }
@@ -198,17 +201,17 @@ bool replace(const stufflib_args args[const static 1]) {
   stufflib_iterator iter = stufflib_tokenizer_iter(&pattern_tokenizer);
   while (!iter.is_done(&iter)) {
     stufflib_string line = stufflib_string_from_utf8(iter.get_item(&iter));
-    const int ret = stufflib_string_fprint(stdout, &line, L"", L"");
+    const bool write_ok = stufflib_string_fprint(stdout, &line);
     stufflib_string_delete(&line);
-    if (ret < 0) {
+    if (!write_ok) {
       goto done;
     }
     iter.advance(&iter);
     if (!iter.is_done(&iter) && replacement.size) {
       stufflib_string repl = stufflib_string_from_utf8(&replacement);
-      const int ret = stufflib_string_fprint(stdout, &repl, L"", L"");
+      const bool write_ok = stufflib_string_fprint(stdout, &repl);
       stufflib_string_delete(&repl);
-      if (ret < 0) {
+      if (!write_ok) {
         goto done;
       }
     }
@@ -271,9 +274,9 @@ bool linefreq(const stufflib_args args[const static 1]) {
       goto done;
     }
     stufflib_string key_str = stufflib_string_from_utf8(&(slot->key));
-    const int ret = stufflib_string_fprint(stdout, &key_str, L"", L"\n");
+    bool write_ok = stufflib_string_fprint(stdout, &key_str);
     stufflib_string_delete(&key_str);
-    if (ret < 0) {
+    if (!write_ok || (printf("\n") < 0)) {
       goto done;
     }
   }

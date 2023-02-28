@@ -98,22 +98,20 @@ stufflib_string stufflib_string_slice(const stufflib_string str[const static 1],
   return stufflib_string_from_utf8(&utf8_slice);
 }
 
-int stufflib_string_fprint(FILE stream[const static 1],
-                           const stufflib_string str[const static 1],
-                           const wchar_t separator[const static 1],
-                           const wchar_t newline[const static 1]) {
-  setlocale(LC_ALL, "");
+bool stufflib_string_fprint(FILE stream[const static 1],
+                            const stufflib_string str[const static 1]) {
   const stufflib_data utf8_data = stufflib_string_view_utf8_data(str);
   for (stufflib_iterator iter = stufflib_unicode_iter(&utf8_data);
        !iter.is_done(&iter);
        iter.advance(&iter)) {
-    const wchar_t item = stufflib_unicode_iter_decode_item(&iter);
-    const int ret = fwprintf(stream, L"%lc%ls", item, separator);
-    if (ret < 0) {
-      return ret;
+    unsigned char* item = iter.get_item(&iter);
+    const size_t item_width = stufflib_unicode_iter_get_item_width(&iter);
+    const size_t wrote_count = fwrite(item, 1, item_width, stream);
+    if (wrote_count != item_width) {
+      return false;
     }
   }
-  return fwprintf(stream, L"%ls", newline);
+  return true;
 }
 
 #endif  // _STUFFLIB_STRING_H_INCLUDED
