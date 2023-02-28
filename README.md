@@ -8,9 +8,18 @@ Contains mostly over-engineered solutions to the programming challenges suggeste
 * `make`
 * `clang-16`, see the [LLVM docs](https://apt.llvm.org/) or stufflib's [CI config](./.github/workflows/c.yml) on how to install pre-release versions of Clang.
 
+If you can't install Clang 16 using a package manager, there are two options:
+
+### (Optional) Run in Docker
+
+```sh
+./scripts/build_image.sh
+./scripts/run_image.sh
+```
+Continue from "Build and test".
+
 ### (Optional) Download and build LLVM
 
-If you can't install Clang 16 using a package manager, you can compile LLVM from source.
 This requires CMake and patience.
 ```sh
 make --makefile llvm.Makefile
