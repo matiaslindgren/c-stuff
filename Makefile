@@ -84,5 +84,5 @@ $(RUN_DEBUG_TESTS): run_debug_%: $(TESTS_DIR_DEBUG)/%
 $(RUN_RELEASE_TESTS): run_release_%: $(TESTS_DIR_RELEASE)/%
 	./$< $(TEST_ARGS)
 .PHONY: $(RUN_INTEGRATION_TESTS)
-$(RUN_INTEGRATION_TESTS): run_integration_test_%: ./scripts/test_%_tool.bash $(TOOLS_DEBUG) $(TOOLS_RELEASE)
+$(RUN_INTEGRATION_TESTS): run_integration_test_%: ./tests/test_%_tool.bash $(TOOLS_DEBUG) $(TOOLS_RELEASE)
 	timeout --kill-after=4m 2m ./$< $(TEST_ARGS)

@@ -2,7 +2,7 @@
 set -ue
 
 self_dir=$(dirname "$0")
-source ${self_dir}/_test_common.bash $@
+source ${self_dir}/common.bash $@
 
 test_dir=$(mktemp --directory)
 
