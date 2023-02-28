@@ -31,11 +31,14 @@ bool concat(const stufflib_args args[const static 1]) {
       break;
     }
     stufflib_string content = stufflib_string_from_file(path);
-    if (!content.length) {
+    const bool read_ok = content.length > 0;
+    if (read_ok) {
+      stufflib_string_extend(&result, &content);
+    }
+    stufflib_string_delete(&content);
+    if (!read_ok) {
       goto done;
     }
-    stufflib_string_extend(&result, &content);
-    stufflib_string_delete(&content);
   }
 
   if (stufflib_string_fprint(stdout, &result, L"", L"") < 0) {
