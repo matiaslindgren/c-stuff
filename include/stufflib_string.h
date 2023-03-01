@@ -40,7 +40,7 @@ struct sl_data sl_string_view_utf8_data(
 struct sl_string sl_string_from_file(const char filename[const static 1]) {
   struct sl_iterator file_iter = sl_file_iter_open(filename);
 
-  struct sl_data utf8_data = (struct sl_data){0};
+  struct sl_data utf8_data = {0};
   for (; !file_iter.is_done(&file_iter); file_iter.advance(&file_iter)) {
     struct sl_data* buffer = file_iter.get_item(&file_iter);
     sl_data_extend(&utf8_data, buffer);

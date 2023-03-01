@@ -85,7 +85,7 @@ static struct sl_huffman_tree _make_fixed_literal_tree() {
       code_lengths[symbol] = 8;
     }
   }
-  struct sl_huffman_tree tree = (struct sl_huffman_tree){0};
+  struct sl_huffman_tree tree = {0};
   if (!sl_huffman_init(&tree, max_literal, code_lengths)) {
     sl_free(code_lengths);
     goto error;
@@ -104,7 +104,7 @@ static struct sl_huffman_tree _make_fixed_distance_tree() {
   for (size_t symbol = 0; symbol <= max_dist; ++symbol) {
     code_lengths[symbol] = 5;
   }
-  struct sl_huffman_tree tree = (struct sl_huffman_tree){0};
+  struct sl_huffman_tree tree = {0};
   if (!sl_huffman_init(&tree, max_dist, code_lengths)) {
     sl_free(code_lengths);
     goto error;
@@ -226,7 +226,7 @@ bool sl_inflate_dynamic_block(struct _deflate_state state[static 1]) {
   for (size_t i = 0; i < num_length_lengths; ++i) {
     length_lengths[length_order[i]] = _next_n_bits(state, 3);
   }
-  struct sl_huffman_tree length_tree = (struct sl_huffman_tree){0};
+  struct sl_huffman_tree length_tree = {0};
   if (!sl_huffman_init(&length_tree, max_length_length, length_lengths)) {
     sl_free(length_lengths);
     goto error;
@@ -268,12 +268,12 @@ bool sl_inflate_dynamic_block(struct _deflate_state state[static 1]) {
   const size_t max_length = num_lengths - 1;
   const size_t max_distance = num_distances - 1;
 
-  struct sl_huffman_tree literal_tree = (struct sl_huffman_tree){0};
+  struct sl_huffman_tree literal_tree = {0};
   if (!sl_huffman_init(&literal_tree, max_length, dynamic_code_lengths)) {
     sl_free(dynamic_code_lengths);
     goto error;
   }
-  struct sl_huffman_tree distance_tree = (struct sl_huffman_tree){0};
+  struct sl_huffman_tree distance_tree = {0};
   if (!sl_huffman_init(&distance_tree,
                        max_distance,
                        dynamic_code_lengths + num_lengths)) {

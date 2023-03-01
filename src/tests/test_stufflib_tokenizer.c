@@ -8,8 +8,8 @@
 #include "stufflib_tokenizer.h"
 
 bool test_tokenize_empty(const bool verbose) {
-  struct sl_data empty1 = (struct sl_data){0};
-  struct sl_data empty2 = (struct sl_data){0};
+  struct sl_data empty1 = {0};
+  struct sl_data empty2 = {0};
   unsigned char x[] = {1, 2, 3};
   const size_t n = SL_ARRAY_LEN(x);
   struct sl_data data = sl_data_view(n, x);

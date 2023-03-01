@@ -49,7 +49,7 @@ bool sl_file_iter_is_done(struct sl_iterator iter[const static 1]) {
 }
 
 struct sl_iterator sl_file_iter_open(const char filename[const static 1]) {
-  struct sl_iterator iter = (struct sl_iterator){
+  struct sl_iterator iter = {
       .get_item = sl_file_iter_get_item,
       .advance = sl_file_iter_advance,
       .is_done = sl_file_iter_is_done,

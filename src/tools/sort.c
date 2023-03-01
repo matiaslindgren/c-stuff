@@ -33,7 +33,7 @@ char** sort_doubles(const size_t count, char* lines[count]) {
 int main(int argc, char* const argv[argc + 1]) {
   bool ok = false;
 
-  struct sl_string content = (struct sl_string){0};
+  struct sl_string content = {0};
   char** lines = nullptr;
   size_t num_lines = 0;
 

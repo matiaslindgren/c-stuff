@@ -147,7 +147,7 @@ bool sl_hashmap_iter_is_done(struct sl_iterator iter[const static 1]) {
 
 struct sl_iterator sl_hashmap_iter(
     const struct sl_hashmap map[const static 1]) {
-  struct sl_iterator iter = (struct sl_iterator){
+  struct sl_iterator iter = {
       .data = (void*)map,
       .get_item = sl_hashmap_iter_get_item,
       .advance = sl_hashmap_iter_advance,

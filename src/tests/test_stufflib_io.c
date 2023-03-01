@@ -19,7 +19,7 @@ bool test_create_file_iter_from_file(const bool verbose) {
   for (size_t i = 0; i < SL_ARRAY_LEN(files); ++i) {
     struct sl_iterator iter = sl_file_iter_open(files[i]);
     assert(iter.data);
-    struct sl_file_buffer* buffer = (struct sl_file_buffer*)(iter.data);
+    struct sl_file_buffer* buffer = iter.data;
     assert(buffer);
     assert(buffer->filename);
     assert(strcmp(buffer->filename, files[i]) == 0);
@@ -97,7 +97,7 @@ bool test_read_read_entire_file(const bool verbose) {
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(files); ++i) {
     struct sl_iterator iter = sl_file_iter_open(files[i]);
-    struct sl_file_buffer* buffer = (struct sl_file_buffer*)(iter.data);
+    struct sl_file_buffer* buffer = iter.data;
     size_t total_size = 0;
     while (!iter.is_done(&iter)) {
       total_size += buffer->data.size;

@@ -263,7 +263,7 @@ bool test_data_find(const bool verbose) {
   const size_t n2 = SL_ARRAY_LEN(x2);
   struct sl_data data1 = sl_data_view(n1, x1);
   struct sl_data data2 = sl_data_view(n2, x2);
-  struct sl_data empty = (struct sl_data){0};
+  struct sl_data empty = {0};
   assert(!sl_data_find(&data2, &data1).data);
   assert(!sl_data_find(&data1, &empty).data);
   assert(!sl_data_find(&empty, &data1).data);

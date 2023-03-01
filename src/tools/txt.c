@@ -23,7 +23,7 @@ bool concat(const struct sl_args args[const static 1]) {
   }
 
   bool ok = false;
-  struct sl_string result = (struct sl_string){0};
+  struct sl_string result = {0};
 
   for (size_t i = 1;; ++i) {
     const char* path = sl_args_get_positional(args, i);
