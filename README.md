@@ -264,7 +264,7 @@ Vatn er ólífrænn lyktar-, bragð- og nær litlaus vökvi sem er lífsnauðsyn
 ```
 **`stdout`**:
 ```
-104
+105
 42
 3
 ```
@@ -338,6 +338,7 @@ struct it {
 ```
 clang-16 -std=c2x -E -I./include ./src/tools/txt.c \
   | ./build/debug/tools/txt replace '  ' '' /dev/stdin \
+  | ./build/debug/tools/txt replace $'\n ' $'\n' /dev/stdin \
   | ./build/debug/tools/txt linefreq /dev/stdin \
   | ./build/debug/tools/sort numeric --reverse /dev/stdin \
   | ./build/debug/tools/txt slicelines 0 25 /dev/stdin
@@ -346,29 +347,29 @@ clang-16 -std=c2x -E -I./include ./src/tools/txt.c \
 ```
 249 }
 24 };
+18 __attribute__ ((__const__));
 17 {
 13 goto done;
 11 } break;
 10 return false;
-9  __attribute__ ((__nothrow__ )) __attribute__ ((__pure__)) __attribute__ ((__nonnull__ (1, 2)));
-9 __attribute__ ((__const__));
-9  __attribute__ ((__const__));
+9 __attribute__ ((__nothrow__ )) __attribute__ ((__pure__)) __attribute__ ((__nonnull__ (1, 2)));
 8 __extension__
 8 return dst;
 7 for (size_t i = 0; i < n; ++i) {
-6 # 1 "/usr/include/aarch64-linux-gnu/bits/libc-header-start.h" 1 3 4
-6 if (0x80 <= byte && byte <= 0xbf) {
-6 } else {
-6 done:
 6 bool ok = false;
-6  __attribute__ ((__nothrow__ )) __attribute__ ((__nonnull__ (1)));
-5 sl_string_delete(&content);
-5 return ok;
-5 # 1 "/usr/include/assert.h" 1 3 4
+6 done:
+6 __attribute__ ((__nothrow__ )) __attribute__ ((__nonnull__ (1)));
+6 } else {
+6 if (0x80 <= byte && byte <= 0xbf) {
+6 # 1 "/usr/include/aarch64-linux-gnu/bits/libc-header-start.h" 1 3 4
 5 struct sl_string content = sl_string_from_file(path);
-5  "\n"
-5 # 1 "/usr/include/aarch64-linux-gnu/bits/wordsize.h" 1 3 4
 5 ok = true;
+5 sl_string_delete(&content);
+5 "\n"
+5 # 1 "/usr/include/aarch64-linux-gnu/bits/wordsize.h" 1 3 4
+5 return ok;
+5 return 0;
+5 const size_t args_count = sl_args_count_positional(args) - 1;
 ```
 
 ### Format `NUL`-separated metadata fields in a PNG `tEXt` block
