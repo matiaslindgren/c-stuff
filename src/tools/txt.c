@@ -10,78 +10,78 @@
 #include "stufflib_string.h"
 #include "stufflib_tokenizer.h"
 
-bool concat(const stufflib_args args[const static 1]) {
+bool concat(const sl_args args[const static 1]) {
   {
-    const size_t args_count = stufflib_args_count_positional(args) - 1;
+    const size_t args_count = sl_args_count_positional(args) - 1;
     const size_t expected_count = 1;
     if (args_count < expected_count) {
-      STUFFLIB_LOG_ERROR("concat takes %zu or more arguments, not %zu",
-                         expected_count,
-                         args_count);
+      SL_LOG_ERROR("concat takes %zu or more arguments, not %zu",
+                   expected_count,
+                   args_count);
       return false;
     }
   }
 
   bool ok = false;
-  stufflib_string result = (stufflib_string){0};
+  sl_string result = (sl_string){0};
 
   for (size_t i = 1;; ++i) {
-    const char* path = stufflib_args_get_positional(args, i);
+    const char* path = sl_args_get_positional(args, i);
     if (!path) {
       break;
     }
-    stufflib_string content = stufflib_string_from_file(path);
+    sl_string content = sl_string_from_file(path);
     const bool read_ok = content.length > 0;
     if (read_ok) {
-      stufflib_string_extend(&result, &content);
+      sl_string_extend(&result, &content);
     }
-    stufflib_string_delete(&content);
+    sl_string_delete(&content);
     if (!read_ok) {
       goto done;
     }
   }
 
-  if (!stufflib_string_fprint(stdout, &result)) {
+  if (!sl_string_fprint(stdout, &result)) {
     goto done;
   }
 
   ok = true;
 
 done:
-  stufflib_string_delete(&result);
+  sl_string_delete(&result);
   return ok;
 }
 
-bool count(const stufflib_args args[const static 1]) {
+bool count(const sl_args args[const static 1]) {
   {
-    const size_t args_count = stufflib_args_count_positional(args) - 1;
+    const size_t args_count = sl_args_count_positional(args) - 1;
     const size_t expected_count = 2;
     if (args_count != expected_count) {
-      STUFFLIB_LOG_ERROR("count takes %zu arguments, not %zu",
-                         expected_count,
-                         args_count);
+      SL_LOG_ERROR("count takes %zu arguments, not %zu",
+                   expected_count,
+                   args_count);
       return false;
     }
   }
 
-  const char* pattern_str = stufflib_args_get_positional(args, 1);
+  const char* pattern_str = sl_args_get_positional(args, 1);
   if (strlen(pattern_str) == 0) {
-    STUFFLIB_LOG_ERROR("pattern to count cannot be empty");
+    SL_LOG_ERROR("pattern to count cannot be empty");
     return false;
   }
 
   bool ok = false;
 
-  const char* path = stufflib_args_get_positional(args, 2);
-  stufflib_string content = stufflib_string_from_file(path);
+  const char* path = sl_args_get_positional(args, 2);
+  sl_string content = sl_string_from_file(path);
 
-  stufflib_data pattern =
-      stufflib_data_view(strlen(pattern_str), (unsigned char*)pattern_str);
-  stufflib_tokenizer pattern_tokenizer =
-      stufflib_tokenizer_create(&(content.utf8_data), &pattern);
+  sl_data pattern =
+      sl_data_view(strlen(pattern_str), (unsigned char*)pattern_str);
+  sl_tokenizer pattern_tokenizer =
+      sl_tokenizer_create(&(content.utf8_data), &pattern);
 
   size_t n = 0;
-  for (stufflib_iterator iter = stufflib_tokenizer_iter(&pattern_tokenizer);
+  for (sl_iterator iter = sl_tokenizer_iter(&pattern_tokenizer);
        !iter.is_done(&iter);
        iter.advance(&iter)) {
     ++n;
@@ -96,45 +96,45 @@ bool count(const stufflib_args args[const static 1]) {
   ok = true;
 
 done:
-  stufflib_string_delete(&content);
+  sl_string_delete(&content);
   return ok;
 }
 
-bool slicelines(const stufflib_args args[const static 1]) {
+bool slicelines(const sl_args args[const static 1]) {
   {
-    const size_t args_count = stufflib_args_count_positional(args) - 1;
+    const size_t args_count = sl_args_count_positional(args) - 1;
     const size_t expected_count = 3;
     if (args_count != expected_count) {
-      STUFFLIB_LOG_ERROR("slicelines takes %zu arguments, not %zu",
-                         expected_count,
-                         args_count);
+      SL_LOG_ERROR("slicelines takes %zu arguments, not %zu",
+                   expected_count,
+                   args_count);
       return false;
     }
   }
 
-  const size_t begin = strtoull(stufflib_args_get_positional(args, 1), 0, 10);
-  const size_t end = strtoull(stufflib_args_get_positional(args, 2), 0, 10);
-  const char* path = stufflib_args_get_positional(args, 3);
+  const size_t begin = strtoull(sl_args_get_positional(args, 1), 0, 10);
+  const size_t end = strtoull(sl_args_get_positional(args, 2), 0, 10);
+  const char* path = sl_args_get_positional(args, 3);
 
   bool ok = false;
 
-  stufflib_string content = stufflib_string_from_file(path);
+  sl_string content = sl_string_from_file(path);
   if (!content.length) {
     goto done;
   }
 
-  const stufflib_data newline = stufflib_data_view(1, (unsigned char[]){'\n'});
-  stufflib_tokenizer newline_tokenizer =
-      stufflib_tokenizer_create(&(content.utf8_data), &newline);
+  const sl_data newline = sl_data_view(1, (unsigned char[]){'\n'});
+  sl_tokenizer newline_tokenizer =
+      sl_tokenizer_create(&(content.utf8_data), &newline);
 
   size_t lineno = 1;
-  for (stufflib_iterator iter = stufflib_tokenizer_iter(&newline_tokenizer);
+  for (sl_iterator iter = sl_tokenizer_iter(&newline_tokenizer);
        !iter.is_done(&iter);
        iter.advance(&iter)) {
     if (begin <= lineno && lineno <= end) {
-      stufflib_string line = stufflib_string_from_utf8(iter.get_item(&iter));
-      bool write_ok = stufflib_string_fprint(stdout, &line);
-      stufflib_string_delete(&line);
+      sl_string line = sl_string_from_utf8(iter.get_item(&iter));
+      bool write_ok = sl_string_fprint(stdout, &line);
+      sl_string_delete(&line);
       if (!write_ok) {
         goto done;
       }
@@ -148,69 +148,69 @@ bool slicelines(const stufflib_args args[const static 1]) {
   ok = true;
 
 done:
-  stufflib_string_delete(&content);
+  sl_string_delete(&content);
   return ok;
 }
 
-bool replace(const stufflib_args args[const static 1]) {
+bool replace(const sl_args args[const static 1]) {
   {
-    const size_t args_count = stufflib_args_count_positional(args) - 1;
+    const size_t args_count = sl_args_count_positional(args) - 1;
     const size_t expected_count = 3;
     if (args_count != expected_count) {
-      STUFFLIB_LOG_ERROR("replace takes %zu arguments, not %zu",
-                         expected_count,
-                         args_count);
+      SL_LOG_ERROR("replace takes %zu arguments, not %zu",
+                   expected_count,
+                   args_count);
       return false;
     }
   }
 
-  const char* pattern_str = stufflib_args_get_positional(args, 1);
-  const char* replacement_str = stufflib_args_get_positional(args, 2);
-  const char* path = stufflib_args_get_positional(args, 3);
+  const char* pattern_str = sl_args_get_positional(args, 1);
+  const char* replacement_str = sl_args_get_positional(args, 2);
+  const char* path = sl_args_get_positional(args, 3);
 
   if (strlen(pattern_str) == 0) {
     // TODO allow empty pattern str to split at all codepoints
-    STUFFLIB_LOG_ERROR("pattern to replace cannot be empty");
+    SL_LOG_ERROR("pattern to replace cannot be empty");
     return false;
   }
 
   bool ok = false;
 
-  stufflib_string content = stufflib_string_from_file(path);
+  sl_string content = sl_string_from_file(path);
   if (!content.length) {
     goto done;
   }
 
-  stufflib_data pattern = stufflib_data_from_str(pattern_str);
-  if (stufflib_data_is_hexadecimal_str(&pattern)) {
-    stufflib_data hex_pattern = stufflib_data_parse_hex(&pattern);
-    stufflib_data_delete(&pattern);
+  sl_data pattern = sl_data_from_str(pattern_str);
+  if (sl_data_is_hexadecimal_str(&pattern)) {
+    sl_data hex_pattern = sl_data_parse_hex(&pattern);
+    sl_data_delete(&pattern);
     pattern = hex_pattern;
   }
 
-  stufflib_data replacement = stufflib_data_from_str(replacement_str);
-  if (stufflib_data_is_hexadecimal_str(&replacement)) {
-    stufflib_data hex_replacement = stufflib_data_parse_hex(&replacement);
-    stufflib_data_delete(&replacement);
+  sl_data replacement = sl_data_from_str(replacement_str);
+  if (sl_data_is_hexadecimal_str(&replacement)) {
+    sl_data hex_replacement = sl_data_parse_hex(&replacement);
+    sl_data_delete(&replacement);
     replacement = hex_replacement;
   }
 
-  stufflib_tokenizer pattern_tokenizer =
-      stufflib_tokenizer_create(&(content.utf8_data), &pattern);
+  sl_tokenizer pattern_tokenizer =
+      sl_tokenizer_create(&(content.utf8_data), &pattern);
 
-  stufflib_iterator iter = stufflib_tokenizer_iter(&pattern_tokenizer);
+  sl_iterator iter = sl_tokenizer_iter(&pattern_tokenizer);
   while (!iter.is_done(&iter)) {
-    stufflib_string line = stufflib_string_from_utf8(iter.get_item(&iter));
-    const bool write_ok = stufflib_string_fprint(stdout, &line);
-    stufflib_string_delete(&line);
+    sl_string line = sl_string_from_utf8(iter.get_item(&iter));
+    const bool write_ok = sl_string_fprint(stdout, &line);
+    sl_string_delete(&line);
     if (!write_ok) {
       goto done;
     }
     iter.advance(&iter);
     if (!iter.is_done(&iter) && replacement.size) {
-      stufflib_string repl = stufflib_string_from_utf8(&replacement);
-      const bool write_ok = stufflib_string_fprint(stdout, &repl);
-      stufflib_string_delete(&repl);
+      sl_string repl = sl_string_from_utf8(&replacement);
+      const bool write_ok = sl_string_fprint(stdout, &repl);
+      sl_string_delete(&repl);
       if (!write_ok) {
         goto done;
       }
@@ -220,62 +220,61 @@ bool replace(const stufflib_args args[const static 1]) {
   ok = true;
 
 done:
-  stufflib_string_delete(&content);
-  stufflib_data_delete(&pattern);
-  stufflib_data_delete(&replacement);
+  sl_string_delete(&content);
+  sl_data_delete(&pattern);
+  sl_data_delete(&replacement);
   return ok;
 }
 
-bool linefreq(const stufflib_args args[const static 1]) {
+bool linefreq(const sl_args args[const static 1]) {
   {
-    const size_t args_count = stufflib_args_count_positional(args) - 1;
+    const size_t args_count = sl_args_count_positional(args) - 1;
     const size_t expected_count = 1;
     if (args_count != expected_count) {
-      STUFFLIB_LOG_ERROR("linefreq takes %zu arguments, not %zu",
-                         expected_count,
-                         args_count);
+      SL_LOG_ERROR("linefreq takes %zu arguments, not %zu",
+                   expected_count,
+                   args_count);
       return false;
     }
   }
 
-  const char* path = stufflib_args_get_positional(args, 1);
+  const char* path = sl_args_get_positional(args, 1);
 
   bool ok = false;
 
-  stufflib_hashmap freq = stufflib_hashmap_create();
-  stufflib_string content = stufflib_string_from_file(path);
+  sl_hashmap freq = sl_hashmap_create();
+  sl_string content = sl_string_from_file(path);
   if (!content.length) {
     goto done;
   }
 
-  const stufflib_data newline = stufflib_data_view(1, (unsigned char[]){'\n'});
-  stufflib_tokenizer newline_tokenizer =
-      stufflib_tokenizer_create(&(content.utf8_data), &newline);
+  const sl_data newline = sl_data_view(1, (unsigned char[]){'\n'});
+  sl_tokenizer newline_tokenizer =
+      sl_tokenizer_create(&(content.utf8_data), &newline);
 
-  for (stufflib_iterator line_iter =
-           stufflib_tokenizer_iter(&newline_tokenizer);
+  for (sl_iterator line_iter = sl_tokenizer_iter(&newline_tokenizer);
        !line_iter.is_done(&line_iter);
        line_iter.advance(&line_iter)) {
-    stufflib_data* line = line_iter.get_item(&line_iter);
+    sl_data* line = line_iter.get_item(&line_iter);
     if (!(line->size)) {
       continue;
     }
-    if (!stufflib_hashmap_contains(&freq, line)) {
-      stufflib_hashmap_insert(&freq, line, 0);
+    if (!sl_hashmap_contains(&freq, line)) {
+      sl_hashmap_insert(&freq, line, 0);
     }
-    ++(stufflib_hashmap_get(&freq, line)->value);
+    ++(sl_hashmap_get(&freq, line)->value);
   }
 
-  for (stufflib_iterator freq_iter = stufflib_hashmap_iter(&freq);
+  for (sl_iterator freq_iter = sl_hashmap_iter(&freq);
        !freq_iter.is_done(&freq_iter);
        freq_iter.advance(&freq_iter)) {
-    stufflib_hashmap_slot* slot = freq_iter.get_item(&freq_iter);
+    sl_hashmap_slot* slot = freq_iter.get_item(&freq_iter);
     if (printf("%zu ", slot->value) < 0) {
       goto done;
     }
-    stufflib_string key_str = stufflib_string_from_utf8(&(slot->key));
-    bool write_ok = stufflib_string_fprint(stdout, &key_str);
-    stufflib_string_delete(&key_str);
+    sl_string key_str = sl_string_from_utf8(&(slot->key));
+    bool write_ok = sl_string_fprint(stdout, &key_str);
+    sl_string_delete(&key_str);
     if (!write_ok || (printf("\n") < 0)) {
       goto done;
     }
@@ -284,12 +283,12 @@ bool linefreq(const stufflib_args args[const static 1]) {
   ok = true;
 
 done:
-  stufflib_string_delete(&content);
-  stufflib_hashmap_delete(&freq);
+  sl_string_delete(&content);
+  sl_hashmap_delete(&freq);
   return ok;
 }
 
-void print_usage(const stufflib_args args[const static 1]) {
+void print_usage(const sl_args args[const static 1]) {
   fprintf(stderr,
           ("usage:"
            "\n"
@@ -311,9 +310,9 @@ void print_usage(const stufflib_args args[const static 1]) {
 }
 
 int main(int argc, char* const argv[argc + 1]) {
-  stufflib_args args = stufflib_args_from_argv(argc, argv);
+  sl_args args = sl_args_from_argv(argc, argv);
   bool ok = false;
-  const char* command = stufflib_args_get_positional(&args, 0);
+  const char* command = sl_args_get_positional(&args, 0);
   if (command) {
     if (strcmp(command, "concat") == 0) {
       ok = concat(&args);
@@ -326,12 +325,12 @@ int main(int argc, char* const argv[argc + 1]) {
     } else if (strcmp(command, "linefreq") == 0) {
       ok = linefreq(&args);
     } else {
-      STUFFLIB_LOG_ERROR("unknown command %s", command);
+      SL_LOG_ERROR("unknown command %s", command);
     }
   }
   if (!ok) {
     print_usage(&args);
   }
-  stufflib_args_destroy(&args);
+  sl_args_destroy(&args);
   return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

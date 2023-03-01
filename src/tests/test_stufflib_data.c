@@ -11,50 +11,50 @@
 
 bool test_data_view_one(const bool verbose) {
   unsigned char x = 1;
-  stufflib_data data = stufflib_data_view(1, &x);
+  sl_data data = sl_data_view(1, &x);
   assert(data.size == 1);
   assert(!data.owned);
   assert(data.data == &x);
-  stufflib_data_delete(&data);
+  sl_data_delete(&data);
   assert(data.data == nullptr);
   return true;
 }
 
 bool test_data_view_array(const bool verbose) {
   unsigned char x[] = {1, 2, 3, 4};
-  const size_t n = STUFFLIB_ARRAY_LEN(x);
-  stufflib_data data = stufflib_data_view(n, x);
+  const size_t n = SL_ARRAY_LEN(x);
+  sl_data data = sl_data_view(n, x);
   assert(data.size == n);
   assert(!data.owned);
   assert(data.data == x);
   for (size_t i = 0; i < n; ++i) {
     assert(data.data + i == x + i);
   }
-  stufflib_data_delete(&data);
+  sl_data_delete(&data);
   assert(data.data == nullptr);
   return true;
 }
 
 bool test_data_create(const bool verbose) {
   const size_t n = 10;
-  stufflib_data data = stufflib_data_create(n);
+  sl_data data = sl_data_create(n);
   assert(data.size == n);
   assert(data.owned);
   assert(data.data);
   for (size_t i = 0; i < n; ++i) {
     assert(data.data[i] == 0);
   }
-  stufflib_data_delete(&data);
+  sl_data_delete(&data);
   assert(data.data == nullptr);
   return true;
 }
 
 bool test_data_create_empty(const bool verbose) {
-  stufflib_data data = stufflib_data_create(0);
+  sl_data data = sl_data_create(0);
   assert(data.size == 0);
   assert(data.owned);
   assert(!data.data);
-  stufflib_data_delete(&data);
+  sl_data_delete(&data);
   assert(data.data == nullptr);
   return true;
 }
@@ -76,9 +76,9 @@ bool test_data_create_from_cstr(const bool verbose) {
       2,
       3,
   };
-  for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(strings); ++i) {
+  for (size_t i = 0; i < SL_ARRAY_LEN(strings); ++i) {
     const char* cstr = strings[i];
-    stufflib_data str = stufflib_data_from_str(cstr);
+    sl_data str = sl_data_from_str(cstr);
     assert(str.size == lengths[i]);
     assert(str.owned);
     if (str.size == 0) {
@@ -87,8 +87,8 @@ bool test_data_create_from_cstr(const bool verbose) {
       assert(str.data);
       assert(memcmp(str.data, cstr, str.size) == 0);
     }
-    assert(!stufflib_data_is_hexadecimal_str(&str));
-    stufflib_data_delete(&str);
+    assert(!sl_data_is_hexadecimal_str(&str));
+    sl_data_delete(&str);
   }
   return true;
 }
@@ -134,30 +134,30 @@ bool test_data_create_from_hexadecimal_cstr(const bool verbose) {
       3,
       9,
   };
-  for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(strings); ++i) {
+  for (size_t i = 0; i < SL_ARRAY_LEN(strings); ++i) {
     const char* cstr = strings[i];
-    stufflib_data str = stufflib_data_from_str(cstr);
+    sl_data str = sl_data_from_str(cstr);
     assert(str.size == str_lengths[i]);
     assert(str.owned);
     assert(str.data);
     assert(memcmp(str.data, cstr, str.size) == 0);
-    assert(stufflib_data_is_hexadecimal_str(&str));
-    stufflib_data num = stufflib_data_parse_hex(&str);
+    assert(sl_data_is_hexadecimal_str(&str));
+    sl_data num = sl_data_parse_hex(&str);
     assert(num.size == data_lengths[i]);
     assert(num.owned);
     assert(num.data);
     assert(memcmp(num.data, bytes[i], num.size) == 0);
-    stufflib_data_delete(&num);
-    stufflib_data_delete(&str);
+    sl_data_delete(&num);
+    sl_data_delete(&str);
   }
   return true;
 }
 
 bool test_data_copy_view(const bool verbose) {
   unsigned char x[] = {1, 2, 3, 4};
-  const size_t n = STUFFLIB_ARRAY_LEN(x);
-  stufflib_data data1 = stufflib_data_view(n, x);
-  stufflib_data data2 = stufflib_data_copy(&data1);
+  const size_t n = SL_ARRAY_LEN(x);
+  sl_data data1 = sl_data_view(n, x);
+  sl_data data2 = sl_data_copy(&data1);
   assert(!data1.owned);
   assert(data1.data == x);
   assert(data2.owned);
@@ -167,7 +167,7 @@ bool test_data_copy_view(const bool verbose) {
     assert(data2.data + i != x + i);
     assert(data2.data[i] == x[i]);
   }
-  stufflib_data_delete(&data2);
+  sl_data_delete(&data2);
   assert(data2.data == nullptr);
   return true;
 }
@@ -175,11 +175,11 @@ bool test_data_copy_view(const bool verbose) {
 bool test_data_concat_views(const bool verbose) {
   unsigned char x1[] = {1, 2, 3, 4};
   unsigned char x2[] = {6, 7, 8, 9, 10, 11};
-  const size_t n1 = STUFFLIB_ARRAY_LEN(x1);
-  const size_t n2 = STUFFLIB_ARRAY_LEN(x2);
-  stufflib_data data1 = stufflib_data_view(n1, x1);
-  stufflib_data data2 = stufflib_data_view(n2, x2);
-  stufflib_data data3 = stufflib_data_concat(&data1, &data2);
+  const size_t n1 = SL_ARRAY_LEN(x1);
+  const size_t n2 = SL_ARRAY_LEN(x2);
+  sl_data data1 = sl_data_view(n1, x1);
+  sl_data data2 = sl_data_view(n2, x2);
+  sl_data data3 = sl_data_concat(&data1, &data2);
   assert(!data1.owned);
   assert(!data2.owned);
   assert(data3.owned);
@@ -196,17 +196,17 @@ bool test_data_concat_views(const bool verbose) {
     assert(data2.data + i != data3.data + n1 + i);
     assert(data2.data[i] == data3.data[n1 + i]);
   }
-  stufflib_data_delete(&data3);
+  sl_data_delete(&data3);
   assert(data3.data == nullptr);
   return true;
 }
 
 bool test_data_concat_empty(const bool verbose) {
   unsigned char x1[] = {1, 2, 3, 4};
-  const size_t n1 = STUFFLIB_ARRAY_LEN(x1);
-  stufflib_data data1 = stufflib_data_view(n1, x1);
-  stufflib_data data2 = stufflib_data_create(0);
-  stufflib_data data3 = stufflib_data_concat(&data1, &data2);
+  const size_t n1 = SL_ARRAY_LEN(x1);
+  sl_data data1 = sl_data_view(n1, x1);
+  sl_data data2 = sl_data_create(0);
+  sl_data data3 = sl_data_concat(&data1, &data2);
   assert(!data1.owned);
   assert(data2.owned);
   assert(data3.owned);
@@ -218,18 +218,18 @@ bool test_data_concat_empty(const bool verbose) {
     assert(data1.data + i != data3.data + i);
     assert(data1.data[i] == data3.data[i]);
   }
-  stufflib_data_delete(&data3);
+  sl_data_delete(&data3);
   assert(data3.data == nullptr);
   return true;
 }
 
 bool test_data_slice(const bool verbose) {
   unsigned char x[] = {1, 2, 3, 4, 5, 6};
-  const size_t n = STUFFLIB_ARRAY_LEN(x);
-  stufflib_data data = stufflib_data_view(n, x);
+  const size_t n = SL_ARRAY_LEN(x);
+  sl_data data = sl_data_view(n, x);
   for (size_t begin = 0; begin < n; ++begin) {
     for (size_t end = begin; end < n; ++end) {
-      stufflib_data slice = stufflib_data_slice(&data, begin, end);
+      sl_data slice = sl_data_slice(&data, begin, end);
       assert(!slice.owned);
       assert(slice.size == end - begin);
       if (!slice.size) {
@@ -245,9 +245,9 @@ bool test_data_slice(const bool verbose) {
 
 bool test_data_slice_past_end(const bool verbose) {
   unsigned char x[] = {1, 2, 3, 4, 5, 6};
-  const size_t n = STUFFLIB_ARRAY_LEN(x);
-  stufflib_data data = stufflib_data_view(n, x);
-  stufflib_data slice = stufflib_data_slice(&data, 0, SIZE_MAX);
+  const size_t n = SL_ARRAY_LEN(x);
+  sl_data data = sl_data_view(n, x);
+  sl_data slice = sl_data_slice(&data, 0, SIZE_MAX);
   assert(!slice.owned);
   assert(slice.size == data.size);
   for (size_t i = 0; i < slice.size; ++i) {
@@ -259,25 +259,25 @@ bool test_data_slice_past_end(const bool verbose) {
 bool test_data_find(const bool verbose) {
   unsigned char x1[] = {1, 2, 3, 1, 2, 3};
   unsigned char x2[] = {2, 3};
-  const size_t n1 = STUFFLIB_ARRAY_LEN(x1);
-  const size_t n2 = STUFFLIB_ARRAY_LEN(x2);
-  stufflib_data data1 = stufflib_data_view(n1, x1);
-  stufflib_data data2 = stufflib_data_view(n2, x2);
-  stufflib_data empty = (stufflib_data){0};
-  assert(!stufflib_data_find(&data2, &data1).data);
-  assert(!stufflib_data_find(&data1, &empty).data);
-  assert(!stufflib_data_find(&empty, &data1).data);
-  assert(stufflib_data_find(&data1, &data1).data == x1);
-  assert(stufflib_data_find(&data2, &data2).data == x2);
-  assert(stufflib_data_find(&data1, &data2).data == x1 + 1);
+  const size_t n1 = SL_ARRAY_LEN(x1);
+  const size_t n2 = SL_ARRAY_LEN(x2);
+  sl_data data1 = sl_data_view(n1, x1);
+  sl_data data2 = sl_data_view(n2, x2);
+  sl_data empty = (sl_data){0};
+  assert(!sl_data_find(&data2, &data1).data);
+  assert(!sl_data_find(&data1, &empty).data);
+  assert(!sl_data_find(&empty, &data1).data);
+  assert(sl_data_find(&data1, &data1).data == x1);
+  assert(sl_data_find(&data2, &data2).data == x2);
+  assert(sl_data_find(&data1, &data2).data == x1 + 1);
   return true;
 }
 
 bool test_data_iter(const bool verbose) {
   unsigned char x[] = {1, 2, 3, 4, 5, 6};
-  const size_t n = STUFFLIB_ARRAY_LEN(x);
-  stufflib_data data = stufflib_data_view(n, x);
-  stufflib_iterator iter = stufflib_data_iter(&data);
+  const size_t n = SL_ARRAY_LEN(x);
+  sl_data data = sl_data_view(n, x);
+  sl_iterator iter = sl_data_iter(&data);
   for (size_t i = 0; i < n; ++i) {
     assert(!iter.is_done(&iter));
     assert(iter.index == i);
@@ -291,16 +291,16 @@ bool test_data_iter(const bool verbose) {
   return true;
 }
 
-STUFFLIB_TEST_MAIN(test_data_view_one,
-                   test_data_view_array,
-                   test_data_create,
-                   test_data_create_empty,
-                   test_data_create_from_cstr,
-                   test_data_create_from_hexadecimal_cstr,
-                   test_data_copy_view,
-                   test_data_concat_views,
-                   test_data_concat_empty,
-                   test_data_slice,
-                   test_data_slice_past_end,
-                   test_data_find,
-                   test_data_iter)
+SL_TEST_MAIN(test_data_view_one,
+             test_data_view_array,
+             test_data_create,
+             test_data_create_empty,
+             test_data_create_from_cstr,
+             test_data_create_from_hexadecimal_cstr,
+             test_data_copy_view,
+             test_data_concat_views,
+             test_data_concat_empty,
+             test_data_slice,
+             test_data_slice_past_end,
+             test_data_find,
+             test_data_iter)

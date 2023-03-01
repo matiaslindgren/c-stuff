@@ -1,5 +1,5 @@
-#ifndef _STUFFLIB_DEFLATE_H_INCLUDED
-#define _STUFFLIB_DEFLATE_H_INCLUDED
+#ifndef _SL_DEFLATE_H_INCLUDED
+#define _SL_DEFLATE_H_INCLUDED
 // DEFLATE decoder.
 // Only non-compressed encoding is implemented.
 //
@@ -40,8 +40,8 @@ typedef struct _deflate_state _deflate_state;
 struct _deflate_state {
   const _length_codes len_codes;
   const _distance_codes dist_codes;
-  stufflib_data dst;
-  const stufflib_data src;
+  sl_data dst;
+  const sl_data src;
   size_t dst_pos;
   size_t src_bit;
 };
@@ -49,8 +49,8 @@ struct _deflate_state {
 static _length_codes _make_length_codes() {
   _length_codes codes = {0};
   codes.lengths[0] = 3;
-  for (size_t i = 1; i < STUFFLIB_ARRAY_LEN(codes.lengths); ++i) {
-    const int extra_bits = (STUFFLIB_MAX(1, (i - 1) / 4) - 1) % 6;
+  for (size_t i = 1; i < SL_ARRAY_LEN(codes.lengths); ++i) {
+    const int extra_bits = (SL_MAX(1, (i - 1) / 4) - 1) % 6;
     codes.extra[i - 1] = extra_bits;
     codes.lengths[i] = codes.lengths[i - 1] + (1 << extra_bits);
   }
@@ -61,8 +61,8 @@ static _length_codes _make_length_codes() {
 static _distance_codes _make_distance_codes() {
   _distance_codes codes = {0};
   codes.distances[0] = 1;
-  for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(codes.distances); ++i) {
-    codes.extra[i] = STUFFLIB_MAX(1, i / 2) - 1;
+  for (size_t i = 0; i < SL_ARRAY_LEN(codes.distances); ++i) {
+    codes.extra[i] = SL_MAX(1, i / 2) - 1;
     if (i) {
       codes.distances[i] = codes.distances[i - 1] + (1 << codes.extra[i - 1]);
     }
@@ -70,9 +70,9 @@ static _distance_codes _make_distance_codes() {
   return codes;
 }
 
-static stufflib_huffman_tree _make_fixed_literal_tree() {
+static sl_huffman_tree _make_fixed_literal_tree() {
   const size_t max_literal = 287;
-  size_t* code_lengths = stufflib_alloc(max_literal + 1, sizeof(size_t));
+  size_t* code_lengths = sl_alloc(max_literal + 1, sizeof(size_t));
   {
     size_t symbol = 0;
     for (; symbol < 144; ++symbol) {
@@ -88,37 +88,36 @@ static stufflib_huffman_tree _make_fixed_literal_tree() {
       code_lengths[symbol] = 8;
     }
   }
-  stufflib_huffman_tree tree = (stufflib_huffman_tree){0};
-  if (!stufflib_huffman_init(&tree, max_literal, code_lengths)) {
-    stufflib_free(code_lengths);
+  sl_huffman_tree tree = (sl_huffman_tree){0};
+  if (!sl_huffman_init(&tree, max_literal, code_lengths)) {
+    sl_free(code_lengths);
     goto error;
   }
-  stufflib_free(code_lengths);
+  sl_free(code_lengths);
   return tree;
 
 error:
-  STUFFLIB_LOG_ERROR("failed building fixed literal huffman codes for DEFLATE");
-  return (stufflib_huffman_tree){0};
+  SL_LOG_ERROR("failed building fixed literal huffman codes for DEFLATE");
+  return (sl_huffman_tree){0};
 }
 
-static stufflib_huffman_tree _make_fixed_distance_tree() {
+static sl_huffman_tree _make_fixed_distance_tree() {
   const size_t max_dist = 31;
-  size_t* code_lengths = stufflib_alloc(max_dist + 1, sizeof(size_t));
+  size_t* code_lengths = sl_alloc(max_dist + 1, sizeof(size_t));
   for (size_t symbol = 0; symbol <= max_dist; ++symbol) {
     code_lengths[symbol] = 5;
   }
-  stufflib_huffman_tree tree = (stufflib_huffman_tree){0};
-  if (!stufflib_huffman_init(&tree, max_dist, code_lengths)) {
-    stufflib_free(code_lengths);
+  sl_huffman_tree tree = (sl_huffman_tree){0};
+  if (!sl_huffman_init(&tree, max_dist, code_lengths)) {
+    sl_free(code_lengths);
     goto error;
   }
-  stufflib_free(code_lengths);
+  sl_free(code_lengths);
   return tree;
 
 error:
-  STUFFLIB_LOG_ERROR(
-      "failed building fixed distance huffman codes for DEFLATE");
-  return (stufflib_huffman_tree){0};
+  SL_LOG_ERROR("failed building fixed distance huffman codes for DEFLATE");
+  return (sl_huffman_tree){0};
 }
 
 static size_t _next_bit(_deflate_state state[static 1]) {
@@ -137,23 +136,21 @@ static size_t _next_n_bits(_deflate_state state[static 1], const size_t count) {
   return res;
 }
 
-static size_t _decode_next_code(
-    const stufflib_huffman_tree codes[const static 1],
-    _deflate_state state[static 1]) {
+static size_t _decode_next_code(const sl_huffman_tree codes[const static 1],
+                                _deflate_state state[static 1]) {
   size_t code = 0;
   for (size_t code_len = 1; code_len <= codes->max_code_len; ++code_len) {
     code = (code << 1) | _next_bit(state);
-    if (stufflib_huffman_contains(codes, code, code_len)) {
-      return stufflib_huffman_get(codes, code, code_len);
+    if (sl_huffman_contains(codes, code, code_len)) {
+      return sl_huffman_get(codes, code, code_len);
     }
   }
   return SIZE_MAX;
 }
 
-static void _inflate_block(
-    const stufflib_huffman_tree literal_tree[const static 1],
-    const stufflib_huffman_tree distance_tree[const static 1],
-    _deflate_state state[static 1]) {
+static void _inflate_block(const sl_huffman_tree literal_tree[const static 1],
+                           const sl_huffman_tree distance_tree[const static 1],
+                           _deflate_state state[static 1]) {
   const size_t end_of_block = 256;
 
   while (true) {
@@ -186,22 +183,22 @@ static void _inflate_block(
   }
 }
 
-bool stufflib_inflate_uncompressed_block(_deflate_state state[static 1]) {
+bool sl_inflate_uncompressed_block(_deflate_state state[static 1]) {
   size_t src_byte_pos = state->src_bit / CHAR_BIT + 1;
   const size_t block_len =
-      stufflib_misc_parse_lil_endian(2, state->src.data + src_byte_pos);
+      sl_misc_parse_lil_endian(2, state->src.data + src_byte_pos);
   src_byte_pos += 2;
 
   const size_t block_len_check =
-      stufflib_misc_parse_lil_endian(2, state->src.data + src_byte_pos);
+      sl_misc_parse_lil_endian(2, state->src.data + src_byte_pos);
   src_byte_pos += 2;
 
   if ((~block_len & 0xffff) != block_len_check) {
-    STUFFLIB_LOG_ERROR("corrupted zlib block, ~LEN != NLEN");
+    SL_LOG_ERROR("corrupted zlib block, ~LEN != NLEN");
     return false;
   }
   if (block_len > state->src.size - src_byte_pos) {
-    STUFFLIB_LOG_ERROR("corrupted zlib block, LEN too large");
+    SL_LOG_ERROR("corrupted zlib block, LEN too large");
     return false;
   }
 
@@ -216,7 +213,7 @@ bool stufflib_inflate_uncompressed_block(_deflate_state state[static 1]) {
   return true;
 }
 
-bool stufflib_inflate_dynamic_block(_deflate_state state[static 1]) {
+bool sl_inflate_dynamic_block(_deflate_state state[static 1]) {
   const size_t num_lengths = 257 + _next_n_bits(state, 5);
   const size_t num_distances = 1 + _next_n_bits(state, 5);
   const size_t num_length_lengths = 4 + _next_n_bits(state, 4);
@@ -225,20 +222,19 @@ bool stufflib_inflate_dynamic_block(_deflate_state state[static 1]) {
       {16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
   static const size_t max_length_length = 18;
 
-  size_t* length_lengths =
-      stufflib_alloc(max_length_length + 1, sizeof(size_t));
+  size_t* length_lengths = sl_alloc(max_length_length + 1, sizeof(size_t));
   for (size_t i = 0; i < num_length_lengths; ++i) {
     length_lengths[length_order[i]] = _next_n_bits(state, 3);
   }
-  stufflib_huffman_tree length_tree = (stufflib_huffman_tree){0};
-  if (!stufflib_huffman_init(&length_tree, max_length_length, length_lengths)) {
-    stufflib_free(length_lengths);
+  sl_huffman_tree length_tree = (sl_huffman_tree){0};
+  if (!sl_huffman_init(&length_tree, max_length_length, length_lengths)) {
+    sl_free(length_lengths);
     goto error;
   }
-  stufflib_free(length_lengths);
+  sl_free(length_lengths);
 
   size_t* dynamic_code_lengths =
-      stufflib_alloc(num_lengths + num_distances, sizeof(size_t));
+      sl_alloc(num_lengths + num_distances, sizeof(size_t));
   for (size_t i = 0; i < num_lengths + num_distances;) {
     const size_t symbol = _decode_next_code(&length_tree, state);
     assert(symbol != SIZE_MAX);
@@ -258,8 +254,8 @@ bool stufflib_inflate_dynamic_block(_deflate_state state[static 1]) {
       code_len = 0;
       num_repeats = 11 + _next_n_bits(state, 7);
     } else {
-      STUFFLIB_LOG_ERROR("unexpected symbol %zu in dynamic block", symbol);
-      stufflib_free(dynamic_code_lengths);
+      SL_LOG_ERROR("unexpected symbol %zu in dynamic block", symbol);
+      sl_free(dynamic_code_lengths);
       goto error;
     }
     for (size_t r = 0; r < num_repeats; ++r) {
@@ -267,66 +263,66 @@ bool stufflib_inflate_dynamic_block(_deflate_state state[static 1]) {
     }
     i += num_repeats;
   }
-  stufflib_huffman_destroy(&length_tree);
+  sl_huffman_destroy(&length_tree);
 
   const size_t max_length = num_lengths - 1;
   const size_t max_distance = num_distances - 1;
 
-  stufflib_huffman_tree literal_tree = (stufflib_huffman_tree){0};
-  if (!stufflib_huffman_init(&literal_tree, max_length, dynamic_code_lengths)) {
-    stufflib_free(dynamic_code_lengths);
+  sl_huffman_tree literal_tree = (sl_huffman_tree){0};
+  if (!sl_huffman_init(&literal_tree, max_length, dynamic_code_lengths)) {
+    sl_free(dynamic_code_lengths);
     goto error;
   }
-  stufflib_huffman_tree distance_tree = (stufflib_huffman_tree){0};
-  if (!stufflib_huffman_init(&distance_tree,
-                             max_distance,
-                             dynamic_code_lengths + num_lengths)) {
-    stufflib_free(dynamic_code_lengths);
-    stufflib_huffman_destroy(&literal_tree);
+  sl_huffman_tree distance_tree = (sl_huffman_tree){0};
+  if (!sl_huffman_init(&distance_tree,
+                       max_distance,
+                       dynamic_code_lengths + num_lengths)) {
+    sl_free(dynamic_code_lengths);
+    sl_huffman_destroy(&literal_tree);
     goto error;
   }
-  stufflib_free(dynamic_code_lengths);
+  sl_free(dynamic_code_lengths);
 
   _inflate_block(&literal_tree, &distance_tree, state);
-  stufflib_huffman_destroy(&literal_tree);
-  stufflib_huffman_destroy(&distance_tree);
+  sl_huffman_destroy(&literal_tree);
+  sl_huffman_destroy(&distance_tree);
   return true;
 
 error:
   return false;
 }
 
-bool stufflib_inflate_fixed_block(_deflate_state state[static 1]) {
-  stufflib_huffman_tree literal_tree = _make_fixed_literal_tree();
-  stufflib_huffman_tree distance_tree = _make_fixed_distance_tree();
+bool sl_inflate_fixed_block(_deflate_state state[static 1]) {
+  sl_huffman_tree literal_tree = _make_fixed_literal_tree();
+  sl_huffman_tree distance_tree = _make_fixed_distance_tree();
   _inflate_block(&literal_tree, &distance_tree, state);
-  stufflib_huffman_destroy(&literal_tree);
-  stufflib_huffman_destroy(&distance_tree);
+  sl_huffman_destroy(&literal_tree);
+  sl_huffman_destroy(&distance_tree);
   return true;
 }
 
-size_t stufflib_inflate(stufflib_data dst, const stufflib_data src) {
+size_t sl_inflate(sl_data dst, const sl_data src) {
   if (src.size < 3) {
-    STUFFLIB_LOG_ERROR("DEFLATE stream is too short");
+    SL_LOG_ERROR("DEFLATE stream is too short");
     goto error;
   }
   if ((src.data[0] * 256 + src.data[1]) % 31) {
-    STUFFLIB_LOG_ERROR("DEFLATE stream is corrupted");
+    SL_LOG_ERROR("DEFLATE stream is corrupted");
     goto error;
   }
   const int cmethod = src.data[0] & 0x0F;
   if (cmethod != 8) {
-    STUFFLIB_LOG_ERROR("unexpected compression method %d != 8", cmethod);
+    SL_LOG_ERROR("unexpected compression method %d != 8", cmethod);
     goto error;
   }
   const int cinfo = (src.data[0] & 0xF0) >> 4;
   if (cinfo > 7) {
-    STUFFLIB_LOG_ERROR("too large compression info %d > 7", cinfo);
+    SL_LOG_ERROR("too large compression info %d > 7", cinfo);
     goto error;
   }
   const int fdict = (src.data[1] & 0x20) >> 5;
   if (fdict) {
-    STUFFLIB_LOG_ERROR("dictionaries are not supported");
+    SL_LOG_ERROR("dictionaries are not supported");
     goto error;
   }
 
@@ -349,25 +345,25 @@ size_t stufflib_inflate(stufflib_data dst, const stufflib_data src) {
     const enum block_type type = _next_n_bits(state, 2);
     switch (type) {
       case no_compression: {
-        if (!stufflib_inflate_uncompressed_block(state)) {
-          STUFFLIB_LOG_ERROR("failed inflating uncompressed block");
+        if (!sl_inflate_uncompressed_block(state)) {
+          SL_LOG_ERROR("failed inflating uncompressed block");
           goto error;
         }
       } break;
       case dynamic_huffman_trees: {
-        if (!stufflib_inflate_dynamic_block(state)) {
-          STUFFLIB_LOG_ERROR("failed inflating dynamic block");
+        if (!sl_inflate_dynamic_block(state)) {
+          SL_LOG_ERROR("failed inflating dynamic block");
           goto error;
         }
       } break;
       case fixed_huffman_trees: {
-        if (!stufflib_inflate_fixed_block(state)) {
-          STUFFLIB_LOG_ERROR("failed inflating fixed block");
+        if (!sl_inflate_fixed_block(state)) {
+          SL_LOG_ERROR("failed inflating fixed block");
           goto error;
         }
       } break;
       default: {
-        STUFFLIB_LOG_ERROR("invalid block type %d", type);
+        SL_LOG_ERROR("invalid block type %d", type);
         goto error;
       } break;
     }
@@ -375,9 +371,9 @@ size_t stufflib_inflate(stufflib_data dst, const stufflib_data src) {
 
   /* const size_t src_adler32 = _next_n_bits(state, 32); */
   /* const size_t dst_adler32 = */
-  /*     stufflib_hash_adler32(state->dst.size, state->dst.data); */
+  /*     sl_hash_adler32(state->dst.size, state->dst.data); */
   /* if (dst_adler32 != src_adler32) { */
-  /*   STUFFLIB_LOG_ERROR("output stream adler32 %zu not equal to expected
+  /*   SL_LOG_ERROR("output stream adler32 %zu not equal to expected
    * %zu", */
   /*                        dst_adler32, */
   /*                        src_adler32); */
@@ -390,11 +386,10 @@ error:
   return 0;
 }
 
-#define STUFFLIB_DEFLATE_BLOCK_SIZE 8192
+#define SL_DEFLATE_BLOCK_SIZE 8192
 
-size_t stufflib_deflate_uncompressed(stufflib_data dst,
-                                     const stufflib_data src) {
-  const size_t block_size = STUFFLIB_DEFLATE_BLOCK_SIZE;
+size_t sl_deflate_uncompressed(sl_data dst, const sl_data src) {
+  const size_t block_size = SL_DEFLATE_BLOCK_SIZE;
   size_t dst_pos = 0;
   size_t src_pos = 0;
 
@@ -410,12 +405,12 @@ size_t stufflib_deflate_uncompressed(stufflib_data dst,
     dst.data[dst_pos++] = (int)is_final_block & 1;
 
     const size_t dist_to_end = src.size - src_pos;
-    const uint16_t block_len = STUFFLIB_MIN(block_size, dist_to_end) & 0xffff;
+    const uint16_t block_len = SL_MIN(block_size, dist_to_end) & 0xffff;
 
     const unsigned char* block_len_bytes =
-        stufflib_misc_encode_lil_endian(2, (unsigned char[2]){0}, block_len);
+        sl_misc_encode_lil_endian(2, (unsigned char[2]){0}, block_len);
     const unsigned char* block_len_check_bytes =
-        stufflib_misc_encode_lil_endian(2, (unsigned char[2]){0}, ~block_len);
+        sl_misc_encode_lil_endian(2, (unsigned char[2]){0}, ~block_len);
 
     memcpy(dst.data + dst_pos, block_len_bytes, 2);
     dst_pos += 2;
@@ -427,14 +422,14 @@ size_t stufflib_deflate_uncompressed(stufflib_data dst,
     src_pos += block_len;
   }
 
-  const unsigned char* adler32 = stufflib_misc_encode_big_endian(
-      4,
-      (unsigned char[4]){0},
-      stufflib_hash_adler32(src.size, src.data));
+  const unsigned char* adler32 =
+      sl_misc_encode_big_endian(4,
+                                (unsigned char[4]){0},
+                                sl_hash_adler32(src.size, src.data));
   memcpy(dst.data + dst_pos, adler32, 4);
   dst_pos += 4;
 
   return dst_pos;
 }
 
-#endif  // _STUFFLIB_DEFLATE_H_INCLUDED
+#endif  // _SL_DEFLATE_H_INCLUDED

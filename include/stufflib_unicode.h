@@ -1,5 +1,5 @@
-#ifndef _STUFFLIB_UNICODE_H_INCLUDED
-#define _STUFFLIB_UNICODE_H_INCLUDED
+#ifndef _SL_UNICODE_H_INCLUDED
+#define _SL_UNICODE_H_INCLUDED
 // Definition of well-formed UTF-8 sequences taken from the Unicode standard:
 // "The Unicode® Standard Version 15.0" – Core Specification
 // https://www.unicode.org/versions/Unicode15.0.0/ch03.pdf#G7404
@@ -14,9 +14,9 @@
 #include "stufflib_iterator.h"
 #include "stufflib_macros.h"
 
-const char32_t stufflib_unicode_error_value = UINT_LEAST32_WIDTH;
+const char32_t sl_unicode_error_value = UINT_LEAST32_WIDTH;
 
-size_t stufflib_unicode_codepoint_width(const char32_t value) {
+size_t sl_unicode_codepoint_width(const char32_t value) {
   if (value < 0x000080) {
     return 1;
   }
@@ -32,7 +32,7 @@ size_t stufflib_unicode_codepoint_width(const char32_t value) {
   return 0;
 }
 
-size_t stufflib_unicode_codepoint_width_from_utf8(
+size_t sl_unicode_codepoint_width_from_utf8(
     const size_t size,
     const unsigned char bytes[const size]) {
   // See Table 3-7 in Chapter 3
@@ -150,7 +150,7 @@ error:
   return 0;
 }
 
-char32_t stufflib_unicode_codepoint_from_utf8(
+char32_t sl_unicode_codepoint_from_utf8(
     const size_t width,
     const unsigned char bytes[const width]) {
   switch (width) {
@@ -177,17 +177,17 @@ char32_t stufflib_unicode_codepoint_from_utf8(
       return byte1;
     }
     default: {
-      return stufflib_unicode_error_value;
+      return sl_unicode_error_value;
     }
   }
 }
 
-bool stufflib_unicode_is_valid_utf8(const stufflib_data data[const static 1]) {
+bool sl_unicode_is_valid_utf8(const sl_data data[const static 1]) {
   size_t byte_pos = 0;
   while (byte_pos < data->size) {
     const size_t codepoint_width =
-        stufflib_unicode_codepoint_width_from_utf8(data->size - byte_pos,
-                                                   data->data + byte_pos);
+        sl_unicode_codepoint_width_from_utf8(data->size - byte_pos,
+                                             data->data + byte_pos);
     if (codepoint_width == 0) {
       return false;
     }
@@ -196,56 +196,51 @@ bool stufflib_unicode_is_valid_utf8(const stufflib_data data[const static 1]) {
   return byte_pos == data->size;
 }
 
-size_t stufflib_unicode_iter_get_item_width(
-    stufflib_iterator iter[const static 1]) {
-  const stufflib_data* data = iter->data;
+size_t sl_unicode_iter_get_item_width(sl_iterator iter[const static 1]) {
+  const sl_data* data = iter->data;
   const unsigned char* item = data->data + iter->index;
-  return stufflib_unicode_codepoint_width_from_utf8(data->size - iter->index,
-                                                    item);
+  return sl_unicode_codepoint_width_from_utf8(data->size - iter->index, item);
 }
 
-void stufflib_unicode_iter_advance(stufflib_iterator iter[const static 1]) {
+void sl_unicode_iter_advance(sl_iterator iter[const static 1]) {
   // TODO find next valid code point instead of advance by 1
-  const size_t codepoint_width = stufflib_unicode_iter_get_item_width(iter);
-  iter->index += STUFFLIB_MAX(1, codepoint_width);
+  const size_t codepoint_width = sl_unicode_iter_get_item_width(iter);
+  iter->index += SL_MAX(1, codepoint_width);
   iter->pos += 1;
 }
 
-bool stufflib_unicode_iter_is_done(stufflib_iterator iter[const static 1]) {
-  const stufflib_data* data = iter->data;
+bool sl_unicode_iter_is_done(sl_iterator iter[const static 1]) {
+  const sl_data* data = iter->data;
   return iter->index >= data->size;
 }
 
-void* stufflib_unicode_iter_get_item(stufflib_iterator iter[const static 1]) {
-  return stufflib_data_iter_get_item(iter);
+void* sl_unicode_iter_get_item(sl_iterator iter[const static 1]) {
+  return sl_data_iter_get_item(iter);
 }
 
-char32_t stufflib_unicode_iter_decode_item(
-    stufflib_iterator iter[const static 1]) {
-  return stufflib_unicode_codepoint_from_utf8(
-      stufflib_unicode_iter_get_item_width(iter),
-      iter->get_item(iter));
+char32_t sl_unicode_iter_decode_item(sl_iterator iter[const static 1]) {
+  return sl_unicode_codepoint_from_utf8(sl_unicode_iter_get_item_width(iter),
+                                        iter->get_item(iter));
 }
 
-stufflib_iterator stufflib_unicode_iter(
-    const stufflib_data data[const static 1]) {
-  return (stufflib_iterator){
+sl_iterator sl_unicode_iter(const sl_data data[const static 1]) {
+  return (sl_iterator){
       .data = (void*)data,
-      .get_item = stufflib_unicode_iter_get_item,
-      .advance = stufflib_unicode_iter_advance,
-      .is_done = stufflib_unicode_iter_is_done,
+      .get_item = sl_unicode_iter_get_item,
+      .advance = sl_unicode_iter_advance,
+      .is_done = sl_unicode_iter_is_done,
   };
 }
 
-size_t stufflib_unicode_length(const stufflib_data data[const static 1]) {
-  if (!stufflib_unicode_is_valid_utf8(data)) {
+size_t sl_unicode_length(const sl_data data[const static 1]) {
+  if (!sl_unicode_is_valid_utf8(data)) {
     return 0;
   }
-  stufflib_iterator iter = stufflib_unicode_iter(data);
+  sl_iterator iter = sl_unicode_iter(data);
   while (!iter.is_done(&iter)) {
     iter.advance(&iter);
   }
   return iter.pos;
 }
 
-#endif  // _STUFFLIB_UNICODE_H_INCLUDED
+#endif  // _SL_UNICODE_H_INCLUDED

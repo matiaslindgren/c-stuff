@@ -1,10 +1,10 @@
-#ifndef _STUFFLIB_RAND_H_INCLUDED
-#define _STUFFLIB_RAND_H_INCLUDED
+#ifndef _SL_RAND_H_INCLUDED
+#define _SL_RAND_H_INCLUDED
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
 
-void stufflib_rand_fill_double(const size_t n, double dst[n], double scale) {
+void sl_rand_fill_double(const size_t n, double dst[n], double scale) {
   srand(time(0));
   for (size_t i = 0; i < n; ++i) {
     double r = rand() - RAND_MAX / 2;
@@ -12,7 +12,7 @@ void stufflib_rand_fill_double(const size_t n, double dst[n], double scale) {
   }
 }
 
-void stufflib_rand_set_zero_double(const size_t n,
+void sl_rand_set_zero_double(const size_t n,
                                    double dst[n],
                                    double probability) {
   probability = fmax(0, fmin(1, probability));
@@ -24,4 +24,4 @@ void stufflib_rand_set_zero_double(const size_t n,
   }
 }
 
-#endif  // _STUFFLIB_RAND_H_INCLUDED
+#endif  // _SL_RAND_H_INCLUDED

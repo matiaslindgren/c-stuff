@@ -272,9 +272,9 @@ Vatn er ólífrænn lyktar-, bragð- og nær litlaus vökvi sem er lífsnauðsyn
 **`stdout`**:
 ```
 int main(int argc, char* const argv[argc + 1]) {
-  stufflib_args args = stufflib_args_from_argv(argc, argv);
+  sl_args args = stufflib_args_from_argv(argc, argv);
   bool ok = false;
-  const char* command = stufflib_args_get_positional(&args, 0);
+  const char* command = sl_args_get_positional(&args, 0);
   if (command) {
     if (strcmp(command, "concat") == 0) {
       ok = concat(&args);
@@ -293,14 +293,14 @@ int main(int argc, char* const argv[argc + 1]) {
   if (!ok) {
     print_usage(&args);
   }
-  stufflib_args_destroy(&args);
+  sl_args_destroy(&args);
   return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 ```
 
 #### Replace pattern
 ```
-./build/debug/tools/txt replace stufflib_iterator it ./include/stufflib_iterator.h
+./build/debug/tools/txt replace sl_iterator it ./include/stufflib_iterator.h
 ```
 **`stdout`**:
 ```

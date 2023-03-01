@@ -19,27 +19,27 @@ bool test_compare_doubles(const bool verbose) {
   b[0] = 0;
   b[1] = 1e12;
 
-  assert(stufflib_sort_compare_double((void*)(&a[0]), (void*)(&a[0])) == 0);
-  assert(stufflib_sort_compare_double((void*)(&a[1]), (void*)(&a[1])) == 0);
-  assert(stufflib_sort_compare_double((void*)(&b[0]), (void*)(&b[0])) == 0);
-  assert(stufflib_sort_compare_double((void*)(&b[1]), (void*)(&b[1])) == 0);
+  assert(sl_sort_compare_double((void*)(&a[0]), (void*)(&a[0])) == 0);
+  assert(sl_sort_compare_double((void*)(&a[1]), (void*)(&a[1])) == 0);
+  assert(sl_sort_compare_double((void*)(&b[0]), (void*)(&b[0])) == 0);
+  assert(sl_sort_compare_double((void*)(&b[1]), (void*)(&b[1])) == 0);
 
-  assert(stufflib_sort_compare_double((void*)(&a[0]), (void*)(&a[1])) == -1);
-  assert(stufflib_sort_compare_double((void*)(&a[1]), (void*)(&a[0])) == 1);
-  assert(stufflib_sort_compare_double((void*)(&b[0]), (void*)(&b[1])) == -1);
-  assert(stufflib_sort_compare_double((void*)(&b[1]), (void*)(&b[0])) == 1);
+  assert(sl_sort_compare_double((void*)(&a[0]), (void*)(&a[1])) == -1);
+  assert(sl_sort_compare_double((void*)(&a[1]), (void*)(&a[0])) == 1);
+  assert(sl_sort_compare_double((void*)(&b[0]), (void*)(&b[1])) == -1);
+  assert(sl_sort_compare_double((void*)(&b[1]), (void*)(&b[0])) == 1);
 
-  assert(stufflib_sort_compare_double((void*)(&a[0]), (void*)(&b[0])) == -1);
-  assert(stufflib_sort_compare_double((void*)(&a[0]), (void*)(&b[1])) == -1);
-  assert(stufflib_sort_compare_double((void*)(&a[1]), (void*)(&b[0])) == 1);
-  assert(stufflib_sort_compare_double((void*)(&a[1]), (void*)(&b[1])) == -1);
+  assert(sl_sort_compare_double((void*)(&a[0]), (void*)(&b[0])) == -1);
+  assert(sl_sort_compare_double((void*)(&a[0]), (void*)(&b[1])) == -1);
+  assert(sl_sort_compare_double((void*)(&a[1]), (void*)(&b[0])) == 1);
+  assert(sl_sort_compare_double((void*)(&a[1]), (void*)(&b[1])) == -1);
 
   free(a);
   free(b);
   return true;
 }
 
-bool test_sort_doubles(stufflib_sort_double* sort_doubles, const bool verbose) {
+bool test_sort_doubles(sl_sort_double* sort_doubles, const bool verbose) {
   const size_t num_tests_per_size = 5;
   const size_t array_sizes[] = {1, 2, 10, 1000, 10000, 100000};
 
@@ -53,8 +53,8 @@ bool test_sort_doubles(stufflib_sort_double* sort_doubles, const bool verbose) {
     }
 
     for (size_t test = 0; test < num_tests_per_size; ++test) {
-      stufflib_rand_fill_double(n, x, 1e6);
-      stufflib_rand_set_zero_double(n, x, 0.01);
+      sl_rand_fill_double(n, x, 1e6);
+      sl_rand_set_zero_double(n, x, 0.01);
 
       clock_t start_time = clock();
       if (!sort_doubles(n, x)) {
@@ -86,7 +86,7 @@ bool test_sort_doubles(stufflib_sort_double* sort_doubles, const bool verbose) {
 }
 
 double* _stdlib_qsort_double(const size_t count, double src[count]) {
-  qsort((void*)src, count, sizeof(double), stufflib_sort_compare_double);
+  qsort((void*)src, count, sizeof(double), sl_sort_compare_double);
   return src;
 }
 
@@ -94,14 +94,14 @@ bool test_quicksort_doubles(const bool verbose) {
   if (verbose) {
     printf("test quicksort doubles\n");
   }
-  return test_sort_doubles(stufflib_sort_quicksort_double, verbose);
+  return test_sort_doubles(sl_sort_quicksort_double, verbose);
 }
 
 bool test_mergesort_doubles(const bool verbose) {
   if (verbose) {
     printf("test mergesort doubles\n");
   }
-  return test_sort_doubles(stufflib_sort_mergesort_double, verbose);
+  return test_sort_doubles(sl_sort_mergesort_double, verbose);
 }
 
 bool test_qsort_doubles(const bool verbose) {
@@ -116,25 +116,25 @@ bool test_compare_strings(const bool verbose) {
   const char* a[] = {"hello", "there"};
   const char* b[] = {"ok", " "};
 
-  assert(stufflib_sort_compare_str((void*)(&a[0]), (void*)(&a[0])) == 0);
-  assert(stufflib_sort_compare_str((void*)(&a[1]), (void*)(&a[1])) == 0);
-  assert(stufflib_sort_compare_str((void*)(&b[0]), (void*)(&b[0])) == 0);
-  assert(stufflib_sort_compare_str((void*)(&b[1]), (void*)(&b[1])) == 0);
+  assert(sl_sort_compare_str((void*)(&a[0]), (void*)(&a[0])) == 0);
+  assert(sl_sort_compare_str((void*)(&a[1]), (void*)(&a[1])) == 0);
+  assert(sl_sort_compare_str((void*)(&b[0]), (void*)(&b[0])) == 0);
+  assert(sl_sort_compare_str((void*)(&b[1]), (void*)(&b[1])) == 0);
 
-  assert(stufflib_sort_compare_str((void*)(&a[0]), (void*)(&a[1])) == -1);
-  assert(stufflib_sort_compare_str((void*)(&a[1]), (void*)(&a[0])) == 1);
-  assert(stufflib_sort_compare_str((void*)(&b[0]), (void*)(&b[1])) == 1);
-  assert(stufflib_sort_compare_str((void*)(&b[1]), (void*)(&b[0])) == -1);
+  assert(sl_sort_compare_str((void*)(&a[0]), (void*)(&a[1])) == -1);
+  assert(sl_sort_compare_str((void*)(&a[1]), (void*)(&a[0])) == 1);
+  assert(sl_sort_compare_str((void*)(&b[0]), (void*)(&b[1])) == 1);
+  assert(sl_sort_compare_str((void*)(&b[1]), (void*)(&b[0])) == -1);
 
-  assert(stufflib_sort_compare_str((void*)(&a[0]), (void*)(&b[0])) == -1);
-  assert(stufflib_sort_compare_str((void*)(&a[0]), (void*)(&b[1])) == 1);
-  assert(stufflib_sort_compare_str((void*)(&a[1]), (void*)(&b[0])) == 1);
-  assert(stufflib_sort_compare_str((void*)(&a[1]), (void*)(&b[1])) == 1);
+  assert(sl_sort_compare_str((void*)(&a[0]), (void*)(&b[0])) == -1);
+  assert(sl_sort_compare_str((void*)(&a[0]), (void*)(&b[1])) == 1);
+  assert(sl_sort_compare_str((void*)(&a[1]), (void*)(&b[0])) == 1);
+  assert(sl_sort_compare_str((void*)(&a[1]), (void*)(&b[1])) == 1);
 
   return true;
 }
 
-bool test_sort_strings(stufflib_sort_str* sort_strings, const bool verbose) {
+bool test_sort_strings(sl_sort_str* sort_strings, const bool verbose) {
   const size_t n = 5;
 
   char** s = calloc(n, sizeof(char*));
@@ -171,7 +171,7 @@ bool test_sort_strings(stufflib_sort_str* sort_strings, const bool verbose) {
 }
 
 char** _stdlib_qsort_str(const size_t count, char* src[count]) {
-  qsort((void*)src, count, sizeof(char*), stufflib_sort_compare_str);
+  qsort((void*)src, count, sizeof(char*), sl_sort_compare_str);
   return src;
 }
 
@@ -179,14 +179,14 @@ bool test_quicksort_strings(const bool verbose) {
   if (verbose) {
     printf("test quicksort strings\n");
   }
-  return test_sort_strings(stufflib_sort_quicksort_str, verbose);
+  return test_sort_strings(sl_sort_quicksort_str, verbose);
 }
 
 bool test_mergesort_strings(const bool verbose) {
   if (verbose) {
     printf("test mergesort strings\n");
   }
-  return test_sort_strings(stufflib_sort_mergesort_str, verbose);
+  return test_sort_strings(sl_sort_mergesort_str, verbose);
 }
 
 bool test_qsort_strings(const bool verbose) {
@@ -265,18 +265,18 @@ bool test_sort_named_vec3(_sort_named_vec3* _sort_named_vec3,
 
 _named_vec3* _mergesort_named_vec3s(const size_t count,
                                     _named_vec3 src[count]) {
-  return stufflib_sort_mergesort((void*)src,
-                                 count,
-                                 sizeof(_named_vec3),
-                                 _compare_named_vec3);
+  return sl_sort_mergesort((void*)src,
+                           count,
+                           sizeof(_named_vec3),
+                           _compare_named_vec3);
 }
 
 _named_vec3* _quicksort_named_vec3s(const size_t count,
                                     _named_vec3 src[count]) {
-  return stufflib_sort_quicksort((void*)src,
-                                 count,
-                                 sizeof(_named_vec3),
-                                 _compare_named_vec3);
+  return sl_sort_quicksort((void*)src,
+                           count,
+                           sizeof(_named_vec3),
+                           _compare_named_vec3);
 }
 
 _named_vec3* _stdlib_qsort_named_vec3s(const size_t count,
@@ -306,14 +306,14 @@ bool test_qsort_custom_obj(const bool verbose) {
   return test_sort_named_vec3(_stdlib_qsort_named_vec3s, verbose);
 }
 
-STUFFLIB_TEST_MAIN(test_compare_doubles,
-                   test_compare_strings,
-                   test_quicksort_doubles,
-                   test_mergesort_doubles,
-                   test_qsort_doubles,
-                   test_quicksort_strings,
-                   test_mergesort_strings,
-                   test_qsort_strings,
-                   test_quicksort_custom_obj,
-                   test_mergesort_custom_obj,
-                   test_qsort_custom_obj)
+SL_TEST_MAIN(test_compare_doubles,
+             test_compare_strings,
+             test_quicksort_doubles,
+             test_mergesort_doubles,
+             test_qsort_doubles,
+             test_quicksort_strings,
+             test_mergesort_strings,
+             test_qsort_strings,
+             test_quicksort_custom_obj,
+             test_mergesort_custom_obj,
+             test_qsort_custom_obj)

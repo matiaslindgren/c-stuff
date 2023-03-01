@@ -13,7 +13,7 @@
 #include "stufflib_unicode.h"
 
 bool test_validate_utf8(const bool verbose) {
-  stufflib_data invalid_utf8[] = {
+  sl_data invalid_utf8[] = {
       {.size = 1,                   .data = (unsigned char[]){0x80}},
       {.size = 2,             .data = (unsigned char[]){0xc0, 0x80}},
       {.size = 2,             .data = (unsigned char[]){0xe0, 0x80}},
@@ -22,30 +22,29 @@ bool test_validate_utf8(const bool verbose) {
       {.size = 4, .data = (unsigned char[]){0xff, 0x80, 0x80, 0x80}},
       {.size = 5,       .data = (unsigned char[]){0, 1, 2, 0xf4, 0}},
   };
-  for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(invalid_utf8); ++i) {
-    assert(!stufflib_unicode_is_valid_utf8(invalid_utf8 + i));
+  for (size_t i = 0; i < SL_ARRAY_LEN(invalid_utf8); ++i) {
+    assert(!sl_unicode_is_valid_utf8(invalid_utf8 + i));
   }
-  for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(hello_utf8); ++i) {
-    assert(stufflib_unicode_is_valid_utf8(hello_utf8 + i));
+  for (size_t i = 0; i < SL_ARRAY_LEN(hello_utf8); ++i) {
+    assert(sl_unicode_is_valid_utf8(hello_utf8 + i));
   }
   return true;
 }
 
 bool test_decode_codepoints(const bool verbose) {
   size_t codepoint_pos = 0;
-  for (size_t i_str = 0; i_str < STUFFLIB_ARRAY_LEN(hello_utf8); ++i_str) {
-    stufflib_data utf8_data = hello_utf8[i_str];
+  for (size_t i_str = 0; i_str < SL_ARRAY_LEN(hello_utf8); ++i_str) {
+    sl_data utf8_data = hello_utf8[i_str];
     size_t byte_pos = 0;
     while (byte_pos < utf8_data.size) {
       const char32_t expected_codepoint = decoded_strings[codepoint_pos];
       const size_t codepoint_width =
-          stufflib_unicode_codepoint_width_from_utf8(utf8_data.size - byte_pos,
-                                                     utf8_data.data + byte_pos);
-      assert(codepoint_width ==
-             stufflib_unicode_codepoint_width(expected_codepoint));
-      const char32_t codepoint =
-          stufflib_unicode_codepoint_from_utf8(codepoint_width,
+          sl_unicode_codepoint_width_from_utf8(utf8_data.size - byte_pos,
                                                utf8_data.data + byte_pos);
+      assert(codepoint_width == sl_unicode_codepoint_width(expected_codepoint));
+      const char32_t codepoint =
+          sl_unicode_codepoint_from_utf8(codepoint_width,
+                                         utf8_data.data + byte_pos);
       assert(codepoint == expected_codepoint);
       ++codepoint_pos;
       byte_pos += codepoint_width;
@@ -57,18 +56,18 @@ bool test_decode_codepoints(const bool verbose) {
 
 bool test_unicode_iterator(const bool verbose) {
   size_t codepoint_pos = 0;
-  for (size_t i_str = 0; i_str < STUFFLIB_ARRAY_LEN(hello_utf8); ++i_str) {
-    stufflib_data utf8_data = hello_utf8[i_str];
+  for (size_t i_str = 0; i_str < SL_ARRAY_LEN(hello_utf8); ++i_str) {
+    sl_data utf8_data = hello_utf8[i_str];
     size_t str_len = 0;
     size_t byte_pos = 0;
-    stufflib_iterator iter = stufflib_unicode_iter(hello_utf8 + i_str);
+    sl_iterator iter = sl_unicode_iter(hello_utf8 + i_str);
     for (; !iter.is_done(&iter); iter.advance(&iter)) {
       assert(iter.index == byte_pos);
-      const char32_t codepoint = stufflib_unicode_iter_decode_item(&iter);
+      const char32_t codepoint = sl_unicode_iter_decode_item(&iter);
       assert(codepoint == decoded_strings[codepoint_pos]);
       const size_t codepoint_width =
-          stufflib_unicode_codepoint_width_from_utf8(utf8_data.size - byte_pos,
-                                                     utf8_data.data + byte_pos);
+          sl_unicode_codepoint_width_from_utf8(utf8_data.size - byte_pos,
+                                               utf8_data.data + byte_pos);
       byte_pos += codepoint_width;
       ++str_len;
       ++codepoint_pos;
@@ -80,8 +79,8 @@ bool test_unicode_iterator(const bool verbose) {
 }
 
 bool test_unicode_length(const bool verbose) {
-  for (size_t i_str = 0; i_str < STUFFLIB_ARRAY_LEN(hello_utf8); ++i_str) {
-    const size_t str_len = stufflib_unicode_length(hello_utf8 + i_str);
+  for (size_t i_str = 0; i_str < SL_ARRAY_LEN(hello_utf8); ++i_str) {
+    const size_t str_len = sl_unicode_length(hello_utf8 + i_str);
     assert(str_len == decoded_lengths[i_str]);
   }
   return true;
@@ -93,8 +92,8 @@ bool test_decode_utf8_files(const bool verbose) {
       "ja", "ka",  "ki", "ko",  "ku", "lt", "lv", "nah", "nqo", "pl", "pt",
       "ru", "shi", "sl", "szl", "ta", "tr", "uk", "vep", "vi",  "zh",
   };
-  for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(languages); ++i) {
-    stufflib_data utf8_data = {
+  for (size_t i = 0; i < SL_ARRAY_LEN(languages); ++i) {
+    sl_data utf8_data = {
         .size = 0,
         .data = (unsigned char[20000]){0},
     };
@@ -108,7 +107,7 @@ bool test_decode_utf8_files(const bool verbose) {
       }
       FILE* fp = fopen(input_path, "rb");
       if (!fp) {
-        STUFFLIB_LOG_ERROR("cannot open %s", input_path);
+        SL_LOG_ERROR("cannot open %s", input_path);
         continue;
       }
       utf8_data.size = fread(utf8_data.data, 1, 20000, fp);
@@ -128,7 +127,7 @@ bool test_decode_utf8_files(const bool verbose) {
               languages[i]);
       FILE* fp = fopen(codepoints_path, "rb");
       if (!fp) {
-        STUFFLIB_LOG_ERROR("cannot open %s", codepoints_path);
+        SL_LOG_ERROR("cannot open %s", codepoints_path);
         continue;
       }
       char buf[1000] = {0};
@@ -142,11 +141,10 @@ bool test_decode_utf8_files(const bool verbose) {
     }
 
     size_t codepoint_pos = 0;
-    for (stufflib_iterator iter = stufflib_unicode_iter(&utf8_data);
-         !iter.is_done(&iter);
+    for (sl_iterator iter = sl_unicode_iter(&utf8_data); !iter.is_done(&iter);
          iter.advance(&iter)) {
       assert(codepoint_pos < str_len);
-      const char32_t codepoint = stufflib_unicode_iter_decode_item(&iter);
+      const char32_t codepoint = sl_unicode_iter_decode_item(&iter);
       assert(codepoint == expected_codepoints[codepoint_pos]);
       ++codepoint_pos;
     }
@@ -155,8 +153,8 @@ bool test_decode_utf8_files(const bool verbose) {
   return true;
 }
 
-STUFFLIB_TEST_MAIN(test_validate_utf8,
-                   test_decode_codepoints,
-                   test_unicode_iterator,
-                   test_unicode_length,
-                   test_decode_utf8_files)
+SL_TEST_MAIN(test_validate_utf8,
+             test_decode_codepoints,
+             test_unicode_iterator,
+             test_unicode_length,
+             test_decode_utf8_files)

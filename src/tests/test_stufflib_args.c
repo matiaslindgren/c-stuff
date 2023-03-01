@@ -12,8 +12,8 @@ bool test_parse_positional(const bool verbose) {
       "arg1",
       0,
   };
-  const int argc = STUFFLIB_ARRAY_LEN(argv) - 1;
-  stufflib_args args = stufflib_args_from_argv(argc, argv);
+  const int argc = SL_ARRAY_LEN(argv) - 1;
+  sl_args args = sl_args_from_argv(argc, argv);
 
   assert(strcmp(args.program, "bin/path") == 0);
   assert(args.optional[0] == 0);
@@ -22,10 +22,10 @@ bool test_parse_positional(const bool verbose) {
   assert(args.required[1] == 0);
   assert(strcmp(*args.required[0], "arg1") == 0);
 
-  assert(strcmp(stufflib_args_get_positional(&args, 0), "arg1") == 0);
-  assert(stufflib_args_count_positional(&args) == 1);
+  assert(strcmp(sl_args_get_positional(&args, 0), "arg1") == 0);
+  assert(sl_args_count_positional(&args) == 1);
 
-  stufflib_args_destroy(&args);
+  sl_args_destroy(&args);
   return true;
 }
 
@@ -35,15 +35,15 @@ bool test_parse_one_flag(const bool verbose) {
       "-x",
       0,
   };
-  const int argc = STUFFLIB_ARRAY_LEN(argv) - 1;
-  stufflib_args args = stufflib_args_from_argv(argc, argv);
+  const int argc = SL_ARRAY_LEN(argv) - 1;
+  sl_args args = sl_args_from_argv(argc, argv);
 
   assert(strcmp(args.program, "bin/path") == 0);
   assert(args.optional[0] != 0);
   assert(args.optional[1] == 0);
   assert(args.required[0] == 0);
 
-  assert(stufflib_args_parse_flag(&args, "-x"));
+  assert(sl_args_parse_flag(&args, "-x"));
 
   char* const should_not_match[] = {
       "-vv",
@@ -57,13 +57,13 @@ bool test_parse_one_flag(const bool verbose) {
       "-w",
       "-v",
   };
-  for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(should_not_match); ++i) {
-    assert(!stufflib_args_parse_flag(&args, should_not_match[i]));
+  for (size_t i = 0; i < SL_ARRAY_LEN(should_not_match); ++i) {
+    assert(!sl_args_parse_flag(&args, should_not_match[i]));
   }
 
-  assert(stufflib_args_count_positional(&args) == 0);
+  assert(sl_args_count_positional(&args) == 0);
 
-  stufflib_args_destroy(&args);
+  sl_args_destroy(&args);
   return true;
 }
 
@@ -74,8 +74,8 @@ bool test_parse_positional_after_optional(const bool verbose) {
       "arg1",
       0,
   };
-  const int argc = STUFFLIB_ARRAY_LEN(argv) - 1;
-  stufflib_args args = stufflib_args_from_argv(argc, argv);
+  const int argc = SL_ARRAY_LEN(argv) - 1;
+  sl_args args = sl_args_from_argv(argc, argv);
 
   assert(strcmp(args.program, "bin/path") == 0);
 
@@ -87,11 +87,11 @@ bool test_parse_positional_after_optional(const bool verbose) {
   assert(args.required[1] == 0);
   assert(strcmp(*args.required[0], "arg1") == 0);
 
-  assert(stufflib_args_parse_flag(&args, "-v"));
-  assert(strcmp(stufflib_args_get_positional(&args, 0), "arg1") == 0);
-  assert(stufflib_args_count_positional(&args) == 1);
+  assert(sl_args_parse_flag(&args, "-v"));
+  assert(strcmp(sl_args_get_positional(&args, 0), "arg1") == 0);
+  assert(sl_args_count_positional(&args) == 1);
 
-  stufflib_args_destroy(&args);
+  sl_args_destroy(&args);
   return true;
 }
 
@@ -102,8 +102,8 @@ bool test_parse_two_flags(const bool verbose) {
       "-v",
       0,
   };
-  const int argc = STUFFLIB_ARRAY_LEN(argv) - 1;
-  stufflib_args args = stufflib_args_from_argv(argc, argv);
+  const int argc = SL_ARRAY_LEN(argv) - 1;
+  sl_args args = sl_args_from_argv(argc, argv);
 
   assert(strcmp(args.program, "bin/path") == 0);
   assert(args.required[0] == 0);
@@ -114,8 +114,8 @@ bool test_parse_two_flags(const bool verbose) {
   assert(strcmp(*args.optional[0], "-w") == 0);
   assert(strcmp(*args.optional[1], "-v") == 0);
 
-  assert(stufflib_args_parse_flag(&args, "-w"));
-  assert(stufflib_args_parse_flag(&args, "-v"));
+  assert(sl_args_parse_flag(&args, "-w"));
+  assert(sl_args_parse_flag(&args, "-v"));
 
   char* const should_not_match[] = {
       "-x",
@@ -128,13 +128,13 @@ bool test_parse_two_flags(const bool verbose) {
       "--v",
       "",
   };
-  for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(should_not_match); ++i) {
-    assert(!stufflib_args_parse_flag(&args, should_not_match[i]));
+  for (size_t i = 0; i < SL_ARRAY_LEN(should_not_match); ++i) {
+    assert(!sl_args_parse_flag(&args, should_not_match[i]));
   }
 
-  assert(stufflib_args_count_positional(&args) == 0);
+  assert(sl_args_count_positional(&args) == 0);
 
-  stufflib_args_destroy(&args);
+  sl_args_destroy(&args);
   return true;
 }
 
@@ -148,8 +148,8 @@ bool test_parse_uint(const bool verbose) {
       "--num-stuff=100",
       0,
   };
-  const int argc = STUFFLIB_ARRAY_LEN(argv) - 1;
-  stufflib_args args = stufflib_args_from_argv(argc, argv);
+  const int argc = SL_ARRAY_LEN(argv) - 1;
+  sl_args args = sl_args_from_argv(argc, argv);
 
   assert(strcmp(args.program, "bin/path") == 0);
   assert(args.required[0] == 0);
@@ -163,33 +163,33 @@ bool test_parse_uint(const bool verbose) {
   assert(strcmp(*args.optional[3], "-v=10") == 0);
   assert(strcmp(*args.optional[4], "--num-stuff=100") == 0);
 
-  assert(stufflib_args_parse_uint(&args, "-w", 10) == 1);
-  assert(stufflib_args_parse_uint(&args, "-w", 8) == 1);
-  assert(stufflib_args_parse_uint(&args, "-w", 16) == 1);
-  assert(stufflib_args_parse_uint(&args, "-v", 10) == 10);
-  assert(stufflib_args_parse_uint(&args, "-v", 8) == 8);
-  assert(stufflib_args_parse_uint(&args, "-v", 16) == 16);
-  assert(stufflib_args_parse_uint(&args, "--num-stuff", 10) == 100);
-  assert(stufflib_args_parse_uint(&args, "--num-stuff", 8) == 64);
-  assert(stufflib_args_parse_uint(&args, "--num-stuff", 16) == 256);
+  assert(sl_args_parse_uint(&args, "-w", 10) == 1);
+  assert(sl_args_parse_uint(&args, "-w", 8) == 1);
+  assert(sl_args_parse_uint(&args, "-w", 16) == 1);
+  assert(sl_args_parse_uint(&args, "-v", 10) == 10);
+  assert(sl_args_parse_uint(&args, "-v", 8) == 8);
+  assert(sl_args_parse_uint(&args, "-v", 16) == 16);
+  assert(sl_args_parse_uint(&args, "--num-stuff", 10) == 100);
+  assert(sl_args_parse_uint(&args, "--num-stuff", 8) == 64);
+  assert(sl_args_parse_uint(&args, "--num-stuff", 16) == 256);
 
   char* const should_not_match[] = {
       "-f",
       "--flag",
       "",
   };
-  for (size_t i = 0; i < STUFFLIB_ARRAY_LEN(should_not_match); ++i) {
-    assert(stufflib_args_parse_uint(&args, should_not_match[i], 10) == 0);
+  for (size_t i = 0; i < SL_ARRAY_LEN(should_not_match); ++i) {
+    assert(sl_args_parse_uint(&args, should_not_match[i], 10) == 0);
   }
 
-  assert(stufflib_args_count_positional(&args) == 0);
+  assert(sl_args_count_positional(&args) == 0);
 
-  stufflib_args_destroy(&args);
+  sl_args_destroy(&args);
   return true;
 }
 
-STUFFLIB_TEST_MAIN(test_parse_positional,
-                   test_parse_one_flag,
-                   test_parse_positional_after_optional,
-                   test_parse_two_flags,
-                   test_parse_uint)
+SL_TEST_MAIN(test_parse_positional,
+             test_parse_one_flag,
+             test_parse_positional_after_optional,
+             test_parse_two_flags,
+             test_parse_uint)
