@@ -3,12 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct sl_iterator sl_iterator;
 struct sl_iterator;
 
-typedef void* sl_iterator_get_item(sl_iterator*);
-typedef void sl_iterator_advance(sl_iterator*);
-typedef bool sl_iterator_is_done(sl_iterator*);
+typedef void* sl_iterator_get_item(struct sl_iterator*);
+typedef void sl_iterator_advance(struct sl_iterator*);
+typedef bool sl_iterator_is_done(struct sl_iterator*);
 
 struct sl_iterator {
   size_t index;

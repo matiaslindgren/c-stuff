@@ -17,9 +17,9 @@ bool test_create_file_iter_from_file(const bool verbose) {
       "./test-data/png/asan.png",
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(files); ++i) {
-    sl_iterator iter = sl_file_iter_open(files[i]);
+    struct sl_iterator iter = sl_file_iter_open(files[i]);
     assert(iter.data);
-    sl_file_buffer* buffer = (sl_file_buffer*)(iter.data);
+    struct sl_file_buffer* buffer = (struct sl_file_buffer*)(iter.data);
     assert(buffer);
     assert(buffer->filename);
     assert(strcmp(buffer->filename, files[i]) == 0);
@@ -33,12 +33,12 @@ bool test_create_file_iter_from_file(const bool verbose) {
 }
 
 bool test_read_single_char(const bool verbose) {
-  sl_iterator iter = sl_file_iter_open("./test-data/txt/one.txt");
+  struct sl_iterator iter = sl_file_iter_open("./test-data/txt/one.txt");
   assert(iter.index == 0);
   assert(iter.pos == 0);
   assert(!iter.is_done(&iter));
 
-  sl_data* data = iter.get_item(&iter);
+  struct sl_data* data = iter.get_item(&iter);
   assert(data);
   assert(data->size == 1);
   assert(data->data[0] == '1');
@@ -51,7 +51,7 @@ bool test_read_single_char(const bool verbose) {
 }
 
 bool test_read_empty_file(const bool verbose) {
-  sl_iterator iter = sl_file_iter_open("./test-data/txt/empty");
+  struct sl_iterator iter = sl_file_iter_open("./test-data/txt/empty");
   assert(iter.index == 0);
   assert(iter.pos == 0);
   assert(iter.is_done(&iter));
@@ -60,7 +60,8 @@ bool test_read_empty_file(const bool verbose) {
 }
 
 bool test_read_nonexisting_file(const bool verbose) {
-  sl_iterator iter = sl_file_iter_open("./test-data/txt/missing/file.txt");
+  struct sl_iterator iter =
+      sl_file_iter_open("./test-data/txt/missing/file.txt");
   assert(iter.index == 0);
   assert(iter.pos == 0);
   assert(!iter.data);
@@ -95,8 +96,8 @@ bool test_read_read_entire_file(const bool verbose) {
       383,
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(files); ++i) {
-    sl_iterator iter = sl_file_iter_open(files[i]);
-    sl_file_buffer* buffer = (sl_file_buffer*)(iter.data);
+    struct sl_iterator iter = sl_file_iter_open(files[i]);
+    struct sl_file_buffer* buffer = (struct sl_file_buffer*)(iter.data);
     size_t total_size = 0;
     while (!iter.is_done(&iter)) {
       total_size += buffer->data.size;

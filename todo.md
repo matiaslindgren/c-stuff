@@ -22,6 +22,7 @@
 - [ ] implement log levels and replace `STUFFLIB_LOG` macros as no-ops if level too low
 - [ ] `printf` for unicode (`wchar_t` and `wprintf`?)
 - [ ] try to replace `void*` casts with `_Generic`
+- [ ] return `struct sl_data` from math functions
 
 - [x] unify iterator API for getting values, don't transform, only return a single item/range/chunk
 - [x] replace str lib with unicode strings

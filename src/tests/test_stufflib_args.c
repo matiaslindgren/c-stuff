@@ -13,7 +13,7 @@ bool test_parse_positional(const bool verbose) {
       0,
   };
   const int argc = SL_ARRAY_LEN(argv) - 1;
-  sl_args args = sl_args_from_argv(argc, argv);
+  struct sl_args args = sl_args_from_argv(argc, argv);
 
   assert(strcmp(args.program, "bin/path") == 0);
   assert(args.optional[0] == 0);
@@ -36,7 +36,7 @@ bool test_parse_one_flag(const bool verbose) {
       0,
   };
   const int argc = SL_ARRAY_LEN(argv) - 1;
-  sl_args args = sl_args_from_argv(argc, argv);
+  struct sl_args args = sl_args_from_argv(argc, argv);
 
   assert(strcmp(args.program, "bin/path") == 0);
   assert(args.optional[0] != 0);
@@ -75,7 +75,7 @@ bool test_parse_positional_after_optional(const bool verbose) {
       0,
   };
   const int argc = SL_ARRAY_LEN(argv) - 1;
-  sl_args args = sl_args_from_argv(argc, argv);
+  struct sl_args args = sl_args_from_argv(argc, argv);
 
   assert(strcmp(args.program, "bin/path") == 0);
 
@@ -103,7 +103,7 @@ bool test_parse_two_flags(const bool verbose) {
       0,
   };
   const int argc = SL_ARRAY_LEN(argv) - 1;
-  sl_args args = sl_args_from_argv(argc, argv);
+  struct sl_args args = sl_args_from_argv(argc, argv);
 
   assert(strcmp(args.program, "bin/path") == 0);
   assert(args.required[0] == 0);
@@ -149,7 +149,7 @@ bool test_parse_uint(const bool verbose) {
       0,
   };
   const int argc = SL_ARRAY_LEN(argv) - 1;
-  sl_args args = sl_args_from_argv(argc, argv);
+  struct sl_args args = sl_args_from_argv(argc, argv);
 
   assert(strcmp(args.program, "bin/path") == 0);
   assert(args.required[0] == 0);

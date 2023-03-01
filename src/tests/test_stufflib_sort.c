@@ -196,7 +196,6 @@ bool test_qsort_strings(const bool verbose) {
   return test_sort_strings(_stdlib_qsort_str, verbose);
 }
 
-typedef struct _named_vec3 _named_vec3;
 struct _named_vec3 {
   long x;
   long y;
@@ -204,11 +203,11 @@ struct _named_vec3 {
   const char* name;
 };
 
-typedef _named_vec3* _sort_named_vec3(const size_t, _named_vec3*);
+typedef struct _named_vec3* _sort_named_vec3(const size_t, struct _named_vec3*);
 
 int _compare_named_vec3(const void* a, const void* b) {
-  const _named_vec3 lhs = ((const _named_vec3*)a)[0];
-  const _named_vec3 rhs = ((const _named_vec3*)b)[0];
+  const struct _named_vec3 lhs = ((const struct _named_vec3*)a)[0];
+  const struct _named_vec3 rhs = ((const struct _named_vec3*)b)[0];
   int res = 0;
   if (!res) res = (lhs.x > rhs.x) - (lhs.x < rhs.x);
   if (!res) res = (lhs.y > rhs.y) - (lhs.y < rhs.y);
@@ -219,7 +218,7 @@ int _compare_named_vec3(const void* a, const void* b) {
 
 bool test_sort_named_vec3(_sort_named_vec3* _sort_named_vec3,
                           const bool verbose) {
-  _named_vec3 items[] = {
+  struct _named_vec3 items[] = {
       {-1, 0,   0,  "f"},
       {-1, 0,   1,  "e"},
       { 0, 0,   0,  "d"},
@@ -228,7 +227,7 @@ bool test_sort_named_vec3(_sort_named_vec3* _sort_named_vec3,
       { 0, 0,   0,  "a"},
       { 0, 0,   0, " a"},
   };
-  _named_vec3 sorted_items[] = {
+  struct _named_vec3 sorted_items[] = {
       items[0],
       items[1],
       items[6],
@@ -263,25 +262,25 @@ bool test_sort_named_vec3(_sort_named_vec3* _sort_named_vec3,
   return true;
 }
 
-_named_vec3* _mergesort_named_vec3s(const size_t count,
-                                    _named_vec3 src[count]) {
+struct _named_vec3* _mergesort_named_vec3s(const size_t count,
+                                           struct _named_vec3 src[count]) {
   return sl_sort_mergesort((void*)src,
                            count,
-                           sizeof(_named_vec3),
+                           sizeof(struct _named_vec3),
                            _compare_named_vec3);
 }
 
-_named_vec3* _quicksort_named_vec3s(const size_t count,
-                                    _named_vec3 src[count]) {
+struct _named_vec3* _quicksort_named_vec3s(const size_t count,
+                                           struct _named_vec3 src[count]) {
   return sl_sort_quicksort((void*)src,
                            count,
-                           sizeof(_named_vec3),
+                           sizeof(struct _named_vec3),
                            _compare_named_vec3);
 }
 
-_named_vec3* _stdlib_qsort_named_vec3s(const size_t count,
-                                       _named_vec3 src[count]) {
-  qsort((void*)src, count, sizeof(_named_vec3), _compare_named_vec3);
+struct _named_vec3* _stdlib_qsort_named_vec3s(const size_t count,
+                                              struct _named_vec3 src[count]) {
+  qsort((void*)src, count, sizeof(struct _named_vec3), _compare_named_vec3);
   return src;
 }
 

@@ -7,7 +7,7 @@
 #include "stufflib_macros.h"
 #include "stufflib_png.h"
 
-bool segment(const sl_args args[const static 1]) {
+bool segment(const struct sl_args args[const static 1]) {
   if (sl_args_count_positional(args) != 3) {
     SL_LOG_ERROR("too few arguments to PNG segment");
     return false;
@@ -15,8 +15,8 @@ bool segment(const sl_args args[const static 1]) {
 
   bool ok = false;
 
-  sl_png_image src = {0};
-  sl_png_image dst = {0};
+  struct sl_png_image src = {0};
+  struct sl_png_image dst = {0};
 
   const char* const png_src_path = sl_args_get_positional(args, 1);
   const char* const png_dst_path = sl_args_get_positional(args, 2);
@@ -53,7 +53,7 @@ done:
   return ok;
 }
 
-bool info(const sl_args args[const static 1]) {
+bool info(const struct sl_args args[const static 1]) {
   if (sl_args_count_positional(args) != 2) {
     SL_LOG_ERROR("too few arguments to PNG info");
     return false;
@@ -61,8 +61,8 @@ bool info(const sl_args args[const static 1]) {
 
   bool ok = false;
 
-  sl_png_chunks chunks = {0};
-  sl_png_image img = {0};
+  struct sl_png_chunks chunks = {0};
+  struct sl_png_image img = {0};
 
   const char* const png_path = sl_args_get_positional(args, 1);
 
@@ -71,7 +71,7 @@ bool info(const sl_args args[const static 1]) {
   printf("\"chunks\":");
   sl_png_dump_chunk_type_freq(stdout, chunks);
 
-  sl_png_header header = sl_png_read_header(png_path);
+  struct sl_png_header header = sl_png_read_header(png_path);
   printf(",\"header\":");
   sl_png_dump_header(stdout, header);
 
@@ -93,7 +93,7 @@ done:
   return ok;
 }
 
-bool dump_raw(const sl_args args[const static 1]) {
+bool dump_raw(const struct sl_args args[const static 1]) {
   if (sl_args_count_positional(args) < 3) {
     SL_LOG_ERROR("too few arguments to PNG dump_raw");
     return false;
@@ -102,7 +102,7 @@ bool dump_raw(const sl_args args[const static 1]) {
   bool ok = false;
 
   const char* const png_path = sl_args_get_positional(args, 1);
-  sl_png_chunks img_chunks = sl_png_read_chunks(png_path);
+  struct sl_png_chunks img_chunks = sl_png_read_chunks(png_path);
   if (!img_chunks.count) {
     SL_LOG_ERROR("failed reading PNG IDAT chunks from %s", png_path);
     goto done;
@@ -114,7 +114,7 @@ bool dump_raw(const sl_args args[const static 1]) {
       if (!block_type) {
         break;
       }
-      const sl_png_chunk chunk = img_chunks.chunks[i];
+      const struct sl_png_chunk chunk = img_chunks.chunks[i];
       if (strncmp(sl_png_chunk_types[chunk.type], block_type, 4) == 0) {
         fwrite(chunk.data.data,
                sizeof(chunk.data.data[0]),
@@ -132,7 +132,7 @@ done:
   return ok;
 }
 
-void print_usage(const sl_args args[const static 1]) {
+void print_usage(const struct sl_args args[const static 1]) {
   fprintf(
       stderr,
       ("usage:"
@@ -149,7 +149,7 @@ void print_usage(const sl_args args[const static 1]) {
 }
 
 int main(int argc, char* const argv[argc + 1]) {
-  sl_args args = sl_args_from_argv(argc, argv);
+  struct sl_args args = sl_args_from_argv(argc, argv);
   bool ok = false;
   const char* command = sl_args_get_positional(&args, 0);
   if (command) {

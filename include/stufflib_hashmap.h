@@ -18,52 +18,50 @@
 #define SL_HASHMAP_INIT_CAPACITY 64
 #endif
 
-typedef struct sl_hashmap_slot sl_hashmap_slot;
 struct sl_hashmap_slot {
   bool filled;
-  sl_data key;
+  struct sl_data key;
   size_t value;
 };
 
-typedef struct sl_hashmap sl_hashmap;
 struct sl_hashmap {
   size_t size;
   size_t capacity;
   size_t num_collisions;
-  sl_hashmap_slot* slots;
+  struct sl_hashmap_slot* slots;
 };
 
-sl_hashmap sl_hashmap_create() {
+struct sl_hashmap sl_hashmap_create() {
   const size_t capacity = SL_HASHMAP_INIT_CAPACITY;
   assert(capacity);
-  return (sl_hashmap){
+  return (struct sl_hashmap){
       .capacity = capacity,
-      .slots = sl_alloc(capacity, sizeof(sl_hashmap_slot)),
+      .slots = sl_alloc(capacity, sizeof(struct sl_hashmap_slot)),
   };
 }
 
 void sl_hashmap_delete_slots(const size_t capacity,
-                             sl_hashmap_slot slots[capacity]) {
+                             struct sl_hashmap_slot slots[capacity]) {
   for (size_t i = 0; i < capacity; ++i) {
     sl_data_delete(&(slots[i].key));
   }
   sl_free(slots);
 }
 
-void sl_hashmap_delete(sl_hashmap map[const static 1]) {
+void sl_hashmap_delete(struct sl_hashmap map[const static 1]) {
   sl_hashmap_delete_slots(map->capacity, map->slots);
-  *map = (sl_hashmap){0};
+  *map = (struct sl_hashmap){0};
 }
 
-sl_hashmap_slot* sl_hashmap_get(sl_hashmap map[const static 1],
-                                sl_data key[const static 1]) {
+struct sl_hashmap_slot* sl_hashmap_get(struct sl_hashmap map[const static 1],
+                                       struct sl_data key[const static 1]) {
   size_t index = sl_hash_crc32_bytes(key->size, key->data);
   for (size_t probe = 0;; ++probe) {
     // https://en.wikipedia.org/wiki/Quadratic_probing#Quadratic_function
     // accessed 2023-02-06
     index += (probe + probe * probe) / 2;
     index %= map->capacity;
-    sl_hashmap_slot* slot = map->slots + index;
+    struct sl_hashmap_slot* slot = map->slots + index;
     assert(slot);
     if (!slot->filled || sl_data_compare(&(slot->key), key) == 0) {
       return slot;
@@ -72,26 +70,26 @@ sl_hashmap_slot* sl_hashmap_get(sl_hashmap map[const static 1],
   }
 }
 
-void sl_hashmap_set(sl_hashmap map[const static 1],
-                    sl_data key[const static 1],
+void sl_hashmap_set(struct sl_hashmap map[const static 1],
+                    struct sl_data key[const static 1],
                     const size_t value) {
-  *sl_hashmap_get(map, key) = (sl_hashmap_slot){
+  *sl_hashmap_get(map, key) = (struct sl_hashmap_slot){
       .filled = true,
       .key = sl_data_copy(key),
       .value = value,
   };
 }
 
-void sl_hashmap_resize(sl_hashmap map[const static 1],
+void sl_hashmap_resize(struct sl_hashmap map[const static 1],
                        const size_t new_capacity) {
   assert(new_capacity);
   assert(new_capacity >= map->size);
-  sl_hashmap_slot* const old_slots = map->slots;
+  struct sl_hashmap_slot* const old_slots = map->slots;
   const size_t old_capacity = map->capacity;
-  map->slots = sl_alloc(new_capacity, sizeof(sl_hashmap_slot));
+  map->slots = sl_alloc(new_capacity, sizeof(struct sl_hashmap_slot));
   map->capacity = new_capacity;
   for (size_t i = 0; i < old_capacity; ++i) {
-    sl_hashmap_slot slot = old_slots[i];
+    struct sl_hashmap_slot slot = old_slots[i];
     if (slot.filled) {
       sl_hashmap_set(map, &slot.key, slot.value);
     }
@@ -99,19 +97,19 @@ void sl_hashmap_resize(sl_hashmap map[const static 1],
   sl_hashmap_delete_slots(old_capacity, old_slots);
 }
 
-double sl_hashmap_load_factor(sl_hashmap map[const static 1]) {
+double sl_hashmap_load_factor(struct sl_hashmap map[const static 1]) {
   assert(map->capacity);
   return (double)map->size / (double)map->capacity;
 }
 
-bool sl_hashmap_contains(sl_hashmap map[const static 1],
-                         sl_data key[const static 1]) {
-  sl_hashmap_slot* slot = sl_hashmap_get(map, key);
+bool sl_hashmap_contains(struct sl_hashmap map[const static 1],
+                         struct sl_data key[const static 1]) {
+  struct sl_hashmap_slot* slot = sl_hashmap_get(map, key);
   return slot->filled && sl_data_compare(&(slot->key), key) == 0;
 }
 
-void sl_hashmap_insert(sl_hashmap map[const static 1],
-                       sl_data key[const static 1],
+void sl_hashmap_insert(struct sl_hashmap map[const static 1],
+                       struct sl_data key[const static 1],
                        const size_t value) {
   assert(map->size < map->capacity);
   sl_hashmap_set(map, key, value);
@@ -122,9 +120,9 @@ void sl_hashmap_insert(sl_hashmap map[const static 1],
   }
 }
 
-size_t sl_hashmap_iter_find_next(sl_iterator iter[const static 1],
+size_t sl_hashmap_iter_find_next(struct sl_iterator iter[const static 1],
                                  const size_t begin) {
-  const sl_hashmap* map = iter->data;
+  const struct sl_hashmap* map = iter->data;
   size_t i = begin;
   while (i < map->capacity && !(map->slots[i].filled)) {
     ++i;
@@ -132,23 +130,24 @@ size_t sl_hashmap_iter_find_next(sl_iterator iter[const static 1],
   return i;
 }
 
-void* sl_hashmap_iter_get_item(sl_iterator iter[const static 1]) {
-  sl_hashmap* map = iter->data;
+void* sl_hashmap_iter_get_item(struct sl_iterator iter[const static 1]) {
+  struct sl_hashmap* map = iter->data;
   return map->slots + iter->index;
 }
 
-void sl_hashmap_iter_advance(sl_iterator iter[const static 1]) {
+void sl_hashmap_iter_advance(struct sl_iterator iter[const static 1]) {
   iter->index = sl_hashmap_iter_find_next(iter, iter->index + 1);
   iter->pos += 1;
 }
 
-bool sl_hashmap_iter_is_done(sl_iterator iter[const static 1]) {
-  const sl_hashmap* map = iter->data;
+bool sl_hashmap_iter_is_done(struct sl_iterator iter[const static 1]) {
+  const struct sl_hashmap* map = iter->data;
   return iter->index == map->capacity;
 }
 
-sl_iterator sl_hashmap_iter(const sl_hashmap map[const static 1]) {
-  sl_iterator iter = (sl_iterator){
+struct sl_iterator sl_hashmap_iter(
+    const struct sl_hashmap map[const static 1]) {
+  struct sl_iterator iter = (struct sl_iterator){
       .data = (void*)map,
       .get_item = sl_hashmap_iter_get_item,
       .advance = sl_hashmap_iter_advance,

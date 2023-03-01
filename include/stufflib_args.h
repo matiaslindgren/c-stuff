@@ -8,7 +8,6 @@
 #include "stufflib_macros.h"
 #include "stufflib_memory.h"
 
-typedef struct sl_args sl_args;
 struct sl_args {
   char* program;
   // pointers to main argv
@@ -16,7 +15,7 @@ struct sl_args {
   char* const** optional;
 };
 
-sl_args sl_args_from_argv(const int argc, char* const argv[argc + 1]) {
+struct sl_args sl_args_from_argv(const int argc, char* const argv[argc + 1]) {
   size_t num_required = 0;
   for (size_t i = 1; i < argc; ++i) {
     num_required += argv[i][0] != '-';
@@ -38,20 +37,20 @@ sl_args sl_args_from_argv(const int argc, char* const argv[argc + 1]) {
     }
   }
 
-  return (sl_args){
+  return (struct sl_args){
       .program = argv[0],
       .required = required,
       .optional = optional,
   };
 }
 
-void sl_args_destroy(sl_args args[const static 1]) {
+void sl_args_destroy(struct sl_args args[const static 1]) {
   sl_free(args->required);
   sl_free(args->optional);
-  *args = (sl_args){0};
+  *args = (struct sl_args){0};
 }
 
-char* const sl_args_get_positional(const sl_args args[const static 1],
+char* const sl_args_get_positional(const struct sl_args args[const static 1],
                                    const size_t pos) {
   for (size_t i = 0; args->required[i]; ++i) {
     if (i == pos) {
@@ -61,7 +60,7 @@ char* const sl_args_get_positional(const sl_args args[const static 1],
   return nullptr;
 }
 
-size_t sl_args_count_positional(const sl_args args[const static 1]) {
+size_t sl_args_count_positional(const struct sl_args args[const static 1]) {
   size_t count = 0;
   while (args->required[count]) {
     ++count;
@@ -69,7 +68,7 @@ size_t sl_args_count_positional(const sl_args args[const static 1]) {
   return count;
 }
 
-bool sl_args_parse_flag(const sl_args args[const static 1],
+bool sl_args_parse_flag(const struct sl_args args[const static 1],
                         const char arg[const static 1]) {
   for (size_t i = 0; args->optional[i]; ++i) {
     char* const opt = *args->optional[i];
@@ -80,7 +79,7 @@ bool sl_args_parse_flag(const sl_args args[const static 1],
   return false;
 }
 
-size_t sl_args_parse_uint(const sl_args args[const static 1],
+size_t sl_args_parse_uint(const struct sl_args args[const static 1],
                           const char arg[const static 1],
                           const int base) {
   const size_t arg_len = strlen(arg);

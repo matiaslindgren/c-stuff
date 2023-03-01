@@ -13,7 +13,7 @@
 
 bool test_string_init(const bool verbose) {
   for (size_t i = 0; i < SL_ARRAY_LEN(hello_utf8); ++i) {
-    sl_string str = sl_string_from_utf8(hello_utf8 + i);
+    struct sl_string str = sl_string_from_utf8(hello_utf8 + i);
     assert(str.length == decoded_lengths[i]);
     const size_t data_size = str.utf8_data.size;
     assert(data_size == hello_utf8[i].size + 1);
@@ -27,17 +27,17 @@ bool test_string_init(const bool verbose) {
 }
 
 bool test_string_utf8_view(const bool verbose) {
-  sl_string empty_str = sl_string_from_utf8(&(sl_data){0});
+  struct sl_string empty_str = sl_string_from_utf8(&(struct sl_data){0});
   assert(empty_str.length == 0);
   assert(empty_str.utf8_data.size == 1);
   assert(empty_str.utf8_data.data[0] == 0);
-  sl_data empty_view = sl_string_view_utf8_data(&empty_str);
+  struct sl_data empty_view = sl_string_view_utf8_data(&empty_str);
   assert(empty_view.size == 0);
   assert(empty_view.data == nullptr);
   sl_string_delete(&empty_str);
   for (size_t i = 0; i < SL_ARRAY_LEN(hello_utf8); ++i) {
-    sl_string str = sl_string_from_utf8(hello_utf8 + i);
-    sl_data view = sl_string_view_utf8_data(&str);
+    struct sl_string str = sl_string_from_utf8(hello_utf8 + i);
+    struct sl_data view = sl_string_view_utf8_data(&str);
     assert(view.size == hello_utf8[i].size);
     for (size_t c = 0; c < view.size; ++c) {
       assert(view.data[c] == hello_utf8[i].data[c]);
@@ -50,13 +50,15 @@ bool test_string_utf8_view(const bool verbose) {
 bool test_string_slice(const bool verbose) {
   size_t decoded_pos = 0;
   for (size_t i = 0; i < SL_ARRAY_LEN(hello_utf8); ++i) {
-    sl_string str = sl_string_from_utf8(hello_utf8 + i);
+    struct sl_string str = sl_string_from_utf8(hello_utf8 + i);
     for (size_t substr_len = 0; substr_len <= str.length; ++substr_len) {
       for (size_t begin = 0; begin + substr_len <= str.length; ++begin) {
-        sl_string substr = sl_string_slice(&str, begin, begin + substr_len);
+        struct sl_string substr =
+            sl_string_slice(&str, begin, begin + substr_len);
         assert(substr.length == substr_len);
-        sl_data view = sl_string_view_utf8_data(&substr);
-        for (sl_iterator iter = sl_unicode_iter(&view); !iter.is_done(&iter);
+        struct sl_data view = sl_string_view_utf8_data(&substr);
+        for (struct sl_iterator iter = sl_unicode_iter(&view);
+             !iter.is_done(&iter);
              iter.advance(&iter)) {
           const char32_t codepoint = sl_unicode_iter_decode_item(&iter);
           assert(codepoint == decoded_strings[decoded_pos + begin + iter.pos]);
@@ -95,7 +97,7 @@ bool test_init_from_file(const bool verbose) {
     fclose(fp);
     const size_t expected_str_length = strtoull(tmp, 0, 10);
 
-    sl_string str = sl_string_from_file(input_path);
+    struct sl_string str = sl_string_from_file(input_path);
     assert(str.length == expected_str_length);
     sl_string_delete(&str);
   }

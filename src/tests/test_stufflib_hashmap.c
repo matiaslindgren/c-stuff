@@ -10,12 +10,12 @@
 #include "stufflib_hashmap.h"
 
 bool test_empty(const bool verbose) {
-  sl_hashmap map = sl_hashmap_create();
+  struct sl_hashmap map = sl_hashmap_create();
   assert(map.size == 0);
   assert(map.capacity == 2);
   assert(map.slots != nullptr);
 
-  sl_data keys[] = {
+  struct sl_data keys[] = {
       sl_data_from_str("hello"),
       sl_data_from_str(" "),
       sl_data_from_str("there"),
@@ -35,8 +35,8 @@ bool test_empty(const bool verbose) {
 }
 
 bool test_insert_single_element(const bool verbose) {
-  sl_hashmap map = sl_hashmap_create();
-  sl_data key_hello = sl_data_from_str("hello");
+  struct sl_hashmap map = sl_hashmap_create();
+  struct sl_data key_hello = sl_data_from_str("hello");
 
   assert(map.size == 0);
   assert(map.capacity == 2);
@@ -60,9 +60,9 @@ bool test_insert_single_element(const bool verbose) {
 }
 
 bool test_insert_two_elements_resizes(const bool verbose) {
-  sl_hashmap map = sl_hashmap_create();
-  sl_data key_hello = sl_data_from_str("hello");
-  sl_data key_there = sl_data_from_str("there");
+  struct sl_hashmap map = sl_hashmap_create();
+  struct sl_data key_hello = sl_data_from_str("hello");
+  struct sl_data key_there = sl_data_from_str("there");
 
   assert(map.size == 0);
   assert(map.capacity == 2);
@@ -83,8 +83,8 @@ bool test_insert_two_elements_resizes(const bool verbose) {
 }
 
 bool test_update_single_element(const bool verbose) {
-  sl_hashmap map = sl_hashmap_create();
-  sl_data key_hello = sl_data_from_str("hello");
+  struct sl_hashmap map = sl_hashmap_create();
+  struct sl_data key_hello = sl_data_from_str("hello");
 
   sl_hashmap_insert(&map, &key_hello, 1);
   assert(sl_hashmap_contains(&map, &key_hello));
@@ -101,7 +101,7 @@ bool test_update_single_element(const bool verbose) {
 }
 
 bool test_multiple_resizes_retain_slots(const bool verbose) {
-  sl_hashmap map = sl_hashmap_create();
+  struct sl_hashmap map = sl_hashmap_create();
   const char* keys[] = {
       "ten",
       "eleven",
@@ -143,12 +143,12 @@ bool test_multiple_resizes_retain_slots(const bool verbose) {
   for (size_t i = 0; i < n; ++i) {
     assert(map.size == i);
     assert(map.capacity == expected_capacities[i]);
-    sl_data key1 = sl_data_from_str(keys[i]);
+    struct sl_data key1 = sl_data_from_str(keys[i]);
     assert(!sl_hashmap_contains(&map, &key1));
     assert(sl_hashmap_get(&map, &key1));
     assert(!(sl_hashmap_get(&map, &key1)->filled));
     for (size_t j = 0; j < i; ++j) {
-      sl_data key2 = sl_data_from_str(keys[j]);
+      struct sl_data key2 = sl_data_from_str(keys[j]);
       assert(sl_hashmap_contains(&map, &key2));
       assert(sl_hashmap_get(&map, &key2));
       assert(sl_hashmap_get(&map, &key2)->value == values[j]);
@@ -164,7 +164,7 @@ bool test_multiple_resizes_retain_slots(const bool verbose) {
 }
 
 bool test_slot_iterator(const bool verbose) {
-  sl_hashmap map = sl_hashmap_create();
+  struct sl_hashmap map = sl_hashmap_create();
   const char* keys[] = {
       "ten",
       "eleven",
@@ -179,15 +179,15 @@ bool test_slot_iterator(const bool verbose) {
   };
   const size_t n = SL_ARRAY_LEN(keys);
   for (size_t i = 0; i < n; ++i) {
-    sl_data key = sl_data_from_str(keys[i]);
+    struct sl_data key = sl_data_from_str(keys[i]);
     sl_hashmap_insert(&map, &key, i);
     sl_data_delete(&key);
   }
-  sl_iterator iter = sl_hashmap_iter(&map);
+  struct sl_iterator iter = sl_hashmap_iter(&map);
   for (size_t i = 0; i < n; ++i) {
     assert(!iter.is_done(&iter));
     assert(iter.pos == i);
-    sl_hashmap_slot* slot = iter.get_item(&iter);
+    struct sl_hashmap_slot* slot = iter.get_item(&iter);
     assert(slot);
     assert(iter.index == slot - map.slots);
     assert(slot->filled);

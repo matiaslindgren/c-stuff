@@ -12,15 +12,14 @@
 
 #define SL_FILE_BUFFER_CAPACITY 4096
 
-typedef struct sl_file_buffer sl_file_buffer;
 struct sl_file_buffer {
   const char* filename;
   FILE* restrict file;
   size_t capacity;
-  sl_data data;
+  struct sl_data data;
 };
 
-void sl_file_iter_read_data(sl_file_buffer buffer[const static 1]) {
+void sl_file_iter_read_data(struct sl_file_buffer buffer[const static 1]) {
   buffer->data.size = fread(buffer->data.data,
                             sizeof(unsigned char),
                             buffer->capacity,
@@ -32,25 +31,25 @@ void sl_file_iter_read_data(sl_file_buffer buffer[const static 1]) {
   }
 }
 
-void* sl_file_iter_get_item(sl_iterator iter[const static 1]) {
-  sl_file_buffer* buffer = iter->data;
+void* sl_file_iter_get_item(struct sl_iterator iter[const static 1]) {
+  struct sl_file_buffer* buffer = iter->data;
   return &(buffer->data);
 }
 
-void sl_file_iter_advance(sl_iterator iter[const static 1]) {
-  sl_file_buffer* buffer = iter->data;
+void sl_file_iter_advance(struct sl_iterator iter[const static 1]) {
+  struct sl_file_buffer* buffer = iter->data;
   sl_file_iter_read_data(buffer);
   iter->index += buffer->data.size;
   iter->pos += 1;
 }
 
-bool sl_file_iter_is_done(sl_iterator iter[const static 1]) {
-  sl_file_buffer* buffer = iter->data;
+bool sl_file_iter_is_done(struct sl_iterator iter[const static 1]) {
+  struct sl_file_buffer* buffer = iter->data;
   return !iter->data || ferror(buffer->file) != 0 || buffer->data.size == 0;
 }
 
-sl_iterator sl_file_iter_open(const char filename[const static 1]) {
-  sl_iterator iter = (sl_iterator){
+struct sl_iterator sl_file_iter_open(const char filename[const static 1]) {
+  struct sl_iterator iter = (struct sl_iterator){
       .get_item = sl_file_iter_get_item,
       .advance = sl_file_iter_advance,
       .is_done = sl_file_iter_is_done,
@@ -61,8 +60,8 @@ sl_iterator sl_file_iter_open(const char filename[const static 1]) {
     goto done;
   }
 
-  sl_file_buffer* buffer = sl_alloc(1, sizeof(sl_file_buffer));
-  *buffer = (sl_file_buffer){
+  struct sl_file_buffer* buffer = sl_alloc(1, sizeof(struct sl_file_buffer));
+  *buffer = (struct sl_file_buffer){
       .file = file,
       .filename = filename,
       .capacity = SL_FILE_BUFFER_CAPACITY,
@@ -75,11 +74,11 @@ done:
   return iter;
 }
 
-void sl_file_iter_close(sl_iterator iter[const static 1]) {
+void sl_file_iter_close(struct sl_iterator iter[const static 1]) {
   if (!iter->data) {
     return;
   }
-  sl_file_buffer* buffer = iter->data;
+  struct sl_file_buffer* buffer = iter->data;
   fclose(buffer->file);
   sl_data_delete(&buffer->data);
   sl_free(iter->data);

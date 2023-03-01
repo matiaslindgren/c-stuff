@@ -182,7 +182,7 @@ char32_t sl_unicode_codepoint_from_utf8(
   }
 }
 
-bool sl_unicode_is_valid_utf8(const sl_data data[const static 1]) {
+bool sl_unicode_is_valid_utf8(const struct sl_data data[const static 1]) {
   size_t byte_pos = 0;
   while (byte_pos < data->size) {
     const size_t codepoint_width =
@@ -196,35 +196,35 @@ bool sl_unicode_is_valid_utf8(const sl_data data[const static 1]) {
   return byte_pos == data->size;
 }
 
-size_t sl_unicode_iter_get_item_width(sl_iterator iter[const static 1]) {
-  const sl_data* data = iter->data;
+size_t sl_unicode_iter_get_item_width(struct sl_iterator iter[const static 1]) {
+  const struct sl_data* data = iter->data;
   const unsigned char* item = data->data + iter->index;
   return sl_unicode_codepoint_width_from_utf8(data->size - iter->index, item);
 }
 
-void sl_unicode_iter_advance(sl_iterator iter[const static 1]) {
+void sl_unicode_iter_advance(struct sl_iterator iter[const static 1]) {
   // TODO find next valid code point instead of advance by 1
   const size_t codepoint_width = sl_unicode_iter_get_item_width(iter);
   iter->index += SL_MAX(1, codepoint_width);
   iter->pos += 1;
 }
 
-bool sl_unicode_iter_is_done(sl_iterator iter[const static 1]) {
-  const sl_data* data = iter->data;
+bool sl_unicode_iter_is_done(struct sl_iterator iter[const static 1]) {
+  const struct sl_data* data = iter->data;
   return iter->index >= data->size;
 }
 
-void* sl_unicode_iter_get_item(sl_iterator iter[const static 1]) {
+void* sl_unicode_iter_get_item(struct sl_iterator iter[const static 1]) {
   return sl_data_iter_get_item(iter);
 }
 
-char32_t sl_unicode_iter_decode_item(sl_iterator iter[const static 1]) {
+char32_t sl_unicode_iter_decode_item(struct sl_iterator iter[const static 1]) {
   return sl_unicode_codepoint_from_utf8(sl_unicode_iter_get_item_width(iter),
                                         iter->get_item(iter));
 }
 
-sl_iterator sl_unicode_iter(const sl_data data[const static 1]) {
-  return (sl_iterator){
+struct sl_iterator sl_unicode_iter(const struct sl_data data[const static 1]) {
+  return (struct sl_iterator){
       .data = (void*)data,
       .get_item = sl_unicode_iter_get_item,
       .advance = sl_unicode_iter_advance,
@@ -232,11 +232,11 @@ sl_iterator sl_unicode_iter(const sl_data data[const static 1]) {
   };
 }
 
-size_t sl_unicode_length(const sl_data data[const static 1]) {
+size_t sl_unicode_length(const struct sl_data data[const static 1]) {
   if (!sl_unicode_is_valid_utf8(data)) {
     return 0;
   }
-  sl_iterator iter = sl_unicode_iter(data);
+  struct sl_iterator iter = sl_unicode_iter(data);
   while (!iter.is_done(&iter)) {
     iter.advance(&iter);
   }

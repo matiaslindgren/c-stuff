@@ -17,7 +17,7 @@ bool test_read_single_pixel_chunks(const bool verbose) {
     if (verbose) {
       printf("%s\n", png_path);
     }
-    sl_png_chunks chunks = sl_png_read_chunks(png_path);
+    struct sl_png_chunks chunks = sl_png_read_chunks(png_path);
     assert(chunks.count == 3);
     assert(chunks.chunks[0].type == sl_png_IHDR);
     assert(chunks.chunks[0].data.size == 13);
@@ -35,7 +35,7 @@ bool test_read_large_image_with_many_chunks(const bool verbose) {
   if (verbose) {
     printf("%s\n", png_path);
   }
-  sl_png_chunks chunks = sl_png_read_chunks(png_path);
+  struct sl_png_chunks chunks = sl_png_read_chunks(png_path);
   assert(chunks.count == 6);
   assert(chunks.chunks[0].type == sl_png_IHDR);
   assert(chunks.chunks[0].data.size == 13);
@@ -62,7 +62,7 @@ bool test_read_single_pixel_header(const bool verbose) {
     if (verbose) {
       printf("%s\n", png_path);
     }
-    sl_png_header pixel = sl_png_read_header(png_path);
+    struct sl_png_header pixel = sl_png_read_header(png_path);
     if (!pixel.width) {
       return false;
     }
@@ -83,7 +83,7 @@ bool test_read_img_header(const bool verbose) {
     if (verbose) {
       printf("%s\n", png_path);
     }
-    sl_png_header white_square = sl_png_read_header(png_path);
+    struct sl_png_header white_square = sl_png_read_header(png_path);
     if (!white_square.width) {
       return false;
     }
@@ -101,7 +101,7 @@ bool test_read_img_header(const bool verbose) {
     if (verbose) {
       printf("%s\n", png_path);
     }
-    sl_png_header github_squares = sl_png_read_header(png_path);
+    struct sl_png_header github_squares = sl_png_read_header(png_path);
     if (!github_squares.width) {
       return false;
     }
@@ -119,7 +119,7 @@ bool test_read_img_header(const bool verbose) {
     if (verbose) {
       printf("%s\n", png_path);
     }
-    sl_png_header github_profile = sl_png_read_header(png_path);
+    struct sl_png_header github_profile = sl_png_read_header(png_path);
     if (!github_profile.width) {
       return false;
     }
@@ -137,7 +137,7 @@ bool test_read_img_header(const bool verbose) {
     if (verbose) {
       printf("%s\n", png_path);
     }
-    sl_png_header asan = sl_png_read_header(png_path);
+    struct sl_png_header asan = sl_png_read_header(png_path);
     if (!asan.width) {
       return false;
     }
@@ -159,7 +159,7 @@ static inline int _test_read_single_pixel(const char* png_path,
   if (verbose) {
     printf("%s\n", png_path);
   }
-  sl_png_image pixel = sl_png_read_image(png_path);
+  struct sl_png_image pixel = sl_png_read_image(png_path);
   if (!pixel.data.size) {
     SL_LOG_ERROR("failed reading PNG image %s", png_path);
     return false;
@@ -216,7 +216,7 @@ bool test_read_rgba_image_with_dynamic_compression(const bool verbose) {
   if (verbose) {
     printf("%s\n", png_path);
   }
-  sl_png_image white_square = sl_png_read_image(png_path);
+  struct sl_png_image white_square = sl_png_read_image(png_path);
   if (!white_square.data.size) {
     return false;
   }
@@ -259,7 +259,7 @@ bool test_read_small_images_with_dynamic_compression(const bool verbose) {
     if (verbose) {
       printf("%s\n", png_path);
     }
-    sl_png_image img = sl_png_read_image(png_path);
+    struct sl_png_image img = sl_png_read_image(png_path);
     if (!img.data.size) {
       SL_LOG_ERROR("failed reading PNG image %s", png_path);
       return false;
@@ -293,7 +293,7 @@ bool test_read_large_images_with_dynamic_compression(const bool verbose) {
     if (verbose) {
       printf("%s\n", png_path);
     }
-    sl_png_image square = sl_png_read_image(png_path);
+    struct sl_png_image square = sl_png_read_image(png_path);
     if (!square.data.size) {
       SL_LOG_ERROR("failed reading PNG image %s", png_path);
       return false;
@@ -323,7 +323,7 @@ bool test_read_large_images_with_dynamic_compression(const bool verbose) {
     if (verbose) {
       printf("%s\n", png_path);
     }
-    sl_png_image asan = sl_png_read_image(png_path);
+    struct sl_png_image asan = sl_png_read_image(png_path);
     if (!asan.data.size) {
       SL_LOG_ERROR("failed reading PNG image %s", png_path);
       return false;
@@ -348,7 +348,7 @@ int _test_read_write_read(const bool verbose, const char* img0_path) {
   if (verbose) {
     printf("%s\n", img0_path);
   }
-  sl_png_image img0 = sl_png_read_image(img0_path);
+  struct sl_png_image img0 = sl_png_read_image(img0_path);
   if (!img0.data.size) {
     SL_LOG_ERROR("failed reading PNG image %s", img0_path);
     return false;
@@ -358,7 +358,7 @@ int _test_read_write_read(const bool verbose, const char* img0_path) {
   }
   const char* img1_path = "/tmp/sl_test.png";
   assert(sl_png_write_image(img0, img1_path));
-  sl_png_image img1 = sl_png_read_image(img1_path);
+  struct sl_png_image img1 = sl_png_read_image(img1_path);
   if (img1.data.size != img0.data.size) {
     fprintf(stderr,
             "written %s img size %zu is not equal to size %zu of original %s\n",

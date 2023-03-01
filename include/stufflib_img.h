@@ -6,10 +6,10 @@
 #include "stufflib_png.h"
 #include "stufflib_unionfind.h"
 
-void sl_img_segment_rgb(sl_png_image dst[const static 1],
-                        const sl_png_image src[const static 1],
+void sl_img_segment_rgb(struct sl_png_image dst[const static 1],
+                        const struct sl_png_image src[const static 1],
                         const size_t threshold_percent) {
-  sl_unionfind segments = {0};
+  struct sl_unionfind segments = {0};
   size_t* segment_sizes = nullptr;
   double* segment_sums = nullptr;
 

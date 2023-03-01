@@ -10,12 +10,12 @@
 #include "stufflib_unicode.h"
 
 bool test_data(const bool verbose) {
-  sl_data data = {
+  struct sl_data data = {
       .size = 5,
       .data = (unsigned char[5]){0, 1, 2, 3, 4},
   };
   size_t i = 0;
-  sl_iterator iter = sl_data_iter(&data);
+  struct sl_iterator iter = sl_data_iter(&data);
   for (; !iter.is_done(&iter); iter.advance(&iter)) {
     assert(iter.index == i);
     const unsigned char* item = iter.get_item(&iter);
@@ -27,18 +27,20 @@ bool test_data(const bool verbose) {
   return true;
 }
 
-void* sl_cstr_iter_get_item(sl_iterator iter[const static 1]) {
+void* sl_cstr_iter_get_item(struct sl_iterator iter[const static 1]) {
   return ((char*)iter->data) + iter->index;
 }
 
-void sl_cstr_iter_advance(sl_iterator iter[const static 1]) { ++(iter->index); }
+void sl_cstr_iter_advance(struct sl_iterator iter[const static 1]) {
+  ++(iter->index);
+}
 
-bool sl_cstr_iter_is_done(sl_iterator iter[const static 1]) {
+bool sl_cstr_iter_is_done(struct sl_iterator iter[const static 1]) {
   return ((char*)iter->data)[iter->index] == 0;
 }
 
-sl_iterator sl_cstr_iter(char str[const static 1]) {
-  return (sl_iterator){
+struct sl_iterator sl_cstr_iter(char str[const static 1]) {
+  return (struct sl_iterator){
       .index = 0,
       .data = (void*)str,
       .get_item = sl_cstr_iter_get_item,
@@ -61,7 +63,7 @@ bool test_cstr(const bool verbose) {
   for (size_t i_str = 0; i_str < SL_ARRAY_LEN(strings); ++i_str) {
     size_t i = 0;
     char* str = strings[i_str];
-    sl_iterator iter = sl_cstr_iter(str);
+    struct sl_iterator iter = sl_cstr_iter(str);
     for (; !iter.is_done(&iter); iter.advance(&iter)) {
       assert(iter.index == i);
       const char* ch = iter.get_item(&iter);

@@ -7,7 +7,8 @@
 #include "stufflib_macros.h"
 #include "stufflib_unionfind.h"
 
-int _check_roots(const sl_unionfind uf, size_t expected_roots[static 1]) {
+int _check_roots(const struct sl_unionfind uf,
+                 size_t expected_roots[static 1]) {
   for (size_t i = 0; i < uf.count; ++i) {
     const size_t root = sl_unionfind_find_root(&uf, i);
     if (root != expected_roots[i]) {
@@ -18,7 +19,7 @@ int _check_roots(const sl_unionfind uf, size_t expected_roots[static 1]) {
 }
 
 bool test_union_until_single_set(const bool verbose) {
-  sl_unionfind uf = {0};
+  struct sl_unionfind uf = {0};
   if (!sl_unionfind_init(&uf, 10)) {
     SL_LOG_ERROR("unable to allocate union find structure");
     return false;
@@ -83,7 +84,7 @@ bool test_union_until_single_set(const bool verbose) {
 }
 
 bool test_union_self(const bool verbose) {
-  sl_unionfind uf = {0};
+  struct sl_unionfind uf = {0};
   if (!sl_unionfind_init(&uf, 3)) {
     SL_LOG_ERROR("unable to allocate union find structure");
     return false;

@@ -5,7 +5,7 @@
 #include "stufflib_data.h"
 
 // clang-format off
-sl_data hello_utf8[] = {
+struct sl_data hello_utf8[] = {
   {.size=5,  .data=(unsigned char*)u8"hello"},
   {.size=18, .data=(unsigned char*)u8"नमस्ते"},
   {.size=27, .data=(unsigned char*)u8"გამარჯობა"},
