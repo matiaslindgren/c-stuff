@@ -1,7 +1,6 @@
 #ifndef _STUFFLIB_DATA_H_INCLUDED
 #define _STUFFLIB_DATA_H_INCLUDED
 #include <assert.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -128,22 +127,6 @@ int stufflib_data_compare(const stufflib_data lhs[const restrict static 1],
     return memcmp(lhs->data, rhs->data, STUFFLIB_MIN(lhs->size, rhs->size));
   }
   return (!rhs->data) - (!lhs->data);
-}
-
-void stufflib_data_fdump(FILE stream[const static 1],
-                         const stufflib_data data,
-                         const size_t bytes_per_line) {
-  for (size_t i = 0; i < data.size; ++i) {
-    if (i) {
-      if (i % bytes_per_line == 0) {
-        fprintf(stream, "\n");
-      } else if (i % 2 == 0) {
-        fprintf(stream, " ");
-      }
-    }
-    fprintf(stream, "%02x", data.data[i]);
-  }
-  fprintf(stream, "\n");
 }
 
 void* stufflib_data_iter_get_item(stufflib_iterator iter[const static 1]) {

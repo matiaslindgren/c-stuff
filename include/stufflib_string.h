@@ -1,9 +1,7 @@
 #ifndef _STUFFLIB_STRING_H_INCLUDED
 #define _STUFFLIB_STRING_H_INCLUDED
-#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <wchar.h>
 
 #include "stufflib_data.h"
 #include "stufflib_io.h"
@@ -101,17 +99,7 @@ stufflib_string stufflib_string_slice(const stufflib_string str[const static 1],
 bool stufflib_string_fprint(FILE stream[const static 1],
                             const stufflib_string str[const static 1]) {
   const stufflib_data utf8_data = stufflib_string_view_utf8_data(str);
-  for (stufflib_iterator iter = stufflib_unicode_iter(&utf8_data);
-       !iter.is_done(&iter);
-       iter.advance(&iter)) {
-    unsigned char* item = iter.get_item(&iter);
-    const size_t item_width = stufflib_unicode_iter_get_item_width(&iter);
-    const size_t wrote_count = fwrite(item, 1, item_width, stream);
-    if (wrote_count != item_width) {
-      return false;
-    }
-  }
-  return true;
+  return fwrite(utf8_data.data, 1, utf8_data.size, stream) == utf8_data.size;
 }
 
 #endif  // _STUFFLIB_STRING_H_INCLUDED

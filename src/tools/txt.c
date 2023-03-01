@@ -311,7 +311,6 @@ void print_usage(const stufflib_args args[const static 1]) {
 }
 
 int main(int argc, char* const argv[argc + 1]) {
-  setlocale(LC_ALL, "");
   stufflib_args args = stufflib_args_from_argv(argc, argv);
   bool ok = false;
   const char* command = stufflib_args_get_positional(&args, 0);

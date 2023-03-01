@@ -1,5 +1,7 @@
 FROM debian:sid-slim
 
+ENV LANG=C.UTF-8
+
 RUN apt update --yes \
   && apt install --yes curl \
   && curl --location https://apt.llvm.org/llvm-snapshot.gpg.key >> /etc/apt/trusted.gpg.d/apt.llvm.org.asc \
