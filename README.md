@@ -267,12 +267,11 @@ Vatn er ólífrænn lyktar-, bragð- og nær litlaus vökvi sem er lífsnauðsyn
 
 #### Slice lines
 ```
-./build/debug/tools/txt slicelines 307 332 ./src/tools/txt.c
+./build/debug/tools/txt slicelines 324 348 ./src/tools/txt.c
 ```
 **`stdout`**:
 ```
 int main(int argc, char* const argv[argc + 1]) {
-  setlocale(LC_ALL, "");
   stufflib_args args = stufflib_args_from_argv(argc, argv);
   bool ok = false;
   const char* command = stufflib_args_get_positional(&args, 0);
@@ -331,34 +330,51 @@ struct it {
 
 ## Combine commands by using `/dev/stdin` as input path
 
-### Find top 10 lines by frequency, ignore multiple spaces
+### Run preprocessor on source file and count 25 most common lines
 
 ```
-./build/debug/tools/txt replace '  ' '' ./src/tests/test_stufflib_unicode.c \
+clang-16 -std=c2x -E -I./include ./src/tools/txt.c \
+  | ./build/debug/tools/txt replace '  ' '' /dev/stdin \
   | ./build/debug/tools/txt linefreq /dev/stdin \
   | ./build/debug/tools/sort numeric --reverse /dev/stdin \
-  | ./build/debug/tools/txt slicelines 0 10 /dev/stdin
+  | ./build/debug/tools/txt slicelines 0 25 /dev/stdin
 ```
 **`stdout`**:
 ```
-21 }
-6 };
-5 return true;
-4 6,
-3 // 안녕하세요
-3 size_t codepoint_pos = 0;
-3 // hello
-3 // привіт
-3 ++codepoint_pos;
-3 // مرحبًا
+251 }
+24 };
+17 {
+13 goto done;
+11 } break;
+10 return false;
+9  __attribute__ ((__nothrow__ )) __attribute__ ((__pure__)) __attribute__ ((__nonnull__ (1, 2)));
+9  __attribute__ ((__const__));
+9 __attribute__ ((__const__));
+8 return dst;
+8 __extension__
+7 for (size_t i = 0; i < n; ++i) {
+6  __attribute__ ((__nothrow__ )) __attribute__ ((__nonnull__ (1)));
+6 } else {
+6 if (0x80 <= byte && byte <= 0xbf) {
+6 # 1 "/usr/include/aarch64-linux-gnu/bits/libc-header-start.h" 1 3 4
+6 bool ok = false;
+6 done:
+5 return 0;
+5 stufflib_string_delete(&content);
+5 # 1 "/usr/include/aarch64-linux-gnu/bits/wordsize.h" 1 3 4
+5  "\n"
+5 stufflib_string content = stufflib_string_from_file(path);
+5 const size_t args_count = stufflib_args_count_positional(args) - 1;
+5 return ok;
 ```
 
-### Format metadata fields in a PNG `tEXt` block
+### Format `NUL`-separated metadata fields in a PNG `tEXt` block
 ```sh
 ./build/debug/tools/png dump_raw ./docs/img/tokyo.png tEXt \
   | ./build/debug/tools/txt replace date: $'\n'date= /dev/stdin \
   | ./build/debug/tools/txt replace exif: $'\n'exif= /dev/stdin \
-  | ./build/debug/tools/txt replace 0x00 ': ' /dev/stdin
+  | ./build/debug/tools/txt replace 0x00 ': ' /dev/stdin \
+  && echo
 ```
 **`stdout`**:
 ```
