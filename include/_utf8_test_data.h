@@ -6,15 +6,15 @@
 
 // clang-format off
 stufflib_data hello_utf8[] = {
-  {.size=5,  .data=(char8_t*)u8"hello"},
-  {.size=18, .data=(char8_t*)u8"नमस्ते"},
-  {.size=27, .data=(char8_t*)u8"გამარჯობა"},
-  {.size=12, .data=(char8_t*)u8"مرحبًا"},
-  {.size=15, .data=(char8_t*)u8"こんにちは"},
-  {.size=9,  .data=(char8_t*)u8"今日は"},
-  {.size=15, .data=(char8_t*)u8"안녕하세요"},
-  {.size=12, .data=(char8_t*)u8"привіт"},
-  {.size=18, .data=(char8_t*)u8"สวัสดี"},
+  {.size=5,  .data=(unsigned char*)u8"hello"},
+  {.size=18, .data=(unsigned char*)u8"नमस्ते"},
+  {.size=27, .data=(unsigned char*)u8"გამარჯობა"},
+  {.size=12, .data=(unsigned char*)u8"مرحبًا"},
+  {.size=15, .data=(unsigned char*)u8"こんにちは"},
+  {.size=9,  .data=(unsigned char*)u8"今日は"},
+  {.size=15, .data=(unsigned char*)u8"안녕하세요"},
+  {.size=12, .data=(unsigned char*)u8"привіт"},
+  {.size=18, .data=(unsigned char*)u8"สวัสดี"},
 };
 
 char32_t decoded_strings[] = {
