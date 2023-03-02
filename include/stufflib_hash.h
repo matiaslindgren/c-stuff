@@ -17,7 +17,7 @@
 static uint32_t sl_hash_crc32_lut[0xff + 1] = {0};
 static int sl_hash_crc32_lut_computed = 0;
 
-void sl_hash_crc32_lut_init() {
+void sl_hash_crc32_lut_init(void) {
   for (size_t n = 0; n < SL_ARRAY_LEN(sl_hash_crc32_lut); ++n) {
     uint32_t c = n;
     for (size_t k = 0; k < CHAR_BIT; ++k) {

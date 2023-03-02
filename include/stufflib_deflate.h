@@ -43,7 +43,7 @@ struct _deflate_state {
   size_t src_bit;
 };
 
-static struct _length_codes _make_length_codes() {
+static struct _length_codes _make_length_codes(void) {
   struct _length_codes codes = {0};
   codes.lengths[0] = 3;
   for (size_t i = 1; i < SL_ARRAY_LEN(codes.lengths); ++i) {
@@ -55,7 +55,7 @@ static struct _length_codes _make_length_codes() {
   return codes;
 }
 
-static struct _distance_codes _make_distance_codes() {
+static struct _distance_codes _make_distance_codes(void) {
   struct _distance_codes codes = {0};
   codes.distances[0] = 1;
   for (size_t i = 0; i < SL_ARRAY_LEN(codes.distances); ++i) {
@@ -67,7 +67,7 @@ static struct _distance_codes _make_distance_codes() {
   return codes;
 }
 
-static struct sl_huffman_tree _make_fixed_literal_tree() {
+static struct sl_huffman_tree _make_fixed_literal_tree(void) {
   const size_t max_literal = 287;
   size_t* code_lengths = sl_alloc(max_literal + 1, sizeof(size_t));
   {
@@ -98,7 +98,7 @@ error:
   return (struct sl_huffman_tree){0};
 }
 
-static struct sl_huffman_tree _make_fixed_distance_tree() {
+static struct sl_huffman_tree _make_fixed_distance_tree(void) {
   const size_t max_dist = 31;
   size_t* code_lengths = sl_alloc(max_dist + 1, sizeof(size_t));
   for (size_t symbol = 0; symbol <= max_dist; ++symbol) {

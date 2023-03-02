@@ -31,7 +31,7 @@ struct sl_hashmap {
   struct sl_hashmap_slot* slots;
 };
 
-struct sl_hashmap sl_hashmap_create() {
+struct sl_hashmap sl_hashmap_create(void) {
   const size_t capacity = SL_HASHMAP_INIT_CAPACITY;
   assert(capacity);
   return (struct sl_hashmap){
