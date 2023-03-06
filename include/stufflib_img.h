@@ -18,7 +18,7 @@ void sl_img_segment_rgb(struct sl_png_image dst[const static 1],
   const size_t height = src->header.height + 2;
   const size_t bytes_per_px = 3;
   const double distance_threshold =
-      sl_math_clamp(0, (double)(threshold_percent) / 100, 1);
+      sl_math_clamp(0, threshold_percent / 100.0, 1);
 
   sl_unionfind_init(&segments, width * height);
   segment_sizes = sl_alloc(width * height, sizeof(size_t));
