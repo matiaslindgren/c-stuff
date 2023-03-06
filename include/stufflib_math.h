@@ -23,9 +23,7 @@ double sl_math_clamp(const double lo, const double mid, const double hi) {
   return fmin(hi, fmax(lo, mid));
 }
 
-double sl_math_inv(const double x) {
-  return 1.0 / x;
-}
+double sl_math_inv(const double x) { return 1.0 / x; }
 
 size_t sl_math_next_power_of_two(const size_t x1) {
   size_t x2 = 1;

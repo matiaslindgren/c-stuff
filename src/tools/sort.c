@@ -24,10 +24,7 @@ int compare_as_doubles(const void* lhs_data, const void* rhs_data) {
 }
 
 char** sort_doubles(const size_t count, char* lines[count]) {
-  return sl_sort_quicksort(lines,
-                           count,
-                           sizeof(char*),
-                           compare_as_doubles);
+  return sl_sort_quicksort(lines, count, sizeof(char*), compare_as_doubles);
 }
 
 int main(int argc, char* const argv[argc + 1]) {
