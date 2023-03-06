@@ -1,5 +1,5 @@
-#ifndef _SL_IMG_H_INCLUDED
-#define _SL_IMG_H_INCLUDED
+#ifndef SL_IMG_H_INCLUDED
+#define SL_IMG_H_INCLUDED
 
 #include "stufflib_macros.h"
 #include "stufflib_math.h"
@@ -121,4 +121,4 @@ void sl_img_segment_rgb(struct sl_png_image dst[const static 1],
   sl_free(segment_sums);
 }
 
-#endif  // _SL_IMG_H_INCLUDED
+#endif  // SL_IMG_H_INCLUDED

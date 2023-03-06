@@ -1,5 +1,5 @@
-#ifndef _SL_MACROS_H_INCLUDED
-#define _SL_MACROS_H_INCLUDED
+#ifndef SL_MACROS_H_INCLUDED
+#define SL_MACROS_H_INCLUDED
 
 #define SL_MIN(x, y) ((x) < (y) ? (x) : (y))
 #define SL_MAX(x, y) ((x) < (y) ? (y) : (x))
@@ -43,4 +43,4 @@
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;                 \
   }
 
-#endif  // _SL_MACROS_H_INCLUDED
+#endif  // SL_MACROS_H_INCLUDED

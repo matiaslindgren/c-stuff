@@ -1,5 +1,5 @@
-#ifndef _SL_PNG_H_INCLUDED
-#define _SL_PNG_H_INCLUDED
+#ifndef SL_PNG_H_INCLUDED
+#define SL_PNG_H_INCLUDED
 // Reference:
 // 1. "PNG (Portable Network Graphics) Specification, Version 1.2",
 //    http://www.libpng.org/pub/png/spec/1.2/PNG-Contents.html,
@@ -710,4 +710,4 @@ done:
   return write_ok;
 }
 
-#endif  // _SL_PNG_H_INCLUDED
+#endif  // SL_PNG_H_INCLUDED

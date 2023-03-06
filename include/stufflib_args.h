@@ -1,5 +1,5 @@
-#ifndef _SL_ARGS_H_INCLUDED
-#define _SL_ARGS_H_INCLUDED
+#ifndef SL_ARGS_H_INCLUDED
+#define SL_ARGS_H_INCLUDED
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -98,4 +98,4 @@ size_t sl_args_parse_uint(const struct sl_args args[const static 1],
   return 0;
 }
 
-#endif  // _SL_ARGS_H_INCLUDED
+#endif  // SL_ARGS_H_INCLUDED

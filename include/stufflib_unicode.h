@@ -1,5 +1,5 @@
-#ifndef _SL_UNICODE_H_INCLUDED
-#define _SL_UNICODE_H_INCLUDED
+#ifndef SL_UNICODE_H_INCLUDED
+#define SL_UNICODE_H_INCLUDED
 // Definition of well-formed UTF-8 sequences taken from the Unicode standard:
 // "The Unicode® Standard Version 15.0" – Core Specification
 // https://www.unicode.org/versions/Unicode15.0.0/ch03.pdf#G7404
@@ -248,4 +248,4 @@ size_t sl_unicode_length(const struct sl_data data[const static 1]) {
   return iter.pos;
 }
 
-#endif  // _SL_UNICODE_H_INCLUDED
+#endif  // SL_UNICODE_H_INCLUDED

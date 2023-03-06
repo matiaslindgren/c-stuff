@@ -1,5 +1,5 @@
-#ifndef _SL_DEFLATE_H_INCLUDED
-#define _SL_DEFLATE_H_INCLUDED
+#ifndef SL_DEFLATE_H_INCLUDED
+#define SL_DEFLATE_H_INCLUDED
 // DEFLATE decoder.
 // Only non-compressed encoding is implemented.
 //
@@ -432,4 +432,4 @@ size_t sl_deflate_uncompressed(struct sl_data dst, const struct sl_data src) {
   return dst_pos;
 }
 
-#endif  // _SL_DEFLATE_H_INCLUDED
+#endif  // SL_DEFLATE_H_INCLUDED

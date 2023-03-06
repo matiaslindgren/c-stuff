@@ -1,5 +1,5 @@
-#ifndef _SL_MEMORY_H_INCLUDED
-#define _SL_MEMORY_H_INCLUDED
+#ifndef SL_MEMORY_H_INCLUDED
+#define SL_MEMORY_H_INCLUDED
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -50,4 +50,4 @@ void* sl_realloc(void* data,
 
 void sl_free(void* data) { free(data); }
 
-#endif  // _SL_MEMORY_H_INCLUDED
+#endif  // SL_MEMORY_H_INCLUDED

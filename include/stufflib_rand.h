@@ -1,5 +1,5 @@
-#ifndef _SL_RAND_H_INCLUDED
-#define _SL_RAND_H_INCLUDED
+#ifndef SL_RAND_H_INCLUDED
+#define SL_RAND_H_INCLUDED
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
@@ -24,4 +24,4 @@ void sl_rand_set_zero_double(const size_t n,
   }
 }
 
-#endif  // _SL_RAND_H_INCLUDED
+#endif  // SL_RAND_H_INCLUDED

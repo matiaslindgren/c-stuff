@@ -1,5 +1,5 @@
-#ifndef _SL_HASH_H_INCLUDED
-#define _SL_HASH_H_INCLUDED
+#ifndef SL_HASH_H_INCLUDED
+#define SL_HASH_H_INCLUDED
 // CRC-32 adapted from the PNG specification
 // http://www.libpng.org/pub/png/spec/1.2/PNG-CRCAppendix.html
 // Accessed 2023-02-05
@@ -68,4 +68,4 @@ uint32_t sl_hash_adler32(const size_t count,
   return (b << 16) | a;
 }
 
-#endif  // _SL_HASH_H_INCLUDED
+#endif  // SL_HASH_H_INCLUDED

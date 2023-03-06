@@ -1,5 +1,5 @@
-#ifndef _SL_ITERATOR_H_INCLUDED
-#define _SL_ITERATOR_H_INCLUDED
+#ifndef SL_ITERATOR_H_INCLUDED
+#define SL_ITERATOR_H_INCLUDED
 #include <stdlib.h>
 #include <string.h>
 
@@ -18,4 +18,4 @@ struct sl_iterator {
   sl_iterator_is_done* is_done;
 };
 
-#endif  // _SL_ITERATOR_H_INCLUDED
+#endif  // SL_ITERATOR_H_INCLUDED

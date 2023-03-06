@@ -1,5 +1,5 @@
-#ifndef _SL_MATH_H_INCLUDED
-#define _SL_MATH_H_INCLUDED
+#ifndef SL_MATH_H_INCLUDED
+#define SL_MATH_H_INCLUDED
 #include <math.h>
 #include <stdlib.h>
 
@@ -145,4 +145,4 @@ void sl_math_linalg_matmul(const size_t nrows,
   }
 }
 
-#endif  // _SL_MATH_H_INCLUDED
+#endif  // SL_MATH_H_INCLUDED

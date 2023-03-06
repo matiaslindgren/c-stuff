@@ -1,5 +1,5 @@
-#ifndef _SL_HUFFMAN_H_INCLUDED
-#define _SL_HUFFMAN_H_INCLUDED
+#ifndef SL_HUFFMAN_H_INCLUDED
+#define SL_HUFFMAN_H_INCLUDED
 #include <stdlib.h>
 
 #include "stufflib_macros.h"
@@ -108,4 +108,4 @@ size_t sl_huffman_get(const struct sl_huffman_tree tree[const static 1],
   return tree->symbols[code_len - 1][code] - 1;
 }
 
-#endif  // _SL_HUFFMAN_H_INCLUDED
+#endif  // SL_HUFFMAN_H_INCLUDED

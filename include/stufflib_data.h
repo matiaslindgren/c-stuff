@@ -1,5 +1,5 @@
-#ifndef _SL_DATA_H_INCLUDED
-#define _SL_DATA_H_INCLUDED
+#ifndef SL_DATA_H_INCLUDED
+#define SL_DATA_H_INCLUDED
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -152,4 +152,4 @@ struct sl_iterator sl_data_iter(const struct sl_data data[const static 1]) {
   };
 }
 
-#endif  // _SL_DATA_H_INCLUDED
+#endif  // SL_DATA_H_INCLUDED

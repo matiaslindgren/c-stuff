@@ -1,5 +1,5 @@
-#ifndef _SL_STRING_H_INCLUDED
-#define _SL_STRING_H_INCLUDED
+#ifndef SL_STRING_H_INCLUDED
+#define SL_STRING_H_INCLUDED
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -100,4 +100,4 @@ bool sl_string_fprint(FILE stream[const static 1],
   return fwrite(utf8_data.data, 1, utf8_data.size, stream) == utf8_data.size;
 }
 
-#endif  // _SL_STRING_H_INCLUDED
+#endif  // SL_STRING_H_INCLUDED

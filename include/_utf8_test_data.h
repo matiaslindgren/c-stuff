@@ -1,5 +1,5 @@
-#ifndef __UTF8_TEST_DATA_H_INCLUDED
-#define __UTF8_TEST_DATA_H_INCLUDED
+#ifndef SL_UTF8_TEST_DATA_H_INCLUDED
+#define SL_UTF8_TEST_DATA_H_INCLUDED
 #include <uchar.h>
 
 #include "stufflib_data.h"
@@ -60,4 +60,4 @@ size_t decoded_lengths[] = {
 };
 // clang-format on
 
-#endif  // __UTF8_TEST_DATA_H_INCLUDED
+#endif  // SL_UTF8_TEST_DATA_H_INCLUDED

@@ -1,5 +1,5 @@
-#ifndef _SL_HASHMAP_H_INCLUDED
-#define _SL_HASHMAP_H_INCLUDED
+#ifndef SL_HASHMAP_H_INCLUDED
+#define SL_HASHMAP_H_INCLUDED
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -156,4 +156,4 @@ struct sl_iterator sl_hashmap_iter(
   return iter;
 }
 
-#endif  // _SL_HASHMAP_H_INCLUDED
+#endif  // SL_HASHMAP_H_INCLUDED

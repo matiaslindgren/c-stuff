@@ -1,5 +1,5 @@
-#ifndef _SL_TOKENIZER_H_INCLUDED
-#define _SL_TOKENIZER_H_INCLUDED
+#ifndef SL_TOKENIZER_H_INCLUDED
+#define SL_TOKENIZER_H_INCLUDED
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -78,4 +78,4 @@ struct sl_iterator sl_tokenizer_iter(
   };
 }
 
-#endif  // _SL_TOKENIZER_H_INCLUDED
+#endif  // SL_TOKENIZER_H_INCLUDED

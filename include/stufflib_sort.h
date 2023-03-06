@@ -1,5 +1,5 @@
-#ifndef _SL_SORT_H_INCLUDED
-#define _SL_SORT_H_INCLUDED
+#ifndef SL_SORT_H_INCLUDED
+#define SL_SORT_H_INCLUDED
 #include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -168,4 +168,4 @@ char** sl_sort_mergesort_str(const size_t count, char* src[count]) {
   return sl_sort_mergesort(src, count, sizeof(char*), sl_sort_compare_str);
 }
 
-#endif  // _SL_SORT_H_INCLUDED
+#endif  // SL_SORT_H_INCLUDED

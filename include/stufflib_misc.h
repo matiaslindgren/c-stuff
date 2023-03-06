@@ -1,5 +1,5 @@
-#ifndef _SL_MISC_H_INCLUDED
-#define _SL_MISC_H_INCLUDED
+#ifndef SL_MISC_H_INCLUDED
+#define SL_MISC_H_INCLUDED
 #include <limits.h>
 #include <stdlib.h>
 
@@ -59,4 +59,4 @@ size_t sl_misc_vmax_size_t(const size_t n, const size_t v[n]) {
   return res;
 }
 
-#endif  // _SL_MISC_H_INCLUDED
+#endif  // SL_MISC_H_INCLUDED

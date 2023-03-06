@@ -1,5 +1,5 @@
-#ifndef _SL_IO_H_INCLUDED
-#define _SL_IO_H_INCLUDED
+#ifndef SL_IO_H_INCLUDED
+#define SL_IO_H_INCLUDED
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -85,4 +85,4 @@ void sl_file_iter_close(struct sl_iterator iter[const static 1]) {
   iter->data = nullptr;
 }
 
-#endif  // _SL_IO_H_INCLUDED
+#endif  // SL_IO_H_INCLUDED
