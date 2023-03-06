@@ -51,8 +51,7 @@ struct sl_data sl_data_from_str(const char str[const static 1]) {
   if (!num_chars) {
     return sl_data_create(0);
   }
-  unsigned char* data = (unsigned char*)str;
-  struct sl_data str_view = sl_data_view(num_chars, data);
+  struct sl_data str_view = sl_data_view(num_chars, (unsigned char*)str);
   return sl_data_copy(&str_view);
 }
 

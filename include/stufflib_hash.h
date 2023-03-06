@@ -33,14 +33,15 @@ void sl_hash_crc32_lut_init(void) {
 
 uint32_t sl_hash_crc32(const uint32_t crc32_init,
                        const size_t count,
-                       const void* data) {
+                       const void* raw_data) {
   if (!sl_hash_crc32_lut_computed) {
     sl_hash_crc32_lut_init();
     sl_hash_crc32_lut_computed = 1;
   }
   uint32_t crc32 = crc32_init;
+  const unsigned char* data = raw_data;
   for (size_t i = 0; i < count; ++i) {
-    const size_t lut_index = (crc32 ^ ((unsigned char*)data)[i]) & 0xff;
+    const size_t lut_index = (crc32 ^ data[i]) & 0xff;
     crc32 = sl_hash_crc32_lut[lut_index] ^ (crc32 >> CHAR_BIT);
   }
   return crc32;

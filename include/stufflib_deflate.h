@@ -336,7 +336,7 @@ size_t sl_inflate(struct sl_data dst, const struct sl_data src) {
   };
 
   for (bool is_final_block = false; !is_final_block;) {
-    is_final_block = (bool)_next_bit(&state);
+    is_final_block = _next_bit(&state);
     enum block_type {
       no_compression = 0,
       fixed_huffman_trees = 1,
@@ -402,7 +402,7 @@ size_t sl_deflate_uncompressed(struct sl_data dst, const struct sl_data src) {
   for (bool is_final_block = false; !is_final_block;) {
     assert(src_pos < src.size);
     is_final_block = (src_pos + block_size) >= src.size;
-    dst.data[dst_pos++] = (int)is_final_block & 1;
+    dst.data[dst_pos++] = is_final_block & 1;
 
     const size_t dist_to_end = src.size - src_pos;
     const uint16_t block_len = SL_MIN(block_size, dist_to_end) & 0xffff;

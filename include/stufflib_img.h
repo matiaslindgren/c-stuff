@@ -30,7 +30,7 @@ void sl_img_segment_rgb(struct sl_png_image dst[const static 1],
       const size_t idx = row * width + col;
       segment_sizes[idx] = 1;
       for (size_t byte = 0; byte < bytes_per_px; ++byte) {
-        segment_sums[bytes_per_px * idx + byte] = (double)(pixel[byte]) / 255;
+        segment_sums[bytes_per_px * idx + byte] = pixel[byte] / 255.0;
       }
     }
   }
@@ -43,7 +43,7 @@ void sl_img_segment_rgb(struct sl_png_image dst[const static 1],
         const size_t cur_seg = sl_unionfind_find_root(&segments, cur_idx);
         const double* cur_sum = segment_sums + bytes_per_px * cur_seg;
         const double* cur_avg =
-            sl_math_linalg_scalar_vmul(1 / (double)(segment_sizes[cur_seg]),
+            sl_math_linalg_scalar_vmul(sl_math_inv(segment_sizes[cur_seg]),
                                        bytes_per_px,
                                        (double[3]){0},
                                        cur_sum);
@@ -56,7 +56,7 @@ void sl_img_segment_rgb(struct sl_png_image dst[const static 1],
         if (left_seg != cur_seg) {
           const double* left_sum = segment_sums + bytes_per_px * left_seg;
           const double* left_avg =
-              sl_math_linalg_scalar_vmul(1 / (double)(segment_sizes[left_seg]),
+              sl_math_linalg_scalar_vmul(sl_math_inv(segment_sizes[left_seg]),
                                          bytes_per_px,
                                          (double[3]){0},
                                          left_sum);
@@ -72,7 +72,7 @@ void sl_img_segment_rgb(struct sl_png_image dst[const static 1],
         if (above_seg != cur_seg) {
           const double* above_sum = segment_sums + bytes_per_px * above_seg;
           const double* above_avg =
-              sl_math_linalg_scalar_vmul(1 / (double)(segment_sizes[above_seg]),
+              sl_math_linalg_scalar_vmul(sl_math_inv(segment_sizes[above_seg]),
                                          bytes_per_px,
                                          (double[3]){0},
                                          above_sum);

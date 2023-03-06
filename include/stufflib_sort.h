@@ -21,8 +21,8 @@ void _sl_sort_mergesort_merge(const size_t size,
                               const size_t mid,
                               const size_t end,
                               sl_sort_compare* const compare) {
-  unsigned char* src = (unsigned char*)(src_raw);
-  unsigned char* dst = (unsigned char*)(dst_raw);
+  unsigned char* src = src_raw;
+  unsigned char* dst = dst_raw;
   size_t lhs = begin;
   size_t rhs = mid;
   size_t out = begin;
@@ -85,10 +85,9 @@ size_t _sl_sort_hoare_partition(const size_t count,
                                 const size_t lo,
                                 const size_t hi,
                                 sl_sort_compare* const compare) {
-  unsigned char* src = (unsigned char*)(src_raw);
-  unsigned char* tmp = (unsigned char*)(tmp_raw);
-  unsigned char* pivot = tmp;
-  unsigned char* swap_tmp = tmp + size;
+  unsigned char* src = src_raw;
+  unsigned char* pivot = tmp_raw;
+  unsigned char* swap_tmp = pivot + size;
 
   const size_t pivot_idx = sl_misc_midpoint(lo, hi);
   memcpy(pivot, src + pivot_idx * size, size);
@@ -141,39 +140,41 @@ void* sl_sort_quicksort(void* src,
   return src;
 }
 
-int sl_sort_compare_double(const void* lhs, const void* rhs) {
-  const double lhs_num = ((const double*)lhs)[0];
-  const double rhs_num = ((const double*)rhs)[0];
-  return (lhs_num > rhs_num) - (lhs_num < rhs_num);
+int sl_sort_compare_double(const void* lhs_data, const void* rhs_data) {
+  const double* lhs = lhs_data;
+  const double* rhs = rhs_data;
+  return (lhs[0] > rhs[0]) - (lhs[0] < rhs[0]);
 }
 
 double* sl_sort_quicksort_double(const size_t count, double src[count]) {
-  return sl_sort_quicksort((void*)src,
+  return sl_sort_quicksort(src,
                            count,
                            sizeof(double),
                            sl_sort_compare_double);
 }
 
 double* sl_sort_mergesort_double(const size_t count, double src[count]) {
-  return sl_sort_mergesort((void*)src,
+  return sl_sort_mergesort(src,
                            count,
                            sizeof(double),
                            sl_sort_compare_double);
 }
 
-int sl_sort_compare_str(const void* lhs, const void* rhs) {
-  return strcmp(((const char**)lhs)[0], ((const char**)rhs)[0]);
+int sl_sort_compare_str(const void* lhs_data, const void* rhs_data) {
+  const char*const* lhs = lhs_data;
+  const char*const* rhs = rhs_data;
+  return strcmp(lhs[0], rhs[0]);
 }
 
 char** sl_sort_quicksort_str(const size_t count, char* src[count]) {
-  return sl_sort_quicksort((void*)src,
+  return sl_sort_quicksort(src,
                            count,
                            sizeof(char*),
                            sl_sort_compare_str);
 }
 
 char** sl_sort_mergesort_str(const size_t count, char* src[count]) {
-  return sl_sort_mergesort((void*)src,
+  return sl_sort_mergesort(src,
                            count,
                            sizeof(char*),
                            sl_sort_compare_str);

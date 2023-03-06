@@ -314,11 +314,11 @@ struct sl_png_header sl_png_parse_header(const struct sl_png_chunk chunk) {
   return (struct sl_png_header){
       .width = sl_misc_parse_big_endian(4, data),
       .height = sl_misc_parse_big_endian(4, data + 4),
-      .bit_depth = (unsigned)(data[8]),
-      .color_type = (enum sl_png_color_type)(data[9]),
-      .compression = (unsigned)(data[10]),
-      .filter = (unsigned)(data[11]),
-      .interlace = (unsigned)(data[12]),
+      .bit_depth = data[8],
+      .color_type = data[9],
+      .compression = data[10],
+      .filter = data[11],
+      .interlace = data[12],
   };
 }
 

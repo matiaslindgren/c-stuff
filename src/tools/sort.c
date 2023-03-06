@@ -13,18 +13,18 @@ void print_usage(const struct sl_args args[const static 1]) {
   fprintf(stderr, "usage: %s { numeric | ascii } path\n", args->program);
 }
 
-int compare_as_doubles(const void* lhs, const void* rhs) {
-  const char* const lhs_str = ((const char**)lhs)[0];
-  const char* const rhs_str = ((const char**)rhs)[0];
-  const double lhs_num = strtod(lhs_str, 0);
+int compare_as_doubles(const void* lhs_data, const void* rhs_data) {
+  const char* const* lhs = lhs_data;
+  const char* const* rhs = rhs_data;
+  const double lhs_num = strtod(lhs[0], 0);
   assert(errno != ERANGE);
-  const double rhs_num = strtod(rhs_str, 0);
+  const double rhs_num = strtod(rhs[0], 0);
   assert(errno != ERANGE);
   return (lhs_num > rhs_num) - (lhs_num < rhs_num);
 }
 
 char** sort_doubles(const size_t count, char* lines[count]) {
-  return sl_sort_quicksort((void*)lines,
+  return sl_sort_quicksort(lines,
                            count,
                            sizeof(char*),
                            compare_as_doubles);
