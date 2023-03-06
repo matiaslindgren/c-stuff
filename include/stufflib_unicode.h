@@ -15,6 +15,7 @@
 #include "stufflib_macros.h"
 
 const char32_t sl_unicode_error_value = UINT_LEAST32_WIDTH;
+const size_t sl_unicode_error_width = 0;
 
 size_t sl_unicode_codepoint_width(const char32_t value) {
   if (value < 0x000080) {
@@ -29,7 +30,7 @@ size_t sl_unicode_codepoint_width(const char32_t value) {
   if (value < 0x110000) {
     return 4;
   }
-  return 0;
+  return sl_unicode_error_width;
 }
 
 size_t sl_unicode_codepoint_width_from_utf8(
@@ -52,11 +53,12 @@ size_t sl_unicode_codepoint_width_from_utf8(
     ill_formed,
   } state = start;
 
+  const size_t max_width = SL_MAX(4, size);
   size_t width = 0;
 
-  while (state != ill_formed && state != end && width < 4 && width < size) {
+  while (state != ill_formed && state != end && width < max_width) {
     const unsigned char byte = bytes[width++];
-    enum decode_state current_state = state;
+    const enum decode_state current_state = state;
     state = ill_formed;
     switch (current_state) {
       case start: {
@@ -147,7 +149,7 @@ size_t sl_unicode_codepoint_width_from_utf8(
   }
 
 error:
-  return 0;
+  return sl_unicode_error_width;
 }
 
 char32_t sl_unicode_codepoint_from_utf8(
@@ -188,7 +190,7 @@ bool sl_unicode_is_valid_utf8(const struct sl_data data[const static 1]) {
     const size_t codepoint_width =
         sl_unicode_codepoint_width_from_utf8(data->size - byte_pos,
                                              data->data + byte_pos);
-    if (codepoint_width == 0) {
+    if (codepoint_width == sl_unicode_error_width) {
       return false;
     }
     byte_pos += codepoint_width;
@@ -203,9 +205,12 @@ size_t sl_unicode_iter_get_item_width(struct sl_iterator iter[const static 1]) {
 }
 
 void sl_unicode_iter_advance(struct sl_iterator iter[const static 1]) {
-  // TODO find next valid code point instead of advance by 1
   const size_t codepoint_width = sl_unicode_iter_get_item_width(iter);
-  iter->index += SL_MAX(1, codepoint_width);
+  if (codepoint_width == sl_unicode_error_width) {
+    iter->index += 1;
+  } else {
+    iter->index += codepoint_width;
+  }
   iter->pos += 1;
 }
 

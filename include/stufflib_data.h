@@ -60,6 +60,7 @@ bool sl_data_is_hexadecimal_str(const struct sl_data src[const static 1]) {
 }
 
 struct sl_data sl_data_parse_hex(const struct sl_data src[const static 1]) {
+  assert(sl_data_is_hexadecimal_str(src));
   const size_t num_bytes = ((src->size - 2) + 1) / 2;
   struct sl_data dst = sl_data_create(num_bytes);
   for (size_t i_byte = 0; i_byte < dst.size; ++i_byte) {

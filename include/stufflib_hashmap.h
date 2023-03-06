@@ -98,8 +98,7 @@ void sl_hashmap_resize(struct sl_hashmap map[const static 1],
 }
 
 double sl_hashmap_load_factor(struct sl_hashmap map[const static 1]) {
-  assert(map->capacity);
-  return (double)map->size / (double)map->capacity;
+  return map->capacity ? (double)map->size / map->capacity : 1;
 }
 
 bool sl_hashmap_contains(struct sl_hashmap map[const static 1],
