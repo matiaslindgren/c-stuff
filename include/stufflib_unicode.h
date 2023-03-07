@@ -14,7 +14,7 @@
 #include "stufflib_iterator.h"
 #include "stufflib_macros.h"
 
-const char32_t sl_unicode_error_value = UINT_LEAST32_WIDTH;
+const char32_t sl_unicode_error_value = UINT_LEAST32_MAX;
 const size_t sl_unicode_error_width = 0;
 
 size_t sl_unicode_codepoint_width(const char32_t value) {
