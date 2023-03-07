@@ -13,12 +13,12 @@ struct sl_huffman_tree {
   size_t** symbols;
 };
 
-bool sl_huffman_init(struct sl_huffman_tree tree[static 1],
+void sl_huffman_init(struct sl_huffman_tree tree[static 1],
                      const size_t max_symbol,
                      const size_t code_lengths[const max_symbol + 1]) {
   if (!max_symbol) {
     *tree = (struct sl_huffman_tree){0};
-    return true;
+    return;
   }
 
   size_t* code_length_count = nullptr;
@@ -81,7 +81,6 @@ bool sl_huffman_init(struct sl_huffman_tree tree[static 1],
   sl_free(codes);
   sl_free(next_code);
   sl_free(code_length_count);
-  return tree->max_code_len > 0;
 }
 
 void sl_huffman_destroy(struct sl_huffman_tree tree[const static 1]) {
