@@ -144,8 +144,8 @@ void sl_png_image_destroy(struct sl_png_image image) {
   sl_data_delete(&(image.filter));
 }
 
-void sl_png_image_copy(struct sl_png_image dst[restrict static 1],
-                       const struct sl_png_image src[restrict static 1]) {
+void sl_png_image_copy(struct sl_png_image dst[static 1],
+                       const struct sl_png_image src[static 1]) {
   dst->header = src->header;
   dst->data = sl_data_copy(&(src->data));
   dst->filter = sl_data_copy(&(src->filter));

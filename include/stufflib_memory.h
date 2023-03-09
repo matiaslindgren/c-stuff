@@ -7,7 +7,7 @@
 #include "stufflib_macros.h"
 
 void sl_memset_explicit(const size_t size,
-                        unsigned char data[const restrict size],
+                        unsigned char data[const size],
                         const unsigned char value) {
   for (size_t i = 0; i < size; ++i) {
     data[i] = value;

@@ -14,7 +14,7 @@
 
 struct sl_file_buffer {
   const char* filename;
-  FILE* restrict file;
+  FILE* file;
   size_t capacity;
   struct sl_data data;
 };
@@ -55,7 +55,7 @@ struct sl_iterator sl_file_iter_open(const char filename[const static 1]) {
       .is_done = sl_file_iter_is_done,
   };
 
-  FILE* restrict file = fopen(filename, "rb");
+  FILE* file = fopen(filename, "rb");
   if (!file) {
     goto done;
   }

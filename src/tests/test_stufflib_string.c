@@ -90,7 +90,7 @@ bool test_init_from_file(const bool verbose) {
     sprintf(length_path,
             "./test-data/txt/wikipedia/water_%s_length.txt",
             languages[i]);
-    FILE* restrict fp = fopen(length_path, "rb");
+    FILE* fp = fopen(length_path, "rb");
     assert(fp);
     char tmp[200] = {0};
     assert(fread(tmp, 1, 200, fp));

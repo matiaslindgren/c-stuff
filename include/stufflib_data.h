@@ -75,8 +75,8 @@ struct sl_data sl_data_parse_hex(const struct sl_data src[const static 1]) {
 }
 
 struct sl_data sl_data_concat(
-    const struct sl_data data1[const restrict static 1],
-    const struct sl_data data2[const restrict static 1]) {
+    const struct sl_data data1[const static 1],
+    const struct sl_data data2[const static 1]) {
   struct sl_data dst = sl_data_create(data1->size + data2->size);
   if (data1->size) {
     memcpy(dst.data, data1->data, data1->size);
@@ -87,8 +87,8 @@ struct sl_data sl_data_concat(
   return dst;
 }
 
-void sl_data_extend(struct sl_data dst[restrict static 1],
-                    const struct sl_data src[const restrict static 1]) {
+void sl_data_extend(struct sl_data dst[static 1],
+                    const struct sl_data src[const static 1]) {
   struct sl_data tmp = sl_data_concat(dst, src);
   sl_data_delete(dst);
   *dst = tmp;
@@ -120,8 +120,8 @@ struct sl_data sl_data_find(const struct sl_data data[const static 1],
   return (struct sl_data){0};
 }
 
-int sl_data_compare(const struct sl_data lhs[const restrict static 1],
-                    const struct sl_data rhs[const restrict static 1]) {
+int sl_data_compare(const struct sl_data lhs[const static 1],
+                    const struct sl_data rhs[const static 1]) {
   if (lhs->data && rhs->data) {
     return memcmp(lhs->data, rhs->data, SL_MIN(lhs->size, rhs->size));
   }

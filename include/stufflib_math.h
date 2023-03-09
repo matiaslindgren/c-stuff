@@ -81,8 +81,8 @@ size_t* sl_math_factorize(size_t n) {
 
 double* sl_math_linalg_scalar_vmul(const double a,
                                    const size_t n,
-                                   double dst[restrict n],
-                                   const double src[restrict n]) {
+                                   double dst[n],
+                                   const double src[n]) {
   for (size_t i = 0; i < n; ++i) {
     dst[i] = a * src[i];
   }
@@ -90,9 +90,9 @@ double* sl_math_linalg_scalar_vmul(const double a,
 }
 
 double* sl_math_linalg_vadd(const size_t n,
-                            double dst[restrict n],
-                            const double lhs[restrict n],
-                            const double rhs[restrict n]) {
+                            double dst[n],
+                            const double lhs[n],
+                            const double rhs[n]) {
   for (size_t i = 0; i < n; ++i) {
     dst[i] = lhs[i] + rhs[i];
   }
@@ -100,9 +100,9 @@ double* sl_math_linalg_vadd(const size_t n,
 }
 
 double* sl_math_linalg_vsub(const size_t n,
-                            double dst[restrict n],
-                            const double lhs[restrict n],
-                            const double rhs[restrict n]) {
+                            double dst[n],
+                            const double lhs[n],
+                            const double rhs[n]) {
   for (size_t i = 0; i < n; ++i) {
     dst[i] = lhs[i] - rhs[i];
   }
@@ -110,14 +110,14 @@ double* sl_math_linalg_vsub(const size_t n,
 }
 
 void sl_math_linalg_vadd_inplace(const size_t n,
-                                 double dst[restrict n],
-                                 const double src[restrict n]) {
+                                 double dst[n],
+                                 const double src[n]) {
   for (size_t i = 0; i < n; ++i) {
     dst[i] += src[i];
   }
 }
 
-double sl_math_linalg_norm2(const size_t n, const double v[restrict n]) {
+double sl_math_linalg_norm2(const size_t n, const double v[n]) {
   double s = 0;
   for (size_t i = 0; i < n; ++i) {
     s += v[i] * v[i];
@@ -126,8 +126,8 @@ double sl_math_linalg_norm2(const size_t n, const double v[restrict n]) {
 }
 
 double sl_math_linalg_dot(const size_t n,
-                          const double v1[restrict n],
-                          const double v2[restrict n]) {
+                          const double v1[n],
+                          const double v2[n]) {
   double dot = 0;
   for (size_t i = 0; i < n; ++i) {
     dot += v1[i] * v2[i];
@@ -137,9 +137,9 @@ double sl_math_linalg_dot(const size_t n,
 
 void sl_math_linalg_matmul(const size_t nrows,
                            const size_t ncols,
-                           const double m[restrict nrows][ncols],
-                           const double v[restrict ncols],
-                           double out[restrict nrows]) {
+                           const double m[nrows][ncols],
+                           const double v[ncols],
+                           double out[nrows]) {
   for (size_t row = 0; row < nrows; ++row) {
     out[row] = sl_math_linalg_dot(ncols, m[row], v);
   }
