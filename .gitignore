@@ -3,3 +3,5 @@ test-data-sizes.txt
 hello.txt
 there.txt
 llvm-*
+.cache
+compile_commands.json
