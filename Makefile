@@ -21,7 +21,7 @@ TESTS_DEBUG   := $(addprefix $(TESTS_DIR_DEBUG)/,$(TESTS_FILES))
 TOOLS_RELEASE := $(addprefix $(TOOLS_DIR_RELEASE)/,$(TOOLS_FILES))
 TESTS_RELEASE := $(addprefix $(TESTS_DIR_RELEASE)/,$(TESTS_FILES))
 
-CLANG ?= clang-16
+CLANG ?= clang-17
 
 CSTANDARD := -std=c2x
 CWARNINGS := -Wall -Wpedantic -Werror

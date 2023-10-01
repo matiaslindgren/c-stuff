@@ -6,11 +6,11 @@ Contains mostly over-engineered solutions to the programming challenges suggeste
 ## Requirements
 
 * `make`
-* `clang-16`, see the [LLVM docs](https://apt.llvm.org/) or stufflib's [CI config](./.github/workflows/c.yml) on how to install pre-release versions of Clang.
+* `clang-17`, see the [LLVM docs](https://apt.llvm.org/) or stufflib's [CI config](./.github/workflows/c.yml) on how to install pre-release versions of Clang.
 
 ### (Optional) Run in Docker
 
-If you can't install Clang 16 using a package manager, you can use Docker:
+If you can't install Clang 17 using a package manager, you can use Docker:
 
 ```sh
 ./scripts/build_image.sh
@@ -336,7 +336,7 @@ struct it {
 ### Run preprocessor on source file and count 25 most common lines
 
 ```
-clang-16 -std=c2x -E -I./include ./src/tools/txt.c \
+clang-17 -std=c2x -E -I./include ./src/tools/txt.c \
   | ./build/debug/tools/txt replace '  ' '' /dev/stdin \
   | ./build/debug/tools/txt replace $'\n ' $'\n' /dev/stdin \
   | ./build/debug/tools/txt linefreq /dev/stdin \
