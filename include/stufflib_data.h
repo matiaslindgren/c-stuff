@@ -74,9 +74,8 @@ struct sl_data sl_data_parse_hex(const struct sl_data src[const static 1]) {
   return dst;
 }
 
-struct sl_data sl_data_concat(
-    const struct sl_data data1[const static 1],
-    const struct sl_data data2[const static 1]) {
+struct sl_data sl_data_concat(const struct sl_data data1[const static 1],
+                              const struct sl_data data2[const static 1]) {
   struct sl_data dst = sl_data_create(data1->size + data2->size);
   if (data1->size) {
     memcpy(dst.data, data1->data, data1->size);

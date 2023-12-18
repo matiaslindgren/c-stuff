@@ -6,7 +6,7 @@ Contains mostly over-engineered solutions to the programming challenges suggeste
 ## Requirements
 
 * `make`
-* `clang-17`, see the [LLVM docs](https://apt.llvm.org/) or stufflib's [CI config](./.github/workflows/c.yml) on how to install pre-release versions of Clang.
+* `clang-17`, see the [LLVM docs](https://apt.llvm.org/) or stufflib's [CI config](./.github/workflows/c.yml) on how to install nightly Clang versions.
 
 ### (Optional) Run in Docker
 
@@ -20,7 +20,9 @@ If you can't install Clang 17 using a package manager, you can use Docker:
 ## Build and test
 
 ```sh
-make -j && make run_debug_tests && make run_release_tests && make -j run_integration_tests
+make DEBUG=1 -j && make DEBUG=1 run_tests \
+  && make -j && make run_tests \
+  && make -j run_integration_tests
 ```
 
 ## PNG tools

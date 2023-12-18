@@ -6,8 +6,14 @@ on:
     paths-ignore:
       - '*.md'
 
+env:
+  clang_version: 17
+
 jobs:
   build-and-test:
+    strategy:
+      matrix:
+        debug: [0, 1]
     runs-on: ubuntu-22.04
     env:
       STUFFLIB_TEST_VERBOSE: 1
@@ -16,16 +22,14 @@ jobs:
       run: wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
     - name: add LLVM apt repositories
       run: |
-        sudo add-apt-repository --yes 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main'
-        sudo add-apt-repository --yes 'deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main'
+        sudo add-apt-repository --yes 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-${clang_version} main'
+        sudo add-apt-repository --yes 'deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-${clang_version} main'
     - name: install clang
-      run: sudo apt update --yes && sudo apt install --yes clang-17
+      run: sudo apt update --yes && sudo apt install --yes clang-${clang_version}
     - uses: actions/checkout@v4
-    - run: make -j
-    - run: make run_debug_tests
-    - run: make clean
-    - run: make -j
-    - run: make run_release_tests
-    - run: make clean
-    - run: make -j
-    - run: make run_integration_tests
+    - run: make DEBUG=${{ matrix.debug }} -j
+    - run: make DEBUG=${{ matrix.debug }} run_tests
+    - run: make DEBUG=${{ matrix.debug }} clean
+    - run: make DEBUG=${{ matrix.debug }} -j
+    - run: make DEBUG=${{ matrix.debug }} run_integration_tests
+    - run: make DEBUG=${{ matrix.debug }} clean

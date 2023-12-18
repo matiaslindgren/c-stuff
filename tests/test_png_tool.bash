@@ -42,12 +42,13 @@ function test_png_tool {
 
   for input in $(find ${self_dir}/../test-data/png -name '*.png'); do
     local info_output=${test_dir}/stufflib_output.json
+    local control=${input/%.png/.json}
     $png_tool info $input > $info_output
     for chunk_type in ${png_chunk_types[*]}; do
-      local grep_count=$(grep --count $chunk_type $input)
+      local control_count=$(jq ".${chunk_type} // 0" $control)
       local info_count=$(jq ".chunks.${chunk_type} // 0" $info_output)
-      if [ $info_count -ne $grep_count ]; then
-        printf "grep says '%s' contains %d chunks of type %s, but stufflib png says %d\n" $input $grep_count $chunk $count
+      if [ $info_count -ne $control_count ]; then
+        printf "control json file says '%s' contains %d chunks of type %s, but stufflib png says %d\n" $input $control_count $chunk_type $info_count
       fi
     done
   done
