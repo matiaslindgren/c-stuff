@@ -46,7 +46,7 @@ clean:
 fmt: $(HEADERS) $(TOOLS_SRC) $(TESTS_SRC)
 	@clang-format --verbose -i $^
 
-$(addsuffix /,$(BUILD_DIR) $(TOOLS_DIR) $(TESTS_DIR)):
+$(BUILD_DIR) $(TOOLS_DIR) $(TESTS_DIR):
 	mkdir -p $@
 
 $(TOOLS) $(TESTS): $(BUILD_DIR)/%: src/%.c $(HEADERS) | $(TOOLS_DIR) $(TESTS_DIR)
