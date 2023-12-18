@@ -6,14 +6,13 @@ on:
     paths-ignore:
       - '*.md'
 
-env:
-  clang_version: 17
-
 jobs:
   build-and-test:
     strategy:
       matrix:
         debug: [0, 1]
+        llvm: [17]
+    name: "debug: ${{ matrix.debug }}, llvm: ${{ matrix.llvm }}"
     runs-on: ubuntu-22.04
     env:
       STUFFLIB_TEST_VERBOSE: 1
@@ -22,10 +21,10 @@ jobs:
       run: wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
     - name: add LLVM apt repositories
       run: |
-        sudo add-apt-repository --yes "deb http://apt.llvm.org/unstable/ llvm-toolchain-${clang_version} main"
-        sudo add-apt-repository --yes "deb-src http://apt.llvm.org/unstable/ llvm-toolchain-${clang_version} main"
+        sudo add-apt-repository --yes "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-${{ matrix.llvm }} main"
+        sudo add-apt-repository --yes "deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-${{ matrix.llvm }} main"
     - name: install clang
-      run: sudo apt update --yes && sudo apt install --yes clang-${clang_version}
+      run: sudo apt update --yes && sudo apt install --yes clang-${{ matrix.llvm }} lld-${{ matrix.llvm }}
     - uses: actions/checkout@v4
     - run: make DEBUG=${{ matrix.debug }} -j
     - run: make DEBUG=${{ matrix.debug }} test
