@@ -64,7 +64,7 @@ test: $(RUN_TESTS)
 $(RUN_TESTS): run_%: $(TESTS_DIR)/%
 	$< $(TEST_ARGS)
 
-TIMEOUT_CMD := $(shell type -p timeout)
+TIMEOUT_CMD := $(shell which timeout)
 ifeq ($(TIMEOUT_CMD),)
 	TIMEOUT_CMD :=
 else

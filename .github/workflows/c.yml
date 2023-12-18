@@ -22,8 +22,8 @@ jobs:
       run: wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
     - name: add LLVM apt repositories
       run: |
-        sudo add-apt-repository --yes 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-${clang_version} main'
-        sudo add-apt-repository --yes 'deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-${clang_version} main'
+        sudo add-apt-repository --yes "deb http://apt.llvm.org/unstable/ llvm-toolchain-${clang_version} main"
+        sudo add-apt-repository --yes "deb-src http://apt.llvm.org/unstable/ llvm-toolchain-${clang_version} main"
     - name: install clang
       run: sudo apt update --yes && sudo apt install --yes clang-${clang_version}
     - uses: actions/checkout@v4
