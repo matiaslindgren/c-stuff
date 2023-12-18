@@ -1,6 +1,6 @@
 #ifndef SL_UTF8_TEST_DATA_H_INCLUDED
 #define SL_UTF8_TEST_DATA_H_INCLUDED
-#include <uchar.h>
+#include <stdint.h>
 
 #include "stufflib_data.h"
 
@@ -17,7 +17,7 @@ struct sl_data hello_utf8[] = {
   {.size=18, .data=(unsigned char*)u8"สวัสดี"},
 };
 
-char32_t decoded_strings[] = {
+uint32_t decoded_strings[] = {
   // hello
   0x68,0x65,0x6c,0x6c,0x6f,
   // नमस्ते

@@ -8,16 +8,15 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <uchar.h>
 
 #include "stufflib_data.h"
 #include "stufflib_iterator.h"
 #include "stufflib_macros.h"
 
-const char32_t sl_unicode_error_value = UINT_LEAST32_MAX;
+const uint32_t sl_unicode_error_value = UINT32_MAX;
 const size_t sl_unicode_error_width = 0;
 
-size_t sl_unicode_codepoint_width(const char32_t value) {
+size_t sl_unicode_codepoint_width(const uint32_t value) {
   if (value < 0x000080) {
     return 1;
   }
@@ -152,30 +151,30 @@ error:
   return sl_unicode_error_width;
 }
 
-char32_t sl_unicode_codepoint_from_utf8(
+uint32_t sl_unicode_codepoint_from_utf8(
     const size_t width,
     const unsigned char bytes[const width]) {
   switch (width) {
     case 4: {
-      const char32_t byte1 = bytes[0] & 0x07;
-      const char32_t byte2 = bytes[1] & 0x3f;
-      const char32_t byte3 = bytes[2] & 0x3f;
-      const char32_t byte4 = bytes[3] & 0x3f;
+      const uint32_t byte1 = bytes[0] & 0x07;
+      const uint32_t byte2 = bytes[1] & 0x3f;
+      const uint32_t byte3 = bytes[2] & 0x3f;
+      const uint32_t byte4 = bytes[3] & 0x3f;
       return (byte1 << 18) | (byte2 << 12) | (byte3 << 6) | byte4;
     }
     case 3: {
-      const char32_t byte1 = bytes[0] & 0x0f;
-      const char32_t byte2 = bytes[1] & 0x3f;
-      const char32_t byte3 = bytes[2] & 0x3f;
+      const uint32_t byte1 = bytes[0] & 0x0f;
+      const uint32_t byte2 = bytes[1] & 0x3f;
+      const uint32_t byte3 = bytes[2] & 0x3f;
       return (byte1 << 12) | (byte2 << 6) | byte3;
     }
     case 2: {
-      const char32_t byte1 = bytes[0] & 0x1f;
-      const char32_t byte2 = bytes[1] & 0x3f;
+      const uint32_t byte1 = bytes[0] & 0x1f;
+      const uint32_t byte2 = bytes[1] & 0x3f;
       return (byte1 << 6) | byte2;
     }
     case 1: {
-      const char32_t byte1 = bytes[0] & 0x7f;
+      const uint32_t byte1 = bytes[0] & 0x7f;
       return byte1;
     }
     default: {
@@ -223,7 +222,7 @@ void* sl_unicode_iter_get_item(struct sl_iterator iter[const static 1]) {
   return sl_data_iter_get_item(iter);
 }
 
-char32_t sl_unicode_iter_decode_item(struct sl_iterator iter[const static 1]) {
+uint32_t sl_unicode_iter_decode_item(struct sl_iterator iter[const static 1]) {
   return sl_unicode_codepoint_from_utf8(sl_unicode_iter_get_item_width(iter),
                                         iter->get_item(iter));
 }

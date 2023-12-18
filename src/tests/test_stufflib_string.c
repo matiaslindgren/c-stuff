@@ -1,9 +1,9 @@
 #include <assert.h>
 #include <limits.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <uchar.h>
 
 #include "_utf8_test_data.h"
 #include "stufflib_args.h"
@@ -60,7 +60,7 @@ bool test_string_slice(const bool verbose) {
         for (struct sl_iterator iter = sl_unicode_iter(&view);
              !iter.is_done(&iter);
              iter.advance(&iter)) {
-          const char32_t codepoint = sl_unicode_iter_decode_item(&iter);
+          const uint32_t codepoint = sl_unicode_iter_decode_item(&iter);
           assert(codepoint == decoded_strings[decoded_pos + begin + iter.pos]);
           // TODO assert iterator slice address equals underlying string
         }
@@ -81,15 +81,19 @@ bool test_init_from_file(const bool verbose) {
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(languages); ++i) {
     char input_path[200] = {0};
-    sprintf(input_path, "./test-data/txt/wikipedia/water_%s.txt", languages[i]);
+    snprintf(input_path,
+             SL_ARRAY_LEN(input_path),
+             "./test-data/txt/wikipedia/water_%s.txt",
+             languages[i]);
     if (verbose) {
       printf("%s\n", input_path);
     }
 
     char length_path[200] = {0};
-    sprintf(length_path,
-            "./test-data/txt/wikipedia/water_%s_length.txt",
-            languages[i]);
+    snprintf(length_path,
+             SL_ARRAY_LEN(length_path),
+             "./test-data/txt/wikipedia/water_%s_length.txt",
+             languages[i]);
     FILE* fp = fopen(length_path, "rb");
     assert(fp);
     char tmp[200] = {0};

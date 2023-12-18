@@ -22,7 +22,7 @@ bool concat(const struct sl_args args[const static 1]) {
     }
   }
 
-  bool ok = false;
+  bool is_done = false;
   struct sl_string result = {0};
 
   for (size_t i = 1;; ++i) {
@@ -45,11 +45,11 @@ bool concat(const struct sl_args args[const static 1]) {
     goto done;
   }
 
-  ok = true;
+  is_done = true;
 
 done:
   sl_string_delete(&result);
-  return ok;
+  return is_done;
 }
 
 bool count(const struct sl_args args[const static 1]) {
@@ -70,7 +70,7 @@ bool count(const struct sl_args args[const static 1]) {
     return false;
   }
 
-  bool ok = false;
+  bool is_done = false;
 
   const char* path = sl_args_get_positional(args, 2);
   struct sl_string content = sl_string_from_file(path);
@@ -93,11 +93,11 @@ bool count(const struct sl_args args[const static 1]) {
     goto done;
   }
 
-  ok = true;
+  is_done = true;
 
 done:
   sl_string_delete(&content);
-  return ok;
+  return is_done;
 }
 
 bool slicelines(const struct sl_args args[const static 1]) {
@@ -116,7 +116,7 @@ bool slicelines(const struct sl_args args[const static 1]) {
   const size_t end = strtoull(sl_args_get_positional(args, 2), 0, 10);
   const char* path = sl_args_get_positional(args, 3);
 
-  bool ok = false;
+  bool is_done = false;
 
   struct sl_string content = sl_string_from_file(path);
   if (!content.length) {
@@ -145,11 +145,11 @@ bool slicelines(const struct sl_args args[const static 1]) {
     ++lineno;
   }
 
-  ok = true;
+  is_done = true;
 
 done:
   sl_string_delete(&content);
-  return ok;
+  return is_done;
 }
 
 bool replace(const struct sl_args args[const static 1]) {
@@ -174,7 +174,7 @@ bool replace(const struct sl_args args[const static 1]) {
     return false;
   }
 
-  bool ok = false;
+  bool is_done = false;
 
   struct sl_string content = sl_string_from_file(path);
   if (!content.length) {
@@ -217,13 +217,13 @@ bool replace(const struct sl_args args[const static 1]) {
     }
   }
 
-  ok = true;
+  is_done = true;
 
 done:
   sl_string_delete(&content);
   sl_data_delete(&pattern);
   sl_data_delete(&replacement);
-  return ok;
+  return is_done;
 }
 
 bool linefreq(const struct sl_args args[const static 1]) {
@@ -240,7 +240,7 @@ bool linefreq(const struct sl_args args[const static 1]) {
 
   const char* path = sl_args_get_positional(args, 1);
 
-  bool ok = false;
+  bool is_done = false;
 
   struct sl_hashmap freq = sl_hashmap_create();
   struct sl_string content = sl_string_from_file(path);
@@ -280,12 +280,12 @@ bool linefreq(const struct sl_args args[const static 1]) {
     }
   }
 
-  ok = true;
+  is_done = true;
 
 done:
   sl_string_delete(&content);
   sl_hashmap_delete(&freq);
-  return ok;
+  return is_done;
 }
 
 void print_usage(const struct sl_args args[const static 1]) {

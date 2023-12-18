@@ -28,7 +28,7 @@ char** sort_doubles(const size_t count, char* lines[count]) {
 }
 
 int main(int argc, char* const argv[argc + 1]) {
-  bool ok = false;
+  bool is_done = false;
 
   struct sl_string content = {0};
   char** lines = nullptr;
@@ -85,7 +85,7 @@ int main(int argc, char* const argv[argc + 1]) {
     printf("%s\n", lines[index]);
   }
 
-  ok = true;
+  is_done = true;
 
 done:
   sl_args_destroy(&args);
@@ -94,5 +94,5 @@ done:
     sl_free(lines[i]);
   }
   sl_free(lines);
-  return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+  return is_done ? EXIT_SUCCESS : EXIT_FAILURE;
 }

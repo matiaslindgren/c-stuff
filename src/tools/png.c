@@ -13,7 +13,7 @@ bool segment(const struct sl_args args[const static 1]) {
     return false;
   }
 
-  bool ok = false;
+  bool is_done = false;
 
   struct sl_png_image src = {0};
   struct sl_png_image dst = {0};
@@ -45,12 +45,12 @@ bool segment(const struct sl_args args[const static 1]) {
     goto done;
   }
 
-  ok = true;
+  is_done = true;
 
 done:
   sl_png_image_destroy(src);
   sl_png_image_destroy(dst);
-  return ok;
+  return is_done;
 }
 
 bool info(const struct sl_args args[const static 1]) {
@@ -59,7 +59,7 @@ bool info(const struct sl_args args[const static 1]) {
     return false;
   }
 
-  bool ok = false;
+  bool is_done = false;
 
   struct sl_png_chunks chunks = {0};
   struct sl_png_image img = {0};
@@ -77,20 +77,20 @@ bool info(const struct sl_args args[const static 1]) {
 
   if (!sl_png_is_supported(header)) {
     SL_LOG_ERROR("PNG contains unsupported features, not reading IDAT chunks");
-    ok = true;
+    is_done = true;
     goto done;
   }
 
   img = sl_png_read_image(png_path);
   printf(",\"data\":");
   sl_png_dump_img_data_info(stdout, img);
-  ok = true;
+  is_done = true;
 
 done:
   printf("}\n");
   sl_png_chunks_destroy(chunks);
   sl_png_image_destroy(img);
-  return ok;
+  return is_done;
 }
 
 bool dump_raw(const struct sl_args args[const static 1]) {
@@ -99,7 +99,7 @@ bool dump_raw(const struct sl_args args[const static 1]) {
     return false;
   }
 
-  bool ok = false;
+  bool is_done = false;
 
   const char* const png_path = sl_args_get_positional(args, 1);
   struct sl_png_chunks img_chunks = sl_png_read_chunks(png_path);
@@ -125,11 +125,11 @@ bool dump_raw(const struct sl_args args[const static 1]) {
     }
   }
 
-  ok = true;
+  is_done = true;
 
 done:
   sl_png_chunks_destroy(img_chunks);
-  return ok;
+  return is_done;
 }
 
 void print_usage(const struct sl_args args[const static 1]) {

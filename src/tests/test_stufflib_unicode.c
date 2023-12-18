@@ -1,9 +1,9 @@
 #include <assert.h>
 #include <limits.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <uchar.h>
 
 #include "_utf8_test_data.h"
 #include "stufflib_args.h"
@@ -37,12 +37,12 @@ bool test_decode_codepoints(const bool verbose) {
     struct sl_data utf8_data = hello_utf8[i_str];
     size_t byte_pos = 0;
     while (byte_pos < utf8_data.size) {
-      const char32_t expected_codepoint = decoded_strings[codepoint_pos];
+      const uint32_t expected_codepoint = decoded_strings[codepoint_pos];
       const size_t codepoint_width =
           sl_unicode_codepoint_width_from_utf8(utf8_data.size - byte_pos,
                                                utf8_data.data + byte_pos);
       assert(codepoint_width == sl_unicode_codepoint_width(expected_codepoint));
-      const char32_t codepoint =
+      const uint32_t codepoint =
           sl_unicode_codepoint_from_utf8(codepoint_width,
                                          utf8_data.data + byte_pos);
       assert(codepoint == expected_codepoint);
@@ -63,7 +63,7 @@ bool test_unicode_iterator(const bool verbose) {
     struct sl_iterator iter = sl_unicode_iter(hello_utf8 + i_str);
     for (; !iter.is_done(&iter); iter.advance(&iter)) {
       assert(iter.index == byte_pos);
-      const char32_t codepoint = sl_unicode_iter_decode_item(&iter);
+      const uint32_t codepoint = sl_unicode_iter_decode_item(&iter);
       assert(codepoint == decoded_strings[codepoint_pos]);
       const size_t codepoint_width =
           sl_unicode_codepoint_width_from_utf8(utf8_data.size - byte_pos,
@@ -99,9 +99,10 @@ bool test_decode_utf8_files(const bool verbose) {
     };
     {
       char input_path[200] = {0};
-      sprintf(input_path,
-              "./test-data/txt/wikipedia/water_%s.txt",
-              languages[i]);
+      snprintf(input_path,
+               SL_ARRAY_LEN(input_path),
+               "./test-data/txt/wikipedia/water_%s.txt",
+               languages[i]);
       if (verbose) {
         printf("%s\n", input_path);
       }
@@ -118,13 +119,14 @@ bool test_decode_utf8_files(const bool verbose) {
       assert(utf8_data.size > 0);
     }
 
-    char32_t expected_codepoints[10000] = {0};
+    uint32_t expected_codepoints[10000] = {0};
     size_t str_len = 0;
     {
       char codepoints_path[200] = {0};
-      sprintf(codepoints_path,
-              "./test-data/txt/wikipedia/water_%s_codepoints.txt",
-              languages[i]);
+      snprintf(codepoints_path,
+               SL_ARRAY_LEN(codepoints_path),
+               "./test-data/txt/wikipedia/water_%s_codepoints.txt",
+               languages[i]);
       FILE* fp = fopen(codepoints_path, "rb");
       if (!fp) {
         SL_LOG_ERROR("cannot open %s", codepoints_path);
@@ -145,7 +147,7 @@ bool test_decode_utf8_files(const bool verbose) {
          !iter.is_done(&iter);
          iter.advance(&iter)) {
       assert(codepoint_pos < str_len);
-      const char32_t codepoint = sl_unicode_iter_decode_item(&iter);
+      const uint32_t codepoint = sl_unicode_iter_decode_item(&iter);
       assert(codepoint == expected_codepoints[codepoint_pos]);
       ++codepoint_pos;
     }

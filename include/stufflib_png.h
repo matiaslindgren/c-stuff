@@ -339,7 +339,7 @@ bool sl_png_has_signature(const unsigned char buf[const static 8]) {
 
 struct sl_png_chunks sl_png_read_n_chunks(const char filename[const static 1],
                                           const size_t count) {
-  bool ok = false;
+  bool is_done = false;
 
   FILE* fp = nullptr;
   struct sl_png_chunk* chunks = nullptr;
@@ -384,13 +384,13 @@ struct sl_png_chunks sl_png_read_n_chunks(const char filename[const static 1],
     chunks[read_count++] = chunk;
   }
 
-  ok = true;
+  is_done = true;
 
 done:
   if (fp) {
     fclose(fp);
   }
-  if (!ok) {
+  if (!is_done) {
     sl_free(chunks);
     return (struct sl_png_chunks){0};
   }
@@ -635,7 +635,7 @@ bool sl_png_chunk_fwrite(FILE stream[const static 1],
   }
   struct sl_data crc_data = sl_data_create(data->size + 4);
 
-  bool ok = false;
+  bool is_done = false;
 
   const unsigned char* chunk_len =
       sl_misc_encode_big_endian(4, (unsigned char[4]){0}, data->size);
@@ -660,16 +660,16 @@ bool sl_png_chunk_fwrite(FILE stream[const static 1],
     goto done;
   }
 
-  ok = true;
+  is_done = true;
 
 done:
   sl_data_delete(&crc_data);
-  return ok;
+  return is_done;
 }
 
 bool sl_png_write_image(const struct sl_png_image image,
                         const char filename[const static 1]) {
-  bool write_ok = false;
+  bool is_done = false;
   struct sl_data packed_data = {0};
   struct sl_data idat = {0};
   FILE* fp = nullptr;
@@ -699,7 +699,7 @@ bool sl_png_write_image(const struct sl_png_image image,
     goto done;
   }
 
-  write_ok = true;
+  is_done = true;
 
 done:
   if (fp) {
@@ -707,7 +707,7 @@ done:
   }
   sl_data_delete(&idat);
   sl_data_delete(&packed_data);
-  return write_ok;
+  return is_done;
 }
 
 #endif  // SL_PNG_H_INCLUDED
