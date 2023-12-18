@@ -10,7 +10,6 @@ fi
 required_commands=(
   'python3'
   'sort'
-  'grep'
   'cmp'
   'cut'
   'find'

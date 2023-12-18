@@ -20,9 +20,9 @@ If you can't install Clang 17 using a package manager, you can use Docker:
 ## Build and test
 
 ```sh
-make DEBUG=1 -j && make DEBUG=1 run_tests \
-  && make -j && make run_tests \
-  && make -j run_integration_tests
+make DEBUG=1 -j && make DEBUG=1 test \
+  && make -j && make test \
+  && make -j integration_test
 ```
 
 ## PNG tools

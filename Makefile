@@ -32,8 +32,8 @@ TOOLS_FILES := $(notdir $(basename $(TOOLS_SRC)))
 TESTS_FILES := $(notdir $(basename $(TESTS_SRC)))
 TOOLS_DIR   := $(BUILD_DIR)/tools
 TESTS_DIR   := $(BUILD_DIR)/tests
-TOOLS       := $(addprefix $(TOOLS_DIR)/,$(TOOL_FILES))
-TESTS       := $(addprefix $(TESTS_DIR)/,$(TEST_FILES))
+TOOLS       := $(addprefix $(TOOLS_DIR)/,$(TOOLS_FILES))
+TESTS       := $(addprefix $(TESTS_DIR)/,$(TESTS_FILES))
 
 .PHONY: all
 all: $(TOOLS) $(TESTS)
@@ -57,9 +57,9 @@ ifeq (${STUFFLIB_TEST_VERBOSE}, 1)
 	TEST_ARGS += -v
 endif
 
-RUN_TESTS := $(addprefix run_,$(TEST_FILES))
-.PHONY: run_tests
-run_tests: $(RUN_TESTS)
+RUN_TESTS := $(addprefix run_,$(TESTS_FILES))
+.PHONY: test
+test: $(RUN_TESTS)
 .PHONY: $(RUN_TESTS)
 $(RUN_TESTS): run_%: $(TESTS_DIR)/%
 	$< $(TEST_ARGS)
@@ -71,9 +71,9 @@ else
 	TIMEOUT_CMD += --kill-after=4m 2m
 endif
 
-RUN_INTEGRATION_TESTS := $(addprefix run_integration_test_,$(TOOL_FILES))
-.PHONY: run_integration_tests
-run_integration_tests: $(RUN_INTEGRATION_TESTS)
+RUN_INTEGRATION_TESTS := $(addprefix integration_test_,$(TOOLS_FILES))
+.PHONY: integration_test
+integration_test: $(RUN_INTEGRATION_TESTS)
 .PHONY: $(RUN_INTEGRATION_TESTS)
-$(RUN_INTEGRATION_TESTS): run_integration_test_%: ./tests/test_%_tool.bash $(TOOLS)
-	$(TIMEOUT_CMD) /$< $(TEST_ARGS)
+$(RUN_INTEGRATION_TESTS): integration_test_%: ./tests/test_%_tool.bash $(BUILD_DIR)/tools/%
+	$(TIMEOUT_CMD) $^ $(TEST_ARGS)

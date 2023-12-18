@@ -4,6 +4,8 @@ set -ue
 self_dir=$(dirname "$0")
 source ${self_dir}/common.bash $@
 
+sort_tool="$1"
+
 test_dir=$(mktemp --directory)
 
 function rm_test_dir {
@@ -14,9 +16,8 @@ trap rm_test_dir EXIT
 build_dir=${self_dir}/../build
 
 function test_sort_tool {
-  local sort_tool=$1
-  local variance="$2"
-  local test_size="$3"
+  local variance="$1"
+  local test_size="$2"
 
   local input=${test_dir}/sort_input.txt
   local expect=${test_dir}/expected_output.txt
@@ -45,18 +46,26 @@ for _ in range(${test_size}):
   return 0
 }
 
-if ! test_sort_tool ${build_dir}/debug/tools/sort 1 '10**3'; then
-  exit 1
+if [[ $sort_tool = */debug/* ]]; then
+  if ! test_sort_tool 1 '10**3'; then
+    exit 1
+  fi
+  if ! test_sort_tool 10 '10**4'; then
+    exit 1
+  fi
+  if ! test_sort_tool '10**6' '10**4'; then
+    exit 1
+  fi
 fi
-if ! test_sort_tool ${build_dir}/debug/tools/sort '10**6' '10**3'; then
-  exit 1
-fi
-if ! test_sort_tool ${build_dir}/release/tools/sort 1 '10**6'; then
-  exit 1
-fi
-if ! test_sort_tool ${build_dir}/release/tools/sort 10 '10**6'; then
-  exit 1
-fi
-if ! test_sort_tool ${build_dir}/release/tools/sort '10**6' '10**6'; then
-  exit 1
+
+if [[ $sort_tool = */release/* ]]; then
+  if ! test_sort_tool 1 '10**6'; then
+    exit 1
+  fi
+  if ! test_sort_tool 10 '10**6'; then
+    exit 1
+  fi
+  if ! test_sort_tool '10**6' '10**6'; then
+    exit 1
+  fi
 fi
