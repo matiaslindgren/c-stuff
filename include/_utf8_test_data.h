@@ -5,7 +5,8 @@
 #include "stufflib_data.h"
 
 // clang-format off
-struct sl_data hello_utf8[] = {
+const struct sl_data hello_utf8[] = {
+  {.size=2,  .data=(unsigned char*)u8"hi"},
   {.size=5,  .data=(unsigned char*)u8"hello"},
   {.size=18, .data=(unsigned char*)u8"नमस्ते"},
   {.size=27, .data=(unsigned char*)u8"გამარჯობა"},
@@ -17,7 +18,9 @@ struct sl_data hello_utf8[] = {
   {.size=18, .data=(unsigned char*)u8"สวัสดี"},
 };
 
-uint32_t decoded_strings[] = {
+const uint32_t decoded_strings[] = {
+  // hi
+  0x68,0x69,
   // hello
   0x68,0x65,0x6c,0x6c,0x6f,
   // नमस्ते
@@ -38,7 +41,9 @@ uint32_t decoded_strings[] = {
   0xe2a,0xe27,0xe31,0xe2a,0xe14,0xe35,
 };
 
-size_t decoded_lengths[] = {
+const size_t decoded_lengths[] = {
+  // hi
+  2,
   // hello
   5,
   // नमस्ते

@@ -52,7 +52,7 @@ size_t sl_unicode_codepoint_width_from_utf8(
     ill_formed,
   } state = start;
 
-  const size_t max_width = SL_MAX(4, size);
+  const size_t max_width = SL_MIN(4, size);
   size_t width = 0;
 
   while (state != ill_formed && state != end && width < max_width) {
