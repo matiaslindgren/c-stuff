@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         debug: [0, 1]
-        llvm: [17]
+        llvm: [18]
     name: "debug: ${{ matrix.debug }}, llvm: ${{ matrix.llvm }}"
     runs-on: ubuntu-22.04
     env:
