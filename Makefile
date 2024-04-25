@@ -1,7 +1,7 @@
 SHELL := /bin/sh
 
-CLANG    := clang-17
-CFLAGS   ?= -std=c2x -Wall -Wpedantic -Werror
+CLANG    := clang-18
+CFLAGS   ?= -std=c23 -Wall -Wpedantic -Werror
 LDFLAGS  ?= -lm -fuse-ld=lld -lc
 INCLUDES ?= ./include
 
