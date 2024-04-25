@@ -17,12 +17,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "stufflib_data.h"
 #include "stufflib_hash.h"
 #include "stufflib_huffman.h"
 #include "stufflib_macros.h"
 #include "stufflib_memory.h"
 #include "stufflib_misc.h"
+#include "stufflib_span.h"
 
 struct _length_codes {
   size_t lengths[29];
@@ -37,8 +37,8 @@ struct _distance_codes {
 struct _deflate_state {
   const struct _length_codes len_codes;
   const struct _distance_codes dist_codes;
-  struct sl_data dst;
-  const struct sl_data src;
+  struct sl_span dst;
+  const struct sl_span src;
   size_t dst_pos;
   size_t src_bit;
 };
@@ -277,7 +277,7 @@ bool sl_inflate_fixed_block(struct _deflate_state state[static 1]) {
   return true;
 }
 
-size_t sl_inflate(struct sl_data dst, const struct sl_data src) {
+size_t sl_inflate(struct sl_span dst, const struct sl_span src) {
   if (src.size < 3) {
     SL_LOG_ERROR("DEFLATE stream is too short");
     goto error;
@@ -364,7 +364,7 @@ error:
 
 #define SL_DEFLATE_BLOCK_SIZE 8192
 
-size_t sl_deflate_uncompressed(struct sl_data dst, const struct sl_data src) {
+size_t sl_deflate_uncompressed(struct sl_span dst, const struct sl_span src) {
   const size_t block_size = SL_DEFLATE_BLOCK_SIZE;
   size_t dst_pos = 0;
   size_t src_pos = 0;

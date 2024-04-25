@@ -7,13 +7,13 @@
 
 #include "_utf8_test_data.h"
 #include "stufflib_args.h"
-#include "stufflib_data.h"
 #include "stufflib_iterator.h"
 #include "stufflib_macros.h"
+#include "stufflib_span.h"
 #include "stufflib_unicode.h"
 
 bool test_validate_utf8(const bool verbose) {
-  struct sl_data invalid_utf8[] = {
+  struct sl_span invalid_utf8[] = {
       {.size = 1,                   .data = (unsigned char[]){0x80}},
       {.size = 2,             .data = (unsigned char[]){0xc0, 0x80}},
       {.size = 2,             .data = (unsigned char[]){0xe0, 0x80}},
@@ -34,7 +34,7 @@ bool test_validate_utf8(const bool verbose) {
 bool test_decode_codepoints(const bool verbose) {
   size_t codepoint_pos = 0;
   for (size_t i_str = 0; i_str < SL_ARRAY_LEN(hello_utf8); ++i_str) {
-    struct sl_data utf8_data = hello_utf8[i_str];
+    struct sl_span utf8_data = hello_utf8[i_str];
     size_t byte_pos = 0;
     while (byte_pos < utf8_data.size) {
       const uint32_t expected_codepoint = decoded_strings[codepoint_pos];
@@ -57,7 +57,7 @@ bool test_decode_codepoints(const bool verbose) {
 bool test_unicode_iterator(const bool verbose) {
   size_t codepoint_pos = 0;
   for (size_t i_str = 0; i_str < SL_ARRAY_LEN(hello_utf8); ++i_str) {
-    struct sl_data utf8_data = hello_utf8[i_str];
+    struct sl_span utf8_data = hello_utf8[i_str];
     size_t str_len = 0;
     size_t byte_pos = 0;
     struct sl_iterator iter = sl_unicode_iter(hello_utf8 + i_str);
@@ -93,7 +93,7 @@ bool test_decode_utf8_files(const bool verbose) {
       "ru", "shi", "sl", "szl", "ta", "tr", "uk", "vep", "vi",  "zh",
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(languages); ++i) {
-    struct sl_data utf8_data = {
+    struct sl_span utf8_data = {
         .size = 0,
         .data = (unsigned char[20000]){0},
     };

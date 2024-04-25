@@ -2,10 +2,10 @@
 #define SL_UTF8_TEST_DATA_H_INCLUDED
 #include <stdint.h>
 
-#include "stufflib_data.h"
+#include "stufflib_span.h"
 
 // clang-format off
-const struct sl_data hello_utf8[] = {
+const struct sl_span hello_utf8[] = {
   {.size=2,  .data=(unsigned char*)u8"hi"},
   {.size=5,  .data=(unsigned char*)u8"hello"},
   {.size=18, .data=(unsigned char*)u8"नमस्ते"},

@@ -49,7 +49,7 @@ int main(int argc, char* const argv[argc + 1]) {
 
   const char* path = sl_args_get_positional(&args, 1);
   content = sl_string_from_file(path);
-  struct sl_data newline = sl_data_view(1, (unsigned char[]){'\n'});
+  struct sl_span newline = sl_span_view(1, (unsigned char[]){'\n'});
 
   struct sl_tokenizer newline_tokenizer =
       sl_tokenizer_create(&(content.utf8_data), &newline);
@@ -57,7 +57,7 @@ int main(int argc, char* const argv[argc + 1]) {
        !iter.is_done(&iter);
        iter.advance(&iter)) {
     // TODO less awful
-    struct sl_data* token = iter.get_item(&iter);
+    struct sl_span* token = iter.get_item(&iter);
     assert(token->size);
     if (token->data[0] == 0) {
       continue;

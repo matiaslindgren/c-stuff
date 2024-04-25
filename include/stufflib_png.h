@@ -10,12 +10,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib_data.h"
 #include "stufflib_deflate.h"
 #include "stufflib_hash.h"
 #include "stufflib_macros.h"
 #include "stufflib_memory.h"
 #include "stufflib_misc.h"
+#include "stufflib_span.h"
 
 enum sl_png_chunk_type {
   sl_png_null_chunk = 0,
@@ -109,7 +109,7 @@ struct sl_png_header {
 
 struct sl_png_chunk {
   enum sl_png_chunk_type type;
-  struct sl_data data;
+  struct sl_span data;
   uint32_t crc32;
 };
 
@@ -120,12 +120,12 @@ struct sl_png_chunks {
 
 struct sl_png_image {
   struct sl_png_header header;
-  struct sl_data data;
-  struct sl_data filter;
+  struct sl_span data;
+  struct sl_span filter;
 };
 
 void sl_png_chunk_destroy(struct sl_png_chunk chunk) {
-  sl_data_delete(&chunk.data);
+  sl_span_delete(&chunk.data);
 }
 
 void sl_png_chunks_destroy(struct sl_png_chunks chunks) {
@@ -140,15 +140,15 @@ void sl_png_header_destroy(struct sl_png_header header) {
 }
 
 void sl_png_image_destroy(struct sl_png_image image) {
-  sl_data_delete(&(image.data));
-  sl_data_delete(&(image.filter));
+  sl_span_delete(&(image.data));
+  sl_span_delete(&(image.filter));
 }
 
 void sl_png_image_copy(struct sl_png_image dst[static 1],
                        const struct sl_png_image src[static 1]) {
   dst->header = src->header;
-  dst->data = sl_data_copy(&(src->data));
-  dst->filter = sl_data_copy(&(src->filter));
+  dst->data = sl_span_copy(&(src->data));
+  dst->filter = sl_span_copy(&(src->filter));
 }
 
 unsigned char* sl_png_image_get_pixel(const struct sl_png_image image[static 1],
@@ -280,7 +280,7 @@ struct sl_png_chunk sl_png_read_next_chunk(FILE fp[const static 1]) {
   }
 
   if (chunk.data.size) {
-    chunk.data = sl_data_create(chunk.data.size);
+    chunk.data = sl_span_create(chunk.data.size);
     if (fread(chunk.data.data, 1, chunk.data.size, fp) != chunk.data.size) {
       SL_LOG_ERROR("failed reading PNG chunk data");
       goto error;
@@ -424,15 +424,15 @@ size_t sl_png_idat_max_size(const struct sl_png_header header) {
   return header_size + 2 * data_size + checksum_size;
 }
 
-struct sl_data sl_png_pack_image_data(
+struct sl_span sl_png_pack_image_data(
     const struct sl_png_image image[static 1]) {
-  struct sl_data packed = {0};
+  struct sl_span packed = {0};
 
   const size_t width = image->header.width;
   const size_t height = image->header.height;
   const size_t bytes_per_px = sl_png_bytes_per_pixel[image->header.color_type];
 
-  packed = sl_data_create(sl_png_data_size(image->header));
+  packed = sl_span_create(sl_png_data_size(image->header));
 
   for (size_t row = 0; row < height; ++row) {
     const size_t filter_idx = bytes_per_px * row * width + row;
@@ -449,15 +449,15 @@ struct sl_data sl_png_pack_image_data(
 }
 
 void sl_png_unpack_and_pad_image_data(struct sl_png_image image[static 1]) {
-  struct sl_data filter = {0};
-  struct sl_data padded = {0};
+  struct sl_span filter = {0};
+  struct sl_span padded = {0};
 
   const size_t width = image->header.width;
   const size_t height = image->header.height;
   const size_t bytes_per_px = sl_png_bytes_per_pixel[image->header.color_type];
 
-  filter = sl_data_create(height);
-  padded = sl_data_create(bytes_per_px * (width + 2) * (height + 2));
+  filter = sl_span_create(height);
+  padded = sl_span_create(bytes_per_px * (width + 2) * (height + 2));
 
   for (size_t row = 0; row < height; ++row) {
     const size_t idx_col0_raw = row * bytes_per_px * width + row;
@@ -473,7 +473,7 @@ void sl_png_unpack_and_pad_image_data(struct sl_png_image image[static 1]) {
   }
 
   image->filter = filter;
-  sl_data_delete(&image->data);
+  sl_span_delete(&image->data);
   image->data = padded;
 }
 
@@ -536,7 +536,7 @@ bool sl_png_unapply_filter(struct sl_png_image image[static 1]) {
 
 struct sl_png_image sl_png_read_image(const char filename[const static 1]) {
   struct sl_png_image image = {0};
-  struct sl_data idat = {0};
+  struct sl_span idat = {0};
 
   struct sl_png_chunks chunks = sl_png_read_chunks(filename);
   if (!chunks.count) {
@@ -560,12 +560,12 @@ struct sl_png_image sl_png_read_image(const char filename[const static 1]) {
   for (size_t i = 1; i < chunks.count; ++i) {
     const struct sl_png_chunk chunk = chunks.chunks[i];
     if (chunk.type == sl_png_IDAT) {
-      sl_data_extend(&idat, &chunk.data);
+      sl_span_extend(&idat, &chunk.data);
     }
   }
   // TODO parse PLTE if header.color_type == sl_png_indexed
 
-  image.data = sl_data_create(sl_png_data_size(image.header));
+  image.data = sl_span_create(sl_png_data_size(image.header));
   const size_t num_decoded = sl_inflate(image.data, idat);
   if (num_decoded != image.data.size) {
     SL_LOG_ERROR("failed decoding IDAT stream");
@@ -578,12 +578,12 @@ struct sl_png_image sl_png_read_image(const char filename[const static 1]) {
   }
 
   sl_png_chunks_destroy(chunks);
-  sl_data_delete(&idat);
+  sl_span_delete(&idat);
   return image;
 
 error:
   sl_png_chunks_destroy(chunks);
-  sl_data_delete(&idat);
+  sl_span_delete(&idat);
   sl_png_image_destroy(image);
   return (struct sl_png_image){0};
 }
@@ -626,14 +626,14 @@ bool sl_png_chunk_fwrite_header(FILE stream[const static 1],
 
 bool sl_png_chunk_fwrite(FILE stream[const static 1],
                          const char chunk_type[const static 1],
-                         const struct sl_data data[const static 1]) {
+                         const struct sl_span data[const static 1]) {
   if (data->size > ((size_t)1 << 31)) {
     SL_LOG_ERROR("will not write too large %s chunk of size %zu",
                  chunk_type,
                  data->size);
     return false;
   }
-  struct sl_data crc_data = sl_data_create(data->size + 4);
+  struct sl_span crc_data = sl_span_create(data->size + 4);
 
   bool is_done = false;
 
@@ -663,15 +663,15 @@ bool sl_png_chunk_fwrite(FILE stream[const static 1],
   is_done = true;
 
 done:
-  sl_data_delete(&crc_data);
+  sl_span_delete(&crc_data);
   return is_done;
 }
 
 bool sl_png_write_image(const struct sl_png_image image,
                         const char filename[const static 1]) {
   bool is_done = false;
-  struct sl_data packed_data = {0};
-  struct sl_data idat = {0};
+  struct sl_span packed_data = {0};
+  struct sl_span idat = {0};
   FILE* fp = nullptr;
 
   fp = fopen(filename, "w");
@@ -680,7 +680,7 @@ bool sl_png_write_image(const struct sl_png_image image,
     goto done;
   }
   packed_data = sl_png_pack_image_data(&image);
-  idat = sl_data_create(sl_png_idat_max_size(image.header));
+  idat = sl_span_create(sl_png_idat_max_size(image.header));
 
   const size_t new_size = sl_deflate_uncompressed(idat, packed_data);
   idat.data = sl_realloc(idat.data, idat.size, new_size, 1);
@@ -694,7 +694,7 @@ bool sl_png_write_image(const struct sl_png_image image,
     SL_LOG_ERROR("failed writing PNG IDAT chunks to %s", filename);
     goto done;
   }
-  if (!sl_png_chunk_fwrite(fp, "IEND", &(struct sl_data){0})) {
+  if (!sl_png_chunk_fwrite(fp, "IEND", &(struct sl_span){0})) {
     SL_LOG_ERROR("failed writing PNG IEND chunk to %s", filename);
     goto done;
   }
@@ -705,8 +705,8 @@ done:
   if (fp) {
     fclose(fp);
   }
-  sl_data_delete(&idat);
-  sl_data_delete(&packed_data);
+  sl_span_delete(&idat);
+  sl_span_delete(&packed_data);
   return is_done;
 }
 

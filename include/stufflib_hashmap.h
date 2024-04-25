@@ -4,12 +4,12 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "stufflib_data.h"
 #include "stufflib_hash.h"
 #include "stufflib_macros.h"
 #include "stufflib_math.h"
 #include "stufflib_memory.h"
 #include "stufflib_misc.h"
+#include "stufflib_span.h"
 
 #ifndef SL_HASHMAP_MAX_LOAD_FACTOR
 #define SL_HASHMAP_MAX_LOAD_FACTOR 0.5
@@ -20,7 +20,7 @@
 
 struct sl_hashmap_slot {
   bool filled;
-  struct sl_data key;
+  struct sl_span key;
   size_t value;
 };
 
@@ -43,7 +43,7 @@ struct sl_hashmap sl_hashmap_create(void) {
 void sl_hashmap_delete_slots(const size_t capacity,
                              struct sl_hashmap_slot slots[capacity]) {
   for (size_t i = 0; i < capacity; ++i) {
-    sl_data_delete(&(slots[i].key));
+    sl_span_delete(&(slots[i].key));
   }
   sl_free(slots);
 }
@@ -54,7 +54,7 @@ void sl_hashmap_delete(struct sl_hashmap map[const static 1]) {
 }
 
 struct sl_hashmap_slot* sl_hashmap_get(struct sl_hashmap map[const static 1],
-                                       struct sl_data key[const static 1]) {
+                                       struct sl_span key[const static 1]) {
   size_t index = sl_hash_crc32_bytes(key->size, key->data);
   for (size_t probe = 0;; ++probe) {
     // https://en.wikipedia.org/wiki/Quadratic_probing#Quadratic_function
@@ -63,7 +63,7 @@ struct sl_hashmap_slot* sl_hashmap_get(struct sl_hashmap map[const static 1],
     index %= map->capacity;
     struct sl_hashmap_slot* slot = map->slots + index;
     assert(slot);
-    if (!slot->filled || sl_data_compare(&(slot->key), key) == 0) {
+    if (!slot->filled || sl_span_compare(&(slot->key), key) == 0) {
       return slot;
     }
     ++(map->num_collisions);
@@ -71,11 +71,11 @@ struct sl_hashmap_slot* sl_hashmap_get(struct sl_hashmap map[const static 1],
 }
 
 void sl_hashmap_set(struct sl_hashmap map[const static 1],
-                    struct sl_data key[const static 1],
+                    struct sl_span key[const static 1],
                     const size_t value) {
   *sl_hashmap_get(map, key) = (struct sl_hashmap_slot){
       .filled = true,
-      .key = sl_data_copy(key),
+      .key = sl_span_copy(key),
       .value = value,
   };
 }
@@ -102,13 +102,13 @@ double sl_hashmap_load_factor(struct sl_hashmap map[const static 1]) {
 }
 
 bool sl_hashmap_contains(struct sl_hashmap map[const static 1],
-                         struct sl_data key[const static 1]) {
+                         struct sl_span key[const static 1]) {
   struct sl_hashmap_slot* slot = sl_hashmap_get(map, key);
-  return slot->filled && sl_data_compare(&(slot->key), key) == 0;
+  return slot->filled && sl_span_compare(&(slot->key), key) == 0;
 }
 
 void sl_hashmap_insert(struct sl_hashmap map[const static 1],
-                       struct sl_data key[const static 1],
+                       struct sl_span key[const static 1],
                        const size_t value) {
   assert(map->size < map->capacity);
   sl_hashmap_set(map, key, value);

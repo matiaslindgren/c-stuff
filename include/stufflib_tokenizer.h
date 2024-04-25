@@ -5,40 +5,40 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib_data.h"
 #include "stufflib_iterator.h"
 #include "stufflib_macros.h"
 #include "stufflib_memory.h"
+#include "stufflib_span.h"
 
 struct sl_tokenizer {
-  struct sl_data data;
-  struct sl_data delimiter;
-  struct sl_data token;
+  struct sl_span data;
+  struct sl_span delimiter;
+  struct sl_span token;
 };
 
-struct sl_data sl_tokenizer_next_token(
-    const struct sl_data data[const static 1],
-    const struct sl_data delimiter[const static 1],
+struct sl_span sl_tokenizer_next_token(
+    const struct sl_span data[const static 1],
+    const struct sl_span delimiter[const static 1],
     const size_t data_begin) {
-  struct sl_data tail = sl_data_slice(data, data_begin, data->size);
-  struct sl_data token_end = sl_data_find(&tail, delimiter);
+  struct sl_span tail = sl_span_slice(data, data_begin, data->size);
+  struct sl_span token_end = sl_span_find(&tail, delimiter);
   if (!token_end.data) {
     return tail;
   }
   const size_t token_size = token_end.data - tail.data;
   if (!token_size) {
-    return (struct sl_data){0};
+    return (struct sl_span){0};
   }
-  return sl_data_view(token_size, tail.data);
+  return sl_span_view(token_size, tail.data);
 }
 
 struct sl_tokenizer sl_tokenizer_create(
-    const struct sl_data data[const static 1],
-    const struct sl_data delimiter[const static 1]) {
-  struct sl_data data_view = sl_data_view(data->size, data->data);
-  struct sl_data delimiter_view =
-      sl_data_view(delimiter->size, delimiter->data);
-  struct sl_data first_token =
+    const struct sl_span data[const static 1],
+    const struct sl_span delimiter[const static 1]) {
+  struct sl_span data_view = sl_span_view(data->size, data->data);
+  struct sl_span delimiter_view =
+      sl_span_view(delimiter->size, delimiter->data);
+  struct sl_span first_token =
       sl_tokenizer_next_token(&data_view, &delimiter_view, 0);
   return (struct sl_tokenizer){
       .data = data_view,

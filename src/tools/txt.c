@@ -4,9 +4,9 @@
 #include <string.h>
 
 #include "stufflib_args.h"
-#include "stufflib_data.h"
 #include "stufflib_hashmap.h"
 #include "stufflib_iterator.h"
+#include "stufflib_span.h"
 #include "stufflib_string.h"
 #include "stufflib_tokenizer.h"
 
@@ -75,8 +75,8 @@ bool count(const struct sl_args args[const static 1]) {
   const char* path = sl_args_get_positional(args, 2);
   struct sl_string content = sl_string_from_file(path);
 
-  struct sl_data pattern =
-      sl_data_view(strlen(pattern_str), (unsigned char*)pattern_str);
+  struct sl_span pattern =
+      sl_span_view(strlen(pattern_str), (unsigned char*)pattern_str);
   struct sl_tokenizer pattern_tokenizer =
       sl_tokenizer_create(&(content.utf8_data), &pattern);
 
@@ -123,7 +123,7 @@ bool slicelines(const struct sl_args args[const static 1]) {
     goto done;
   }
 
-  const struct sl_data newline = sl_data_view(1, (unsigned char[]){'\n'});
+  const struct sl_span newline = sl_span_view(1, (unsigned char[]){'\n'});
   struct sl_tokenizer newline_tokenizer =
       sl_tokenizer_create(&(content.utf8_data), &newline);
 
@@ -181,17 +181,17 @@ bool replace(const struct sl_args args[const static 1]) {
     goto done;
   }
 
-  struct sl_data pattern = sl_data_from_str(pattern_str);
-  if (sl_data_is_hexadecimal_str(&pattern)) {
-    struct sl_data hex_pattern = sl_data_parse_hex(&pattern);
-    sl_data_delete(&pattern);
+  struct sl_span pattern = sl_span_from_str(pattern_str);
+  if (sl_span_is_hexadecimal_str(&pattern)) {
+    struct sl_span hex_pattern = sl_span_parse_hex(&pattern);
+    sl_span_delete(&pattern);
     pattern = hex_pattern;
   }
 
-  struct sl_data replacement = sl_data_from_str(replacement_str);
-  if (sl_data_is_hexadecimal_str(&replacement)) {
-    struct sl_data hex_replacement = sl_data_parse_hex(&replacement);
-    sl_data_delete(&replacement);
+  struct sl_span replacement = sl_span_from_str(replacement_str);
+  if (sl_span_is_hexadecimal_str(&replacement)) {
+    struct sl_span hex_replacement = sl_span_parse_hex(&replacement);
+    sl_span_delete(&replacement);
     replacement = hex_replacement;
   }
 
@@ -221,8 +221,8 @@ bool replace(const struct sl_args args[const static 1]) {
 
 done:
   sl_string_delete(&content);
-  sl_data_delete(&pattern);
-  sl_data_delete(&replacement);
+  sl_span_delete(&pattern);
+  sl_span_delete(&replacement);
   return is_done;
 }
 
@@ -248,14 +248,14 @@ bool linefreq(const struct sl_args args[const static 1]) {
     goto done;
   }
 
-  const struct sl_data newline = sl_data_view(1, (unsigned char[]){'\n'});
+  const struct sl_span newline = sl_span_view(1, (unsigned char[]){'\n'});
   struct sl_tokenizer newline_tokenizer =
       sl_tokenizer_create(&(content.utf8_data), &newline);
 
   for (struct sl_iterator line_iter = sl_tokenizer_iter(&newline_tokenizer);
        !line_iter.is_done(&line_iter);
        line_iter.advance(&line_iter)) {
-    struct sl_data* line = line_iter.get_item(&line_iter);
+    struct sl_span* line = line_iter.get_item(&line_iter);
     if (!(line->size)) {
       continue;
     }

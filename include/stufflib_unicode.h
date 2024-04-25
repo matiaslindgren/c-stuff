@@ -9,9 +9,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "stufflib_data.h"
 #include "stufflib_iterator.h"
 #include "stufflib_macros.h"
+#include "stufflib_span.h"
 
 const uint32_t sl_unicode_error_value = UINT32_MAX;
 const size_t sl_unicode_error_width = 0;
@@ -183,7 +183,7 @@ uint32_t sl_unicode_codepoint_from_utf8(
   }
 }
 
-bool sl_unicode_is_valid_utf8(const struct sl_data data[const static 1]) {
+bool sl_unicode_is_valid_utf8(const struct sl_span data[const static 1]) {
   size_t byte_pos = 0;
   while (byte_pos < data->size) {
     const size_t codepoint_width =
@@ -198,7 +198,7 @@ bool sl_unicode_is_valid_utf8(const struct sl_data data[const static 1]) {
 }
 
 size_t sl_unicode_iter_get_item_width(struct sl_iterator iter[const static 1]) {
-  const struct sl_data* data = iter->data;
+  const struct sl_span* data = iter->data;
   const unsigned char* item = data->data + iter->index;
   return sl_unicode_codepoint_width_from_utf8(data->size - iter->index, item);
 }
@@ -214,12 +214,12 @@ void sl_unicode_iter_advance(struct sl_iterator iter[const static 1]) {
 }
 
 bool sl_unicode_iter_is_done(struct sl_iterator iter[const static 1]) {
-  const struct sl_data* data = iter->data;
+  const struct sl_span* data = iter->data;
   return iter->index >= data->size;
 }
 
 void* sl_unicode_iter_get_item(struct sl_iterator iter[const static 1]) {
-  return sl_data_iter_get_item(iter);
+  return sl_span_iter_get_item(iter);
 }
 
 uint32_t sl_unicode_iter_decode_item(struct sl_iterator iter[const static 1]) {
@@ -227,7 +227,7 @@ uint32_t sl_unicode_iter_decode_item(struct sl_iterator iter[const static 1]) {
                                         iter->get_item(iter));
 }
 
-struct sl_iterator sl_unicode_iter(const struct sl_data data[const static 1]) {
+struct sl_iterator sl_unicode_iter(const struct sl_span data[const static 1]) {
   return (struct sl_iterator){
       .data = (void*)data,
       .get_item = sl_unicode_iter_get_item,
@@ -236,7 +236,7 @@ struct sl_iterator sl_unicode_iter(const struct sl_data data[const static 1]) {
   };
 }
 
-size_t sl_unicode_length(const struct sl_data data[const static 1]) {
+size_t sl_unicode_length(const struct sl_span data[const static 1]) {
   if (!sl_unicode_is_valid_utf8(data)) {
     return 0;
   }

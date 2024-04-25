@@ -38,7 +38,7 @@ bool test_read_single_char(const bool verbose) {
   assert(iter.pos == 0);
   assert(!iter.is_done(&iter));
 
-  struct sl_data* data = iter.get_item(&iter);
+  struct sl_span* data = iter.get_item(&iter);
   assert(data);
   assert(data->size == 1);
   assert(data->data[0] == '1');

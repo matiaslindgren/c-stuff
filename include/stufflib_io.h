@@ -4,11 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib_data.h"
 #include "stufflib_iterator.h"
 #include "stufflib_macros.h"
 #include "stufflib_memory.h"
 #include "stufflib_misc.h"
+#include "stufflib_span.h"
 
 #define SL_FILE_BUFFER_CAPACITY 4096
 
@@ -16,7 +16,7 @@ struct sl_file_buffer {
   const char* filename;
   FILE* file;
   size_t capacity;
-  struct sl_data data;
+  struct sl_span data;
 };
 
 void sl_file_iter_read_data(struct sl_file_buffer buffer[const static 1]) {
@@ -65,7 +65,7 @@ struct sl_iterator sl_file_iter_open(const char filename[const static 1]) {
       .file = file,
       .filename = filename,
       .capacity = SL_FILE_BUFFER_CAPACITY,
-      .data = sl_data_create(SL_FILE_BUFFER_CAPACITY),
+      .data = sl_span_create(SL_FILE_BUFFER_CAPACITY),
   };
   sl_file_iter_read_data(buffer);
   iter.data = buffer;
@@ -80,7 +80,7 @@ void sl_file_iter_close(struct sl_iterator iter[const static 1]) {
   }
   struct sl_file_buffer* buffer = iter->data;
   fclose(buffer->file);
-  sl_data_delete(&buffer->data);
+  sl_span_delete(&buffer->data);
   sl_free(iter->data);
   iter->data = nullptr;
 }

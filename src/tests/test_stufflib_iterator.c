@@ -4,18 +4,18 @@
 #include <string.h>
 
 #include "stufflib_args.h"
-#include "stufflib_data.h"
 #include "stufflib_iterator.h"
 #include "stufflib_macros.h"
+#include "stufflib_span.h"
 #include "stufflib_unicode.h"
 
 bool test_data(const bool verbose) {
-  struct sl_data data = {
+  struct sl_span data = {
       .size = 5,
       .data = (unsigned char[5]){0, 1, 2, 3, 4},
   };
   size_t i = 0;
-  struct sl_iterator iter = sl_data_iter(&data);
+  struct sl_iterator iter = sl_span_iter(&data);
   for (; !iter.is_done(&iter); iter.advance(&iter)) {
     assert(iter.index == i);
     const unsigned char* item = iter.get_item(&iter);
