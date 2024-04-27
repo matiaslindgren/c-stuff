@@ -15,13 +15,14 @@ endif
 
 INCLUDE_DIR := $(abspath ./include)
 SOURCE_DIR  := $(abspath ./src)
+OUTPUT_DIR  := $(abspath ./build)
 
 DEBUG=0
 ifeq ($(DEBUG), 1)
-	BUILD_DIR := $(abspath ./build/debug)
-	CFLAGS    += -O2 -g -fsanitize=address,undefined
+	BUILD_DIR := $(OUTPUT_DIR)/debug
+	CFLAGS    += -O1 -g -fsanitize=address,undefined
 else
-	BUILD_DIR := $(abspath ./build/release)
+	BUILD_DIR := $(OUTPUT_DIR)/release
 	CFLAGS    += -O3 -march=native
 endif
 
@@ -40,7 +41,7 @@ all: $(TOOLS) $(TESTS)
 
 .PHONY: clean
 clean:
-	$(RM) -r $(BUILD_DIR)
+	$(RM) -r $(OUTPUT_DIR)
 
 .PHONY: fmt
 fmt: $(HEADERS) $(TOOLS_SRC) $(TESTS_SRC)
