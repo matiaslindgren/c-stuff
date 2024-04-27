@@ -61,7 +61,7 @@ bool test_unicode_iterator(const bool verbose) {
     size_t str_len = 0;
     size_t byte_pos = 0;
     struct sl_iterator iter = sl_unicode_iter(hello_utf8 + i_str);
-    for (; !iter.is_done(&iter); iter.advance(&iter)) {
+    for (; !sl_unicode_iter_is_done(&iter); sl_unicode_iter_advance(&iter)) {
       assert(iter.index == byte_pos);
       const uint32_t codepoint = sl_unicode_iter_decode_item(&iter);
       assert(codepoint == decoded_strings[codepoint_pos]);
@@ -144,8 +144,8 @@ bool test_decode_utf8_files(const bool verbose) {
 
     size_t codepoint_pos = 0;
     for (struct sl_iterator iter = sl_unicode_iter(&utf8_data);
-         !iter.is_done(&iter);
-         iter.advance(&iter)) {
+         !sl_unicode_iter_is_done(&iter);
+         sl_unicode_iter_advance(&iter)) {
       assert(codepoint_pos < str_len);
       const uint32_t codepoint = sl_unicode_iter_decode_item(&iter);
       assert(codepoint == expected_codepoints[codepoint_pos]);

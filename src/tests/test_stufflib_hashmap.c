@@ -185,18 +185,18 @@ bool test_slot_iterator(const bool verbose) {
   }
   struct sl_iterator iter = sl_hashmap_iter(&map);
   for (size_t i = 0; i < n; ++i) {
-    assert(!iter.is_done(&iter));
+    assert(!sl_hashmap_iter_is_done(&iter));
     assert(iter.pos == i);
-    struct sl_hashmap_slot* slot = iter.get_item(&iter);
+    struct sl_hashmap_slot* slot = sl_hashmap_iter_get(&iter);
     assert(slot);
     assert(iter.index == slot - map.slots);
     assert(slot->filled);
     assert(slot->value >= 0);
     assert(slot->value < n);
     assert(memcmp(keys[slot->value], slot->key.data, slot->key.size) == 0);
-    iter.advance(&iter);
+    sl_hashmap_iter_advance(&iter);
   }
-  assert(iter.is_done(&iter));
+  assert(sl_hashmap_iter_is_done(&iter));
   sl_hashmap_delete(&map);
   return true;
 }

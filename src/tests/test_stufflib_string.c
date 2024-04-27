@@ -58,8 +58,8 @@ bool test_string_slice(const bool verbose) {
         assert(substr.length == substr_len);
         struct sl_span view = sl_string_view_utf8_data(&substr);
         for (struct sl_iterator iter = sl_unicode_iter(&view);
-             !iter.is_done(&iter);
-             iter.advance(&iter)) {
+             !sl_unicode_iter_is_done(&iter);
+             sl_unicode_iter_advance(&iter)) {
           const uint32_t codepoint = sl_unicode_iter_decode_item(&iter);
           assert(codepoint == decoded_strings[decoded_pos + begin + iter.pos]);
           // TODO assert iterator slice address equals underlying string

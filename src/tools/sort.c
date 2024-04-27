@@ -54,10 +54,10 @@ int main(int argc, char* const argv[argc + 1]) {
   struct sl_tokenizer newline_tokenizer =
       sl_tokenizer_create(&(content.utf8_data), &newline);
   for (struct sl_iterator iter = sl_tokenizer_iter(&newline_tokenizer);
-       !iter.is_done(&iter);
-       iter.advance(&iter)) {
+       !sl_tokenizer_iter_is_done(&iter);
+       sl_tokenizer_iter_advance(&iter)) {
     // TODO less awful
-    struct sl_span* token = iter.get_item(&iter);
+    struct sl_span* token = sl_tokenizer_iter_get(&iter);
     assert(token->size);
     if (token->data[0] == 0) {
       continue;

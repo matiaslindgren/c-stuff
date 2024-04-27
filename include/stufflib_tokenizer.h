@@ -47,7 +47,7 @@ struct sl_tokenizer sl_tokenizer_create(
   };
 }
 
-void* sl_tokenizer_iter_get_item(struct sl_iterator iter[const static 1]) {
+void* sl_tokenizer_iter_get(struct sl_iterator iter[const static 1]) {
   struct sl_tokenizer* tok = iter->data;
   return &(tok->token);
 }
@@ -70,12 +70,7 @@ bool sl_tokenizer_iter_is_done(struct sl_iterator iter[const static 1]) {
 
 struct sl_iterator sl_tokenizer_iter(
     const struct sl_tokenizer tok[const static 1]) {
-  return (struct sl_iterator){
-      .data = (void*)tok,
-      .get_item = sl_tokenizer_iter_get_item,
-      .advance = sl_tokenizer_iter_advance,
-      .is_done = sl_tokenizer_iter_is_done,
-  };
+  return (struct sl_iterator){.data = (void*)tok};
 }
 
 #endif  // SL_TOKENIZER_H_INCLUDED

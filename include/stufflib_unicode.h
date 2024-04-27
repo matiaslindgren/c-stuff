@@ -197,14 +197,14 @@ bool sl_unicode_is_valid_utf8(const struct sl_span data[const static 1]) {
   return byte_pos == data->size;
 }
 
-size_t sl_unicode_iter_get_item_width(struct sl_iterator iter[const static 1]) {
+size_t sl_unicode_iter_item_width(struct sl_iterator iter[const static 1]) {
   const struct sl_span* data = iter->data;
   const unsigned char* item = data->data + iter->index;
   return sl_unicode_codepoint_width_from_utf8(data->size - iter->index, item);
 }
 
 void sl_unicode_iter_advance(struct sl_iterator iter[const static 1]) {
-  const size_t codepoint_width = sl_unicode_iter_get_item_width(iter);
+  const size_t codepoint_width = sl_unicode_iter_item_width(iter);
   if (codepoint_width == sl_unicode_error_width) {
     iter->index += 1;
   } else {
@@ -218,22 +218,17 @@ bool sl_unicode_iter_is_done(struct sl_iterator iter[const static 1]) {
   return iter->index >= data->size;
 }
 
-void* sl_unicode_iter_get_item(struct sl_iterator iter[const static 1]) {
-  return sl_span_iter_get_item(iter);
+void* sl_unicode_iter_get(struct sl_iterator iter[const static 1]) {
+  return sl_span_iter_get(iter);
 }
 
 uint32_t sl_unicode_iter_decode_item(struct sl_iterator iter[const static 1]) {
-  return sl_unicode_codepoint_from_utf8(sl_unicode_iter_get_item_width(iter),
-                                        iter->get_item(iter));
+  return sl_unicode_codepoint_from_utf8(sl_unicode_iter_item_width(iter),
+                                        sl_unicode_iter_get(iter));
 }
 
 struct sl_iterator sl_unicode_iter(const struct sl_span data[const static 1]) {
-  return (struct sl_iterator){
-      .data = (void*)data,
-      .get_item = sl_unicode_iter_get_item,
-      .advance = sl_unicode_iter_advance,
-      .is_done = sl_unicode_iter_is_done,
-  };
+  return (struct sl_iterator){.data = (void*)data};
 }
 
 size_t sl_unicode_length(const struct sl_span data[const static 1]) {
@@ -241,8 +236,8 @@ size_t sl_unicode_length(const struct sl_span data[const static 1]) {
     return 0;
   }
   struct sl_iterator iter = sl_unicode_iter(data);
-  while (!iter.is_done(&iter)) {
-    iter.advance(&iter);
+  while (!sl_unicode_iter_is_done(&iter)) {
+    sl_unicode_iter_advance(&iter);
   }
   return iter.pos;
 }

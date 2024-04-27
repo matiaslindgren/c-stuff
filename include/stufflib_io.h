@@ -31,7 +31,7 @@ void sl_file_iter_read_data(struct sl_file_buffer buffer[const static 1]) {
   }
 }
 
-void* sl_file_iter_get_item(struct sl_iterator iter[const static 1]) {
+void* sl_file_iter_get(struct sl_iterator iter[const static 1]) {
   struct sl_file_buffer* buffer = iter->data;
   return &(buffer->data);
 }
@@ -49,11 +49,7 @@ bool sl_file_iter_is_done(struct sl_iterator iter[const static 1]) {
 }
 
 struct sl_iterator sl_file_iter_open(const char filename[const static 1]) {
-  struct sl_iterator iter = {
-      .get_item = sl_file_iter_get_item,
-      .advance = sl_file_iter_advance,
-      .is_done = sl_file_iter_is_done,
-  };
+  struct sl_iterator iter = {};
 
   FILE* file = fopen(filename, "rb");
   if (!file) {

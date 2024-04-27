@@ -127,7 +127,7 @@ int sl_span_compare(const struct sl_span lhs[const static 1],
   return (!rhs->data) - (!lhs->data);
 }
 
-void* sl_span_iter_get_item(struct sl_iterator iter[const static 1]) {
+void* sl_span_iter_get(struct sl_iterator iter[const static 1]) {
   struct sl_span* data = iter->data;
   return data->data + iter->index;
 }
@@ -143,12 +143,7 @@ bool sl_span_iter_is_done(struct sl_iterator iter[const static 1]) {
 }
 
 struct sl_iterator sl_span_iter(const struct sl_span data[const static 1]) {
-  return (struct sl_iterator){
-      .data = (void*)data,
-      .get_item = sl_span_iter_get_item,
-      .advance = sl_span_iter_advance,
-      .is_done = sl_span_iter_is_done,
-  };
+  return (struct sl_iterator){.data = (void*)data};
 }
 
 #endif  // SL_DATA_H_INCLUDED

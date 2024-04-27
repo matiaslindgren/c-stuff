@@ -107,52 +107,52 @@ bool test_tokenize_iter(const bool verbose) {
   struct sl_tokenizer tok = sl_tokenizer_create(&data, &delimiter);
   struct sl_iterator iter = sl_tokenizer_iter(&tok);
 
-  assert(!iter.is_done(&iter));
+  assert(!sl_tokenizer_iter_is_done(&iter));
   {
-    struct sl_span* token = iter.get_item(&iter);
+    struct sl_span* token = sl_tokenizer_iter_get(&iter);
     assert(token);
     assert(token->size == 3);
     assert(token->data == data_str);
   }
-  iter.advance(&iter);
+  sl_tokenizer_iter_advance(&iter);
 
-  assert(!iter.is_done(&iter));
+  assert(!sl_tokenizer_iter_is_done(&iter));
   {
-    struct sl_span* token = iter.get_item(&iter);
+    struct sl_span* token = sl_tokenizer_iter_get(&iter);
     assert(token);
     assert(token->size == 2);
     assert(token->data == data_str + 5);
   }
-  iter.advance(&iter);
+  sl_tokenizer_iter_advance(&iter);
 
-  assert(!iter.is_done(&iter));
+  assert(!sl_tokenizer_iter_is_done(&iter));
   {
-    struct sl_span* token = iter.get_item(&iter);
+    struct sl_span* token = sl_tokenizer_iter_get(&iter);
     assert(token);
     assert(token->size == 4);
     assert(token->data == data_str + 9);
   }
-  iter.advance(&iter);
+  sl_tokenizer_iter_advance(&iter);
 
-  assert(!iter.is_done(&iter));
+  assert(!sl_tokenizer_iter_is_done(&iter));
   {
-    struct sl_span* token = iter.get_item(&iter);
+    struct sl_span* token = sl_tokenizer_iter_get(&iter);
     assert(token);
     assert(token->size == 1);
     assert(token->data == data_str + 15);
   }
-  iter.advance(&iter);
+  sl_tokenizer_iter_advance(&iter);
 
-  assert(!iter.is_done(&iter));
+  assert(!sl_tokenizer_iter_is_done(&iter));
   {
-    struct sl_span* token = iter.get_item(&iter);
+    struct sl_span* token = sl_tokenizer_iter_get(&iter);
     assert(token);
     assert(!token->size);
     assert(!token->data);
   }
-  iter.advance(&iter);
+  sl_tokenizer_iter_advance(&iter);
 
-  assert(iter.is_done(&iter));
+  assert(sl_tokenizer_iter_is_done(&iter));
 
   return true;
 }

@@ -16,9 +16,9 @@ bool test_data(const bool verbose) {
   };
   size_t i = 0;
   struct sl_iterator iter = sl_span_iter(&data);
-  for (; !iter.is_done(&iter); iter.advance(&iter)) {
+  for (; !sl_span_iter_is_done(&iter); sl_span_iter_advance(&iter)) {
     assert(iter.index == i);
-    const unsigned char* item = iter.get_item(&iter);
+    const unsigned char* item = sl_span_iter_get(&iter);
     assert(item);
     assert(*item == data.data[i]);
     ++i;
@@ -27,7 +27,7 @@ bool test_data(const bool verbose) {
   return true;
 }
 
-void* sl_cstr_iter_get_item(struct sl_iterator iter[const static 1]) {
+void* sl_cstr_iter_get(struct sl_iterator iter[const static 1]) {
   char* str = iter->data;
   return str + iter->index;
 }
@@ -42,13 +42,7 @@ bool sl_cstr_iter_is_done(struct sl_iterator iter[const static 1]) {
 }
 
 struct sl_iterator sl_cstr_iter(char str[const static 1]) {
-  return (struct sl_iterator){
-      .index = 0,
-      .data = str,
-      .get_item = sl_cstr_iter_get_item,
-      .advance = sl_cstr_iter_advance,
-      .is_done = sl_cstr_iter_is_done,
-  };
+  return (struct sl_iterator){.index = 0, .data = str};
 }
 
 bool test_cstr(const bool verbose) {
@@ -66,9 +60,9 @@ bool test_cstr(const bool verbose) {
     size_t i = 0;
     char* str = strings[i_str];
     struct sl_iterator iter = sl_cstr_iter(str);
-    for (; !iter.is_done(&iter); iter.advance(&iter)) {
+    for (; !sl_cstr_iter_is_done(&iter); sl_cstr_iter_advance(&iter)) {
       assert(iter.index == i);
-      const char* ch = iter.get_item(&iter);
+      const char* ch = sl_cstr_iter_get(&iter);
       assert(ch);
       assert(*ch == str[i]);
       ++i;

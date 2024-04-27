@@ -279,15 +279,15 @@ bool test_data_iter(const bool verbose) {
   struct sl_span data = sl_span_view(n, x);
   struct sl_iterator iter = sl_span_iter(&data);
   for (size_t i = 0; i < n; ++i) {
-    assert(!iter.is_done(&iter));
+    assert(!sl_span_iter_is_done(&iter));
     assert(iter.index == i);
     assert(iter.pos == i);
-    unsigned char* item = iter.get_item(&iter);
+    unsigned char* item = sl_span_iter_get(&iter);
     assert(item == data.data + i);
     assert(item == x + i);
-    iter.advance(&iter);
+    sl_span_iter_advance(&iter);
   }
-  assert(iter.is_done(&iter));
+  assert(sl_span_iter_is_done(&iter));
   return true;
 }
 

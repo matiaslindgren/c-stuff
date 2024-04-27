@@ -41,8 +41,8 @@ struct sl_string sl_string_from_file(const char filename[const static 1]) {
   struct sl_iterator file_iter = sl_file_iter_open(filename);
 
   struct sl_span utf8_data = {0};
-  for (; !file_iter.is_done(&file_iter); file_iter.advance(&file_iter)) {
-    struct sl_span* buffer = file_iter.get_item(&file_iter);
+  for (; !sl_file_iter_is_done(&file_iter); sl_file_iter_advance(&file_iter)) {
+    struct sl_span* buffer = sl_file_iter_get(&file_iter);
     sl_span_extend(&utf8_data, buffer);
   }
 
@@ -82,12 +82,12 @@ struct sl_string sl_string_slice(const struct sl_string str[const static 1],
                                  const size_t end) {
   const struct sl_span utf8_data = sl_string_view_utf8_data(str);
   struct sl_iterator begin_iter = sl_unicode_iter(&utf8_data);
-  while (begin_iter.pos < begin && !begin_iter.is_done(&begin_iter)) {
-    begin_iter.advance(&begin_iter);
+  while (begin_iter.pos < begin && !sl_unicode_iter_is_done(&begin_iter)) {
+    sl_unicode_iter_advance(&begin_iter);
   }
   struct sl_iterator end_iter = begin_iter;
-  while (end_iter.pos < end && !end_iter.is_done(&end_iter)) {
-    end_iter.advance(&end_iter);
+  while (end_iter.pos < end && !sl_unicode_iter_is_done(&end_iter)) {
+    sl_unicode_iter_advance(&end_iter);
   }
   struct sl_span utf8_slice =
       sl_span_slice(&(str->utf8_data), begin_iter.index, end_iter.index);

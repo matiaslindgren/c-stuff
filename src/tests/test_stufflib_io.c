@@ -36,15 +36,15 @@ bool test_read_single_char(const bool verbose) {
   struct sl_iterator iter = sl_file_iter_open("./test-data/txt/one.txt");
   assert(iter.index == 0);
   assert(iter.pos == 0);
-  assert(!iter.is_done(&iter));
+  assert(!sl_file_iter_is_done(&iter));
 
-  struct sl_span* data = iter.get_item(&iter);
+  struct sl_span* data = sl_file_iter_get(&iter);
   assert(data);
   assert(data->size == 1);
   assert(data->data[0] == '1');
 
-  iter.advance(&iter);
-  assert(iter.is_done(&iter));
+  sl_file_iter_advance(&iter);
+  assert(sl_file_iter_is_done(&iter));
 
   sl_file_iter_close(&iter);
   return true;
@@ -54,7 +54,7 @@ bool test_read_empty_file(const bool verbose) {
   struct sl_iterator iter = sl_file_iter_open("./test-data/txt/empty");
   assert(iter.index == 0);
   assert(iter.pos == 0);
-  assert(iter.is_done(&iter));
+  assert(sl_file_iter_is_done(&iter));
   sl_file_iter_close(&iter);
   return true;
 }
@@ -99,9 +99,9 @@ bool test_read_read_entire_file(const bool verbose) {
     struct sl_iterator iter = sl_file_iter_open(files[i]);
     struct sl_file_buffer* buffer = iter.data;
     size_t total_size = 0;
-    while (!iter.is_done(&iter)) {
+    while (!sl_file_iter_is_done(&iter)) {
       total_size += buffer->data.size;
-      iter.advance(&iter);
+      sl_file_iter_advance(&iter);
     }
     assert(!ferror(buffer->file));
     assert(feof(buffer->file));

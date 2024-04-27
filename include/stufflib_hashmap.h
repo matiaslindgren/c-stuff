@@ -129,7 +129,7 @@ size_t sl_hashmap_iter_find_next(struct sl_iterator iter[const static 1],
   return i;
 }
 
-void* sl_hashmap_iter_get_item(struct sl_iterator iter[const static 1]) {
+void* sl_hashmap_iter_get(struct sl_iterator iter[const static 1]) {
   struct sl_hashmap* map = iter->data;
   return map->slots + iter->index;
 }
@@ -146,12 +146,7 @@ bool sl_hashmap_iter_is_done(struct sl_iterator iter[const static 1]) {
 
 struct sl_iterator sl_hashmap_iter(
     const struct sl_hashmap map[const static 1]) {
-  struct sl_iterator iter = {
-      .data = (void*)map,
-      .get_item = sl_hashmap_iter_get_item,
-      .advance = sl_hashmap_iter_advance,
-      .is_done = sl_hashmap_iter_is_done,
-  };
+  struct sl_iterator iter = {.data = (void*)map};
   iter.index = sl_hashmap_iter_find_next(&iter, 0);
   return iter;
 }

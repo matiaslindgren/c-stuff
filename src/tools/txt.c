@@ -82,8 +82,8 @@ bool count(const struct sl_args args[const static 1]) {
 
   size_t n = 0;
   for (struct sl_iterator iter = sl_tokenizer_iter(&pattern_tokenizer);
-       !iter.is_done(&iter);
-       iter.advance(&iter)) {
+       !sl_tokenizer_iter_is_done(&iter);
+       sl_tokenizer_iter_advance(&iter)) {
     ++n;
   }
   if (n) {
@@ -129,10 +129,10 @@ bool slicelines(const struct sl_args args[const static 1]) {
 
   size_t lineno = 1;
   for (struct sl_iterator iter = sl_tokenizer_iter(&newline_tokenizer);
-       !iter.is_done(&iter);
-       iter.advance(&iter)) {
+       !sl_tokenizer_iter_is_done(&iter);
+       sl_tokenizer_iter_advance(&iter)) {
     if (begin <= lineno && lineno <= end) {
-      struct sl_string line = sl_string_from_utf8(iter.get_item(&iter));
+      struct sl_string line = sl_string_from_utf8(sl_tokenizer_iter_get(&iter));
       bool write_ok = sl_string_fprint(stdout, &line);
       sl_string_delete(&line);
       if (!write_ok) {
@@ -199,15 +199,15 @@ bool replace(const struct sl_args args[const static 1]) {
       sl_tokenizer_create(&(content.utf8_data), &pattern);
 
   struct sl_iterator iter = sl_tokenizer_iter(&pattern_tokenizer);
-  while (!iter.is_done(&iter)) {
-    struct sl_string line = sl_string_from_utf8(iter.get_item(&iter));
+  while (!sl_tokenizer_iter_is_done(&iter)) {
+    struct sl_string line = sl_string_from_utf8(sl_tokenizer_iter_get(&iter));
     const bool write_ok = sl_string_fprint(stdout, &line);
     sl_string_delete(&line);
     if (!write_ok) {
       goto done;
     }
-    iter.advance(&iter);
-    if (!iter.is_done(&iter) && replacement.size) {
+    sl_tokenizer_iter_advance(&iter);
+    if (!sl_tokenizer_iter_is_done(&iter) && replacement.size) {
       struct sl_string repl = sl_string_from_utf8(&replacement);
       const bool write_ok = sl_string_fprint(stdout, &repl);
       sl_string_delete(&repl);
@@ -253,9 +253,9 @@ bool linefreq(const struct sl_args args[const static 1]) {
       sl_tokenizer_create(&(content.utf8_data), &newline);
 
   for (struct sl_iterator line_iter = sl_tokenizer_iter(&newline_tokenizer);
-       !line_iter.is_done(&line_iter);
-       line_iter.advance(&line_iter)) {
-    struct sl_span* line = line_iter.get_item(&line_iter);
+       !sl_tokenizer_iter_is_done(&line_iter);
+       sl_tokenizer_iter_advance(&line_iter)) {
+    struct sl_span* line = sl_tokenizer_iter_get(&line_iter);
     if (!(line->size)) {
       continue;
     }
@@ -266,9 +266,9 @@ bool linefreq(const struct sl_args args[const static 1]) {
   }
 
   for (struct sl_iterator freq_iter = sl_hashmap_iter(&freq);
-       !freq_iter.is_done(&freq_iter);
-       freq_iter.advance(&freq_iter)) {
-    struct sl_hashmap_slot* slot = freq_iter.get_item(&freq_iter);
+       !sl_hashmap_iter_is_done(&freq_iter);
+       sl_hashmap_iter_advance(&freq_iter)) {
+    struct sl_hashmap_slot* slot = sl_hashmap_iter_get(&freq_iter);
     if (printf("%zu ", slot->value) < 0) {
       goto done;
     }
