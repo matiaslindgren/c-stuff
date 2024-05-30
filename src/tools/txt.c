@@ -310,7 +310,7 @@ void print_usage(const struct sl_args args[const static 1]) {
 }
 
 int main(int argc, char* const argv[argc + 1]) {
-  struct sl_args args = sl_args_from_argv(argc, argv);
+  struct sl_args args = {.argc = argc, .argv = argv};
   bool ok = false;
   const char* command = sl_args_get_positional(&args, 0);
   if (command) {
@@ -331,6 +331,5 @@ int main(int argc, char* const argv[argc + 1]) {
   if (!ok) {
     print_usage(&args);
   }
-  sl_args_destroy(&args);
   return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

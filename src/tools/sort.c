@@ -34,7 +34,7 @@ int main(int argc, char* const argv[argc + 1]) {
   char** lines = nullptr;
   size_t num_lines = 0;
 
-  struct sl_args args = sl_args_from_argv(argc, argv);
+  struct sl_args args = {.argc = argc, .argv = argv};
   if (sl_args_count_positional(&args) != 2) {
     print_usage(&args);
     goto done;
@@ -88,7 +88,6 @@ int main(int argc, char* const argv[argc + 1]) {
   is_done = true;
 
 done:
-  sl_args_destroy(&args);
   sl_string_delete(&content);
   for (size_t i = 0; i < num_lines; ++i) {
     sl_free(lines[i]);

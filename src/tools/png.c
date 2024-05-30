@@ -21,7 +21,7 @@ bool segment(const struct sl_args args[const static 1]) {
   const char* const png_src_path = sl_args_get_positional(args, 1);
   const char* const png_dst_path = sl_args_get_positional(args, 2);
   const size_t threshold_percent =
-      sl_args_parse_uint(args, "--threshold-percent", 10);
+      sl_args_parse_ull(args, "--threshold-percent", 10);
   const bool verbose = sl_args_parse_flag(args, "-v");
 
   if (verbose) {
@@ -149,7 +149,7 @@ void print_usage(const struct sl_args args[const static 1]) {
 }
 
 int main(int argc, char* const argv[argc + 1]) {
-  struct sl_args args = sl_args_from_argv(argc, argv);
+  struct sl_args args = {.argc = argc, .argv = argv};
   bool ok = false;
   const char* command = sl_args_get_positional(&args, 0);
   if (command) {
@@ -166,6 +166,5 @@ int main(int argc, char* const argv[argc + 1]) {
   if (!ok) {
     print_usage(&args);
   }
-  sl_args_destroy(&args);
   return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
