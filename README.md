@@ -1,12 +1,16 @@
 # c-stuff
 
 Useless library/toolkit/scribble that reimplements solved problems for the sake of learning.
-Contains mostly over-engineered solutions to the programming challenges suggested by Jens Gustedt in [Modern C](https://gustedt.gitlabpages.inria.fr/modern-c/).
+
+## References
+
+- [Modern C, Jens Gustedt](https://gustedt.gitlabpages.inria.fr/modern-c/).
+- [Effective C, Robert C. Seacord](https://nostarch.com/Effective_C).
 
 ## Requirements
 
 * `make`
-* `clang-18`, see the [LLVM docs](https://apt.llvm.org/) or stufflib's [CI config](./.github/workflows/c.yml) on how to install nightly Clang versions.
+* `clang-18`, see the [LLVM docs](https://apt.llvm.org/) or stufflib's [CI config](./.github/workflows/c.yml) on how to new Clang versions.
 
 ### (Optional) Run in Docker
 
@@ -20,9 +24,8 @@ If you can't install Clang 18 using a package manager, you can use Docker:
 ## Build and test
 
 ```sh
-make DEBUG=1 -j && make DEBUG=1 test \
-  && make -j && make test \
-  && make -j integration_test
+make DEBUG=1 -j4 all test integration_test
+make -j4 all test integration_test
 ```
 
 ## PNG tools
@@ -156,7 +159,7 @@ Simple line sorting.
 
 Create data (on macOS, use `gfind`) by calculating the size of each input file used during testing:
 ```
-find ./test-data/png -printf '%s\n' > test-data-sizes.txt
+find ./test-data/png -name '*.png' -printf '%s\n' > test-data-sizes.txt
 ```
 
 #### Sort lines as numbers
@@ -239,7 +242,7 @@ Source: [`./src/tools/txt.c`](./src/tools/txt.c)
 ```
 ./build/debug/tools/txt concat path [paths...]
 ./build/debug/tools/txt count pattern path
-./build/debug/tools/txt slicelines begin end path
+./build/debug/tools/txt slicelines begin count path
 ./build/debug/tools/txt replace pattern replacement path
 ./build/debug/tools/txt linefreq path
 ```
@@ -260,77 +263,44 @@ Vatn er ólífrænn lyktar-, bragð- og nær litlaus vökvi sem er lífsnauðsyn
 
 #### Count pattern occurrence
 ```
-./build/debug/tools/txt count '#' README.md
+./build/debug/tools/txt count 'struct' src/tools/txt.c
 ./build/debug/tools/txt count '##' README.md
 ./build/debug/tools/txt count 'ある' README.md
+./build/debug/tools/txt count 'ið' README.md
 ```
 **`stdout`**:
 ```
-105
-42
+36
+43
 3
+4
 ```
 
 #### Slice lines
 ```
-./build/debug/tools/txt slicelines 312 336 ./src/tools/txt.c
+./build/debug/tools/txt slicelines 315 10 ./src/tools/txt.c
 ```
 **`stdout`**:
 ```
 int main(int argc, char* const argv[argc + 1]) {
-  struct sl_args args ={.argc=argc, .argv=argv};
+  struct sl_args args = {.argc = argc, .argv = argv};
   bool ok = false;
-  const char* command = sl_args_get_positional(&args, 0);
+  char* command = sl_args_get_positional(&args, 0);
   if (command) {
     if (strcmp(command, "concat") == 0) {
       ok = concat(&args);
     } else if (strcmp(command, "count") == 0) {
       ok = count(&args);
     } else if (strcmp(command, "slicelines") == 0) {
-      ok = slicelines(&args);
-    } else if (strcmp(command, "replace") == 0) {
-      ok = replace(&args);
-    } else if (strcmp(command, "linefreq") == 0) {
-      ok = linefreq(&args);
-    } else {
-      SL_LOG_ERROR("unknown command %s", command);
-    }
-  }
-  if (!ok) {
-    print_usage(&args);
-  }
-  sl_args_destroy(&args);
-  return ok ? EXIT_SUCCESS : EXIT_FAILURE;
-}
 ```
 
 #### Replace pattern
 ```
-./build/debug/tools/txt replace sl_iterator it ./include/stufflib_iterator.h
+./build/debug/tools/txt replace '水' water ./test-data/txt/wikipedia/water_ja.txt
 ```
 **`stdout`**:
 ```
-#ifndef _SL_ITERATOR_H_INCLUDED
-#define _SL_ITERATOR_H_INCLUDED
-#include <stdlib.h>
-#include <string.h>
-
-struct it;
-
-typedef void* it_get_item(struct it*);
-typedef void it_advance(struct it*);
-typedef bool it_is_done(struct it*);
-
-struct it {
-  size_t index;
-  size_t pos;
-  void* data;
-  it_get_item* get_item;
-  it_advance* advance;
-  it_is_done* is_done;
-};
-
-#endif  // _SL_ITERATOR_H_INCLUDED
+water（みず、（英: water、他言語呼称は「他言語での呼称」の項を参照）とは、化学式 H2O で表される、water素と酸素の化合物である。日本語においては特に湯と対比して用いられ、液体ではあるが温度が低く、かつ凝固して氷にはなっていない物を言う。また、液状の物全般を指す。
 ```
 
 ## Combine commands by using `/dev/stdin` as input path
@@ -338,7 +308,7 @@ struct it {
 ### Run preprocessor on source file and count 25 most common lines
 
 ```
-clang-18 -std=c2x -E -I./include ./src/tools/txt.c \
+clang-18 -std=c23 -E -I./include ./src/tools/txt.c \
   | ./build/debug/tools/txt replace '  ' '' /dev/stdin \
   | ./build/debug/tools/txt replace $'\n ' $'\n' /dev/stdin \
   | ./build/debug/tools/txt linefreq /dev/stdin \
@@ -348,30 +318,30 @@ clang-18 -std=c2x -E -I./include ./src/tools/txt.c \
 **`stdout`**:
 ```
 249 }
-24 };
+19 };
 18 __attribute__ ((__const__));
 17 {
 13 goto done;
 11 } break;
-10 return false;
+10 __extension__
+9 return false;
+9 return dst;
 9 __attribute__ ((__nothrow__ )) __attribute__ ((__pure__)) __attribute__ ((__nonnull__ (1, 2)));
-8 __extension__
-8 return dst;
 7 for (size_t i = 0; i < n; ++i) {
-6 bool ok = false;
-6 done:
-6 __attribute__ ((__nothrow__ )) __attribute__ ((__nonnull__ (1)));
 6 } else {
+6 __attribute__ ((__nothrow__ )) __attribute__ ((__nonnull__ (1)));
 6 if (0x80 <= byte && byte <= 0xbf) {
+6 done:
 6 # 1 "/usr/include/aarch64-linux-gnu/bits/libc-header-start.h" 1 3 4
 5 struct sl_string content = sl_string_from_file(path);
-5 ok = true;
+5 bool is_done = false;
+5 # 1 "/usr/include/aarch64-linux-gnu/bits/wordsize.h" 1 3 4
+5 const int args_count = sl_args_count_positional(args) - 1;
+5 # 1 "/usr/include/assert.h" 1 3 4
+5 ;
+5 is_done = true;
 5 sl_string_delete(&content);
 5 "\n"
-5 # 1 "/usr/include/aarch64-linux-gnu/bits/wordsize.h" 1 3 4
-5 return ok;
-5 return 0;
-5 const size_t args_count = sl_args_count_positional(args) - 1;
 ```
 
 ### Format `NUL`-separated metadata fields in a PNG `tEXt` block

@@ -27,7 +27,7 @@ endif
 
 INCLUDE_DIR := $(abspath ./include)
 SOURCE_DIR  := $(abspath ./src)
-OUTPUT_DIR  := $(abspath ./build)
+OUTPUT_DIR  := ./build
 
 DEBUG=0
 ifeq ($(DEBUG), 1)

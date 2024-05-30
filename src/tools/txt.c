@@ -113,7 +113,7 @@ bool slicelines(const struct sl_args args[const static 1]) {
   }
 
   const size_t begin = strtoull(sl_args_get_positional(args, 1), 0, 10);
-  const size_t end = strtoull(sl_args_get_positional(args, 2), 0, 10);
+  const size_t count = strtoull(sl_args_get_positional(args, 2), 0, 10);
   char* path = sl_args_get_positional(args, 3);
 
   bool is_done = false;
@@ -128,12 +128,14 @@ bool slicelines(const struct sl_args args[const static 1]) {
       sl_tokenizer_create(&(content.utf8_data), &newline);
 
   size_t lineno = 1;
+  size_t n_printed = 0;
   for (struct sl_iterator iter = sl_tokenizer_iter(&newline_tokenizer);
        !sl_tokenizer_iter_is_done(&iter);
        sl_tokenizer_iter_advance(&iter)) {
-    if (begin <= lineno && lineno <= end) {
+    if (begin <= lineno && n_printed < count) {
       struct sl_string line = sl_string_from_utf8(sl_tokenizer_iter_get(&iter));
       bool write_ok = sl_string_fprint(stdout, &line);
+      ++n_printed;
       sl_string_delete(&line);
       if (!write_ok) {
         goto done;
