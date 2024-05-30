@@ -85,7 +85,7 @@ bool test_sort_doubles(sl_sort_double* sort_doubles, const bool verbose) {
   return true;
 }
 
-double* _stdlib_qsort_double(const size_t count, double src[count]) {
+double* test_stdlib_qsort_double(const size_t count, double src[count]) {
   qsort((void*)src, count, sizeof(double), sl_sort_compare_double);
   return src;
 }
@@ -108,7 +108,7 @@ bool test_qsort_doubles(const bool verbose) {
   if (verbose) {
     printf("test stdlib qsort doubles\n");
   }
-  return test_sort_doubles(_stdlib_qsort_double, verbose);
+  return test_sort_doubles(test_stdlib_qsort_double, verbose);
 }
 
 bool test_compare_strings(const bool verbose) {
@@ -170,7 +170,7 @@ bool test_sort_strings(sl_sort_str* sort_strings, const bool verbose) {
   return true;
 }
 
-char** _stdlib_qsort_str(const size_t count, char* src[count]) {
+char** test_stdlib_qsort_str(const size_t count, char* src[count]) {
   qsort((void*)src, count, sizeof(char*), sl_sort_compare_str);
   return src;
 }
@@ -193,21 +193,25 @@ bool test_qsort_strings(const bool verbose) {
   if (verbose) {
     printf("test stdlib qsort strings\n");
   }
-  return test_sort_strings(_stdlib_qsort_str, verbose);
+  return test_sort_strings(test_stdlib_qsort_str, verbose);
 }
 
-struct _named_vec3 {
+struct sl_test_named_vec3 {
   long x;
   long y;
   long z;
   const char* name;
 };
 
-typedef struct _named_vec3* _sort_named_vec3(const size_t, struct _named_vec3*);
+typedef struct sl_test_named_vec3* sl_test_sort_named_vec3(
+    const size_t,
+    struct sl_test_named_vec3*);
 
-int _compare_named_vec3(const void* a, const void* b) {
-  const struct _named_vec3 lhs = ((const struct _named_vec3*)a)[0];
-  const struct _named_vec3 rhs = ((const struct _named_vec3*)b)[0];
+int sl_test_compare_named_vec3(const void* a, const void* b) {
+  const struct sl_test_named_vec3 lhs =
+      ((const struct sl_test_named_vec3*)a)[0];
+  const struct sl_test_named_vec3 rhs =
+      ((const struct sl_test_named_vec3*)b)[0];
   int res = 0;
   if (!res) res = (lhs.x > rhs.x) - (lhs.x < rhs.x);
   if (!res) res = (lhs.y > rhs.y) - (lhs.y < rhs.y);
@@ -216,9 +220,9 @@ int _compare_named_vec3(const void* a, const void* b) {
   return res;
 }
 
-bool test_sort_named_vec3(_sort_named_vec3* _sort_named_vec3,
+bool test_sort_named_vec3(sl_test_sort_named_vec3* sl_test_sort_named_vec3,
                           const bool verbose) {
-  struct _named_vec3 items[] = {
+  struct sl_test_named_vec3 items[] = {
       {-1, 0,   0,  "f"},
       {-1, 0,   1,  "e"},
       { 0, 0,   0,  "d"},
@@ -227,7 +231,7 @@ bool test_sort_named_vec3(_sort_named_vec3* _sort_named_vec3,
       { 0, 0,   0,  "a"},
       { 0, 0,   0, " a"},
   };
-  struct _named_vec3 sorted_items[] = {
+  struct sl_test_named_vec3 sorted_items[] = {
       items[0],
       items[1],
       items[6],
@@ -240,7 +244,7 @@ bool test_sort_named_vec3(_sort_named_vec3* _sort_named_vec3,
   const size_t n = sizeof(items) / sizeof(items[0]);
 
   clock_t start_time = clock();
-  if (!_sort_named_vec3(n, items)) {
+  if (!sl_test_sort_named_vec3(n, items)) {
     fprintf(stderr, "sort failed\n");
     return false;
   }
@@ -262,25 +266,31 @@ bool test_sort_named_vec3(_sort_named_vec3* _sort_named_vec3,
   return true;
 }
 
-struct _named_vec3* _mergesort_named_vec3s(const size_t count,
-                                           struct _named_vec3 src[count]) {
+struct sl_test_named_vec3* sl_test_mergesort_named_vec3s(
+    const size_t count,
+    struct sl_test_named_vec3 src[count]) {
   return sl_sort_mergesort((void*)src,
                            count,
-                           sizeof(struct _named_vec3),
-                           _compare_named_vec3);
+                           sizeof(struct sl_test_named_vec3),
+                           sl_test_compare_named_vec3);
 }
 
-struct _named_vec3* _quicksort_named_vec3s(const size_t count,
-                                           struct _named_vec3 src[count]) {
+struct sl_test_named_vec3* sl_test_quicksort_named_vec3s(
+    const size_t count,
+    struct sl_test_named_vec3 src[count]) {
   return sl_sort_quicksort((void*)src,
                            count,
-                           sizeof(struct _named_vec3),
-                           _compare_named_vec3);
+                           sizeof(struct sl_test_named_vec3),
+                           sl_test_compare_named_vec3);
 }
 
-struct _named_vec3* _stdlib_qsort_named_vec3s(const size_t count,
-                                              struct _named_vec3 src[count]) {
-  qsort((void*)src, count, sizeof(struct _named_vec3), _compare_named_vec3);
+struct sl_test_named_vec3* sl_test_stdlib_qsort_named_vec3s(
+    const size_t count,
+    struct sl_test_named_vec3 src[count]) {
+  qsort((void*)src,
+        count,
+        sizeof(struct sl_test_named_vec3),
+        sl_test_compare_named_vec3);
   return src;
 }
 
@@ -288,21 +298,21 @@ bool test_quicksort_custom_obj(const bool verbose) {
   if (verbose) {
     printf("test quicksort custom_obj\n");
   }
-  return test_sort_named_vec3(_quicksort_named_vec3s, verbose);
+  return test_sort_named_vec3(sl_test_quicksort_named_vec3s, verbose);
 }
 
 bool test_mergesort_custom_obj(const bool verbose) {
   if (verbose) {
     printf("test mergesort custom objects\n");
   }
-  return test_sort_named_vec3(_mergesort_named_vec3s, verbose);
+  return test_sort_named_vec3(sl_test_mergesort_named_vec3s, verbose);
 }
 
 bool test_qsort_custom_obj(const bool verbose) {
   if (verbose) {
     printf("test stdlib qsort custom objects\n");
   }
-  return test_sort_named_vec3(_stdlib_qsort_named_vec3s, verbose);
+  return test_sort_named_vec3(sl_test_stdlib_qsort_named_vec3s, verbose);
 }
 
 SL_TEST_MAIN(test_compare_doubles,

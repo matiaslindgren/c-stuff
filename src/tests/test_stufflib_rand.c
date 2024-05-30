@@ -8,7 +8,7 @@
 #include "stufflib_macros.h"
 #include "stufflib_rand.h"
 
-bool test_rand_fill(const bool verbose) {
+bool test_rand_fill(const bool) {
   const size_t n = 1000;
   double x[n];
   sl_rand_fill_double(n, x, 0);
@@ -26,11 +26,11 @@ bool test_rand_fill(const bool verbose) {
   return true;
 }
 
-bool test_rand_set_zero(const bool verbose) {
+bool test_rand_set_zero(const bool) {
   const size_t n = 1000;
   double x[n];
   for (size_t i = 0; i < n; ++i) {
-    x[i] = i + 1;
+    x[i] = (double)i + 1;
   }
   sl_rand_set_zero_double(n, x, 0);
   for (size_t i = 0; i < n; ++i) {

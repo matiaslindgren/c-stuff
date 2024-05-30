@@ -12,10 +12,10 @@
 
 bool concat(const struct sl_args args[const static 1]) {
   {
-    const size_t args_count = sl_args_count_positional(args) - 1;
-    const size_t expected_count = 1;
+    const int args_count = sl_args_count_positional(args) - 1;
+    const int expected_count = 1;
     if (args_count < expected_count) {
-      SL_LOG_ERROR("concat takes %zu or more arguments, not %zu",
+      SL_LOG_ERROR("concat takes %d or more arguments, not %d",
                    expected_count,
                    args_count);
       return false;
@@ -25,8 +25,8 @@ bool concat(const struct sl_args args[const static 1]) {
   bool is_done = false;
   struct sl_string result = {0};
 
-  for (size_t i = 1;; ++i) {
-    const char* path = sl_args_get_positional(args, i);
+  for (int i = 1;; ++i) {
+    char* path = sl_args_get_positional(args, i);
     if (!path) {
       break;
     }
@@ -54,17 +54,17 @@ done:
 
 bool count(const struct sl_args args[const static 1]) {
   {
-    const size_t args_count = sl_args_count_positional(args) - 1;
-    const size_t expected_count = 2;
+    const int args_count = sl_args_count_positional(args) - 1;
+    const int expected_count = 2;
     if (args_count != expected_count) {
-      SL_LOG_ERROR("count takes %zu arguments, not %zu",
+      SL_LOG_ERROR("count takes %d arguments, not %d",
                    expected_count,
                    args_count);
       return false;
     }
   }
 
-  const char* pattern_str = sl_args_get_positional(args, 1);
+  char* pattern_str = sl_args_get_positional(args, 1);
   if (strlen(pattern_str) == 0) {
     SL_LOG_ERROR("pattern to count cannot be empty");
     return false;
@@ -72,7 +72,7 @@ bool count(const struct sl_args args[const static 1]) {
 
   bool is_done = false;
 
-  const char* path = sl_args_get_positional(args, 2);
+  char* path = sl_args_get_positional(args, 2);
   struct sl_string content = sl_string_from_file(path);
 
   struct sl_span pattern =
@@ -102,10 +102,10 @@ done:
 
 bool slicelines(const struct sl_args args[const static 1]) {
   {
-    const size_t args_count = sl_args_count_positional(args) - 1;
-    const size_t expected_count = 3;
+    const int args_count = sl_args_count_positional(args) - 1;
+    const int expected_count = 3;
     if (args_count != expected_count) {
-      SL_LOG_ERROR("slicelines takes %zu arguments, not %zu",
+      SL_LOG_ERROR("slicelines takes %d arguments, not %d",
                    expected_count,
                    args_count);
       return false;
@@ -114,7 +114,7 @@ bool slicelines(const struct sl_args args[const static 1]) {
 
   const size_t begin = strtoull(sl_args_get_positional(args, 1), 0, 10);
   const size_t end = strtoull(sl_args_get_positional(args, 2), 0, 10);
-  const char* path = sl_args_get_positional(args, 3);
+  char* path = sl_args_get_positional(args, 3);
 
   bool is_done = false;
 
@@ -123,7 +123,7 @@ bool slicelines(const struct sl_args args[const static 1]) {
     goto done;
   }
 
-  const struct sl_span newline = sl_span_view(1, (unsigned char[]){'\n'});
+  struct sl_span newline = sl_span_view(1, (unsigned char[]){'\n'});
   struct sl_tokenizer newline_tokenizer =
       sl_tokenizer_create(&(content.utf8_data), &newline);
 
@@ -154,19 +154,19 @@ done:
 
 bool replace(const struct sl_args args[const static 1]) {
   {
-    const size_t args_count = sl_args_count_positional(args) - 1;
-    const size_t expected_count = 3;
+    const int args_count = sl_args_count_positional(args) - 1;
+    const int expected_count = 3;
     if (args_count != expected_count) {
-      SL_LOG_ERROR("replace takes %zu arguments, not %zu",
+      SL_LOG_ERROR("replace takes %d arguments, not %d",
                    expected_count,
                    args_count);
       return false;
     }
   }
 
-  const char* pattern_str = sl_args_get_positional(args, 1);
-  const char* replacement_str = sl_args_get_positional(args, 2);
-  const char* path = sl_args_get_positional(args, 3);
+  char* pattern_str = sl_args_get_positional(args, 1);
+  char* replacement_str = sl_args_get_positional(args, 2);
+  char* path = sl_args_get_positional(args, 3);
 
   if (strlen(pattern_str) == 0) {
     // TODO allow empty pattern str to split at all codepoints
@@ -200,11 +200,13 @@ bool replace(const struct sl_args args[const static 1]) {
 
   struct sl_iterator iter = sl_tokenizer_iter(&pattern_tokenizer);
   while (!sl_tokenizer_iter_is_done(&iter)) {
-    struct sl_string line = sl_string_from_utf8(sl_tokenizer_iter_get(&iter));
-    const bool write_ok = sl_string_fprint(stdout, &line);
-    sl_string_delete(&line);
-    if (!write_ok) {
-      goto done;
+    {
+      struct sl_string line = sl_string_from_utf8(sl_tokenizer_iter_get(&iter));
+      const bool write_ok = sl_string_fprint(stdout, &line);
+      sl_string_delete(&line);
+      if (!write_ok) {
+        goto done;
+      }
     }
     sl_tokenizer_iter_advance(&iter);
     if (!sl_tokenizer_iter_is_done(&iter) && replacement.size) {
@@ -228,17 +230,17 @@ done:
 
 bool linefreq(const struct sl_args args[const static 1]) {
   {
-    const size_t args_count = sl_args_count_positional(args) - 1;
-    const size_t expected_count = 1;
+    const int args_count = sl_args_count_positional(args) - 1;
+    const int expected_count = 1;
     if (args_count != expected_count) {
-      SL_LOG_ERROR("linefreq takes %zu arguments, not %zu",
+      SL_LOG_ERROR("linefreq takes %d arguments, not %d",
                    expected_count,
                    args_count);
       return false;
     }
   }
 
-  const char* path = sl_args_get_positional(args, 1);
+  char* path = sl_args_get_positional(args, 1);
 
   bool is_done = false;
 
@@ -248,7 +250,7 @@ bool linefreq(const struct sl_args args[const static 1]) {
     goto done;
   }
 
-  const struct sl_span newline = sl_span_view(1, (unsigned char[]){'\n'});
+  struct sl_span newline = sl_span_view(1, (unsigned char[]){'\n'});
   struct sl_tokenizer newline_tokenizer =
       sl_tokenizer_create(&(content.utf8_data), &newline);
 
@@ -302,17 +304,17 @@ void print_usage(const struct sl_args args[const static 1]) {
            "\n"
            "  %s linefreq path"
            "\n"),
-          args->program,
-          args->program,
-          args->program,
-          args->program,
-          args->program);
+          args->argv[0],
+          args->argv[0],
+          args->argv[0],
+          args->argv[0],
+          args->argv[0]);
 }
 
 int main(int argc, char* const argv[argc + 1]) {
   struct sl_args args = {.argc = argc, .argv = argv};
   bool ok = false;
-  const char* command = sl_args_get_positional(&args, 0);
+  char* command = sl_args_get_positional(&args, 0);
   if (command) {
     if (strcmp(command, "concat") == 0) {
       ok = concat(&args);

@@ -5,14 +5,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "_utf8_test_data.h"
 #include "stufflib_args.h"
 #include "stufflib_iterator.h"
 #include "stufflib_macros.h"
 #include "stufflib_span.h"
+#include "stufflib_test_data.h"
 #include "stufflib_unicode.h"
 
-bool test_validate_utf8(const bool verbose) {
+bool test_validate_utf8(const bool) {
   struct sl_span invalid_utf8[] = {
       {.size = 1,                   .data = (unsigned char[]){0x80}},
       {.size = 2,             .data = (unsigned char[]){0xc0, 0x80}},
@@ -25,19 +25,21 @@ bool test_validate_utf8(const bool verbose) {
   for (size_t i = 0; i < SL_ARRAY_LEN(invalid_utf8); ++i) {
     assert(!sl_unicode_is_valid_utf8(invalid_utf8 + i));
   }
-  for (size_t i = 0; i < SL_ARRAY_LEN(hello_utf8); ++i) {
-    assert(sl_unicode_is_valid_utf8(hello_utf8 + i));
+  for (size_t i = 0; i < SL_ARRAY_LEN(sl_test_data_hello_utf8); ++i) {
+    assert(sl_unicode_is_valid_utf8(sl_test_data_hello_utf8 + i));
   }
   return true;
 }
 
-bool test_decode_codepoints(const bool verbose) {
+bool test_decode_codepoints(const bool) {
   size_t codepoint_pos = 0;
-  for (size_t i_str = 0; i_str < SL_ARRAY_LEN(hello_utf8); ++i_str) {
-    struct sl_span utf8_data = hello_utf8[i_str];
+  for (size_t i_str = 0; i_str < SL_ARRAY_LEN(sl_test_data_hello_utf8);
+       ++i_str) {
+    struct sl_span utf8_data = sl_test_data_hello_utf8[i_str];
     size_t byte_pos = 0;
     while (byte_pos < utf8_data.size) {
-      const uint32_t expected_codepoint = decoded_strings[codepoint_pos];
+      const uint32_t expected_codepoint =
+          sl_test_data_decoded_strings[codepoint_pos];
       const size_t codepoint_width =
           sl_unicode_codepoint_width_from_utf8(utf8_data.size - byte_pos,
                                                utf8_data.data + byte_pos);
@@ -54,17 +56,18 @@ bool test_decode_codepoints(const bool verbose) {
   return true;
 }
 
-bool test_unicode_iterator(const bool verbose) {
+bool test_unicode_iterator(const bool) {
   size_t codepoint_pos = 0;
-  for (size_t i_str = 0; i_str < SL_ARRAY_LEN(hello_utf8); ++i_str) {
-    struct sl_span utf8_data = hello_utf8[i_str];
+  for (size_t i_str = 0; i_str < SL_ARRAY_LEN(sl_test_data_hello_utf8);
+       ++i_str) {
+    struct sl_span utf8_data = sl_test_data_hello_utf8[i_str];
     size_t str_len = 0;
     size_t byte_pos = 0;
-    struct sl_iterator iter = sl_unicode_iter(hello_utf8 + i_str);
+    struct sl_iterator iter = sl_unicode_iter(sl_test_data_hello_utf8 + i_str);
     for (; !sl_unicode_iter_is_done(&iter); sl_unicode_iter_advance(&iter)) {
       assert(iter.index == byte_pos);
       const uint32_t codepoint = sl_unicode_iter_decode_item(&iter);
-      assert(codepoint == decoded_strings[codepoint_pos]);
+      assert(codepoint == sl_test_data_decoded_strings[codepoint_pos]);
       const size_t codepoint_width =
           sl_unicode_codepoint_width_from_utf8(utf8_data.size - byte_pos,
                                                utf8_data.data + byte_pos);
@@ -72,16 +75,17 @@ bool test_unicode_iterator(const bool verbose) {
       ++str_len;
       ++codepoint_pos;
     }
-    assert(str_len == decoded_lengths[i_str]);
+    assert(str_len == sl_test_data_decoded_lengths[i_str]);
     assert(str_len == iter.pos);
   }
   return true;
 }
 
-bool test_unicode_length(const bool verbose) {
-  for (size_t i_str = 0; i_str < SL_ARRAY_LEN(hello_utf8); ++i_str) {
-    const size_t str_len = sl_unicode_length(hello_utf8 + i_str);
-    assert(str_len == decoded_lengths[i_str]);
+bool test_unicode_length(const bool) {
+  for (size_t i_str = 0; i_str < SL_ARRAY_LEN(sl_test_data_hello_utf8);
+       ++i_str) {
+    const size_t str_len = sl_unicode_length(sl_test_data_hello_utf8 + i_str);
+    assert(str_len == sl_test_data_decoded_lengths[i_str]);
   }
   return true;
 }
@@ -134,7 +138,7 @@ bool test_decode_utf8_files(const bool verbose) {
       }
       char buf[1000] = {0};
       while (fgets(buf, sizeof(buf), fp)) {
-        expected_codepoints[str_len] = strtoul(buf, 0, 10);
+        expected_codepoints[str_len] = (uint32_t)strtoul(buf, 0, 10);
         memset(buf, 0, sizeof(buf));
         ++str_len;
       }

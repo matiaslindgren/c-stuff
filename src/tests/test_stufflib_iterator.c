@@ -9,7 +9,7 @@
 #include "stufflib_span.h"
 #include "stufflib_unicode.h"
 
-bool test_data(const bool verbose) {
+bool test_data(const bool) {
   struct sl_span data = {
       .size = 5,
       .data = (unsigned char[5]){0, 1, 2, 3, 4},
@@ -45,7 +45,7 @@ struct sl_iterator sl_cstr_iter(char str[const static 1]) {
   return (struct sl_iterator){.index = 0, .data = str};
 }
 
-bool test_cstr(const bool verbose) {
+bool test_cstr(const bool) {
   char* strings[] = {
       "",
       " ",

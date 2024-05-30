@@ -8,21 +8,22 @@
 #include "stufflib_math.h"
 #include "stufflib_rand.h"
 
-void _check_factorization(const bool verbose, size_t x, size_t* factors) {
-  assert(factors);
-  if (verbose) {
-    printf("%zd factors:\n", x);
-    for (size_t i = 0; factors[i] != 0; ++i) {
-      printf("  %zu: %zu\n", i, factors[i]);
-    }
-  }
-}
+#define SL_ASSERT_FACTORIZATION_OK(verbose, x, factors)              \
+  do {                                                               \
+    assert((factors));                                               \
+    if ((verbose)) {                                                 \
+      printf("%zd factors:\n", (x));                                 \
+      for (size_t f_index = 0; (factors)[f_index] != 0; ++f_index) { \
+        printf("  %zu: %zu\n", f_index, (factors)[f_index]);         \
+      }                                                              \
+    }                                                                \
+  } while (false)
 
 bool test_factorize_primes(const bool verbose) {
   const size_t primes[] = {2, 3, 5, 7, 11, 13, 17};
   for (size_t i = 0; i < SL_ARRAY_LEN(primes); ++i) {
     size_t* f = sl_math_factorize(primes[i]);
-    _check_factorization(verbose, primes[i], f);
+    SL_ASSERT_FACTORIZATION_OK(verbose, primes[i], f);
     assert(f[0] == primes[i]);
     assert(f[1] == 0);
     sl_free(f);
@@ -33,7 +34,7 @@ bool test_factorize_primes(const bool verbose) {
 bool test_factorize_4(const bool verbose) {
   const size_t n = 4;
   size_t* f = sl_math_factorize(n);
-  _check_factorization(verbose, n, f);
+  SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   assert(f[0] == 2);
   assert(f[1] == 2);
   assert(f[2] == 0);
@@ -44,7 +45,7 @@ bool test_factorize_4(const bool verbose) {
 bool test_factorize_25(const bool verbose) {
   const size_t n = 25;
   size_t* f = sl_math_factorize(n);
-  _check_factorization(verbose, n, f);
+  SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   assert(f[0] == 5);
   assert(f[1] == 5);
   assert(f[2] == 0);
@@ -55,7 +56,7 @@ bool test_factorize_25(const bool verbose) {
 bool test_factorize_30(const bool verbose) {
   const size_t n = 30;
   size_t* f = sl_math_factorize(n);
-  _check_factorization(verbose, n, f);
+  SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   assert(f[0] == 2);
   assert(f[1] == 3);
   assert(f[2] == 5);
@@ -67,7 +68,7 @@ bool test_factorize_30(const bool verbose) {
 bool test_factorize_864(const bool verbose) {
   const size_t n = 864;
   size_t* f = sl_math_factorize(n);
-  _check_factorization(verbose, n, f);
+  SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   assert(f[0] == 2);
   assert(f[1] == 2);
   assert(f[2] == 2);
@@ -84,7 +85,7 @@ bool test_factorize_864(const bool verbose) {
 bool test_factorize_2022(const bool verbose) {
   const size_t n = 2022;
   size_t* f = sl_math_factorize(n);
-  _check_factorization(verbose, n, f);
+  SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   assert(f[0] == 2);
   assert(f[1] == 3);
   assert(f[2] == 337);
@@ -96,7 +97,7 @@ bool test_factorize_2022(const bool verbose) {
 bool test_factorize_202212(const bool verbose) {
   const size_t n = 202212;
   size_t* f = sl_math_factorize(n);
-  _check_factorization(verbose, n, f);
+  SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   assert(f[0] == 2);
   assert(f[1] == 2);
   assert(f[2] == 3);
@@ -111,7 +112,7 @@ bool test_factorize_202212(const bool verbose) {
 bool test_factorize_20221210(const bool verbose) {
   const size_t n = 20221210;
   size_t* f = sl_math_factorize(n);
-  _check_factorization(verbose, n, f);
+  SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   assert(f[0] == 2);
   assert(f[1] == 5);
   assert(f[2] == 101);
@@ -121,7 +122,7 @@ bool test_factorize_20221210(const bool verbose) {
   return true;
 }
 
-bool test_linalg(const bool verbose) {
+bool test_linalg(const bool) {
   const double cmp_eps = 1e-16;
 
   const double v1[] = {1, 2, 3, 4};
@@ -188,7 +189,7 @@ bool test_numerical_diff(const bool verbose) {
   return true;
 }
 
-bool test_double_almost(const bool verbose) {
+bool test_double_almost(const bool) {
   if (!sl_math_double_almost(1, 1.5, 1)) {
     return false;
   }
@@ -198,7 +199,7 @@ bool test_double_almost(const bool verbose) {
   return true;
 }
 
-bool test_round_up_pow2(const bool verbose) {
+bool test_round_up_pow2(const bool) {
   assert(sl_math_next_power_of_two(0) == 1);
   assert(sl_math_next_power_of_two(1) == 2);
   assert(sl_math_next_power_of_two(2) == 4);

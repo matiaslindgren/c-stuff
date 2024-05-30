@@ -24,27 +24,27 @@
 #include "stufflib_misc.h"
 #include "stufflib_span.h"
 
-struct _length_codes {
+struct sl_deflate_length_codes {
   size_t lengths[29];
   int extra[29];
 };
 
-struct _distance_codes {
+struct sl_deflate_distance_codes {
   size_t distances[30];
   int extra[30];
 };
 
-struct _deflate_state {
-  const struct _length_codes len_codes;
-  const struct _distance_codes dist_codes;
+struct sl_deflate_deflate_state {
+  const struct sl_deflate_length_codes len_codes;
+  const struct sl_deflate_distance_codes dist_codes;
   struct sl_span dst;
   const struct sl_span src;
   size_t dst_pos;
   size_t src_bit;
 };
 
-static struct _length_codes _make_length_codes(void) {
-  struct _length_codes codes = {0};
+static struct sl_deflate_length_codes sl_deflate_make_length_codes(void) {
+  struct sl_deflate_length_codes codes = {0};
   codes.lengths[0] = 3;
   for (size_t i = 1; i < SL_ARRAY_LEN(codes.lengths); ++i) {
     const int extra_bits = (SL_MAX(1, (i - 1) / 4) - 1) % 6;
@@ -55,10 +55,10 @@ static struct _length_codes _make_length_codes(void) {
   return codes;
 }
 
-static struct _distance_codes _make_distance_codes(void) {
-  struct _distance_codes codes = {0};
+static struct sl_deflate_distance_codes sl_deflate_make_distance_codes(void) {
+  struct sl_deflate_distance_codes codes = {0};
   codes.distances[0] = 1;
-  for (size_t i = 0; i < SL_ARRAY_LEN(codes.distances); ++i) {
+  for (unsigned i = 0; i < SL_ARRAY_LEN(codes.distances); ++i) {
     codes.extra[i] = SL_MAX(1, i / 2) - 1;
     if (i) {
       codes.distances[i] = codes.distances[i - 1] + (1 << codes.extra[i - 1]);
@@ -67,7 +67,7 @@ static struct _distance_codes _make_distance_codes(void) {
   return codes;
 }
 
-static struct sl_huffman_tree _make_fixed_literal_tree(void) {
+static struct sl_huffman_tree sl_deflate_make_fixed_literal_tree(void) {
   const size_t max_literal = 287;
   size_t* code_lengths = sl_alloc(max_literal + 1, sizeof(size_t));
   {
@@ -91,7 +91,7 @@ static struct sl_huffman_tree _make_fixed_literal_tree(void) {
   return tree;
 }
 
-static struct sl_huffman_tree _make_fixed_distance_tree(void) {
+static struct sl_huffman_tree sl_deflate_make_fixed_distance_tree(void) {
   const size_t max_dist = 31;
   size_t* code_lengths = sl_alloc(max_dist + 1, sizeof(size_t));
   for (size_t symbol = 0; symbol <= max_dist; ++symbol) {
@@ -103,7 +103,8 @@ static struct sl_huffman_tree _make_fixed_distance_tree(void) {
   return tree;
 }
 
-static size_t _next_bit(struct _deflate_state state[static 1]) {
+static size_t sl_deflate_next_bit(
+    struct sl_deflate_deflate_state state[static 1]) {
   const size_t src_pos = state->src_bit / CHAR_BIT;
   const size_t src_bit = state->src_bit % CHAR_BIT;
   assert(src_pos < state->src.size);
@@ -111,21 +112,22 @@ static size_t _next_bit(struct _deflate_state state[static 1]) {
   return (state->src.data[src_pos] >> src_bit) & 1;
 }
 
-static size_t _next_n_bits(struct _deflate_state state[static 1],
-                           const size_t count) {
+static size_t sl_deflate_next_n_bits(
+    struct sl_deflate_deflate_state state[static 1],
+    const int count) {
   size_t res = 0;
-  for (size_t bit = 0; bit < count; ++bit) {
-    res |= _next_bit(state) << bit;
+  for (int bit = 0; bit < count; ++bit) {
+    res |= sl_deflate_next_bit(state) << bit;
   }
   return res;
 }
 
-static size_t _decode_next_code(
+static size_t sl_deflate_decode_next_code(
     const struct sl_huffman_tree codes[const static 1],
-    struct _deflate_state state[static 1]) {
+    struct sl_deflate_deflate_state state[static 1]) {
   size_t code = 0;
   for (size_t code_len = 1; code_len <= codes->max_code_len; ++code_len) {
-    code = (code << 1) | _next_bit(state);
+    code = (code << 1) | sl_deflate_next_bit(state);
     if (sl_huffman_contains(codes, code, code_len)) {
       return sl_huffman_get(codes, code, code_len);
     }
@@ -133,14 +135,14 @@ static size_t _decode_next_code(
   return SIZE_MAX;
 }
 
-static void _inflate_block(
+static void sl_deflate_inflate_block(
     const struct sl_huffman_tree literal_tree[const static 1],
     const struct sl_huffman_tree distance_tree[const static 1],
-    struct _deflate_state state[static 1]) {
+    struct sl_deflate_deflate_state state[static 1]) {
   const size_t end_of_block = 256;
 
   while (true) {
-    const size_t symbol = _decode_next_code(literal_tree, state);
+    const size_t symbol = sl_deflate_decode_next_code(literal_tree, state);
     if (symbol < end_of_block) {
       assert(state->dst_pos < state->dst.size);
       state->dst.data[state->dst_pos++] = symbol & 0xff;
@@ -152,12 +154,13 @@ static void _inflate_block(
     assert(symbol < 286);
     const size_t len_symbol = symbol - 257;
     const size_t extra_len =
-        _next_n_bits(state, state->len_codes.extra[len_symbol]);
+        sl_deflate_next_n_bits(state, state->len_codes.extra[len_symbol]);
     const size_t length = state->len_codes.lengths[len_symbol] + extra_len;
 
-    const size_t dist_symbol = _decode_next_code(distance_tree, state);
+    const size_t dist_symbol =
+        sl_deflate_decode_next_code(distance_tree, state);
     const size_t extra_dist =
-        _next_n_bits(state, state->dist_codes.extra[dist_symbol]);
+        sl_deflate_next_n_bits(state, state->dist_codes.extra[dist_symbol]);
     const size_t back_distance =
         state->dist_codes.distances[dist_symbol] + extra_dist;
 
@@ -169,7 +172,8 @@ static void _inflate_block(
   }
 }
 
-bool sl_inflate_uncompressed_block(struct _deflate_state state[static 1]) {
+bool sl_inflate_uncompressed_block(
+    struct sl_deflate_deflate_state state[static 1]) {
   size_t src_byte_pos = state->src_bit / CHAR_BIT + 1;
   const size_t block_len =
       sl_misc_parse_lil_endian(2, state->src.data + src_byte_pos);
@@ -199,10 +203,10 @@ bool sl_inflate_uncompressed_block(struct _deflate_state state[static 1]) {
   return true;
 }
 
-bool sl_inflate_dynamic_block(struct _deflate_state state[static 1]) {
-  const size_t num_lengths = 257 + _next_n_bits(state, 5);
-  const size_t num_distances = 1 + _next_n_bits(state, 5);
-  const size_t num_length_lengths = 4 + _next_n_bits(state, 4);
+bool sl_inflate_dynamic_block(struct sl_deflate_deflate_state state[static 1]) {
+  const size_t num_lengths = 257 + sl_deflate_next_n_bits(state, 5);
+  const size_t num_distances = 1 + sl_deflate_next_n_bits(state, 5);
+  const size_t num_length_lengths = 4 + sl_deflate_next_n_bits(state, 4);
 
   static const size_t length_order[] =
       {16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
@@ -210,7 +214,7 @@ bool sl_inflate_dynamic_block(struct _deflate_state state[static 1]) {
 
   size_t* length_lengths = sl_alloc(max_length_length + 1, sizeof(size_t));
   for (size_t i = 0; i < num_length_lengths; ++i) {
-    length_lengths[length_order[i]] = _next_n_bits(state, 3);
+    length_lengths[length_order[i]] = sl_deflate_next_n_bits(state, 3);
   }
   struct sl_huffman_tree length_tree = {0};
   sl_huffman_init(&length_tree, max_length_length, length_lengths);
@@ -219,7 +223,7 @@ bool sl_inflate_dynamic_block(struct _deflate_state state[static 1]) {
   size_t* dynamic_code_lengths =
       sl_alloc(num_lengths + num_distances, sizeof(size_t));
   for (size_t i = 0; i < num_lengths + num_distances;) {
-    const size_t symbol = _decode_next_code(&length_tree, state);
+    const size_t symbol = sl_deflate_decode_next_code(&length_tree, state);
     assert(symbol != SIZE_MAX);
     size_t code_len = 0;
     size_t num_repeats = 0;
@@ -229,13 +233,13 @@ bool sl_inflate_dynamic_block(struct _deflate_state state[static 1]) {
     } else if (symbol == 16) {
       assert(i > 0);
       code_len = dynamic_code_lengths[i - 1];
-      num_repeats = 3 + _next_n_bits(state, 2);
+      num_repeats = 3 + sl_deflate_next_n_bits(state, 2);
     } else if (symbol == 17) {
       code_len = 0;
-      num_repeats = 3 + _next_n_bits(state, 3);
+      num_repeats = 3 + sl_deflate_next_n_bits(state, 3);
     } else if (symbol == 18) {
       code_len = 0;
-      num_repeats = 11 + _next_n_bits(state, 7);
+      num_repeats = 11 + sl_deflate_next_n_bits(state, 7);
     } else {
       SL_LOG_ERROR("unexpected symbol %zu in dynamic block", symbol);
       sl_free(dynamic_code_lengths);
@@ -259,7 +263,7 @@ bool sl_inflate_dynamic_block(struct _deflate_state state[static 1]) {
                   dynamic_code_lengths + num_lengths);
   sl_free(dynamic_code_lengths);
 
-  _inflate_block(&literal_tree, &distance_tree, state);
+  sl_deflate_inflate_block(&literal_tree, &distance_tree, state);
   sl_huffman_destroy(&literal_tree);
   sl_huffman_destroy(&distance_tree);
   return true;
@@ -268,10 +272,10 @@ error:
   return false;
 }
 
-bool sl_inflate_fixed_block(struct _deflate_state state[static 1]) {
-  struct sl_huffman_tree literal_tree = _make_fixed_literal_tree();
-  struct sl_huffman_tree distance_tree = _make_fixed_distance_tree();
-  _inflate_block(&literal_tree, &distance_tree, state);
+bool sl_inflate_fixed_block(struct sl_deflate_deflate_state state[static 1]) {
+  struct sl_huffman_tree literal_tree = sl_deflate_make_fixed_literal_tree();
+  struct sl_huffman_tree distance_tree = sl_deflate_make_fixed_distance_tree();
+  sl_deflate_inflate_block(&literal_tree, &distance_tree, state);
   sl_huffman_destroy(&literal_tree);
   sl_huffman_destroy(&distance_tree);
   return true;
@@ -302,9 +306,9 @@ size_t sl_inflate(struct sl_span dst, const struct sl_span src) {
     goto error;
   }
 
-  struct _deflate_state state = {
-      .len_codes = _make_length_codes(),
-      .dist_codes = _make_distance_codes(),
+  struct sl_deflate_deflate_state state = {
+      .len_codes = sl_deflate_make_length_codes(),
+      .dist_codes = sl_deflate_make_distance_codes(),
       .dst = dst,
       .src = src,
       .dst_pos = 0,
@@ -312,40 +316,35 @@ size_t sl_inflate(struct sl_span dst, const struct sl_span src) {
   };
 
   for (bool is_final_block = false; !is_final_block;) {
-    is_final_block = _next_bit(&state);
-    enum block_type {
-      no_compression = 0,
-      fixed_huffman_trees = 1,
-      dynamic_huffman_trees = 2,
-    };
-    const enum block_type type = _next_n_bits(&state, 2);
-    switch (type) {
-      case no_compression: {
+    is_final_block = sl_deflate_next_bit(&state);
+    const size_t block_type = sl_deflate_next_n_bits(&state, 2);
+    switch (block_type) {
+      case 0: {
         if (!sl_inflate_uncompressed_block(&state)) {
           SL_LOG_ERROR("failed inflating uncompressed block");
           goto error;
         }
       } break;
-      case dynamic_huffman_trees: {
-        if (!sl_inflate_dynamic_block(&state)) {
-          SL_LOG_ERROR("failed inflating dynamic block");
-          goto error;
-        }
-      } break;
-      case fixed_huffman_trees: {
+      case 1: {
         if (!sl_inflate_fixed_block(&state)) {
           SL_LOG_ERROR("failed inflating fixed block");
           goto error;
         }
       } break;
+      case 2: {
+        if (!sl_inflate_dynamic_block(&state)) {
+          SL_LOG_ERROR("failed inflating dynamic block");
+          goto error;
+        }
+      } break;
       default: {
-        SL_LOG_ERROR("invalid block type %d", type);
+        SL_LOG_ERROR("invalid block type %zu", block_type);
         goto error;
       } break;
     }
   }
 
-  /* const size_t src_adler32 = _next_n_bits(state, 32); */
+  /* const size_t src_adler32 = sl_deflate_next_n_bits(state, 32); */
   /* const size_t dst_adler32 = */
   /*     sl_hash_adler32(state->dst.size, state->dst.data); */
   /* if (dst_adler32 != src_adler32) { */

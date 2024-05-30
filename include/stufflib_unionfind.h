@@ -38,9 +38,9 @@ size_t sl_unionfind_find_root(const struct sl_unionfind uf[const static 1],
   return index;
 }
 
-void _sl_unionfind_set_root(const struct sl_unionfind uf[const static 1],
-                            const size_t begin,
-                            const size_t root) {
+void sl_unionfind_set_root(const struct sl_unionfind uf[const static 1],
+                           const size_t begin,
+                           const size_t root) {
   for (size_t parent = begin; parent != SL_UNIONFIND_ROOT;) {
     const size_t next = uf->parents[parent];
     if (parent != root) {
@@ -53,7 +53,7 @@ void _sl_unionfind_set_root(const struct sl_unionfind uf[const static 1],
 void sl_unionfind_union(const struct sl_unionfind uf[const static 1],
                         const size_t lhs,
                         const size_t rhs) {
-  _sl_unionfind_set_root(uf, rhs, sl_unionfind_find_root(uf, lhs));
+  sl_unionfind_set_root(uf, rhs, sl_unionfind_find_root(uf, lhs));
 }
 
 #undef SL_UNIONFIND_ROOT

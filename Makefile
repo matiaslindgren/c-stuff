@@ -1,7 +1,19 @@
 SHELL := /bin/sh
 
 CLANG    := clang-18
-CFLAGS   ?= -std=c23 -Wall -Wpedantic -Werror
+CFLAGS   ?= \
+	-std=c23 \
+	-Weverything \
+	-Werror \
+	-Wno-missing-prototypes \
+	-Wno-pre-c23-compat \
+	-Wno-c99-compat \
+	-Wno-vla \
+	-Wno-declaration-after-statement \
+	-Wno-padded \
+	-Wno-unsafe-buffer-usage \
+	-Wno-switch-default \
+	-Wno-switch-enum
 LDFLAGS  ?= -lm -fuse-ld=lld -lc
 INCLUDES ?= ./include
 

@@ -27,7 +27,6 @@ struct sl_hashmap_slot {
 struct sl_hashmap {
   size_t size;
   size_t capacity;
-  size_t num_collisions;
   struct sl_hashmap_slot* slots;
 };
 
@@ -59,14 +58,12 @@ struct sl_hashmap_slot* sl_hashmap_get(struct sl_hashmap map[const static 1],
   for (size_t probe = 0;; ++probe) {
     // https://en.wikipedia.org/wiki/Quadratic_probing#Quadratic_function
     // accessed 2023-02-06
-    index += (probe + probe * probe) / 2;
-    index %= map->capacity;
+    index = (index + (probe + probe * probe) / 2) % map->capacity;
     struct sl_hashmap_slot* slot = map->slots + index;
     assert(slot);
     if (!slot->filled || sl_span_compare(&(slot->key), key) == 0) {
       return slot;
     }
-    ++(map->num_collisions);
   }
 }
 
@@ -98,7 +95,7 @@ void sl_hashmap_resize(struct sl_hashmap map[const static 1],
 }
 
 double sl_hashmap_load_factor(struct sl_hashmap map[const static 1]) {
-  return map->capacity ? (double)map->size / map->capacity : 1;
+  return map->capacity ? (double)map->size / (double)map->capacity : 1;
 }
 
 bool sl_hashmap_contains(struct sl_hashmap map[const static 1],
@@ -121,7 +118,7 @@ void sl_hashmap_insert(struct sl_hashmap map[const static 1],
 
 size_t sl_hashmap_iter_find_next(struct sl_iterator iter[const static 1],
                                  const size_t begin) {
-  const struct sl_hashmap* map = iter->data;
+  struct sl_hashmap* map = iter->data;
   size_t i = begin;
   while (i < map->capacity && !(map->slots[i].filled)) {
     ++i;
@@ -140,12 +137,11 @@ void sl_hashmap_iter_advance(struct sl_iterator iter[const static 1]) {
 }
 
 bool sl_hashmap_iter_is_done(struct sl_iterator iter[const static 1]) {
-  const struct sl_hashmap* map = iter->data;
+  struct sl_hashmap* map = iter->data;
   return iter->index == map->capacity;
 }
 
-struct sl_iterator sl_hashmap_iter(
-    const struct sl_hashmap map[const static 1]) {
+struct sl_iterator sl_hashmap_iter(struct sl_hashmap map[const static 1]) {
   struct sl_iterator iter = {.data = (void*)map};
   iter.index = sl_hashmap_iter_find_next(&iter, 0);
   return iter;

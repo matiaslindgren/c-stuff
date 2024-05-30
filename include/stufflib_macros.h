@@ -22,7 +22,7 @@
 
 #define SL_TEST_MAIN(...)                                    \
   int main(int argc, char* const argv[argc + 1]) {           \
-    struct sl_args args = sl_args_from_argv(argc, argv);     \
+    struct sl_args args = {.argc = argc, .argv = argv};      \
     const bool verbose = sl_args_parse_flag(&args, "-v");    \
     bool (*tests[])(const bool) = {__VA_ARGS__};             \
     char test_names_str[] = #__VA_ARGS__;                    \
@@ -39,7 +39,6 @@
         SL_LOG_ERROR("test %s (%zu) failed", test_name, t);  \
       }                                                      \
     }                                                        \
-    sl_args_destroy(&args);                                  \
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;                 \
   }
 

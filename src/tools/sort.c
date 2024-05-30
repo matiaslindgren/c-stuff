@@ -10,7 +10,7 @@
 #include "stufflib_tokenizer.h"
 
 void print_usage(const struct sl_args args[const static 1]) {
-  fprintf(stderr, "usage: %s { numeric | ascii } path\n", args->program);
+  fprintf(stderr, "usage: %s { numeric | ascii } path\n", args->argv[0]);
 }
 
 int compare_as_doubles(const void* lhs_data, const void* rhs_data) {

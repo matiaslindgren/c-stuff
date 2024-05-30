@@ -9,7 +9,7 @@
 #define SL_HASHMAP_INIT_CAPACITY 2
 #include "stufflib_hashmap.h"
 
-bool test_empty(const bool verbose) {
+bool test_empty(const bool) {
   struct sl_hashmap map = sl_hashmap_create();
   assert(map.size == 0);
   assert(map.capacity == 2);
@@ -34,7 +34,7 @@ bool test_empty(const bool verbose) {
   return true;
 }
 
-bool test_insert_single_element(const bool verbose) {
+bool test_insert_single_element(const bool) {
   struct sl_hashmap map = sl_hashmap_create();
   struct sl_span key_hello = sl_span_from_str("hello");
 
@@ -59,7 +59,7 @@ bool test_insert_single_element(const bool verbose) {
   return true;
 }
 
-bool test_insert_two_elements_resizes(const bool verbose) {
+bool test_insert_two_elements_resizes(const bool) {
   struct sl_hashmap map = sl_hashmap_create();
   struct sl_span key_hello = sl_span_from_str("hello");
   struct sl_span key_there = sl_span_from_str("there");
@@ -82,7 +82,7 @@ bool test_insert_two_elements_resizes(const bool verbose) {
   return true;
 }
 
-bool test_update_single_element(const bool verbose) {
+bool test_update_single_element(const bool) {
   struct sl_hashmap map = sl_hashmap_create();
   struct sl_span key_hello = sl_span_from_str("hello");
 
@@ -100,7 +100,7 @@ bool test_update_single_element(const bool verbose) {
   return true;
 }
 
-bool test_multiple_resizes_retain_slots(const bool verbose) {
+bool test_multiple_resizes_retain_slots(const bool) {
   struct sl_hashmap map = sl_hashmap_create();
   const char* keys[] = {
       "ten",
@@ -163,7 +163,7 @@ bool test_multiple_resizes_retain_slots(const bool verbose) {
   return true;
 }
 
-bool test_slot_iterator(const bool verbose) {
+bool test_slot_iterator(const bool) {
   struct sl_hashmap map = sl_hashmap_create();
   const char* keys[] = {
       "ten",
@@ -189,7 +189,7 @@ bool test_slot_iterator(const bool verbose) {
     assert(iter.pos == i);
     struct sl_hashmap_slot* slot = sl_hashmap_iter_get(&iter);
     assert(slot);
-    assert(iter.index == slot - map.slots);
+    assert((long)iter.index == slot - map.slots);
     assert(slot->filled);
     assert(slot->value >= 0);
     assert(slot->value < n);

@@ -5,7 +5,7 @@
 #include "stufflib_span.h"
 
 // clang-format off
-const struct sl_span hello_utf8[] = {
+static struct sl_span sl_test_data_hello_utf8[] = {
   {.size=2,  .data=(unsigned char*)u8"hi"},
   {.size=5,  .data=(unsigned char*)u8"hello"},
   {.size=18, .data=(unsigned char*)u8"नमस्ते"},
@@ -18,7 +18,7 @@ const struct sl_span hello_utf8[] = {
   {.size=18, .data=(unsigned char*)u8"สวัสดี"},
 };
 
-const uint32_t decoded_strings[] = {
+static uint32_t sl_test_data_decoded_strings[] = {
   // hi
   0x68,0x69,
   // hello
@@ -41,7 +41,7 @@ const uint32_t decoded_strings[] = {
   0xe2a,0xe27,0xe31,0xe2a,0xe14,0xe35,
 };
 
-const size_t decoded_lengths[] = {
+static size_t sl_test_data_decoded_lengths[] = {
   // hi
   2,
   // hello

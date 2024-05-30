@@ -109,7 +109,7 @@ bool dump_raw(const struct sl_args args[const static 1]) {
   }
 
   for (size_t i = 0; i < img_chunks.count; ++i) {
-    for (size_t i_arg = 2;; ++i_arg) {
+    for (int i_arg = 2;; ++i_arg) {
       const char* const block_type = sl_args_get_positional(args, i_arg);
       if (!block_type) {
         break;
@@ -143,9 +143,9 @@ void print_usage(const struct sl_args args[const static 1]) {
        "\n"
        "   %s segment png_src_path png_dst_path [--threshold-percent=N] [-v]"
        "\n"),
-      args->program,
-      args->program,
-      args->program);
+      args->argv[0],
+      args->argv[0],
+      args->argv[0]);
 }
 
 int main(int argc, char* const argv[argc + 1]) {

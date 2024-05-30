@@ -14,13 +14,13 @@ typedef void* sl_sort(void*, const size_t, const size_t, sl_sort_compare*);
 typedef double* sl_sort_double(const size_t, double*);
 typedef char** sl_sort_str(const size_t, char**);
 
-void _sl_sort_mergesort_merge(const size_t size,
-                              void* restrict src_raw,
-                              void* restrict dst_raw,
-                              const size_t begin,
-                              const size_t mid,
-                              const size_t end,
-                              sl_sort_compare* const compare) {
+void sl_sort_internal_mergesort_merge(const size_t size,
+                                      void* restrict src_raw,
+                                      void* restrict dst_raw,
+                                      const size_t begin,
+                                      const size_t mid,
+                                      const size_t end,
+                                      sl_sort_compare* const compare) {
   unsigned char* src = src_raw;
   unsigned char* dst = dst_raw;
   size_t lhs = begin;
@@ -48,20 +48,20 @@ void _sl_sort_mergesort_merge(const size_t size,
   }
 }
 
-void _sl_sort_mergesort(const size_t size,
-                        void* restrict src,
-                        void* restrict dst,
-                        const size_t begin,
-                        const size_t end,
-                        sl_sort_compare* const compare) {
+void sl_sort_internal_mergesort(const size_t size,
+                                void* restrict src,
+                                void* restrict dst,
+                                const size_t begin,
+                                const size_t end,
+                                sl_sort_compare* const compare) {
   assert(begin <= end);
   if (end - begin <= 1) {
     return;
   }
   const size_t mid = sl_misc_midpoint(begin, end);
-  _sl_sort_mergesort(size, dst, src, begin, mid, compare);
-  _sl_sort_mergesort(size, dst, src, mid, end, compare);
-  _sl_sort_mergesort_merge(size, src, dst, begin, mid, end, compare);
+  sl_sort_internal_mergesort(size, dst, src, begin, mid, compare);
+  sl_sort_internal_mergesort(size, dst, src, mid, end, compare);
+  sl_sort_internal_mergesort_merge(size, src, dst, begin, mid, end, compare);
 }
 
 void* sl_sort_mergesort(void* src,
@@ -72,19 +72,18 @@ void* sl_sort_mergesort(void* src,
   assert(src);
   void* tmp = sl_alloc(count, size);
   memcpy(tmp, src, count * size);
-  _sl_sort_mergesort(size, src, tmp, 0, count, compare);
+  sl_sort_internal_mergesort(size, src, tmp, 0, count, compare);
   memcpy(src, tmp, count * size);
   sl_free(tmp);
   return src;
 }
 
-size_t _sl_sort_hoare_partition(const size_t count,
-                                const size_t size,
-                                void* restrict src_raw,
-                                void* restrict tmp_raw,
-                                const size_t lo,
-                                const size_t hi,
-                                sl_sort_compare* const compare) {
+size_t sl_sort_internal_hoare_partition(const size_t size,
+                                        void* restrict src_raw,
+                                        void* restrict tmp_raw,
+                                        const size_t lo,
+                                        const size_t hi,
+                                        sl_sort_compare* const compare) {
   unsigned char* src = src_raw;
   unsigned char* pivot = tmp_raw;
   unsigned char* swap_tmp = pivot + size;
@@ -110,20 +109,20 @@ size_t _sl_sort_hoare_partition(const size_t count,
   }
 }
 
-void _sl_sort_quicksort(const size_t count,
-                        const size_t size,
-                        void* src,
-                        void* tmp,
-                        const size_t lo,
-                        const size_t hi,
-                        sl_sort_compare* const compare) {
+void sl_sort_internal_quicksort(const size_t count,
+                                const size_t size,
+                                void* src,
+                                void* tmp,
+                                const size_t lo,
+                                const size_t hi,
+                                sl_sort_compare* const compare) {
   if (lo >= hi || lo >= count || hi >= count) {
     return;
   }
   const size_t pivot =
-      _sl_sort_hoare_partition(count, size, src, tmp, lo, hi, compare);
-  _sl_sort_quicksort(count, size, src, tmp, lo, pivot, compare);
-  _sl_sort_quicksort(count, size, src, tmp, pivot + 1, hi, compare);
+      sl_sort_internal_hoare_partition(size, src, tmp, lo, hi, compare);
+  sl_sort_internal_quicksort(count, size, src, tmp, lo, pivot, compare);
+  sl_sort_internal_quicksort(count, size, src, tmp, pivot + 1, hi, compare);
 }
 
 void* sl_sort_quicksort(void* src,
@@ -135,7 +134,7 @@ void* sl_sort_quicksort(void* src,
   assert(src);
   // pivot and swap space
   void* tmp = sl_alloc(2, size);
-  _sl_sort_quicksort(count, size, src, tmp, 0, count - 1, compare);
+  sl_sort_internal_quicksort(count, size, src, tmp, 0, count - 1, compare);
   sl_free(tmp);
   return src;
 }

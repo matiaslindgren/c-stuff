@@ -7,8 +7,8 @@
 #include "stufflib_unionfind.h"
 
 void sl_img_segment_rgb(struct sl_png_image dst[const static 1],
-                        const struct sl_png_image src[const static 1],
-                        const size_t threshold_percent) {
+                        struct sl_png_image src[const static 1],
+                        size_t threshold_percent) {
   struct sl_unionfind segments = {0};
   size_t* segment_sizes = nullptr;
   double* segment_sums = nullptr;
@@ -18,7 +18,7 @@ void sl_img_segment_rgb(struct sl_png_image dst[const static 1],
   const size_t height = src->header.height + 2;
   const size_t bytes_per_px = 3;
   const double distance_threshold =
-      sl_math_clamp(0, threshold_percent / 100.0, 1);
+      sl_math_clamp(0.0, (double)threshold_percent / 100.0, 1.0);
 
   sl_unionfind_init(&segments, width * height);
   segment_sizes = sl_alloc(width * height, sizeof(size_t));
@@ -42,11 +42,11 @@ void sl_img_segment_rgb(struct sl_png_image dst[const static 1],
         const size_t cur_idx = row * width + col;
         const size_t cur_seg = sl_unionfind_find_root(&segments, cur_idx);
         const double* cur_sum = segment_sums + bytes_per_px * cur_seg;
-        const double* cur_avg =
-            sl_math_linalg_scalar_vmul(sl_math_inv(segment_sizes[cur_seg]),
-                                       bytes_per_px,
-                                       (double[3]){0},
-                                       cur_sum);
+        const double* cur_avg = sl_math_linalg_scalar_vmul(
+            sl_math_inv((double)segment_sizes[cur_seg]),
+            bytes_per_px,
+            (double[3]){0},
+            cur_sum);
 
         double dist2left = distance_threshold;
         double dist2above = distance_threshold;
@@ -55,11 +55,11 @@ void sl_img_segment_rgb(struct sl_png_image dst[const static 1],
         const size_t left_seg = sl_unionfind_find_root(&segments, left_idx);
         if (left_seg != cur_seg) {
           const double* left_sum = segment_sums + bytes_per_px * left_seg;
-          const double* left_avg =
-              sl_math_linalg_scalar_vmul(sl_math_inv(segment_sizes[left_seg]),
-                                         bytes_per_px,
-                                         (double[3]){0},
-                                         left_sum);
+          const double* left_avg = sl_math_linalg_scalar_vmul(
+              sl_math_inv((double)segment_sizes[left_seg]),
+              bytes_per_px,
+              (double[3]){0},
+              left_sum);
           const double* left_diff = sl_math_linalg_vsub(bytes_per_px,
                                                         (double[3]){0},
                                                         left_avg,
@@ -71,11 +71,11 @@ void sl_img_segment_rgb(struct sl_png_image dst[const static 1],
         const size_t above_seg = sl_unionfind_find_root(&segments, above_idx);
         if (above_seg != cur_seg) {
           const double* above_sum = segment_sums + bytes_per_px * above_seg;
-          const double* above_avg =
-              sl_math_linalg_scalar_vmul(sl_math_inv(segment_sizes[above_seg]),
-                                         bytes_per_px,
-                                         (double[3]){0},
-                                         above_sum);
+          const double* above_avg = sl_math_linalg_scalar_vmul(
+              sl_math_inv((double)segment_sizes[above_seg]),
+              bytes_per_px,
+              (double[3]){0},
+              above_sum);
           const double* above_diff = sl_math_linalg_vsub(bytes_per_px,
                                                          (double[3]){0},
                                                          above_avg,

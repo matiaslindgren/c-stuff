@@ -278,7 +278,7 @@ Vatn er ólífrænn lyktar-, bragð- og nær litlaus vökvi sem er lífsnauðsyn
 **`stdout`**:
 ```
 int main(int argc, char* const argv[argc + 1]) {
-  struct sl_args args = sl_args_from_argv(argc, argv);
+  struct sl_args args ={.argc=argc, .argv=argv};
   bool ok = false;
   const char* command = sl_args_get_positional(&args, 0);
   if (command) {

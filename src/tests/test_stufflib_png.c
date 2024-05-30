@@ -153,9 +153,9 @@ bool test_read_img_header(const bool verbose) {
   return true;
 }
 
-static inline int _test_read_single_pixel(const char* png_path,
-                                          const size_t on_index,
-                                          const bool verbose) {
+static inline int test_read_single_pixel(const char* png_path,
+                                         const size_t on_index,
+                                         const bool verbose) {
   if (verbose) {
     printf("%s\n", png_path);
   }
@@ -190,7 +190,7 @@ bool test_read_single_pixel_no_compression(const bool verbose) {
         "./test-data/png/00ff00-1x1-rgb-nocomp.png",
         "./test-data/png/0000ff-1x1-rgb-nocomp.png",
     }[on_pixel];
-    if (!_test_read_single_pixel(png_path, on_pixel, verbose)) {
+    if (!test_read_single_pixel(png_path, on_pixel, verbose)) {
       return false;
     }
   }
@@ -204,7 +204,7 @@ bool test_read_single_pixel_with_fixed_compression(const bool verbose) {
         "./test-data/png/00ff00-1x1-rgb-fixed.png",
         "./test-data/png/0000ff-1x1-rgb-fixed.png",
     }[on_pixel];
-    if (!_test_read_single_pixel(png_path, on_pixel, verbose)) {
+    if (!test_read_single_pixel(png_path, on_pixel, verbose)) {
       return false;
     }
   }
@@ -344,7 +344,7 @@ bool test_read_large_images_with_dynamic_compression(const bool verbose) {
   return true;
 }
 
-int _test_read_write_read(const bool verbose, const char* img0_path) {
+int test_read_write_read(const bool verbose, const char* img0_path) {
   if (verbose) {
     printf("%s\n", img0_path);
   }
@@ -384,7 +384,7 @@ bool test_read_write_read_single_pixel(const bool verbose) {
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(paths); ++i) {
     const char* png_path = paths[i];
-    if (!_test_read_write_read(verbose, png_path)) {
+    if (!test_read_write_read(verbose, png_path)) {
       return false;
     }
   }
@@ -399,7 +399,7 @@ bool test_read_write_read_small(const bool verbose) {
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(paths); ++i) {
     const char* png_path = paths[i];
-    if (!_test_read_write_read(verbose, png_path)) {
+    if (!test_read_write_read(verbose, png_path)) {
       return false;
     }
   }
@@ -414,7 +414,7 @@ bool test_read_write_read_large(const bool verbose) {
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(paths); ++i) {
     const char* png_path = paths[i];
-    if (!_test_read_write_read(verbose, png_path)) {
+    if (!test_read_write_read(verbose, png_path)) {
       return false;
     }
   }

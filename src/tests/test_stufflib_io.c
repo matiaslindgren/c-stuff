@@ -8,7 +8,7 @@
 #include "stufflib_iterator.h"
 #include "stufflib_macros.h"
 
-bool test_create_file_iter_from_file(const bool verbose) {
+bool test_create_file_iter_from_file(const bool) {
   const char* files[] = {
       "./test-data/txt/empty",
       "./test-data/txt/hello.txt",
@@ -32,7 +32,7 @@ bool test_create_file_iter_from_file(const bool verbose) {
   return true;
 }
 
-bool test_read_single_char(const bool verbose) {
+bool test_read_single_char(const bool) {
   struct sl_iterator iter = sl_file_iter_open("./test-data/txt/one.txt");
   assert(iter.index == 0);
   assert(iter.pos == 0);
@@ -50,7 +50,7 @@ bool test_read_single_char(const bool verbose) {
   return true;
 }
 
-bool test_read_empty_file(const bool verbose) {
+bool test_read_empty_file(const bool) {
   struct sl_iterator iter = sl_file_iter_open("./test-data/txt/empty");
   assert(iter.index == 0);
   assert(iter.pos == 0);
@@ -59,7 +59,7 @@ bool test_read_empty_file(const bool verbose) {
   return true;
 }
 
-bool test_read_nonexisting_file(const bool verbose) {
+bool test_read_nonexisting_file(const bool) {
   struct sl_iterator iter =
       sl_file_iter_open("./test-data/txt/missing/file.txt");
   assert(iter.index == 0);
