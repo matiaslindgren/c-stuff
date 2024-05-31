@@ -10,7 +10,9 @@
 #include "stufflib_misc.h"
 #include "stufflib_span.h"
 
-#define SL_FILE_BUFFER_CAPACITY 4096
+#ifndef SL_FILE_BUFFER_CAPACITY
+#define SL_FILE_BUFFER_CAPACITY (1024 << 5)
+#endif
 
 struct sl_file_buffer {
   const char* filename;

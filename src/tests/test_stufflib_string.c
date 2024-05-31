@@ -74,42 +74,4 @@ bool test_string_slice(const bool) {
   return true;
 }
 
-bool test_init_from_file(const bool verbose) {
-  const char* languages[] = {
-      "ar", "bg",  "cs", "de",  "el", "fa", "fi", "fr",  "he",  "hi", "is",
-      "ja", "ka",  "ki", "ko",  "ku", "lt", "lv", "nah", "nqo", "pl", "pt",
-      "ru", "shi", "sl", "szl", "ta", "tr", "uk", "vep", "vi",  "zh",
-  };
-  for (size_t i = 0; i < SL_ARRAY_LEN(languages); ++i) {
-    char input_path[200] = {0};
-    snprintf(input_path,
-             SL_ARRAY_LEN(input_path),
-             "./test-data/txt/wikipedia/water_%s.txt",
-             languages[i]);
-    if (verbose) {
-      printf("%s\n", input_path);
-    }
-
-    char length_path[200] = {0};
-    snprintf(length_path,
-             SL_ARRAY_LEN(length_path),
-             "./test-data/txt/wikipedia/water_%s_length.txt",
-             languages[i]);
-    FILE* fp = fopen(length_path, "rb");
-    assert(fp);
-    char tmp[200] = {0};
-    assert(fread(tmp, 1, 200, fp));
-    fclose(fp);
-    const size_t expected_str_length = strtoull(tmp, 0, 10);
-
-    struct sl_string str = sl_string_from_file(input_path);
-    assert(str.length == expected_str_length);
-    sl_string_delete(&str);
-  }
-  return true;
-}
-
-SL_TEST_MAIN(test_string_init,
-             test_string_utf8_view,
-             test_string_slice,
-             test_init_from_file)
+SL_TEST_MAIN(test_string_init, test_string_utf8_view, test_string_slice)

@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "stufflib_io.h"
 #include "stufflib_iterator.h"
 #include "stufflib_macros.h"
 #include "stufflib_span.h"
@@ -33,29 +32,6 @@ struct sl_string sl_string_from_utf8(struct sl_span utf8_data[const static 1]) {
 
 struct sl_span sl_string_view_utf8_data(struct sl_string str[const static 1]) {
   return sl_span_slice(&(str->utf8_data), 0, str->utf8_data.size - 1);
-}
-
-struct sl_string sl_string_from_file(const char filename[const static 1]) {
-  struct sl_iterator file_iter = sl_file_iter_open(filename);
-
-  struct sl_span utf8_data = {0};
-  for (; !sl_file_iter_is_done(&file_iter); sl_file_iter_advance(&file_iter)) {
-    struct sl_span* buffer = sl_file_iter_get(&file_iter);
-    sl_span_extend(&utf8_data, buffer);
-  }
-
-  sl_file_iter_close(&file_iter);
-
-  if (!sl_unicode_is_valid_utf8(&utf8_data)) {
-    SL_LOG_ERROR("cannot decode '%s' as UTF-8", filename);
-    sl_span_delete(&utf8_data);
-    return (struct sl_string){0};
-  }
-
-  struct sl_string file_content = sl_string_from_utf8(&utf8_data);
-  sl_span_delete(&utf8_data);
-
-  return file_content;
 }
 
 struct sl_string sl_string_concat(struct sl_string str1[const static 1],

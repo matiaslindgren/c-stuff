@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "stufflib_args.h"
+#include "stufflib_filesystem.h"
 #include "stufflib_hashmap.h"
 #include "stufflib_iterator.h"
 #include "stufflib_span.h"
@@ -30,7 +31,7 @@ bool concat(const struct sl_args args[const static 1]) {
     if (!path) {
       break;
     }
-    struct sl_string content = sl_string_from_file(path);
+    struct sl_string content = sl_fs_read_file_utf8(path);
     const bool read_ok = content.length > 0;
     if (read_ok) {
       sl_string_extend(&result, &content);
@@ -73,7 +74,7 @@ bool count(const struct sl_args args[const static 1]) {
   bool is_done = false;
 
   char* path = sl_args_get_positional(args, 2);
-  struct sl_string content = sl_string_from_file(path);
+  struct sl_string content = sl_fs_read_file_utf8(path);
 
   struct sl_span pattern =
       sl_span_view(strlen(pattern_str), (unsigned char*)pattern_str);
@@ -118,7 +119,7 @@ bool slicelines(const struct sl_args args[const static 1]) {
 
   bool is_done = false;
 
-  struct sl_string content = sl_string_from_file(path);
+  struct sl_string content = sl_fs_read_file_utf8(path);
   if (!content.length) {
     goto done;
   }
@@ -178,7 +179,7 @@ bool replace(const struct sl_args args[const static 1]) {
 
   bool is_done = false;
 
-  struct sl_string content = sl_string_from_file(path);
+  struct sl_string content = sl_fs_read_file_utf8(path);
   if (!content.length) {
     goto done;
   }
@@ -247,7 +248,7 @@ bool linefreq(const struct sl_args args[const static 1]) {
   bool is_done = false;
 
   struct sl_hashmap freq = sl_hashmap_create();
-  struct sl_string content = sl_string_from_file(path);
+  struct sl_string content = sl_fs_read_file_utf8(path);
   if (!content.length) {
     goto done;
   }

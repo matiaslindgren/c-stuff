@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "stufflib_args.h"
+#include "stufflib_filesystem.h"
 #include "stufflib_io.h"
 #include "stufflib_sort.h"
 #include "stufflib_string.h"
@@ -48,7 +49,7 @@ int main(int argc, char* const argv[argc + 1]) {
   }
 
   const char* path = sl_args_get_positional(&args, 1);
-  content = sl_string_from_file(path);
+  content = sl_fs_read_file_utf8(path);
   struct sl_span newline = sl_span_view(1, (unsigned char[]){'\n'});
 
   struct sl_tokenizer newline_tokenizer =

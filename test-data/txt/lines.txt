@@ -1,0 +1,10 @@
+# test-data/txt/wikipedia/water_fi.txt
+Vesi on huoneenlämmössä
+
+
+ nesteenä esiintyvä
+
+vedyn ja hapen
+  muodostama epäorgaaninen
+
+kemiallinen yhdiste ja vedyn palamistuote.
