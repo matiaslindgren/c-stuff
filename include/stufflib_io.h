@@ -81,15 +81,4 @@ void sl_file_iter_close(struct sl_iterator iter[const static 1]) {
   iter->data = nullptr;
 }
 
-struct sl_span sl_io_slurp_file(const char filename[const static 1]) {
-  struct sl_iterator file_iter = sl_file_iter_open(filename);
-  struct sl_span data = {0};
-  for (; !sl_file_iter_is_done(&file_iter); sl_file_iter_advance(&file_iter)) {
-    struct sl_span* buffer = sl_file_iter_get(&file_iter);
-    sl_span_extend(&data, buffer);
-  }
-  sl_file_iter_close(&file_iter);
-  return data;
-}
-
 #endif  // SL_IO_H_INCLUDED

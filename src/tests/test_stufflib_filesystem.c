@@ -7,7 +7,7 @@
 #include "stufflib_span.h"
 #include "stufflib_test_data.h"
 
-bool test_slurp_file(const bool verbose) {
+bool test_slurp_file(const bool) {
   for (size_t i = 0; i < SL_ARRAY_LEN(sl_test_data_file_paths); ++i) {
     struct sl_span data = sl_fs_slurp_file(sl_test_data_file_paths[i]);
     assert(data.owned);
