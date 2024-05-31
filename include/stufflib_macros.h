@@ -6,18 +6,19 @@
 
 #define SL_ARRAY_LEN(a) (sizeof(a) / sizeof((a)[0]))
 
-#define SL_LOG(level, ...)                       \
-  do {                                           \
-    const char* const fname = __FILE__;          \
-    const unsigned long lineno = __LINE__;       \
-    fprintf(stderr, "{\"level\":\"%s\"", level); \
-    fprintf(stderr, ",\"file\":\"%s\"", fname);  \
-    fprintf(stderr, ",\"line\":%ld", lineno);    \
-    fprintf(stderr, ",\"msg\":\"");              \
-    fprintf(stderr, __VA_ARGS__);                \
-    fprintf(stderr, "\"}\n");                    \
+#define SL_LOG(level, ...)                             \
+  do {                                                 \
+    const char* const sl_log_fname = __FILE__;         \
+    const unsigned long sl_log_lineno = __LINE__;      \
+    fprintf(stderr, "{\"level\":\"%s\"", level);       \
+    fprintf(stderr, ",\"file\":\"%s\"", sl_log_fname); \
+    fprintf(stderr, ",\"line\":%ld", sl_log_lineno);   \
+    fprintf(stderr, ",\"msg\":\"");                    \
+    fprintf(stderr, __VA_ARGS__);                      \
+    fprintf(stderr, "\"}\n");                          \
   } while (false)
 
+#define SL_LOG_INFO(...) SL_LOG("info", __VA_ARGS__)
 #define SL_LOG_ERROR(...) SL_LOG("error", __VA_ARGS__)
 
 #define SL_TEST_MAIN(...)                                    \
