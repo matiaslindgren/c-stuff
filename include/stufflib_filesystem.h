@@ -1,5 +1,5 @@
-#ifndef _STUFFLIB_FILESYSTEM_H_INCLUDED
-#define _STUFFLIB_FILESYSTEM_H_INCLUDED
+#ifndef SL_FILESYSTEM_H_INCLUDED
+#define SL_FILESYSTEM_H_INCLUDED
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,4 +18,4 @@ struct sl_span sl_fs_slurp_file(const char filename[const static 1]) {
   return data;
 }
 
-#endif  // _STUFFLIB_FILESYSTEM_H_INCLUDED
+#endif  // SL_FILESYSTEM_H_INCLUDED
