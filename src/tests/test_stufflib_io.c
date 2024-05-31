@@ -7,6 +7,7 @@
 #include "stufflib_io.h"
 #include "stufflib_iterator.h"
 #include "stufflib_macros.h"
+#include "stufflib_test_data.h"
 
 bool test_create_file_iter_from_file(const bool) {
   const char* files[] = {
@@ -69,34 +70,9 @@ bool test_read_nonexisting_file(const bool) {
   return true;
 }
 
-bool test_read_read_entire_file(const bool verbose) {
-  const char* files[] = {
-      "./test-data/png/asan.png",
-      "./test-data/png/ff0000-1x1-rgb-fixed.png",
-      "./test-data/txt/empty",
-      "./test-data/txt/hello.txt",
-      "./test-data/txt/numbers.txt",
-      "./test-data/txt/one.txt",
-      "./test-data/txt/wikipedia/water_ar.txt",
-      "./test-data/txt/wikipedia/water_ar_codepoints.txt",
-      "./test-data/txt/wikipedia/water_zh.txt",
-      "./test-data/txt/wikipedia/water_zh_codepoints.txt",
-
-  };
-  const size_t file_sizes[] = {
-      24'733,
-      69,
-      0,
-      11,
-      292,
-      1,
-      922,
-      2'345,
-      190,
-      383,
-  };
-  for (size_t i = 0; i < SL_ARRAY_LEN(files); ++i) {
-    struct sl_iterator iter = sl_file_iter_open(files[i]);
+bool test_read_entire_file(const bool verbose) {
+  for (size_t i = 0; i < SL_ARRAY_LEN(sl_test_data_file_paths); ++i) {
+    struct sl_iterator iter = sl_file_iter_open(sl_test_data_file_paths[i]);
     struct sl_file_buffer* buffer = iter.data;
     size_t total_size = 0;
     while (!sl_file_iter_is_done(&iter)) {
@@ -109,10 +85,10 @@ bool test_read_read_entire_file(const bool verbose) {
     if (verbose) {
       printf("computed size %zu, expecting %zu, file '%s'\n",
              total_size,
-             file_sizes[i],
-             files[i]);
+             sl_test_data_file_sizes[i],
+             sl_test_data_file_paths[i]);
     }
-    assert(total_size == file_sizes[i]);
+    assert(total_size == sl_test_data_file_sizes[i]);
     sl_file_iter_close(&iter);
   }
   return true;
@@ -122,4 +98,4 @@ SL_TEST_MAIN(test_create_file_iter_from_file,
              test_read_single_char,
              test_read_empty_file,
              test_read_nonexisting_file,
-             test_read_read_entire_file)
+             test_read_entire_file)

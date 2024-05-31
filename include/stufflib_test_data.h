@@ -1,5 +1,5 @@
-#ifndef SL_UTF8_TEST_DATA_H_INCLUDED
-#define SL_UTF8_TEST_DATA_H_INCLUDED
+#ifndef SL_TEST_DATA_H_INCLUDED
+#define SL_TEST_DATA_H_INCLUDED
 #include <stdint.h>
 
 #include "stufflib_span.h"
@@ -63,6 +63,34 @@ static size_t sl_test_data_decoded_lengths[] = {
   // สวัสดี
   6,
 };
+
 // clang-format on
 
-#endif  // SL_UTF8_TEST_DATA_H_INCLUDED
+static const char* sl_test_data_file_paths[] = {
+    "./test-data/png/asan.png",
+    "./test-data/png/ff0000-1x1-rgb-fixed.png",
+    "./test-data/txt/empty",
+    "./test-data/txt/hello.txt",
+    "./test-data/txt/numbers.txt",
+    "./test-data/txt/one.txt",
+    "./test-data/txt/wikipedia/water_ar.txt",
+    "./test-data/txt/wikipedia/water_ar_codepoints.txt",
+    "./test-data/txt/wikipedia/water_zh.txt",
+    "./test-data/txt/wikipedia/water_zh_codepoints.txt",
+
+};
+
+static const size_t sl_test_data_file_sizes[] = {
+    24'733,
+    69,
+    0,
+    11,
+    292,
+    1,
+    922,
+    2'345,
+    190,
+    383,
+};
+
+#endif  // SL_TEST_DATA_H_INCLUDED
