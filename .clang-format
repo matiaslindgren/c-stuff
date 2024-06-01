@@ -6,3 +6,4 @@ BinPackParameters: false
 AllowAllArgumentsOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: false
 AlignArrayOfStructures: Right
+IndentPPDirectives: BeforeHash

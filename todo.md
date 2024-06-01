@@ -34,3 +34,5 @@
 - https://www.cl.cam.ac.uk/~mgk25/unicode.html
 - https://stackoverflow.com/questions/526430/c-programming-how-to-program-for-unicode
 - https://www.unicode.org/versions/Unicode15.0.0/
+- https://developer.apple.com/documentation/accelerate/blas?language=objc
+- `#include <Accelerate/Accelerate.h>`

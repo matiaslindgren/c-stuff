@@ -13,7 +13,8 @@ CFLAGS   ?= \
 	-Wno-padded \
 	-Wno-unsafe-buffer-usage \
 	-Wno-switch-default \
-	-Wno-switch-enum
+	-Wno-switch-enum \
+	-Wno-double-promotion
 LDFLAGS  ?= -lm -fuse-ld=lld -lc
 INCLUDES ?= ./include
 
@@ -21,7 +22,7 @@ ifeq ($(shell uname), Darwin)
 	SDK_PATH := $(shell xcrun --show-sdk-path)
 	LLVM_DIR := $(shell brew --prefix llvm)
 	CLANG    := $(LLVM_DIR)/bin/$(CLANG)
-	LDFLAGS  += -Wl,-syslibroot,$(SDK_PATH)
+	LDFLAGS  += -Wl,-syslibroot,$(SDK_PATH),-framework,Accelerate
 	INCLUDES += -isysroot $(SDK_PATH)
 endif
 
