@@ -11,7 +11,7 @@
 #include "stufflib_span.h"
 
 #ifndef SL_FILE_BUFFER_CAPACITY
-#define SL_FILE_BUFFER_CAPACITY (1024 << 5)
+  #define SL_FILE_BUFFER_CAPACITY (1024 << 5)
 #endif
 
 struct sl_file_buffer {

@@ -12,10 +12,10 @@
 #include "stufflib_span.h"
 
 #ifndef SL_HASHMAP_MAX_LOAD_FACTOR
-#define SL_HASHMAP_MAX_LOAD_FACTOR 0.5
+  #define SL_HASHMAP_MAX_LOAD_FACTOR 0.5
 #endif
 #ifndef SL_HASHMAP_INIT_CAPACITY
-#define SL_HASHMAP_INIT_CAPACITY 64
+  #define SL_HASHMAP_INIT_CAPACITY 64
 #endif
 
 struct sl_hashmap_slot {
