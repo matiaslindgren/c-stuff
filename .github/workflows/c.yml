@@ -17,6 +17,8 @@ jobs:
     env:
       STUFFLIB_TEST_VERBOSE: 1
     steps:
+    - name: install OpenBLAS
+      run: sudo apt update --yes && sudo apt install --yes libopenblas-dev
     - name: trust LLVM apt repositories
       run: wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
     - name: add LLVM apt repositories

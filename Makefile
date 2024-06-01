@@ -24,6 +24,8 @@ ifeq ($(shell uname), Darwin)
 	CLANG    := $(LLVM_DIR)/bin/$(CLANG)
 	LDFLAGS  += -Wl,-syslibroot,$(SDK_PATH),-framework,Accelerate
 	INCLUDES += -isysroot $(SDK_PATH)
+else
+	LDFLAGS += -lopenblas
 endif
 
 INCLUDE_DIR := $(abspath ./include)

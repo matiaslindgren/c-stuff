@@ -14,6 +14,7 @@ RUN apt update --yes \
        clang-${LLVM_VERSION} \
        lld-${LLVM_VERSION} \
        clang-format-${LLVM_VERSION} \
+       libopenblas-dev \
        make \
        xxd \
        jq

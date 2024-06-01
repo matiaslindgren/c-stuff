@@ -1,19 +1,25 @@
 #ifndef SL_BLAS_H_INCLUDED
 #define SL_BLAS_H_INCLUDED
 
-#include "stufflib_macros.h"
-#include "stufflib_memory.h"
-
 #ifdef __APPLE__
   #if __has_include(<Accelerate/Accelerate.h>)
     #define ACCELERATE_NEW_LAPACK
     #include <Accelerate/Accelerate.h>
   #else
-    #error "cannot find Apple BLAS framework"
+    #error "cannot find Apple Accelerate framework"
+  #endif
+#elifdef __gnu_linux__
+  #if __has_include(<cblas.h>)
+    #include <cblas.h>
+  #else
+    #error "cannot find OpenBLAS headers"
   #endif
 #else
   #error "no BLAS support available for this platform"
 #endif
+
+#include "stufflib_macros.h"
+#include "stufflib_memory.h"
 
 struct sl_blas_vector {
   int size;
