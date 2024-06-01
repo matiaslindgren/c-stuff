@@ -34,6 +34,22 @@ struct sl_span sl_string_view_utf8_data(struct sl_string str[const static 1]) {
   return sl_span_slice(&(str->utf8_data), 0, str->utf8_data.size - 1);
 }
 
+bool sl_string_is_ascii(const struct sl_string str[const static 1]) {
+  for (size_t i = 0; i < str->utf8_data.size; ++i) {
+    if (sl_unicode_codepoint_width(str->utf8_data.data[i]) != 1) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void sl_string_copy_ascii(char dst[const static 1],
+                          const struct sl_string str[const static 1]) {
+  if (str->utf8_data.size > 0) {
+    memcpy(dst, str->utf8_data.data, str->utf8_data.size);
+  }
+}
+
 struct sl_string sl_string_concat(struct sl_string str1[const static 1],
                                   struct sl_string str2[const static 1]) {
   struct sl_span str1_data = sl_string_view_utf8_data(str1);

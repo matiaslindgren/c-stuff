@@ -74,4 +74,38 @@ bool test_string_slice(const bool) {
   return true;
 }
 
-SL_TEST_MAIN(test_string_init, test_string_utf8_view, test_string_slice)
+bool test_string_is_ascii(const bool) {
+  {
+    struct sl_span hello =
+        (struct sl_span){.size = 12, .data = (unsigned char*)u8"hello there!"};
+    struct sl_string str = sl_string_from_utf8(&hello);
+    assert(sl_string_is_ascii(&str));
+    sl_string_delete(&str);
+  }
+  {
+    struct sl_span hello =
+        (struct sl_span){.size = 18, .data = (unsigned char*)u8"नमस्ते"};
+    struct sl_string str = sl_string_from_utf8(&hello);
+    assert(!sl_string_is_ascii(&str));
+    sl_string_delete(&str);
+  }
+  return true;
+}
+
+bool test_string_copy_ascii(const bool) {
+  struct sl_span hello =
+      (struct sl_span){.size = 12, .data = (unsigned char*)u8"hello there!"};
+  struct sl_string str = sl_string_from_utf8(&hello);
+  char buf[100] = {0};
+  sl_string_copy_ascii(buf, &str);
+  assert(strlen(buf) == hello.size);
+  assert(strcmp(buf, "hello there!") == 0);
+  sl_string_delete(&str);
+  return true;
+}
+
+SL_TEST_MAIN(test_string_init,
+             test_string_utf8_view,
+             test_string_slice,
+             test_string_is_ascii,
+             test_string_copy_ascii)
