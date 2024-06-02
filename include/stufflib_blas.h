@@ -49,6 +49,12 @@ void sl_blas_matrix_destroy(struct sl_blas_matrix a[const static 1]) {
   *a = (struct sl_blas_matrix){0};
 }
 
+float* sl_blas_matrix_get(struct sl_blas_matrix a[const static 1],
+                          const int row,
+                          const int col) {
+  return a->data + row * a->cols + col;
+}
+
 void sl_blas_matmul_f(const struct sl_blas_matrix a[const static 1],
                       const struct sl_blas_matrix b[const static 1],
                       struct sl_blas_matrix c[const static 1]) {

@@ -151,6 +151,18 @@ void sl_png_image_copy(struct sl_png_image dst[static 1],
   dst->filter = sl_span_copy(&(src->filter));
 }
 
+struct sl_png_image sl_png_image_rgb_create(const size_t width,
+                                            const size_t height) {
+  return (struct sl_png_image){
+      .header = (struct sl_png_header){.width = width,
+                                       .height = height,
+                                       .bit_depth = 8,
+                                       .color_type = sl_png_rgb},
+      .data = sl_span_create((width + 2) * (height + 2) * 3),
+      .filter = sl_span_create(height)
+  };
+}
+
 unsigned char* sl_png_image_get_pixel(struct sl_png_image image[static 1],
                                       size_t row,
                                       size_t col) {

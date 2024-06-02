@@ -32,6 +32,20 @@ bool check_matrix_equal(const struct sl_blas_matrix a[const static 1],
   return true;
 }
 
+bool test_matrix_get(const bool) {
+  struct sl_blas_matrix a = {
+      .rows = 3,
+      .cols = 3,
+      .data = (float[]){0, 1, 2, 3, 4, 5, 6, 7, 8}
+  };
+  for (int row = 0; row < a.rows; ++row) {
+    for (int col = 0; col < a.cols; ++col) {
+      assert(a.data + row * a.cols + col == sl_blas_matrix_get(&a, row, col));
+    }
+  }
+  return true;
+}
+
 bool test_matmul_square(const bool) {
   const struct sl_blas_matrix a = {
       .rows = 3,
@@ -69,4 +83,4 @@ bool test_matmul_zeros(const bool) {
   return ok;
 }
 
-SL_TEST_MAIN(test_matmul_square, test_matmul_zeros)
+SL_TEST_MAIN(test_matrix_get, test_matmul_square, test_matmul_zeros)
