@@ -1,5 +1,5 @@
-#ifndef SL_BLAS_H_INCLUDED
-#define SL_BLAS_H_INCLUDED
+#ifndef SL_LINALG_H_INCLUDED
+#define SL_LINALG_H_INCLUDED
 
 #include <math.h>
 
@@ -23,45 +23,45 @@
 #include "stufflib_macros.h"
 #include "stufflib_memory.h"
 
-struct sl_blas_vector {
+struct sl_la_vector {
   int size;
   float* data;
 };
 
-struct sl_blas_matrix {
+struct sl_la_matrix {
   int rows;
   int cols;
   float* data;
 };
 
-struct sl_blas_matrix sl_blas_matrix_create(const int rows, const int cols) {
+struct sl_la_matrix sl_la_matrix_create(const int rows, const int cols) {
   if (rows < 0 || cols < 0) {
     SL_LOG_ERROR("cannot allocate a matrix with negative dimensions");
-    return (struct sl_blas_matrix){0};
+    return (struct sl_la_matrix){0};
   }
-  return (struct sl_blas_matrix){
+  return (struct sl_la_matrix){
       .rows = rows,
       .cols = cols,
       .data = sl_alloc((size_t)(rows * cols), sizeof(float)),
   };
 }
 
-void sl_blas_matrix_destroy(struct sl_blas_matrix a[const static 1]) {
+void sl_la_matrix_destroy(struct sl_la_matrix a[const static 1]) {
   sl_free(a->data);
-  *a = (struct sl_blas_matrix){0};
+  *a = (struct sl_la_matrix){0};
 }
 
-static inline float* sl_blas_matrix_get(struct sl_blas_matrix a[const static 1],
-                                        const int row,
-                                        const int col) {
+static inline float* sl_la_matrix_get(struct sl_la_matrix a[const static 1],
+                                      const int row,
+                                      const int col) {
   return a->data + row * a->cols + col;
 }
 
-void sl_blas_matrix_print(FILE stream[const static 1],
-                          struct sl_blas_matrix a[const static 1]) {
+void sl_la_matrix_print(FILE stream[const static 1],
+                        struct sl_la_matrix a[const static 1]) {
   for (int row = 0; row < a->rows; ++row) {
     for (int col = 0; col < a->cols; ++col) {
-      float value = *sl_blas_matrix_get(a, row, col);
+      float value = *sl_la_matrix_get(a, row, col);
       if (fprintf(stream, "%.3f ", value) < 0) {
         SL_LOG_ERROR("failed printing matrix value at (%d, %d): %.3g",
                      row,
@@ -77,9 +77,9 @@ void sl_blas_matrix_print(FILE stream[const static 1],
   }
 }
 
-void sl_blas_matrix_multiply(const struct sl_blas_matrix a[const static 1],
-                             const struct sl_blas_matrix b[const static 1],
-                             struct sl_blas_matrix c[const static 1]) {
+void sl_la_matrix_multiply(const struct sl_la_matrix a[const static 1],
+                           const struct sl_la_matrix b[const static 1],
+                           struct sl_la_matrix c[const static 1]) {
   // c := a b
   if (a->cols == b->rows && a->rows == c->rows && b->cols == c->cols) {
     // column-major implicit transpose trickery from
@@ -105,25 +105,25 @@ void sl_blas_matrix_multiply(const struct sl_blas_matrix a[const static 1],
   }
 }
 
-double sl_blas_matrix_trace(struct sl_blas_matrix a[const static 1]) {
+double sl_la_matrix_trace(struct sl_la_matrix a[const static 1]) {
   double tr = 0;
   for (int i = 0; i < SL_MIN(a->rows, a->cols); ++i) {
-    tr += *sl_blas_matrix_get(a, i, i);
+    tr += *sl_la_matrix_get(a, i, i);
   }
   return tr;
 }
 
-double sl_blas_matrix_frobenius_norm(struct sl_blas_matrix a[const static 1]) {
+double sl_la_matrix_frobenius_norm(struct sl_la_matrix a[const static 1]) {
   // https://en.wikipedia.org/wiki/Matrix_norm#Frobenius_norm
   // 2024-06-09
   double norm = 0;
   for (int row = 0; row < a->rows; ++row) {
     for (int col = 0; col < a->cols; ++col) {
-      const double value = *sl_blas_matrix_get(a, row, col);
+      const double value = *sl_la_matrix_get(a, row, col);
       norm += pow(fabs(value), 2);
     }
   }
   return sqrt(norm);
 }
 
-#endif  // SL_BLAS_H_INCLUDED
+#endif  // SL_LINALG_H_INCLUDED
