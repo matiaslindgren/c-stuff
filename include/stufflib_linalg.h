@@ -57,6 +57,11 @@ static inline float* sl_la_matrix_get(struct sl_la_matrix a[const static 1],
   return a->data + row * a->cols + col;
 }
 
+static inline float* sl_la_matrix_get_row(struct sl_la_matrix a[const static 1],
+                                          const int row) {
+  return sl_la_matrix_get(a, row, 0);
+}
+
 void sl_la_matrix_print(FILE stream[const static 1],
                         struct sl_la_matrix a[const static 1]) {
   for (int row = 0; row < a->rows; ++row) {
@@ -117,11 +122,9 @@ double sl_la_matrix_frobenius_norm(struct sl_la_matrix a[const static 1]) {
   // https://en.wikipedia.org/wiki/Matrix_norm#Frobenius_norm
   // 2024-06-09
   double norm = 0;
-  for (int row = 0; row < a->rows; ++row) {
-    for (int col = 0; col < a->cols; ++col) {
-      const double value = *sl_la_matrix_get(a, row, col);
-      norm += pow(fabs(value), 2);
-    }
+  for (int r = 0; r < a->rows; ++r) {
+    const float* row = sl_la_matrix_get_row(a, r);
+    norm += cblas_sdot(a->cols, row, 1, row, 1);
   }
   return sqrt(norm);
 }
