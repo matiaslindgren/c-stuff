@@ -1,9 +1,14 @@
 #ifndef SL_MISC_H_INCLUDED
 #define SL_MISC_H_INCLUDED
+#include <assert.h>
 #include <limits.h>
 #include <stdlib.h>
 
 #include "stufflib_macros.h"
+
+#ifndef SL_MISC_SWAP_MAX_SIZE
+  #define SL_MISC_SWAP_MAX_SIZE 128
+#endif
 
 size_t sl_misc_parse_lil_endian(const size_t size,
                                 const unsigned char data[size]) {
@@ -57,6 +62,16 @@ size_t sl_misc_vmax_size_t(const size_t n, const size_t v[n]) {
     res = SL_MAX(res, v[i]);
   }
   return res;
+}
+
+void sl_misc_swap(unsigned char a[const static 1],
+                  unsigned char b[const static 1],
+                  const size_t count) {
+  assert(count < SL_MISC_SWAP_MAX_SIZE);
+  unsigned char tmp[SL_MISC_SWAP_MAX_SIZE] = {0};
+  memcpy(tmp, a, count);
+  memcpy(a, b, count);
+  memcpy(b, tmp, count);
 }
 
 #endif  // SL_MISC_H_INCLUDED

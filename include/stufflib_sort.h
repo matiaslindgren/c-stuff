@@ -86,7 +86,6 @@ size_t sl_sort_internal_hoare_partition(const size_t size,
                                         sl_sort_compare* const compare) {
   unsigned char* src = src_raw;
   unsigned char* pivot = tmp_raw;
-  unsigned char* swap_tmp = pivot + size;
 
   const size_t pivot_idx = sl_misc_midpoint(lo, hi);
   memcpy(pivot, src + pivot_idx * size, size);
@@ -103,9 +102,7 @@ size_t sl_sort_internal_hoare_partition(const size_t size,
     if (lhs >= rhs) {
       return rhs;
     }
-    memcpy(swap_tmp, src + lhs * size, size);
-    memcpy(src + lhs * size, src + rhs * size, size);
-    memcpy(src + rhs * size, swap_tmp, size);
+    sl_misc_swap(src + lhs * size, src + rhs * size, size);
   }
 }
 
