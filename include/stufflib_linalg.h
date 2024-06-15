@@ -34,9 +34,25 @@ struct sl_la_matrix {
   float* data;
 };
 
+struct sl_la_vector sl_la_vector_create(const int size) {
+  if (size <= 0) {
+    SL_LOG_ERROR("cannot allocate a vector with non-positive size");
+    return (struct sl_la_vector){0};
+  }
+  return (struct sl_la_vector){
+      .size = size,
+      .data = sl_alloc((size_t)(size), sizeof(float)),
+  };
+}
+
+void sl_la_vector_destroy(struct sl_la_vector v[const static 1]) {
+  sl_free(v->data);
+  *v = (struct sl_la_vector){0};
+}
+
 struct sl_la_matrix sl_la_matrix_create(const int rows, const int cols) {
-  if (rows < 0 || cols < 0) {
-    SL_LOG_ERROR("cannot allocate a matrix with negative dimensions");
+  if (rows <= 0 || cols <= 0) {
+    SL_LOG_ERROR("cannot allocate a matrix with non-positive size");
     return (struct sl_la_matrix){0};
   }
   return (struct sl_la_matrix){
@@ -60,6 +76,50 @@ static inline float* sl_la_matrix_get(struct sl_la_matrix a[const static 1],
 static inline float* sl_la_matrix_get_row(struct sl_la_matrix a[const static 1],
                                           const int row) {
   return sl_la_matrix_get(a, row, 0);
+}
+
+void sl_la_vector_scale(struct sl_la_vector v[const static 1],
+                        const float alpha) {
+  cblas_sscal(v->size, alpha, v->data, 1);
+}
+
+float sl_la_vector_dot(const struct sl_la_vector a[const static 1],
+                       const struct sl_la_vector b[const static 1]) {
+  if (a->size != b->size) {
+    SL_LOG_ERROR("mismatching vector dimensions, cannot compute dot");
+    return 0;
+  }
+  return cblas_sdot(a->size, a->data, 1, b->data, 1);
+}
+
+void sl_la_vector_scale_add(const struct sl_la_vector a[const static 1],
+                            const float alpha,
+                            const struct sl_la_vector b[const static 1]) {
+  if (a->size != b->size) {
+    SL_LOG_ERROR("mismatching vector dimensions, cannot add vectors");
+    return;
+  }
+  cblas_saxpy(a->size, alpha, b->data, 1, a->data, 1);
+}
+
+void sl_la_vector_add(const struct sl_la_vector a[const static 1],
+                      const struct sl_la_vector b[const static 1]) {
+  sl_la_vector_scale_add(a, 1, b);
+}
+
+void sl_la_vector_print(FILE stream[const static 1],
+                        const struct sl_la_vector v[const static 1]) {
+  for (int i = 0; i < v->size; ++i) {
+    const float value = v->data[i];
+    if (fprintf(stream, "%.3f ", value) < 0) {
+      SL_LOG_ERROR("failed printing vector value at (%d): %.3g", i, value);
+      return;
+    }
+  }
+  if (fprintf(stream, "\n") < 0) {
+    SL_LOG_ERROR("failed printing newline");
+    return;
+  }
 }
 
 void sl_la_matrix_print(FILE stream[const static 1],
@@ -127,6 +187,18 @@ double sl_la_matrix_frobenius_norm(struct sl_la_matrix a[const static 1]) {
     norm += cblas_sdot(a->cols, row, 1, row, 1);
   }
   return sqrt(norm);
+}
+
+void sl_la_matrix_copy_row(struct sl_la_vector dst[const static 1],
+                           struct sl_la_matrix src[const static 1],
+                           const int row) {
+  if (dst->size != src->cols) {
+    SL_LOG_ERROR(
+        "destination vector size is not equal to matrix column count, cannot "
+        "copy row");
+    return;
+  }
+  cblas_scopy(dst->size, sl_la_matrix_get_row(src, row), 1, dst->data, 1);
 }
 
 #endif  // SL_LINALG_H_INCLUDED

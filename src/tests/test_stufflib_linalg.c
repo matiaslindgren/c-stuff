@@ -9,6 +9,23 @@
 
 bool fequal(const double a, const double b) { return fabs(a - b) < 1e-6; }
 
+bool check_vector_equal(struct sl_la_vector a[const static 1],
+                        struct sl_la_vector b[const static 1]) {
+  bool ok = (a->size == b->size);
+  const int size = a->size;
+  for (int i = 0; ok && i < size; ++i) {
+    ok = fequal(a->data[i], b->data[i]);
+  }
+  if (!ok) {
+    fprintf(stderr, "!expected vectors a and b to be equal\n");
+    fprintf(stderr, "a:\n");
+    sl_la_vector_print(stderr, a);
+    fprintf(stderr, "b:\n");
+    sl_la_vector_print(stderr, b);
+  }
+  return ok;
+}
+
 bool check_matrix_equal(struct sl_la_matrix a[const static 1],
                         struct sl_la_matrix b[const static 1]) {
   bool ok = (a->rows == b->rows && a->cols == b->cols);
@@ -22,7 +39,7 @@ bool check_matrix_equal(struct sl_la_matrix a[const static 1],
     }
   }
   if (!ok) {
-    fprintf(stderr, "!expected matrix a and b to be equal\n");
+    fprintf(stderr, "!expected matrices a and b to be equal\n");
     fprintf(stderr, "a:\n");
     sl_la_matrix_print(stderr, a);
     fprintf(stderr, "b:\n");
@@ -161,10 +178,137 @@ bool test_matrix_frobenius_norm(const bool) {
   return false;
 }
 
+bool test_vector_scale(const bool) {
+  for (int alpha = -10; alpha <= 10; ++alpha) {
+    struct sl_la_vector v = {
+        .size = 9,
+        .data = (float[]){-4, -3, -2, -1, 0, 1, 2, 3, 4},
+    };
+    sl_la_vector_scale(&v, (float)alpha);
+    for (int i = 0; i < v.size; ++i) {
+      assert(fequal(v.data[i], (i - 4) * alpha));
+    }
+  }
+  return true;
+}
+
+bool test_vector_dot(const bool) {
+  {
+    struct sl_la_vector v1 = {
+        .size = 5,
+        .data = (float[]){-1, 0, 1, 2, 3},
+    };
+    struct sl_la_vector v2 = {
+        .size = 5,
+        .data = (float[5]){0},
+    };
+    assert(fequal(sl_la_vector_dot(&v1, &v2), 0));
+  }
+  {
+    struct sl_la_vector v1 = {
+        .size = 5,
+        .data = (float[]){-1, 0, 1, 2, 3},
+    };
+    struct sl_la_vector v2 = {
+        .size = 5,
+        .data = (float[]){1, 2, 3, 4, 5},
+    };
+    assert(fequal(sl_la_vector_dot(&v1, &v2), 25));
+  }
+  return true;
+}
+
+bool test_vector_scale_add(const bool) {
+  {
+    struct sl_la_vector v1 = {
+        .size = 5,
+        .data = (float[]){-1, 0, 1, 2, 3},
+    };
+    struct sl_la_vector v2 = {
+        .size = 5,
+        .data = (float[]){-1, 0, 1, 2, 3},
+    };
+    struct sl_la_vector w1 = {
+        .size = 5,
+        .data = (float[]){1, 2, 3, 4, 5},
+    };
+    struct sl_la_vector w2 = {
+        .size = 5,
+        .data = (float[]){1, 2, 3, 4, 5},
+    };
+    sl_la_vector_scale_add(&w1, 0, &v1);
+    if (!check_vector_equal(&v1, &v2)) {
+      return false;
+    }
+    if (!check_vector_equal(&w1, &w2)) {
+      return false;
+    }
+  }
+  {
+    struct sl_la_vector v1 = {
+        .size = 5,
+        .data = (float[]){-1, 0, 1, 2, 3},
+    };
+    struct sl_la_vector v2 = {
+        .size = 5,
+        .data = (float[]){-1, 0, 1, 2, 3},
+    };
+    struct sl_la_vector w1 = {
+        .size = 5,
+        .data = (float[]){1, 2, 3, 4, 5},
+    };
+    struct sl_la_vector w2 = {
+        .size = 5,
+        .data = (float[]){-1, 2, 5, 8, 11},
+    };
+    sl_la_vector_scale_add(&w1, 2, &v1);
+    if (!check_vector_equal(&v1, &v2)) {
+      return false;
+    }
+    if (!check_vector_equal(&w1, &w2)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool test_vector_add(const bool) {
+  {
+    struct sl_la_vector v1 = {
+        .size = 5,
+        .data = (float[]){-1, 0, 1, 2, 3},
+    };
+    struct sl_la_vector v2 = {
+        .size = 5,
+        .data = (float[]){0, 1, 2, 3, 4},
+    };
+    struct sl_la_vector w1 = {
+        .size = 5,
+        .data = (float[]){1, 1, 1, 1, 1},
+    };
+    struct sl_la_vector w2 = {
+        .size = 5,
+        .data = (float[]){1, 1, 1, 1, 1},
+    };
+    sl_la_vector_add(&v1, &w1);
+    if (!check_vector_equal(&v1, &v2)) {
+      return false;
+    }
+    if (!check_vector_equal(&w1, &w2)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 SL_TEST_MAIN(test_matrix_get,
              test_matrix_create,
              test_matrix_trace,
              test_matrix_multiply_square,
              test_matrix_multiply_zeros,
              test_matrix_multiply,
-             test_matrix_frobenius_norm)
+             test_matrix_frobenius_norm,
+             test_vector_scale,
+             test_vector_dot,
+             test_vector_scale_add,
+             test_vector_add, )
