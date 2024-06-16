@@ -160,6 +160,7 @@ void sl_ml_svm_linear_fit(struct sl_ml_svm svm[const static 1],
   for (int t = 1; t <= svm->n_iterations; ++t) {
     const float eta = 1.0f / (lambda * (float)t);
     sl_la_vector_scale(&s, 0);
+    // todo optimize, sliding window over shuffle buffer
     sl_rand_shuffle(index_batch, sizeof(int), (size_t)data->rows);
     for (int i = 0; i < k; ++i) {
       sl_la_matrix_copy_row(&x, data, index_batch[i]);
