@@ -21,7 +21,16 @@
 #endif
 
 #include "stufflib_macros.h"
+#include "stufflib_math.h"
 #include "stufflib_memory.h"
+
+#ifndef SL_LA_FLOAT_EQ_TOL
+  #define SL_LA_FLOAT_EQ_TOL 1e-12
+#endif
+
+#ifndef SL_LA_FLOAT_FORMAT
+  #define SL_LA_FLOAT_FORMAT "%+15.12e"
+#endif
 
 struct sl_la_vector {
   int size;
@@ -111,8 +120,11 @@ void sl_la_vector_print(FILE stream[const static 1],
                         const struct sl_la_vector v[const static 1]) {
   for (int i = 0; i < v->size; ++i) {
     const float value = v->data[i];
-    if (fprintf(stream, "%.3f ", value) < 0) {
-      SL_LOG_ERROR("failed printing vector value at (%d): %.3g", i, value);
+    if (fprintf(stream, (SL_LA_FLOAT_FORMAT " "), value) < 0) {
+      SL_LOG_ERROR(
+          ("failed printing vector value at (%d): " SL_LA_FLOAT_FORMAT),
+          i,
+          value);
       return;
     }
   }
@@ -127,11 +139,12 @@ void sl_la_matrix_print(FILE stream[const static 1],
   for (int row = 0; row < a->rows; ++row) {
     for (int col = 0; col < a->cols; ++col) {
       float value = *sl_la_matrix_get(a, row, col);
-      if (fprintf(stream, "%.3f ", value) < 0) {
-        SL_LOG_ERROR("failed printing matrix value at (%d, %d): %.3g",
-                     row,
-                     col,
-                     value);
+      if (fprintf(stream, (SL_LA_FLOAT_FORMAT " "), value) < 0) {
+        SL_LOG_ERROR(
+            ("failed printing matrix value at (%d, %d): " SL_LA_FLOAT_FORMAT),
+            row,
+            col,
+            value);
         return;
       }
     }
@@ -199,6 +212,65 @@ void sl_la_matrix_copy_row(struct sl_la_vector dst[const static 1],
     return;
   }
   cblas_scopy(dst->size, sl_la_matrix_get_row(src, row), 1, dst->data, 1);
+}
+
+void sl_la_matrix_add_axis0(struct sl_la_matrix m[const static 1],
+                            struct sl_la_vector v[const static 1]) {
+  if (m->cols != v->size) {
+    SL_LOG_ERROR("dimension mismatch %d != %d", m->cols, v->size);
+    return;
+  }
+  for (int row = 0; row < m->rows; ++row) {
+    cblas_saxpy(m->cols, 1, v->data, 1, sl_la_matrix_get_row(m, row), 1);
+  }
+}
+
+void sl_la_matrix_div_axis0(struct sl_la_matrix m[const static 1],
+                            struct sl_la_vector v[const static 1]) {
+  if (m->cols != v->size) {
+    SL_LOG_ERROR("dimension mismatch %d != %d", m->cols, v->size);
+    return;
+  }
+  for (int row = 0; row < m->rows; ++row) {
+    // TODO blas invert values?
+    for (int col = 0; col < m->cols; ++col) {
+      *sl_la_matrix_get(m, row, col) /= v->data[col];
+    }
+  }
+}
+
+bool sl_la_vector_equal(struct sl_la_vector lhs[const static 1],
+                        struct sl_la_vector rhs[const static 1]) {
+  if (lhs->size != rhs->size) {
+    return false;
+  }
+  for (int i = 0; i < lhs->size; ++i) {
+    if (!sl_math_double_almost(lhs->data[i],
+                               rhs->data[i],
+                               SL_LA_FLOAT_EQ_TOL)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool sl_la_matrix_equal(struct sl_la_matrix lhs[const static 1],
+                        struct sl_la_matrix rhs[const static 1]) {
+  if (lhs->rows != rhs->rows || lhs->cols != rhs->cols) {
+    return false;
+  }
+  const int rows = lhs->rows;
+  const int cols = lhs->cols;
+  for (int row = 0; row < rows; ++row) {
+    for (int col = 0; col < cols; ++col) {
+      if (!sl_math_double_almost(*sl_la_matrix_get(lhs, row, col),
+                                 *sl_la_matrix_get(rhs, row, col),
+                                 SL_LA_FLOAT_EQ_TOL)) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 #endif  // SL_LINALG_H_INCLUDED

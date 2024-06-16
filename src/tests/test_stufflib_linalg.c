@@ -6,46 +6,36 @@
 #include "stufflib_args.h"
 #include "stufflib_linalg.h"
 #include "stufflib_macros.h"
+#include "stufflib_math.h"
 
-bool fequal(const double a, const double b) { return fabs(a - b) < 1e-6; }
+bool fequal(const double a, const double b) {
+  return sl_math_double_almost(a, b, 1e-9);
+}
 
 bool check_vector_equal(struct sl_la_vector a[const static 1],
                         struct sl_la_vector b[const static 1]) {
-  bool ok = (a->size == b->size);
-  const int size = a->size;
-  for (int i = 0; ok && i < size; ++i) {
-    ok = fequal(a->data[i], b->data[i]);
-  }
-  if (!ok) {
+  if (!sl_la_vector_equal(a, b)) {
     fprintf(stderr, "!expected vectors a and b to be equal\n");
     fprintf(stderr, "a:\n");
     sl_la_vector_print(stderr, a);
     fprintf(stderr, "b:\n");
     sl_la_vector_print(stderr, b);
+    return false;
   }
-  return ok;
+  return true;
 }
 
 bool check_matrix_equal(struct sl_la_matrix a[const static 1],
                         struct sl_la_matrix b[const static 1]) {
-  bool ok = (a->rows == b->rows && a->cols == b->cols);
-  const int rows = a->rows;
-  const int cols = a->cols;
-  for (int row = 0; ok && row < rows; ++row) {
-    for (int col = 0; ok && col < cols; ++col) {
-      const float a_val = a->data[row * cols + col];
-      const float b_val = b->data[row * cols + col];
-      ok = fequal(a_val, b_val);
-    }
-  }
-  if (!ok) {
+  if (!sl_la_matrix_equal(a, b)) {
     fprintf(stderr, "!expected matrices a and b to be equal\n");
     fprintf(stderr, "a:\n");
     sl_la_matrix_print(stderr, a);
     fprintf(stderr, "b:\n");
     sl_la_matrix_print(stderr, b);
+    return false;
   }
-  return ok;
+  return true;
 }
 
 bool test_matrix_get(const bool) {
@@ -58,6 +48,88 @@ bool test_matrix_get(const bool) {
     for (int col = 0; col < a.cols; ++col) {
       assert(a.data + row * a.cols + col == sl_la_matrix_get(&a, row, col));
     }
+  }
+  return true;
+}
+
+bool test_matrix_equal(const bool) {
+  {
+    struct sl_la_matrix a = {
+        .rows = 1,
+        .cols = 1,
+        .data = (float[]){0},
+    };
+    struct sl_la_matrix b = {
+        .rows = 1,
+        .cols = 1,
+        .data = (float[]){0},
+    };
+    assert(sl_la_matrix_equal(&a, &b));
+  }
+  {
+    struct sl_la_matrix a = {
+        .rows = 1,
+        .cols = 1,
+        .data = (float[]){1},
+    };
+    struct sl_la_matrix b = {
+        .rows = 1,
+        .cols = 1,
+        .data = (float[]){0},
+    };
+    assert(!sl_la_matrix_equal(&a, &b));
+  }
+  {
+    struct sl_la_matrix a = {
+        .rows = 2,
+        .cols = 1,
+        .data = (float[]){0, 0},
+    };
+    struct sl_la_matrix b = {
+        .rows = 1,
+        .cols = 1,
+        .data = (float[]){0},
+    };
+    assert(!sl_la_matrix_equal(&a, &b));
+  }
+  {
+    struct sl_la_matrix a = {
+        .rows = 1,
+        .cols = 1,
+        .data = (float[]){0},
+    };
+    struct sl_la_matrix b = {
+        .rows = 1,
+        .cols = 2,
+        .data = (float[]){0, 0},
+    };
+    assert(!sl_la_matrix_equal(&a, &b));
+  }
+  {
+    struct sl_la_matrix a = {
+        .rows = 4,
+        .cols = 3,
+        .data = (float[]){0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
+    };
+    struct sl_la_matrix b = {
+        .rows = 4,
+        .cols = 3,
+        .data = (float[]){0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
+    };
+    assert(sl_la_matrix_equal(&a, &b));
+  }
+  {
+    struct sl_la_matrix a = {
+        .rows = 4,
+        .cols = 3,
+        .data = (float[]){0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
+    };
+    struct sl_la_matrix b = {
+        .rows = 4,
+        .cols = 3,
+        .data = (float[12]){0, 1, 2, 3, 4, 5}
+    };
+    assert(!sl_la_matrix_equal(&a, &b));
   }
   return true;
 }
@@ -99,6 +171,61 @@ bool test_matrix_trace(const bool) {
   }
   fprintf(stderr, "trace should be %g, not %g\n", expected, tr);
   return false;
+}
+
+bool test_matrix_add_axis0(const bool) {
+  {
+    struct sl_la_matrix a1 = {
+        .rows = 4,
+        .cols = 3,
+        .data = (float[]){2, -7, 3, 7, 1, -5, -3, 9, -5, -1, 6, -1},
+    };
+    struct sl_la_matrix a2 = {
+        .rows = 4,
+        .cols = 3,
+        .data = (float[]){3, -7, 1, 8, 1, -7, -2, 9, -7, 0, 6, -3},
+    };
+    struct sl_la_vector v = {
+        .size = 3,
+        .data = (float[]){1, 0, -2},
+    };
+    sl_la_matrix_add_axis0(&a1, &v);
+    if (!check_matrix_equal(&a1, &a2)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool test_matrix_div_axis0(const bool) {
+  {
+    struct sl_la_matrix a1 = {
+        .rows = 4,
+        .cols = 3,
+        .data = (float[]){2, -7, 3, 7, 1, -5, -3, 9, -5, -1, 6, -1},
+    };
+    struct sl_la_matrix a2 = {
+        .rows = 4,
+        .cols = 3,
+        .data = (float[]){-0.666666667f,
+                          -7.0f,
+                          -1.50f,
+                          -2.333333333f,
+                          1.0f, 2.50f,
+                          1.0f, 9.0f,
+                          2.50f, 0.333333333f,
+                          6.0f, 0.50f},
+    };
+    struct sl_la_vector v = {
+        .size = 3,
+        .data = (float[]){-3, 1, -2},
+    };
+    sl_la_matrix_div_axis0(&a1, &v);
+    if (!check_matrix_equal(&a1, &a2)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool test_matrix_multiply_square(const bool) {
@@ -188,6 +315,21 @@ bool test_vector_scale(const bool) {
     for (int i = 0; i < v.size; ++i) {
       assert(fequal(v.data[i], (i - 4) * alpha));
     }
+  }
+  return true;
+}
+
+bool test_vector_equal(const bool) {
+  {
+    struct sl_la_vector v1 = {
+        .size = 5,
+        .data = (float[]){-1, 0, 1, 2, 3},
+    };
+    struct sl_la_vector v2 = {
+        .size = 5,
+        .data = (float[]){-1, 0, 1, 2, 3},
+    };
+    assert(sl_la_vector_equal(&v1, &v2));
   }
   return true;
 }
@@ -302,13 +444,17 @@ bool test_vector_add(const bool) {
 }
 
 SL_TEST_MAIN(test_matrix_get,
+             test_matrix_equal,
              test_matrix_create,
              test_matrix_trace,
+             test_matrix_add_axis0,
+             test_matrix_div_axis0,
              test_matrix_multiply_square,
              test_matrix_multiply_zeros,
              test_matrix_multiply,
              test_matrix_frobenius_norm,
              test_vector_scale,
+             test_vector_equal,
              test_vector_dot,
              test_vector_scale_add,
-             test_vector_add, )
+             test_vector_add)
