@@ -32,6 +32,7 @@ INCLUDE_DIR := $(abspath ./include)
 SOURCE_DIR  := $(abspath ./src)
 OUTPUT_DIR  := ./build
 
+# todo separate: asan, ubsan, valgrind
 DEBUG=0
 ifeq ($(DEBUG), 1)
 	BUILD_DIR := $(OUTPUT_DIR)/debug
