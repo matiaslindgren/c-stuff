@@ -134,7 +134,7 @@ void sl_ml_classification_print(
 struct sl_ml_svm {
   struct sl_la_vector w;
   int batch_size;
-  int n_epochs;
+  int n_iterations;
   float learning_rate;
 };
 
@@ -157,7 +157,7 @@ void sl_ml_svm_linear_fit(struct sl_ml_svm svm[const static 1],
   const int k = svm->batch_size;
   const float lambda = svm->learning_rate;
 
-  for (int t = 1; t <= svm->n_epochs; ++t) {
+  for (int t = 1; t <= svm->n_iterations; ++t) {
     const float eta = 1.0f / (lambda * (float)t);
     sl_la_vector_scale(&s, 0);
     sl_rand_shuffle(index_batch, sizeof(int), (size_t)data->rows);
