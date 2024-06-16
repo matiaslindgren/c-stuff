@@ -87,6 +87,15 @@ static inline float* sl_la_matrix_get_row(struct sl_la_matrix a[const static 1],
   return sl_la_matrix_get(a, row, 0);
 }
 
+static inline struct sl_la_vector sl_la_matrix_row_view(
+    struct sl_la_matrix a[const static 1],
+    const int row) {
+  return (struct sl_la_vector){
+      .size = a->cols,
+      .data = sl_la_matrix_get_row(a, row),
+  };
+}
+
 void sl_la_vector_scale(struct sl_la_vector v[const static 1],
                         const float alpha) {
   cblas_sscal(v->size, alpha, v->data, 1);
