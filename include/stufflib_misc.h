@@ -7,7 +7,7 @@
 #include "stufflib_macros.h"
 
 #ifndef SL_MISC_SWAP_MAX_SIZE
-  #define SL_MISC_SWAP_MAX_SIZE 128
+  #define SL_MISC_SWAP_MAX_SIZE 1024
 #endif
 
 size_t sl_misc_parse_lil_endian(const size_t size,

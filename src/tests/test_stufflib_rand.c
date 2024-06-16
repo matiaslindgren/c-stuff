@@ -51,15 +51,15 @@ bool test_randint(const bool) {
   assert(sl_rand_int(0, 0) == 0);
   assert(sl_rand_int(1, 0) == 1);
   assert(sl_rand_int(0, 1) == 0);
-  for (int a = 1; a < 100; ++a) {
-    for (int b = a + 1; b < 100; ++b) {
+  for (size_t a = 1; a < 100; ++a) {
+    for (size_t b = a + 1; b < 100; ++b) {
       int freq[100] = {0};
-      for (int i = 0; i < 2000; ++i) {
-        int x = sl_rand_int(a, b);
+      for (size_t i = 0; i < 2000; ++i) {
+        size_t x = sl_rand_int(a, b);
         assert(a <= x && x < b);
         freq[x] += 1;
       }
-      for (int x = a; x < b; ++x) {
+      for (size_t x = a; x < b; ++x) {
         assert(0 < freq[x] && freq[x] <= 2000);
       }
     }
@@ -84,7 +84,7 @@ bool test_rand_shuffle(const bool verbose) {
     for (int iter = 0; iter < 100; ++iter) {
       unsigned char buf[16] = {0};
       memcpy(buf, v, n);
-      sl_rand_shuffle(buf, n, 1);
+      sl_rand_shuffle(buf, 1, n);
       if (verbose) {
         printf("shuffle %02d: ", iter);
         for (size_t i = 0; i < n; ++i) {
@@ -111,7 +111,32 @@ bool test_rand_shuffle(const bool verbose) {
   return true;
 }
 
+bool test_rand_shuffle_together(const bool verbose) {
+  for (int iter = 0; iter < 100; ++iter) {
+    size_t v1[16] = {0};
+    char v2[16] = {0};
+    const size_t n = SL_ARRAY_LEN(v1);
+    for (size_t i = 0; i < n; ++i) {
+      v1[i] = i;
+      v2[i] = (char)i;
+    }
+    sl_rand_shuffle_together(v1, v2, sizeof(size_t), 1, n);
+    if (verbose) {
+      printf("shuffle %02d: ", iter);
+      for (size_t i = 0; i < n; ++i) {
+        printf("%zu,%d ", v1[i], v2[i]);
+      }
+      printf("\n");
+    }
+    for (size_t i = 0; i < n; ++i) {
+      assert(v1[i] == (size_t)v2[i]);
+    }
+  }
+  return true;
+}
+
 SL_TEST_MAIN(test_rand_fill,
              test_rand_set_zero,
              test_randint,
-             test_rand_shuffle)
+             test_rand_shuffle,
+             test_rand_shuffle_together)

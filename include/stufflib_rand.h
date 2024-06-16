@@ -24,24 +24,42 @@ void sl_rand_set_zero_double(const size_t n,
   }
 }
 
-int sl_rand_int(const int a, const int b) {
+size_t sl_rand_int(const size_t a, const size_t b) {
   // return random integer i such that a <= i < b
   if (a >= b) {
     return a;
   }
-  return a + (rand() % (b - a));
+  return a + (size_t)(rand() % (int)(b - a));
 }
 
-void sl_rand_shuffle(void* data, const int count, const int size) {
-  // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
-  // 2024-06-14
+// https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
+// 2024-06-14
+void sl_rand_shuffle(void* data, const size_t size, const size_t count) {
   if (size <= 0 || count < 2) {
     return;
   }
   unsigned char* v = data;
-  for (int i = 0; i < count - 1; ++i) {
-    const int j = sl_rand_int(i, count);
-    sl_misc_swap(v + i * size, v + j * size, (size_t)size);
+  for (size_t i = 0; i < count - 1; ++i) {
+    const size_t j = sl_rand_int(i, count);
+    sl_misc_swap(v + i * size, v + j * size, size);
+  }
+}
+
+void sl_rand_shuffle_together(void* data1,
+                              void* data2,
+                              const size_t size1,
+                              const size_t size2,
+                              const size_t count) {
+  // sl_rand_shuffle but with two arrays of same length
+  if (size1 <= 0 || size2 <= 0 || count < 2) {
+    return;
+  }
+  unsigned char* v1 = data1;
+  unsigned char* v2 = data2;
+  for (size_t i = 0; i < count - 1; ++i) {
+    const size_t j = sl_rand_int(i, count);
+    sl_misc_swap(v1 + i * size1, v1 + j * size1, size1);
+    sl_misc_swap(v2 + i * size2, v2 + j * size2, size2);
   }
 }
 
