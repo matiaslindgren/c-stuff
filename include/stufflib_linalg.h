@@ -2,6 +2,7 @@
 #define SL_LINALG_H_INCLUDED
 
 #include <math.h>
+#include <string.h>
 
 #ifdef __APPLE__
   #if __has_include(<Accelerate/Accelerate.h>)
@@ -99,6 +100,10 @@ static inline struct sl_la_vector sl_la_matrix_row_view(
 void sl_la_vector_scale(struct sl_la_vector v[const static 1],
                         const float alpha) {
   cblas_sscal(v->size, alpha, v->data, 1);
+}
+
+void sl_la_vector_clear(struct sl_la_vector v[const static 1]) {
+  memset(v->data, 0, sizeof(float) * (size_t)v->size);
 }
 
 float sl_la_vector_dot(const struct sl_la_vector a[const static 1],

@@ -160,7 +160,7 @@ void sl_ml_svm_linear_fit(struct sl_ml_svm svm[const static 1],
     }
 
     const float eta = 1.0f / (lambda * (float)t);
-    sl_la_vector_scale(&s, 0);
+    sl_la_vector_clear(&s);
 
     for (int i = 0; i < k; ++i) {
       const int idx = indices[batch_begin + i];
