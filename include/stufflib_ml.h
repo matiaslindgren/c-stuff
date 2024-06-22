@@ -148,28 +148,37 @@ void sl_ml_svm_linear_fit(struct sl_ml_svm svm[const static 1],
                           const int classes[const static 1]) {
   struct sl_la_vector x = sl_la_vector_create(data->cols);
   struct sl_la_vector s = sl_la_vector_create(data->cols);
-  int* index_batch = sl_alloc((size_t)data->rows, sizeof(int));
+  int* indices = sl_alloc((size_t)data->rows, sizeof(int));
 
   for (int i = 0; i < data->rows; ++i) {
-    index_batch[i] = i;
+    indices[i] = i;
   }
 
   const int k = svm->batch_size;
   const float lambda = svm->learning_rate;
 
+  int batch_begin = data->rows;
+
   for (int t = 1; t <= svm->n_iterations; ++t) {
+    if (batch_begin + k >= data->rows) {
+      sl_rand_shuffle(indices, sizeof(int), (size_t)data->rows);
+      batch_begin = 0;
+    }
+
     const float eta = 1.0f / (lambda * (float)t);
     sl_la_vector_scale(&s, 0);
-    // todo optimize, sliding window over shuffle buffer
-    sl_rand_shuffle(index_batch, sizeof(int), (size_t)data->rows);
+
     for (int i = 0; i < k; ++i) {
-      sl_la_matrix_copy_row(&x, data, index_batch[i]);
-      const float y = (classes[index_batch[i]] == 1) ? 1 : -1;
+      const int idx = indices[batch_begin + i];
+      sl_la_matrix_copy_row(&x, data, idx);
+      const float y = (classes[idx] == 1) ? 1 : -1;
       if (y * sl_la_vector_dot(&(svm->w), &x) < 1) {
         sl_la_vector_scale(&x, y);
         sl_la_vector_add(&s, &x);
       }
     }
+    batch_begin += k;
+
     sl_la_vector_scale(&(svm->w), 1 - eta * lambda);
     sl_la_vector_scale(&s, eta / (float)k);
     sl_la_vector_add(&(svm->w), &s);
@@ -177,7 +186,7 @@ void sl_ml_svm_linear_fit(struct sl_ml_svm svm[const static 1],
 
   sl_la_vector_destroy(&s);
   sl_la_vector_destroy(&x);
-  sl_free(index_batch);
+  sl_free(indices);
 }
 
 #endif  // SL_ML_H_INCLUDED
