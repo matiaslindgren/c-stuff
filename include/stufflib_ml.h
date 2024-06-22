@@ -130,8 +130,14 @@ void sl_ml_classification_print(
 // Shalev-Shwartz, S., Singer, Y., Srebro, N. et al.
 // Pegasos: primal estimated sub-gradient solver for SVM. (2011).
 // https://doi.org/10.1007/s10107-010-0420-4
-// 2024-06-16
+// https://courses.edx.org/assets/courseware/v1/16f13f7ac37ae86ebe0372f2410bcec4/asset-v1:MITx+6.86x+1T2021+type@asset+block/resources_pegasos.pdf
+// 2024-06-22
 //
+// 3.
+// Smola, A.J., Schölkopf, B. A tutorial on support vector regression.
+// Statistics and Computing 14, 199–222 (2004).
+// https://alex.smola.org/papers/2004/SmoSch04.pdf
+// 2024-06-22
 struct sl_ml_svm {
   struct sl_la_vector w;
   int batch_size;
@@ -144,6 +150,7 @@ int sl_ml_svm_predict(struct sl_ml_svm svm[const static 1],
   return (sl_la_vector_dot(&(svm->w), x) > 0) ? 1 : 0;
 }
 
+// Shalev-Shwartz et al. Mini-Batch Pegasos
 void sl_ml_svm_linear_fit(struct sl_ml_svm svm[const static 1],
                           struct sl_la_matrix data[const static 1],
                           const int classes[const static 1]) {
