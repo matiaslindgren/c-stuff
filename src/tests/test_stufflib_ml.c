@@ -156,7 +156,7 @@ bool test_random_train_test_split(const bool) {
 bool test_svm_linear_fit(const bool) {
   for (int iter = 0; iter < 1000; ++iter) {
     for (int batch_size = 1; batch_size < 3; ++batch_size) {
-      for (int n_iterations = 2; n_iterations < 10; ++n_iterations) {
+      for (int n_epochs = 1; n_epochs < 10; ++n_epochs) {
         struct sl_la_matrix data = {
             .rows = 4,
             .cols = 3,
@@ -167,7 +167,7 @@ bool test_svm_linear_fit(const bool) {
         struct sl_ml_svm svm = {
             .w = (struct sl_la_vector){.size = 3, .data = (float[3]){0}},
             .batch_size = batch_size,
-            .n_iterations = n_iterations,
+            .n_epochs = n_epochs,
             .learning_rate = 1e-6f,
         };
         sl_ml_svm_linear_fit(&svm, &data, classes);

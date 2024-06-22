@@ -289,9 +289,9 @@ bool spambase(const struct sl_args args[const static 1]) {
 
   struct sl_ml_svm svm = {
       .w = (struct sl_la_vector){.size = data.cols, .data = (float[57]){0}},
-      .batch_size = 8,
-      .n_iterations = 20'000,
-      .learning_rate = 1e-6f,
+      .batch_size = 4,
+      .n_epochs = 2,
+      .learning_rate = 1e-9f,
   };
 
   struct sl_la_matrix test_data = {
