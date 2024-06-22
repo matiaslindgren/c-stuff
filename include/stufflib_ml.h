@@ -64,6 +64,8 @@ void sl_ml_minmax_rescale(struct sl_la_matrix m[const static 1],
   sl_la_vector_destroy(&v_min);
 }
 
+// https://en.wikipedia.org/wiki/F-score#Diagnostic_testing
+// 2024-06-22
 struct sl_ml_classification {
   int tp;
   int tn;
@@ -73,6 +75,7 @@ struct sl_ml_classification {
 
 void sl_ml_classification_update(
     struct sl_ml_classification cls[const static 1],
+    // TODO don't assume true/false
     const int pred_class,
     const int real_class) {
   cls->tp += real_class && pred_class;
@@ -91,6 +94,11 @@ static inline double sl_ml_classification_precision(
   return (double)cls->tp / (cls->tp + cls->fp);
 }
 
+static inline double sl_ml_classification_recall(
+    struct sl_ml_classification cls[const static 1]) {
+  return (double)cls->tp / (cls->tp + cls->fn);
+}
+
 static inline double sl_ml_classification_f1_score(
     struct sl_ml_classification cls[const static 1]) {
   return (double)(2 * cls->tp) / (2 * cls->tp + cls->fp + cls->fn);
@@ -105,6 +113,7 @@ void sl_ml_classification_print(
   printf("\"fn\":%d,", cls->fn);
   printf("\"accuracy\":%.3f,", sl_ml_classification_accuracy(cls));
   printf("\"precision\":%.3f,", sl_ml_classification_precision(cls));
+  printf("\"recall\":%.3f,", sl_ml_classification_recall(cls));
   printf("\"f1_score\":%.3f", sl_ml_classification_f1_score(cls));
   printf("}\n");
 }
