@@ -58,15 +58,8 @@ void sl_ml_rescale_features(struct sl_la_matrix m[const static 1],
   sl_la_vector_add(&v_max, &v_min);
   sl_la_matrix_add_axis0(m, &v_min);
   sl_la_matrix_div_axis0(m, &v_max);
-  // sl_la_matrix_mul_axis2(m, b-a);
-  // sl_la_matrix_add_axis2(m, a);
-  for (int row = 0; row < m->rows; ++row) {
-    for (int col = 0; col < m->cols; ++col) {
-      float* val = sl_la_matrix_get(m, row, col);
-      *val *= b - a;
-      *val += a;
-    }
-  }
+  sl_la_matrix_mul_axis2(m, b - a);
+  sl_la_matrix_add_axis2(m, a);
 
   sl_la_vector_destroy(&v_max);
   sl_la_vector_destroy(&v_min);

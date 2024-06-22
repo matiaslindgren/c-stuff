@@ -248,6 +248,18 @@ void sl_la_matrix_div_axis0(struct sl_la_matrix m[const static 1],
   }
 }
 
+void sl_la_matrix_add_axis2(struct sl_la_matrix m[const static 1],
+                            const float x) {
+  for (int i = 0; i < m->rows * m->cols; ++i) {
+    m->data[i] += x;
+  }
+}
+
+void sl_la_matrix_mul_axis2(struct sl_la_matrix m[const static 1],
+                            const float x) {
+  cblas_sscal(m->rows * m->cols, x, m->data, 1);
+}
+
 bool sl_la_vector_equal(struct sl_la_vector lhs[const static 1],
                         struct sl_la_vector rhs[const static 1]) {
   if (lhs->size != rhs->size) {
