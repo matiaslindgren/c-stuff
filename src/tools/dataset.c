@@ -313,7 +313,7 @@ bool spambase(const struct sl_args args[const static 1]) {
                                 train_classes,
                                 test_classes);
 
-  sl_ml_rescale_features(&train_data, 0, 1);
+  sl_ml_minmax_rescale(&train_data, -1, 1);
   sl_ml_svm_linear_fit(&svm, &train_data, train_classes);
 
   struct sl_ml_classification report = {0};

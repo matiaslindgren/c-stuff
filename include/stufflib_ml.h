@@ -35,12 +35,11 @@ void sl_ml_random_train_test_split(struct sl_la_matrix data[const static 1],
   memcpy(train_classes, classes + n_test, sizeof(int) * (size_t)train->rows);
 }
 
-// min-max rescaling
 // https://en.wikipedia.org/wiki/Feature_scaling#Rescaling_(min-max_normalization)
 // 2024-06-16
-void sl_ml_rescale_features(struct sl_la_matrix m[const static 1],
-                            const float a,
-                            const float b) {
+void sl_ml_minmax_rescale(struct sl_la_matrix m[const static 1],
+                          const float a,
+                          const float b) {
   // TODO maybe with doubles to avoid precision loss
   struct sl_la_vector v_min = sl_la_vector_create(m->cols);
   struct sl_la_vector v_max = sl_la_vector_create(m->cols);

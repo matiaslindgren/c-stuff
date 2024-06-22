@@ -58,7 +58,7 @@ bool test_minmax_normalization(const bool) {
                           1.0f, 1.0f,
                           -0.55555556f},
     };
-    sl_ml_rescale_features(&a1, -1, 1);
+    sl_ml_minmax_rescale(&a1, -1, 1);
     if (!check_matrix_equal(&a1, &a2)) {
       return false;
     }
@@ -80,7 +80,7 @@ bool test_minmax_normalization(const bool) {
                           1.0f, 1.0f,
                           0.22222222f},
     };
-    sl_ml_rescale_features(&a1, 0, 1);
+    sl_ml_minmax_rescale(&a1, 0, 1);
     if (!check_matrix_equal(&a1, &a2)) {
       return false;
     }
@@ -102,7 +102,7 @@ bool test_minmax_normalization(const bool) {
                           10.0f, 10.0f,
                           3.0f},
     };
-    sl_ml_rescale_features(&a1, 1, 10);
+    sl_ml_minmax_rescale(&a1, 1, 10);
     if (!check_matrix_equal(&a1, &a2)) {
       return false;
     }
