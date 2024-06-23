@@ -33,6 +33,9 @@
   #define SL_LA_FLOAT_FORMAT "%+15.12e"
 #endif
 
+// TODO generic n dim row-major tensor?
+// vector and matrix as views instead of alloc
+
 struct sl_la_vector {
   int size;
   float* data;

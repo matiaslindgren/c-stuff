@@ -138,6 +138,11 @@ void sl_ml_classification_print(
 // Statistics and Computing 14, 199–222 (2004).
 // https://alex.smola.org/papers/2004/SmoSch04.pdf
 // 2024-06-22
+//
+// 4.
+// Thorsten Joachims. Training Linear SVMs in Linear Time.
+// https://www.cs.cornell.edu/people/tj/publications/joachims_06a.pdf
+// 2024-06-22
 struct sl_ml_svm {
   struct sl_la_vector w;
   int batch_size;
@@ -150,7 +155,7 @@ int sl_ml_svm_predict(struct sl_ml_svm svm[const static 1],
   return (sl_la_vector_dot(&(svm->w), x) > 0) ? 1 : 0;
 }
 
-// Shalev-Shwartz et al. Mini-Batch Pegasos
+// implements mini-batch pegasos by Shalev-Shwartz et al. (2011)
 void sl_ml_svm_linear_fit(struct sl_ml_svm svm[const static 1],
                           struct sl_la_matrix data[const static 1],
                           const int classes[const static 1]) {
