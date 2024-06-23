@@ -5,6 +5,7 @@
 
 #include "stufflib_args.h"
 #include "stufflib_macros.h"
+#include "stufflib_misc.h"
 #include "stufflib_png.h"
 
 bool test_read_single_pixel_chunks(const bool verbose) {
@@ -357,12 +358,11 @@ int test_read_write_read(const bool verbose, const char* img0_path) {
     sl_png_dump_img_meta(stdout, img0);
   }
 
-  const char* tmpdir = getenv("SL_TMP_DIR");
-  assert(tmpdir);
   char img1_path[200] = {0};
-  assert(
-      0 <
-      snprintf(img1_path, SL_ARRAY_LEN(img1_path), "%s/sl_test.png", tmpdir));
+  assert(0 < snprintf(img1_path,
+                      SL_ARRAY_LEN(img1_path),
+                      "%s/sl_test.png",
+                      sl_misc_tmpdir()));
   assert(sl_png_write_image(img0, img1_path));
 
   struct sl_png_image img1 = sl_png_read_image(img1_path);

@@ -74,4 +74,12 @@ void sl_misc_swap(unsigned char a[const static 1],
   memcpy(b, tmp, count);
 }
 
+static inline const char* sl_misc_tmpdir() {
+  const char* tmpdir = getenv("SL_TMP_DIR");
+  if (!tmpdir) {
+    return "/tmp";
+  }
+  return tmpdir;
+}
+
 #endif  // SL_MISC_H_INCLUDED
