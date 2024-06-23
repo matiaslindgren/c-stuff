@@ -1,7 +1,8 @@
-build
-test-data-sizes.txt
-hello.txt
-there.txt
-llvm-*
 .cache
+build
 compile_commands.json
+datasets
+hello.txt
+llvm-*
+test-data-sizes.txt
+there.txt
