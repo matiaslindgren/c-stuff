@@ -1,0 +1,5 @@
+name: small1
+type: dense
+size: 3
+dims: 1
+dim0: 3

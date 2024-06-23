@@ -1,0 +1,7 @@
+name: large2
+type: sparse
+size: 10
+dims: 3
+dim0: 1000
+dim1: 2000
+dim2: 3000

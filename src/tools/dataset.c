@@ -1,10 +1,12 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define SL_FILE_BUFFER_CAPACITY (1024 << 10)
 
 #include "stufflib_args.h"
+#include "stufflib_dataset.h"
 #include "stufflib_filesystem.h"
 #include "stufflib_io.h"
 #include "stufflib_linalg.h"
@@ -170,7 +172,7 @@ bool spambase(const struct sl_args args[const static 1]) {
   bool all_ok = false;
 
   const char* const dataset_dir = sl_args_get_positional(args, 1);
-  const char* const output_dir = sl_args_get_positional(args, 1);
+  const char* const output_dir = sl_args_get_positional(args, 2);
   const bool verbose = sl_args_parse_flag(args, "-v");
 
   if (verbose) {
@@ -188,14 +190,16 @@ bool spambase(const struct sl_args args[const static 1]) {
     if (verbose) {
       SL_LOG_INFO("reading csv file '%s'", filename);
     }
+
     struct sl_string content = sl_fs_read_file_utf8(filename);
     // TODO create iterlines util
     struct sl_span newline = sl_span_view(1, (unsigned char[]){'\n'});
     struct sl_tokenizer newline_tokenizer =
         sl_tokenizer_create(&(content.utf8_data), &newline);
+
     int lineno = 0;
     for (struct sl_iterator iter = sl_tokenizer_iter(&newline_tokenizer);
-         !sl_tokenizer_iter_is_done(&iter);
+         lineno < data.rows && !sl_tokenizer_iter_is_done(&iter);
          sl_tokenizer_iter_advance(&iter)) {
       struct sl_span* line = sl_tokenizer_iter_get(&iter);
       if (line->size < 2) {
@@ -204,136 +208,137 @@ bool spambase(const struct sl_args args[const static 1]) {
       }
 
       int label = 0;
-      if (sscanf((const char*)line->data,
-                 ("%f" SL_REPEAT_56(",%f") ",%d"),
-                 sl_la_matrix_get(&data, lineno, 0),
-                 sl_la_matrix_get(&data, lineno, 1),
-                 sl_la_matrix_get(&data, lineno, 2),
-                 sl_la_matrix_get(&data, lineno, 3),
-                 sl_la_matrix_get(&data, lineno, 4),
-                 sl_la_matrix_get(&data, lineno, 5),
-                 sl_la_matrix_get(&data, lineno, 6),
-                 sl_la_matrix_get(&data, lineno, 7),
-                 sl_la_matrix_get(&data, lineno, 8),
-                 sl_la_matrix_get(&data, lineno, 9),
-                 sl_la_matrix_get(&data, lineno, 10),
-                 sl_la_matrix_get(&data, lineno, 11),
-                 sl_la_matrix_get(&data, lineno, 12),
-                 sl_la_matrix_get(&data, lineno, 13),
-                 sl_la_matrix_get(&data, lineno, 14),
-                 sl_la_matrix_get(&data, lineno, 15),
-                 sl_la_matrix_get(&data, lineno, 16),
-                 sl_la_matrix_get(&data, lineno, 17),
-                 sl_la_matrix_get(&data, lineno, 18),
-                 sl_la_matrix_get(&data, lineno, 19),
-                 sl_la_matrix_get(&data, lineno, 20),
-                 sl_la_matrix_get(&data, lineno, 21),
-                 sl_la_matrix_get(&data, lineno, 22),
-                 sl_la_matrix_get(&data, lineno, 23),
-                 sl_la_matrix_get(&data, lineno, 24),
-                 sl_la_matrix_get(&data, lineno, 25),
-                 sl_la_matrix_get(&data, lineno, 26),
-                 sl_la_matrix_get(&data, lineno, 27),
-                 sl_la_matrix_get(&data, lineno, 28),
-                 sl_la_matrix_get(&data, lineno, 29),
-                 sl_la_matrix_get(&data, lineno, 30),
-                 sl_la_matrix_get(&data, lineno, 31),
-                 sl_la_matrix_get(&data, lineno, 32),
-                 sl_la_matrix_get(&data, lineno, 33),
-                 sl_la_matrix_get(&data, lineno, 34),
-                 sl_la_matrix_get(&data, lineno, 35),
-                 sl_la_matrix_get(&data, lineno, 36),
-                 sl_la_matrix_get(&data, lineno, 37),
-                 sl_la_matrix_get(&data, lineno, 38),
-                 sl_la_matrix_get(&data, lineno, 39),
-                 sl_la_matrix_get(&data, lineno, 40),
-                 sl_la_matrix_get(&data, lineno, 41),
-                 sl_la_matrix_get(&data, lineno, 42),
-                 sl_la_matrix_get(&data, lineno, 43),
-                 sl_la_matrix_get(&data, lineno, 44),
-                 sl_la_matrix_get(&data, lineno, 45),
-                 sl_la_matrix_get(&data, lineno, 46),
-                 sl_la_matrix_get(&data, lineno, 47),
-                 sl_la_matrix_get(&data, lineno, 48),
-                 sl_la_matrix_get(&data, lineno, 49),
-                 sl_la_matrix_get(&data, lineno, 50),
-                 sl_la_matrix_get(&data, lineno, 51),
-                 sl_la_matrix_get(&data, lineno, 52),
-                 sl_la_matrix_get(&data, lineno, 53),
-                 sl_la_matrix_get(&data, lineno, 54),
-                 sl_la_matrix_get(&data, lineno, 55),
-                 sl_la_matrix_get(&data, lineno, 56),
-                 &label) == EOF) {
+      if (EOF == sscanf((const char*)line->data,
+                        ("%f" SL_REPEAT_56(",%f") ",%d"),
+                        sl_la_matrix_get(&data, lineno, 0),
+                        sl_la_matrix_get(&data, lineno, 1),
+                        sl_la_matrix_get(&data, lineno, 2),
+                        sl_la_matrix_get(&data, lineno, 3),
+                        sl_la_matrix_get(&data, lineno, 4),
+                        sl_la_matrix_get(&data, lineno, 5),
+                        sl_la_matrix_get(&data, lineno, 6),
+                        sl_la_matrix_get(&data, lineno, 7),
+                        sl_la_matrix_get(&data, lineno, 8),
+                        sl_la_matrix_get(&data, lineno, 9),
+                        sl_la_matrix_get(&data, lineno, 10),
+                        sl_la_matrix_get(&data, lineno, 11),
+                        sl_la_matrix_get(&data, lineno, 12),
+                        sl_la_matrix_get(&data, lineno, 13),
+                        sl_la_matrix_get(&data, lineno, 14),
+                        sl_la_matrix_get(&data, lineno, 15),
+                        sl_la_matrix_get(&data, lineno, 16),
+                        sl_la_matrix_get(&data, lineno, 17),
+                        sl_la_matrix_get(&data, lineno, 18),
+                        sl_la_matrix_get(&data, lineno, 19),
+                        sl_la_matrix_get(&data, lineno, 20),
+                        sl_la_matrix_get(&data, lineno, 21),
+                        sl_la_matrix_get(&data, lineno, 22),
+                        sl_la_matrix_get(&data, lineno, 23),
+                        sl_la_matrix_get(&data, lineno, 24),
+                        sl_la_matrix_get(&data, lineno, 25),
+                        sl_la_matrix_get(&data, lineno, 26),
+                        sl_la_matrix_get(&data, lineno, 27),
+                        sl_la_matrix_get(&data, lineno, 28),
+                        sl_la_matrix_get(&data, lineno, 29),
+                        sl_la_matrix_get(&data, lineno, 30),
+                        sl_la_matrix_get(&data, lineno, 31),
+                        sl_la_matrix_get(&data, lineno, 32),
+                        sl_la_matrix_get(&data, lineno, 33),
+                        sl_la_matrix_get(&data, lineno, 34),
+                        sl_la_matrix_get(&data, lineno, 35),
+                        sl_la_matrix_get(&data, lineno, 36),
+                        sl_la_matrix_get(&data, lineno, 37),
+                        sl_la_matrix_get(&data, lineno, 38),
+                        sl_la_matrix_get(&data, lineno, 39),
+                        sl_la_matrix_get(&data, lineno, 40),
+                        sl_la_matrix_get(&data, lineno, 41),
+                        sl_la_matrix_get(&data, lineno, 42),
+                        sl_la_matrix_get(&data, lineno, 43),
+                        sl_la_matrix_get(&data, lineno, 44),
+                        sl_la_matrix_get(&data, lineno, 45),
+                        sl_la_matrix_get(&data, lineno, 46),
+                        sl_la_matrix_get(&data, lineno, 47),
+                        sl_la_matrix_get(&data, lineno, 48),
+                        sl_la_matrix_get(&data, lineno, 49),
+                        sl_la_matrix_get(&data, lineno, 50),
+                        sl_la_matrix_get(&data, lineno, 51),
+                        sl_la_matrix_get(&data, lineno, 52),
+                        sl_la_matrix_get(&data, lineno, 53),
+                        sl_la_matrix_get(&data, lineno, 54),
+                        sl_la_matrix_get(&data, lineno, 55),
+                        sl_la_matrix_get(&data, lineno, 56),
+                        &label)) {
         SL_LOG_ERROR("failed parsing CSV line %d", lineno);
         break;
       }
       classes[lineno] = label > 0;
-
       ++lineno;
     }
+
     sl_string_delete(&content);
-    all_ok = (lineno == data.rows);
+
+    if (lineno != data.rows) {
+      SL_LOG_ERROR("expected %d samples but parsed %d", data.rows, lineno);
+      goto done;
+    }
   }
+
+  const size_t n_rows = (size_t)data.rows;
+  const size_t n_cols = (size_t)data.cols;
+
+  struct sl_ds_dataset dataset = {
+      .type = "sparse",
+      .name = "spambase",
+      .n_dims = 2,
+  };
+  strcpy(dataset.path, output_dir);
+  dataset.dim_size[0] = n_rows;
+  dataset.dim_size[1] = n_cols;
+
+  if (!sl_ds_append(&dataset, &data) || !sl_ds_finalize(&dataset)) {
+    SL_LOG_ERROR("failed writing spambase dataset to %s", output_dir);
+    goto done;
+  }
+
+  all_ok = true;
+done:
+  sl_la_matrix_destroy(&data);
+  return all_ok;
+}
+
+// RCV1: A New Benchmark Collection for Text Categorization Research.
+// David D. Lewis et al.
+// https://jmlr.csail.mit.edu/papers/volume5/lewis04a/lewis04a.pdf
+// 2024-06-22
+//
+// http://www.ai.mit.edu/projects/jmlr/papers/volume5/lewis04a/lyrl2004_rcv1v2_README.htm
+// 2024-06-23
+bool rcv1(const struct sl_args args[const static 1]) {
+  if (sl_args_count_positional(args) != 3) {
+    SL_LOG_ERROR("too few arguments to RCV1 extractor");
+    return false;
+  }
+
+  bool all_ok = false;
+
+  const char* const dataset_dir = sl_args_get_positional(args, 1);
+  const char* const output_dir = sl_args_get_positional(args, 2);
+  const bool verbose = sl_args_parse_flag(args, "-v");
 
   if (verbose) {
-    sl_la_matrix_print(stdout, &data);
+    SL_LOG_INFO("reading RCV1 dataset from '%s', writing dataset to '%s'",
+                dataset_dir,
+                output_dir);
   }
-
-  const double frob_norm = sl_la_matrix_frobenius_norm(&data);
-  if (round(frob_norm) != 47462) {
-    SL_LOG_ERROR("spamdata dataset with unexpected Frobenius norm %.3f",
-                 frob_norm);
-  } else {
-    all_ok = true;
-  }
-
-  struct sl_ml_svm svm = {
-      .w = (struct sl_la_vector){.size = data.cols, .data = (float[57]){0}},
-      .batch_size = 4,
-      .n_epochs = 2,
-      .learning_rate = 1e-9f,
-  };
-
-  struct sl_la_matrix test_data = {
-      .rows = 400,
-      .cols = data.cols,
-  };
-  int test_classes[400] = {0};
-
-  struct sl_la_matrix train_data = {
-      .rows = data.rows - test_data.rows,
-      .cols = data.cols,
-  };
-  int train_classes[SL_ARRAY_LEN(classes) - SL_ARRAY_LEN(test_classes)] = {0};
-
-  sl_ml_random_train_test_split(&data,
-                                &train_data,
-                                &test_data,
-                                classes,
-                                train_classes,
-                                test_classes);
-
-  sl_ml_minmax_rescale(&train_data, -1, 1);
-  sl_ml_svm_linear_fit(&svm, &train_data, train_classes);
-
-  struct sl_ml_classification report = {0};
-  for (int i = 0; i < test_data.rows; ++i) {
-    struct sl_la_vector x = sl_la_matrix_row_view(&test_data, i);
-    sl_ml_classification_update(&report,
-                                test_classes[i],
-                                sl_ml_svm_predict(&svm, &x));
-  }
-  SL_LOG_INFO("spambase dataset, random test set, linear SVM");
-  sl_ml_classification_print(&report);
-
-  sl_la_matrix_destroy(&data);
 
   return all_ok;
 }
 
 void print_usage(const struct sl_args args[const static 1]) {
   SL_LOG_ERROR(("usage: %s cifar_to_png dataset_path output_path [-v]"
-                "usage: %s spambase dataset_path output_path [-v]"),
+                "usage: %s spambase dataset_path output_path [-v]"
+                "usage: %s rcv1 dataset_path output_path [-v]"),
+               args->argv[0],
                args->argv[0],
                args->argv[0]);
 }
@@ -347,6 +352,8 @@ int main(int argc, char* const argv[argc + 1]) {
       ok = cifar_to_png(&args);
     } else if (strcmp(command, "spambase") == 0) {
       ok = spambase(&args);
+    } else if (strcmp(command, "rcv1") == 0) {
+      ok = rcv1(&args);
     } else {
       SL_LOG_ERROR("unknown command %s", command);
     }

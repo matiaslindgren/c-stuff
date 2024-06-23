@@ -1,0 +1,8 @@
+name: large1
+type: dense
+size: 10000000
+dims: 4
+dim0: 10
+dim1: 15625
+dim2: 3125
+dim3: 64
