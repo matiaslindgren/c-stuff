@@ -356,8 +356,15 @@ int test_read_write_read(const bool verbose, const char* img0_path) {
   if (verbose) {
     sl_png_dump_img_meta(stdout, img0);
   }
-  const char* img1_path = "/tmp/sl_test.png";
+
+  const char* tmpdir = getenv("SL_TMP_DIR");
+  assert(tmpdir);
+  char img1_path[200] = {0};
+  assert(
+      0 <
+      snprintf(img1_path, SL_ARRAY_LEN(img1_path), "%s/sl_test.png", tmpdir));
   assert(sl_png_write_image(img0, img1_path));
+
   struct sl_png_image img1 = sl_png_read_image(img1_path);
   if (img1.data.size != img0.data.size) {
     fprintf(stderr,

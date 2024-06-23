@@ -31,6 +31,7 @@ endif
 INCLUDE_DIR := $(abspath ./include)
 SOURCE_DIR  := $(abspath ./src)
 OUTPUT_DIR  := ./build
+TMP_DIR     := $(shell mktemp --directory)
 
 # todo separate: asan, ubsan, valgrind
 DEBUG=0
@@ -79,7 +80,7 @@ RUN_TESTS := $(addprefix run_,$(TESTS_FILES))
 test: $(RUN_TESTS)
 .PHONY: $(RUN_TESTS)
 $(RUN_TESTS): run_%: $(TESTS_DIR)/%
-	$< $(TEST_ARGS)
+	@env SL_TMP_DIR=$(TMP_DIR) $< $(TEST_ARGS)
 
 TIMEOUT_CMD := $(shell which timeout)
 ifeq ($(TIMEOUT_CMD),)
