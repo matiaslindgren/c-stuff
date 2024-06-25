@@ -1,4 +1,5 @@
 name: large2
+type:   float
 layout: sparse
 size: 10
 dims: 3

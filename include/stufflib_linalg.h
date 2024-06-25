@@ -91,6 +91,10 @@ static inline float* sl_la_matrix_get_row(struct sl_la_matrix a[const static 1],
   return sl_la_matrix_get(a, row, 0);
 }
 
+static inline size_t sl_la_matrix_size(struct sl_la_matrix a[const static 1]) {
+  return ((size_t)a->rows) * ((size_t)a->cols);
+}
+
 static inline struct sl_la_vector sl_la_matrix_row_view(
     struct sl_la_matrix a[const static 1],
     const int row) {

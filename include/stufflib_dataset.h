@@ -5,9 +5,11 @@
 
 #include "stufflib_linalg.h"
 #include "stufflib_macros.h"
+#include "stufflib_misc.h"
 
 struct sl_ds_dataset {
   char layout[8];
+  char type[64];
   char name[128];
   char path[2048];
   size_t pos;
@@ -17,13 +19,17 @@ struct sl_ds_dataset {
 };
 
 bool sl_ds_is_valid(const struct sl_ds_dataset ds[const static 1]) {
+  if (!ds->layout || !ds->type || !ds->name || !ds->path || !ds->n_dims) {
+    return false;
+  }
   bool is_sparse = strcmp(ds->layout, "sparse") == 0;
   bool is_dense = strcmp(ds->layout, "dense") == 0;
   if (!is_sparse && !is_dense) {
     return false;
   }
-  if (!ds->layout || !ds->name || !ds->path || (is_dense && !ds->size) ||
-      !ds->n_dims) {
+  bool is_float = strcmp(ds->type, "float") == 0;
+  bool is_int = strcmp(ds->type, "int") == 0;
+  if (!is_float && !is_int) {
     return false;
   }
   for (int d = 0; d < ds->n_dims; ++d) {
@@ -48,18 +54,19 @@ bool sl_ds_read_metadata(struct sl_ds_dataset ds[const static 1],
                  name);
     goto done;
   }
-  strcpy(ds->path, path);
-  strcpy(ds->name, name);
 
   fp_meta = fopen(inpath, "r");
   if (!fp_meta) {
     SL_LOG_ERROR("cannot open file %s for reading", inpath);
     goto done;
   }
+  strcpy(ds->path, path);
+  strcpy(ds->name, name);
 
   if (EOF == fscanf(fp_meta,
-                    "name: %s\nlayout: %s\nsize: %zu\ndims: %d\n",
+                    "name: %s\ntype: %s\nlayout: %s\nsize: %zu\ndims: %d\n",
                     ds->name,
+                    ds->type,
                     ds->layout,
                     &(ds->size),
                     &(ds->n_dims)) ||
@@ -75,7 +82,7 @@ bool sl_ds_read_metadata(struct sl_ds_dataset ds[const static 1],
   }
 
   if (!sl_ds_is_valid(ds)) {
-    SL_LOG_ERROR("metadata read from %s/%s is invalid", path, name);
+    SL_LOG_ERROR("read metadata from %s/%s but it is invalid", path, name);
     goto done;
   }
 
@@ -116,8 +123,9 @@ bool sl_ds_write_metadata(const struct sl_ds_dataset ds[const static 1]) {
   }
 
   if (0 > fprintf(fp_meta,
-                  "name: %s\nlayout: %s\nsize: %zu\ndims: %d\n",
+                  "name: %s\ntype: %s\nlayout: %s\nsize: %zu\ndims: %d\n",
                   ds->name,
+                  ds->type,
                   ds->layout,
                   ds->size,
                   ds->n_dims)) {
@@ -140,7 +148,8 @@ done:
 }
 
 bool sl_ds_append_data(struct sl_ds_dataset ds[const static 1],
-                       const struct sl_la_matrix data[const static 1]) {
+                       void* raw_data,
+                       const size_t count) {
   FILE* fp_data = nullptr;
   FILE* fp_sparse_index = nullptr;
   bool ok = false;
@@ -168,7 +177,17 @@ bool sl_ds_append_data(struct sl_ds_dataset ds[const static 1],
     goto done;
   }
 
-  const size_t count = (size_t)data->rows * (size_t)data->cols;
+  unsigned char* data = raw_data;
+  size_t size = 0;
+  if (strcmp(ds->type, "float")) {
+    size = sizeof(float);
+  } else if (strcmp(ds->type, "int")) {
+    size = sizeof(int);
+  } else {
+    SL_LOG_ERROR("unknown type '%s'", ds->type);
+    goto done;
+  }
+
   // TODO enum
   if (strcmp(ds->layout, "sparse") == 0) {
     char sparse_index_path[256] = {0};
@@ -193,8 +212,9 @@ bool sl_ds_append_data(struct sl_ds_dataset ds[const static 1],
     size_t prev_pos = ds->pos;
     for (size_t i = 0; i < count; ++i) {
       const size_t pos = ds->pos + i;
-      if (data->data[pos]) {
-        if (1 != fwrite(data->data + pos, sizeof(float), 1, fp_data)) {
+      unsigned char* value = data + pos * size;
+      if (!sl_misc_is_zero(size, value)) {
+        if (1 != fwrite(value, size, 1, fp_data)) {
           SL_LOG_ERROR("failed appending data to %s", data_path);
           goto done;
         }
@@ -209,7 +229,7 @@ bool sl_ds_append_data(struct sl_ds_dataset ds[const static 1],
       }
     }
   } else {
-    if (count != fwrite(data->data, sizeof(float), count, fp_data)) {
+    if (count != fwrite(data, size, count, fp_data)) {
       SL_LOG_ERROR("failed appending data to %s", data_path);
       goto done;
     }
@@ -228,8 +248,7 @@ done:
   return ok;
 }
 
-bool sl_ds_read_data(struct sl_ds_dataset ds[const static 1],
-                     float data[const static 1]) {
+bool sl_ds_read_data(struct sl_ds_dataset ds[const static 1], void* raw_data) {
   FILE* fp_data = nullptr;
   FILE* fp_sparse_index = nullptr;
   bool ok = false;
@@ -249,6 +268,17 @@ bool sl_ds_read_data(struct sl_ds_dataset ds[const static 1],
   fp_data = fopen(data_path, "rb");
   if (!fp_data) {
     SL_LOG_ERROR("cannot open file %s for reading data", data_path);
+    goto done;
+  }
+
+  unsigned char* data = raw_data;
+  size_t size = 0;
+  if (strcmp(ds->type, "float")) {
+    size = sizeof(float);
+  } else if (strcmp(ds->type, "int")) {
+    size = sizeof(int);
+  } else {
+    SL_LOG_ERROR("unknown type '%s'", ds->type);
     goto done;
   }
 
@@ -281,13 +311,13 @@ bool sl_ds_read_data(struct sl_ds_dataset ds[const static 1],
         goto done;
       }
       pos += (size_t)offset;
-      if (1 != fread(data + pos, sizeof(float), 1, fp_data)) {
+      if (1 != fread(data + pos * size, size, 1, fp_data)) {
         SL_LOG_ERROR("failed reading data from %s", data_path);
         goto done;
       }
     }
   } else {
-    if (ds->size != fread(data, sizeof(float), ds->size, fp_data)) {
+    if (ds->size != fread(data, size, ds->size, fp_data)) {
       SL_LOG_ERROR("failed reading data from %s", data_path);
       goto done;
     }

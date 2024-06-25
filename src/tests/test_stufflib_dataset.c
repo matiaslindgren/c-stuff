@@ -33,6 +33,7 @@ bool test_write_metadata(const bool) {
   {
     struct sl_ds_dataset ds = {
         .layout = "dense",
+        .type = "float",
         .name = "small1",
         .size = 3,
         .n_dims = 1,
@@ -43,6 +44,7 @@ bool test_write_metadata(const bool) {
     assert(contains_str(sl_misc_tmpdir(),
                         "small1.sl_ds_meta",
                         ("name: small1\n"
+                         "type: float\n"
                          "layout: dense\n"
                          "size: 3\n"
                          "dims: 1\n"
@@ -51,6 +53,7 @@ bool test_write_metadata(const bool) {
   {
     struct sl_ds_dataset ds = {
         .layout = "dense",
+        .type = "float",
         .name = "small2",
         .size = 3,
         .n_dims = 3,
@@ -61,6 +64,7 @@ bool test_write_metadata(const bool) {
     assert(contains_str(sl_misc_tmpdir(),
                         "small2.sl_ds_meta",
                         ("name: small2\n"
+                         "type: float\n"
                          "layout: dense\n"
                          "size: 3\n"
                          "dims: 3\n"
@@ -71,6 +75,7 @@ bool test_write_metadata(const bool) {
   {
     struct sl_ds_dataset ds = {
         .layout = "dense",
+        .type = "float",
         .name = "large1",
         .size = 10'000'000,
         .n_dims = 4,
@@ -81,6 +86,7 @@ bool test_write_metadata(const bool) {
     assert(contains_str(sl_misc_tmpdir(),
                         "large1.sl_ds_meta",
                         ("name: large1\n"
+                         "type: float\n"
                          "layout: dense\n"
                          "size: 10000000\n"
                          "dims: 4\n"
@@ -98,9 +104,11 @@ bool test_read_metadata(const bool) {
     assert(sl_ds_read_metadata(&ds, "./test-data/dataset", "small1"));
     assert(ds.path);
     assert(ds.name);
+    assert(ds.type);
     assert(ds.layout);
     assert(strcmp(ds.path, "./test-data/dataset") == 0);
     assert(strcmp(ds.name, "small1") == 0);
+    assert(strcmp(ds.type, "float") == 0);
     assert(strcmp(ds.layout, "dense") == 0);
     assert(ds.size == 3);
     assert(ds.n_dims == 1);
@@ -112,9 +120,11 @@ bool test_read_metadata(const bool) {
     assert(sl_ds_read_metadata(&ds, "./test-data/dataset", "small2"));
     assert(ds.path);
     assert(ds.name);
+    assert(ds.type);
     assert(ds.layout);
     assert(strcmp(ds.path, "./test-data/dataset") == 0);
     assert(strcmp(ds.name, "small2") == 0);
+    assert(strcmp(ds.type, "float") == 0);
     assert(strcmp(ds.layout, "dense") == 0);
     assert(ds.size == 3);
     assert(ds.n_dims == 3);
@@ -130,9 +140,11 @@ bool test_read_metadata(const bool) {
     assert(sl_ds_read_metadata(&ds, "./test-data/dataset", "large1"));
     assert(ds.path);
     assert(ds.name);
+    assert(ds.type);
     assert(ds.layout);
     assert(strcmp(ds.path, "./test-data/dataset") == 0);
     assert(strcmp(ds.name, "large1") == 0);
+    assert(strcmp(ds.type, "float") == 0);
     assert(strcmp(ds.layout, "dense") == 0);
     assert(ds.size == 10'000'000);
     assert(ds.n_dims == 4);
@@ -150,9 +162,11 @@ bool test_read_metadata(const bool) {
     assert(sl_ds_read_metadata(&ds, "./test-data/dataset", "large2"));
     assert(ds.path);
     assert(ds.name);
+    assert(ds.type);
     assert(ds.layout);
     assert(strcmp(ds.path, "./test-data/dataset") == 0);
     assert(strcmp(ds.name, "large2") == 0);
+    assert(strcmp(ds.type, "float") == 0);
     assert(strcmp(ds.layout, "sparse") == 0);
     assert(ds.size == 10);
     assert(ds.n_dims == 3);
@@ -170,6 +184,7 @@ bool test_append_data(const bool) {
   {
     struct sl_ds_dataset ds = {
         .layout = "dense",
+        .type = "float",
         .name = "small3",
         .size = 12,
         .n_dims = 2,
@@ -182,7 +197,7 @@ bool test_append_data(const bool) {
         .cols = 3,
         .data = (float[]){2, -7, 3, 7, 1, -5, -3, 9, -5, -1, 6, -1},
     };
-    assert(sl_ds_append_data(&ds, &data));
+    assert(sl_ds_append_data(&ds, data.data, sl_la_matrix_size(&data)));
     assert(ds.pos == 12);
 
     unsigned char raw[] = {
@@ -200,6 +215,7 @@ bool test_append_data(const bool) {
   {
     struct sl_ds_dataset ds = {
         .layout = "sparse",
+        .type = "float",
         .name = "small4",
         .n_dims = 2,
         .dim_size = {4, 3},
@@ -212,7 +228,7 @@ bool test_append_data(const bool) {
         .data = (float[]){0, 0, 0, 5, 0, 0, 0, 0, 0, 0, -10, 0},
     };
 
-    assert(sl_ds_append_data(&ds, &data));
+    assert(sl_ds_append_data(&ds, data.data, sl_la_matrix_size(&data)));
     assert(ds.size == 2);
     assert(ds.pos == 12);
 
@@ -237,6 +253,7 @@ bool test_read_data(const bool) {
   {
     struct sl_ds_dataset ds = {
         .layout = "dense",
+        .type = "float",
         .name = "small3",
         .path = "./test-data/dataset",
         .size = 2,
@@ -251,6 +268,7 @@ bool test_read_data(const bool) {
   {
     struct sl_ds_dataset ds = {
         .layout = "sparse",
+        .type = "float",
         .name = "small3",
         .path = "./test-data/dataset",
         .size = 2,

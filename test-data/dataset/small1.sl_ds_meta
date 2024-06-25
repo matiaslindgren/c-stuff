@@ -1,4 +1,5 @@
 name: small1
+type:   float
 layout: dense
 size: 3
 dims: 1

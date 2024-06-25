@@ -288,6 +288,7 @@ bool spambase(const struct sl_args args[const static 1]) {
 
   struct sl_ds_dataset dataset = {
       .layout = "sparse",
+      .type = "float",
       .name = "spambase",
       .n_dims = 2,
   };
@@ -295,7 +296,8 @@ bool spambase(const struct sl_args args[const static 1]) {
   dataset.dim_size[0] = n_rows;
   dataset.dim_size[1] = n_cols;
 
-  if (!sl_ds_append_data(&dataset, &data) || !sl_ds_write_metadata(&dataset)) {
+  if (!sl_ds_append_data(&dataset, data.data, sl_la_matrix_size(&data)) ||
+      !sl_ds_write_metadata(&dataset)) {
     SL_LOG_ERROR("failed writing spambase dataset to %s", output_dir);
     goto done;
   }

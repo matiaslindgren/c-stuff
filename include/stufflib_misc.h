@@ -82,4 +82,13 @@ static inline const char* sl_misc_tmpdir() {
   return tmpdir;
 }
 
+bool sl_misc_is_zero(size_t count, unsigned char data[count]) {
+  for (size_t i = 0; i < count; ++i) {
+    if (data[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
 #endif  // SL_MISC_H_INCLUDED

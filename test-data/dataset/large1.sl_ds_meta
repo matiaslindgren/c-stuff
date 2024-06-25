@@ -1,8 +1,9 @@
-name: large1
+name:   large1
+type:   float
 layout: dense
-size: 10000000
-dims: 4
-dim0: 10
-dim1: 15625
-dim2: 3125
-dim3: 64
+size:   10000000
+dims:   4
+dim0:   10
+dim1:   15625
+dim2:   3125
+dim3:   64
