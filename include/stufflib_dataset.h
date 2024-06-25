@@ -228,4 +228,80 @@ done:
   return ok;
 }
 
+bool sl_ds_read_data(struct sl_ds_dataset ds[const static 1],
+                     float data[const static 1]) {
+  FILE* fp_data = nullptr;
+  FILE* fp_sparse_index = nullptr;
+  bool ok = false;
+
+  char data_path[256] = {0};
+  if (0 > snprintf(data_path,
+                   SL_ARRAY_LEN(data_path),
+                   "%s/%s.sl_ds_data",
+                   ds->path,
+                   ds->name)) {
+    SL_LOG_ERROR("failed formatting dataset path with prefix %s/%s",
+                 ds->path,
+                 ds->name);
+    goto done;
+  }
+
+  fp_data = fopen(data_path, "rb");
+  if (!fp_data) {
+    SL_LOG_ERROR("cannot open file %s for reading data", data_path);
+    goto done;
+  }
+
+  // TODO enum
+  if (strcmp(ds->type, "sparse") == 0) {
+    char sparse_index_path[256] = {0};
+    if (0 > snprintf(sparse_index_path,
+                     SL_ARRAY_LEN(sparse_index_path),
+                     "%s/%s.sl_ds_sparse_index",
+                     ds->path,
+                     ds->name)) {
+      SL_LOG_ERROR("failed formatting sparse index path with prefix %s/%s",
+                   ds->path,
+                   ds->name);
+      goto done;
+    }
+
+    fp_sparse_index = fopen(sparse_index_path, "rb");
+    if (!fp_sparse_index) {
+      SL_LOG_ERROR("cannot open file %s for reading", sparse_index_path);
+      goto done;
+    }
+
+    size_t pos = 0;
+    for (size_t i = 0; i < ds->size; ++i) {
+      int offset = -1;
+      if ((1 != fread(&offset, sizeof(int), 1, fp_sparse_index)) ||
+          offset < 0) {
+        SL_LOG_ERROR("failed reading sparse index from %s", sparse_index_path);
+        goto done;
+      }
+      pos += (size_t)offset;
+      if (1 != fread(data + pos, sizeof(float), 1, fp_data)) {
+        SL_LOG_ERROR("failed reading data from %s", data_path);
+        goto done;
+      }
+    }
+  } else {
+    if (ds->size != fread(data, sizeof(float), ds->size, fp_data)) {
+      SL_LOG_ERROR("failed reading data from %s", data_path);
+      goto done;
+    }
+  }
+
+  ok = true;
+done:
+  if (fp_data) {
+    fclose(fp_data);
+  }
+  if (fp_sparse_index) {
+    fclose(fp_sparse_index);
+  }
+  return ok;
+}
+
 #endif  // SL_DATASET_H_INCLUDED

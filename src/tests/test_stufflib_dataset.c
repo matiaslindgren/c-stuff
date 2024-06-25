@@ -6,6 +6,7 @@
 #include "stufflib_dataset.h"
 #include "stufflib_linalg.h"
 #include "stufflib_macros.h"
+#include "stufflib_math.h"
 #include "stufflib_misc.h"
 
 bool contains(const char dir[static const 1],
@@ -232,4 +233,41 @@ bool test_append_data(const bool) {
   return true;
 }
 
-SL_TEST_MAIN(test_write_dataset, test_read_dataset, test_append_data)
+bool test_read_data(const bool) {
+  {
+    struct sl_ds_dataset ds = {
+        .type = "dense",
+        .name = "small3",
+        .path = "./test-data/dataset",
+        .size = 2,
+        .n_dims = 1,
+        .dim_size = {2},
+    };
+    float data[2] = {0};
+    assert(sl_ds_read_data(&ds, data));
+    assert(sl_math_double_almost(data[0], 5, 1e-9));
+    assert(sl_math_double_almost(data[1], -10, 1e-9));
+  }
+  {
+    struct sl_ds_dataset ds = {
+        .type = "sparse",
+        .name = "small3",
+        .path = "./test-data/dataset",
+        .size = 2,
+        .n_dims = 2,
+        .dim_size = {4, 3},
+    };
+    float expected[12] = {0, 0, 0, 5, 0, 0, 0, 0, 0, 0, -10, 0};
+    float data[12] = {0};
+    assert(sl_ds_read_data(&ds, data));
+    for (size_t i = 0; i < ds.size; ++i) {
+      assert(sl_math_double_almost(data[i], expected[i], 1e-9));
+    }
+  }
+  return true;
+}
+
+SL_TEST_MAIN(test_write_metadata,
+             test_read_metadata,
+             test_append_data,
+             test_read_data)
