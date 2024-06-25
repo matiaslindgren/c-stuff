@@ -28,7 +28,7 @@ bool contains_str(const char dir[static const 1],
   return contains(dir, name, strlen(expected), (unsigned char*)expected);
 }
 
-bool test_write_dataset(const bool) {
+bool test_write_metadata(const bool) {
   {
     struct sl_ds_dataset ds = {
         .type = "dense",
@@ -38,7 +38,7 @@ bool test_write_dataset(const bool) {
         .dim_size = {3},
     };
     strcpy(ds.path, sl_misc_tmpdir());
-    assert(sl_ds_finalize(&ds));
+    assert(sl_ds_write_metadata(&ds));
     assert(contains_str(sl_misc_tmpdir(),
                         "small1.sl_ds_meta",
                         ("name: small1\n"
@@ -56,7 +56,7 @@ bool test_write_dataset(const bool) {
         .dim_size = {1, 1, 1},
     };
     strcpy(ds.path, sl_misc_tmpdir());
-    assert(sl_ds_finalize(&ds));
+    assert(sl_ds_write_metadata(&ds));
     assert(contains_str(sl_misc_tmpdir(),
                         "small2.sl_ds_meta",
                         ("name: small2\n"
@@ -76,7 +76,7 @@ bool test_write_dataset(const bool) {
         .dim_size = {10, 15625, 3125, 64},
     };
     strcpy(ds.path, sl_misc_tmpdir());
-    assert(sl_ds_finalize(&ds));
+    assert(sl_ds_write_metadata(&ds));
     assert(contains_str(sl_misc_tmpdir(),
                         "large1.sl_ds_meta",
                         ("name: large1\n"
@@ -91,10 +91,10 @@ bool test_write_dataset(const bool) {
   return true;
 }
 
-bool test_read_dataset(const bool) {
+bool test_read_metadata(const bool) {
   {
     struct sl_ds_dataset ds;
-    assert(sl_ds_read(&ds, "./test-data/dataset", "small1"));
+    assert(sl_ds_read_metadata(&ds, "./test-data/dataset", "small1"));
     assert(ds.path);
     assert(ds.name);
     assert(ds.type);
@@ -108,7 +108,7 @@ bool test_read_dataset(const bool) {
   }
   {
     struct sl_ds_dataset ds;
-    assert(sl_ds_read(&ds, "./test-data/dataset", "small2"));
+    assert(sl_ds_read_metadata(&ds, "./test-data/dataset", "small2"));
     assert(ds.path);
     assert(ds.name);
     assert(ds.type);
@@ -126,7 +126,7 @@ bool test_read_dataset(const bool) {
   }
   {
     struct sl_ds_dataset ds;
-    assert(sl_ds_read(&ds, "./test-data/dataset", "large1"));
+    assert(sl_ds_read_metadata(&ds, "./test-data/dataset", "large1"));
     assert(ds.path);
     assert(ds.name);
     assert(ds.type);
@@ -146,7 +146,7 @@ bool test_read_dataset(const bool) {
   }
   {
     struct sl_ds_dataset ds;
-    assert(sl_ds_read(&ds, "./test-data/dataset", "large2"));
+    assert(sl_ds_read_metadata(&ds, "./test-data/dataset", "large2"));
     assert(ds.path);
     assert(ds.name);
     assert(ds.type);
@@ -181,7 +181,7 @@ bool test_append_data(const bool) {
         .cols = 3,
         .data = (float[]){2, -7, 3, 7, 1, -5, -3, 9, -5, -1, 6, -1},
     };
-    assert(sl_ds_append(&ds, &data));
+    assert(sl_ds_append_data(&ds, &data));
     assert(ds.pos == 12);
 
     unsigned char raw[] = {
@@ -189,7 +189,7 @@ bool test_append_data(const bool) {
         0, 0, 0x80, 0x3f, 0, 0, 0xa0, 0xc0, 0, 0, 0x40, 0xc0, 0, 0, 0x10, 0x41,
         0, 0, 0xa0, 0xc0, 0, 0, 0x80, 0xbf, 0, 0, 0xc0, 0x40, 0, 0, 0x80, 0xbf};
 
-    assert(sl_ds_finalize(&ds));
+    assert(sl_ds_write_metadata(&ds));
     assert(contains(sl_misc_tmpdir(),
                     "small3.sl_ds_data",
                     SL_ARRAY_LEN(raw),
@@ -211,14 +211,14 @@ bool test_append_data(const bool) {
         .data = (float[]){0, 0, 0, 5, 0, 0, 0, 0, 0, 0, -10, 0},
     };
 
-    assert(sl_ds_append(&ds, &data));
+    assert(sl_ds_append_data(&ds, &data));
     assert(ds.size == 2);
     assert(ds.pos == 12);
 
     unsigned char raw_data[] = {0, 0, 0xa0, 0x40, 0, 0, 0x20, 0xc1};
     unsigned char raw_sparse_index[] = {0x03, 0, 0, 0, 0x07, 0, 0, 0};
 
-    assert(sl_ds_finalize(&ds));
+    assert(sl_ds_write_metadata(&ds));
     assert(contains(sl_misc_tmpdir(),
                     "small4.sl_ds_sparse_index",
                     SL_ARRAY_LEN(raw_sparse_index),

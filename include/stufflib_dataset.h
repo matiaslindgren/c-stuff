@@ -34,9 +34,9 @@ bool sl_ds_is_valid(const struct sl_ds_dataset ds[const static 1]) {
   return true;
 }
 
-bool sl_ds_read(struct sl_ds_dataset ds[const static 1],
-                const char path[const static 1],
-                const char name[const static 1]) {
+bool sl_ds_read_metadata(struct sl_ds_dataset ds[const static 1],
+                         const char path[const static 1],
+                         const char name[const static 1]) {
   FILE* fp_meta = nullptr;
   bool ok = false;
 
@@ -69,7 +69,7 @@ bool sl_ds_read(struct sl_ds_dataset ds[const static 1],
   }
   for (int d = 0; d < ds->n_dims; ++d) {
     if (EOF == fscanf(fp_meta, "dim%*d: %zu\n", ds->dim_size + d)) {
-      SL_LOG_ERROR("failed writing dimension %d to %s", d, inpath);
+      SL_LOG_ERROR("failed reading dimension %d from %s", d, inpath);
       goto done;
     }
   }
@@ -88,7 +88,7 @@ done:
   return ok;
 }
 
-bool sl_ds_finalize(const struct sl_ds_dataset ds[const static 1]) {
+bool sl_ds_write_metadata(const struct sl_ds_dataset ds[const static 1]) {
   FILE* fp_meta = nullptr;
   bool ok = false;
 
@@ -139,8 +139,8 @@ done:
   return ok;
 }
 
-bool sl_ds_append(struct sl_ds_dataset ds[const static 1],
-                  const struct sl_la_matrix data[const static 1]) {
+bool sl_ds_append_data(struct sl_ds_dataset ds[const static 1],
+                       const struct sl_la_matrix data[const static 1]) {
   FILE* fp_data = nullptr;
   FILE* fp_sparse_index = nullptr;
   bool ok = false;
@@ -164,7 +164,7 @@ bool sl_ds_append(struct sl_ds_dataset ds[const static 1],
 
   fp_data = fopen(data_path, "ab");
   if (!fp_data) {
-    SL_LOG_ERROR("cannot open file %s for appending", data_path);
+    SL_LOG_ERROR("cannot open file %s for appending data", data_path);
     goto done;
   }
 
@@ -185,7 +185,8 @@ bool sl_ds_append(struct sl_ds_dataset ds[const static 1],
 
     fp_sparse_index = fopen(sparse_index_path, "ab");
     if (!fp_sparse_index) {
-      SL_LOG_ERROR("cannot open file %s for appending", sparse_index_path);
+      SL_LOG_ERROR("cannot open file %s for appending sparse index",
+                   sparse_index_path);
       goto done;
     }
 
