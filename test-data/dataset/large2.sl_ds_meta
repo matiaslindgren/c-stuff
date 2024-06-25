@@ -1,5 +1,5 @@
 name: large2
-type: sparse
+layout: sparse
 size: 10
 dims: 3
 dim0: 1000

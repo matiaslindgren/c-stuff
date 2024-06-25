@@ -7,7 +7,7 @@
 #include "stufflib_macros.h"
 
 struct sl_ds_dataset {
-  char type[8];
+  char layout[8];
   char name[128];
   char path[2048];
   size_t pos;
@@ -17,12 +17,12 @@ struct sl_ds_dataset {
 };
 
 bool sl_ds_is_valid(const struct sl_ds_dataset ds[const static 1]) {
-  bool is_sparse = strcmp(ds->type, "sparse") == 0;
-  bool is_dense = strcmp(ds->type, "dense") == 0;
+  bool is_sparse = strcmp(ds->layout, "sparse") == 0;
+  bool is_dense = strcmp(ds->layout, "dense") == 0;
   if (!is_sparse && !is_dense) {
     return false;
   }
-  if (!ds->type || !ds->name || !ds->path || (is_dense && !ds->size) ||
+  if (!ds->layout || !ds->name || !ds->path || (is_dense && !ds->size) ||
       !ds->n_dims) {
     return false;
   }
@@ -58,9 +58,9 @@ bool sl_ds_read_metadata(struct sl_ds_dataset ds[const static 1],
   }
 
   if (EOF == fscanf(fp_meta,
-                    "name: %s\ntype: %s\nsize: %zu\ndims: %d\n",
+                    "name: %s\nlayout: %s\nsize: %zu\ndims: %d\n",
                     ds->name,
-                    ds->type,
+                    ds->layout,
                     &(ds->size),
                     &(ds->n_dims)) ||
       ds->n_dims == 0) {
@@ -116,9 +116,9 @@ bool sl_ds_write_metadata(const struct sl_ds_dataset ds[const static 1]) {
   }
 
   if (0 > fprintf(fp_meta,
-                  "name: %s\ntype: %s\nsize: %zu\ndims: %d\n",
+                  "name: %s\nlayout: %s\nsize: %zu\ndims: %d\n",
                   ds->name,
-                  ds->type,
+                  ds->layout,
                   ds->size,
                   ds->n_dims)) {
     SL_LOG_ERROR("failed writing %s", meta_path);
@@ -170,7 +170,7 @@ bool sl_ds_append_data(struct sl_ds_dataset ds[const static 1],
 
   const size_t count = (size_t)data->rows * (size_t)data->cols;
   // TODO enum
-  if (strcmp(ds->type, "sparse") == 0) {
+  if (strcmp(ds->layout, "sparse") == 0) {
     char sparse_index_path[256] = {0};
     if (0 > snprintf(sparse_index_path,
                      SL_ARRAY_LEN(sparse_index_path),
@@ -253,7 +253,7 @@ bool sl_ds_read_data(struct sl_ds_dataset ds[const static 1],
   }
 
   // TODO enum
-  if (strcmp(ds->type, "sparse") == 0) {
+  if (strcmp(ds->layout, "sparse") == 0) {
     char sparse_index_path[256] = {0};
     if (0 > snprintf(sparse_index_path,
                      SL_ARRAY_LEN(sparse_index_path),

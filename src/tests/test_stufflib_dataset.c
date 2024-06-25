@@ -32,7 +32,7 @@ bool contains_str(const char dir[static const 1],
 bool test_write_metadata(const bool) {
   {
     struct sl_ds_dataset ds = {
-        .type = "dense",
+        .layout = "dense",
         .name = "small1",
         .size = 3,
         .n_dims = 1,
@@ -43,14 +43,14 @@ bool test_write_metadata(const bool) {
     assert(contains_str(sl_misc_tmpdir(),
                         "small1.sl_ds_meta",
                         ("name: small1\n"
-                         "type: dense\n"
+                         "layout: dense\n"
                          "size: 3\n"
                          "dims: 1\n"
                          "dim0: 3\n")));
   }
   {
     struct sl_ds_dataset ds = {
-        .type = "dense",
+        .layout = "dense",
         .name = "small2",
         .size = 3,
         .n_dims = 3,
@@ -61,7 +61,7 @@ bool test_write_metadata(const bool) {
     assert(contains_str(sl_misc_tmpdir(),
                         "small2.sl_ds_meta",
                         ("name: small2\n"
-                         "type: dense\n"
+                         "layout: dense\n"
                          "size: 3\n"
                          "dims: 3\n"
                          "dim0: 1\n"
@@ -70,7 +70,7 @@ bool test_write_metadata(const bool) {
   }
   {
     struct sl_ds_dataset ds = {
-        .type = "dense",
+        .layout = "dense",
         .name = "large1",
         .size = 10'000'000,
         .n_dims = 4,
@@ -81,7 +81,7 @@ bool test_write_metadata(const bool) {
     assert(contains_str(sl_misc_tmpdir(),
                         "large1.sl_ds_meta",
                         ("name: large1\n"
-                         "type: dense\n"
+                         "layout: dense\n"
                          "size: 10000000\n"
                          "dims: 4\n"
                          "dim0: 10\n"
@@ -98,10 +98,10 @@ bool test_read_metadata(const bool) {
     assert(sl_ds_read_metadata(&ds, "./test-data/dataset", "small1"));
     assert(ds.path);
     assert(ds.name);
-    assert(ds.type);
+    assert(ds.layout);
     assert(strcmp(ds.path, "./test-data/dataset") == 0);
     assert(strcmp(ds.name, "small1") == 0);
-    assert(strcmp(ds.type, "dense") == 0);
+    assert(strcmp(ds.layout, "dense") == 0);
     assert(ds.size == 3);
     assert(ds.n_dims == 1);
     assert(ds.dim_size);
@@ -112,10 +112,10 @@ bool test_read_metadata(const bool) {
     assert(sl_ds_read_metadata(&ds, "./test-data/dataset", "small2"));
     assert(ds.path);
     assert(ds.name);
-    assert(ds.type);
+    assert(ds.layout);
     assert(strcmp(ds.path, "./test-data/dataset") == 0);
     assert(strcmp(ds.name, "small2") == 0);
-    assert(strcmp(ds.type, "dense") == 0);
+    assert(strcmp(ds.layout, "dense") == 0);
     assert(ds.size == 3);
     assert(ds.n_dims == 3);
     assert(ds.dim_size);
@@ -130,10 +130,10 @@ bool test_read_metadata(const bool) {
     assert(sl_ds_read_metadata(&ds, "./test-data/dataset", "large1"));
     assert(ds.path);
     assert(ds.name);
-    assert(ds.type);
+    assert(ds.layout);
     assert(strcmp(ds.path, "./test-data/dataset") == 0);
     assert(strcmp(ds.name, "large1") == 0);
-    assert(strcmp(ds.type, "dense") == 0);
+    assert(strcmp(ds.layout, "dense") == 0);
     assert(ds.size == 10'000'000);
     assert(ds.n_dims == 4);
     assert(ds.dim_size);
@@ -150,10 +150,10 @@ bool test_read_metadata(const bool) {
     assert(sl_ds_read_metadata(&ds, "./test-data/dataset", "large2"));
     assert(ds.path);
     assert(ds.name);
-    assert(ds.type);
+    assert(ds.layout);
     assert(strcmp(ds.path, "./test-data/dataset") == 0);
     assert(strcmp(ds.name, "large2") == 0);
-    assert(strcmp(ds.type, "sparse") == 0);
+    assert(strcmp(ds.layout, "sparse") == 0);
     assert(ds.size == 10);
     assert(ds.n_dims == 3);
     assert(ds.dim_size);
@@ -169,7 +169,7 @@ bool test_read_metadata(const bool) {
 bool test_append_data(const bool) {
   {
     struct sl_ds_dataset ds = {
-        .type = "dense",
+        .layout = "dense",
         .name = "small3",
         .size = 12,
         .n_dims = 2,
@@ -199,7 +199,7 @@ bool test_append_data(const bool) {
 
   {
     struct sl_ds_dataset ds = {
-        .type = "sparse",
+        .layout = "sparse",
         .name = "small4",
         .n_dims = 2,
         .dim_size = {4, 3},
@@ -236,7 +236,7 @@ bool test_append_data(const bool) {
 bool test_read_data(const bool) {
   {
     struct sl_ds_dataset ds = {
-        .type = "dense",
+        .layout = "dense",
         .name = "small3",
         .path = "./test-data/dataset",
         .size = 2,
@@ -250,7 +250,7 @@ bool test_read_data(const bool) {
   }
   {
     struct sl_ds_dataset ds = {
-        .type = "sparse",
+        .layout = "sparse",
         .name = "small3",
         .path = "./test-data/dataset",
         .size = 2,

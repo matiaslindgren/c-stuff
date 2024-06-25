@@ -1,5 +1,5 @@
 name: small2
-type: dense
+layout: dense
 size: 3
 dims: 3
 dim0: 1

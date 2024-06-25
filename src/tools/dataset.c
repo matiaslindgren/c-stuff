@@ -287,7 +287,7 @@ bool spambase(const struct sl_args args[const static 1]) {
   const size_t n_cols = (size_t)data.cols;
 
   struct sl_ds_dataset dataset = {
-      .type = "sparse",
+      .layout = "sparse",
       .name = "spambase",
       .n_dims = 2,
   };
