@@ -107,8 +107,8 @@ bool sl_record_write_metadata(const struct sl_record record[const static 1]) {
   char meta_path[256] = {0};
   if (!sl_misc_format_path(SL_ARRAY_LEN(meta_path),
                            meta_path,
-                           path,
-                           name,
+                           record->path,
+                           record->name,
                            "sl_record_meta")) {
     goto done;
   }
@@ -160,7 +160,8 @@ bool sl_record_append_data(struct sl_record record[const static 1],
   if (!sl_misc_format_path(SL_ARRAY_LEN(data_path),
                            data_path,
                            path,
-                           name,
+                           record->path,
+                           record->name,
                            "sl_record_data")) {
     goto done;
   }
@@ -249,7 +250,8 @@ bool sl_record_read_data(struct sl_record record[const static 1],
   if (!sl_misc_format_path(SL_ARRAY_LEN(data_path),
                            data_path,
                            path,
-                           name,
+                           record->path,
+                           record->name,
                            "sl_record_data")) {
     goto done;
   }
