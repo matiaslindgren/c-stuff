@@ -48,14 +48,11 @@ bool sl_record_read_metadata(struct sl_record record[const static 1],
   bool ok = false;
 
   char inpath[256] = {0};
-  if (0 > snprintf(inpath,
-                   SL_ARRAY_LEN(inpath),
-                   "%s/%s.sl_record_meta",
-                   path,
-                   name)) {
-    SL_LOG_ERROR("failed formatting metadata path with prefix %s/%s",
-                 path,
-                 name);
+  if (!sl_misc_format_path(SL_ARRAY_LEN(inpath),
+                           inpath,
+                           path,
+                           name,
+                           "sl_record_meta")) {
     goto done;
   }
 
@@ -109,14 +106,11 @@ bool sl_record_write_metadata(const struct sl_record record[const static 1]) {
   }
 
   char meta_path[256] = {0};
-  if (0 > snprintf(meta_path,
-                   SL_ARRAY_LEN(meta_path),
-                   "%s/%s.sl_record_meta",
-                   record->path,
-                   record->name)) {
-    SL_LOG_ERROR("failed formatting metadata path with prefix %s/%s",
-                 record->path,
-                 record->name);
+  if (!sl_misc_format_path(SL_ARRAY_LEN(meta_path),
+                           meta_path,
+                           path,
+                           name,
+                           "sl_record_meta")) {
     goto done;
   }
 
@@ -164,14 +158,11 @@ bool sl_record_append_data(struct sl_record record[const static 1],
   }
 
   char data_path[256] = {0};
-  if (0 > snprintf(data_path,
-                   SL_ARRAY_LEN(data_path),
-                   "%s/%s.sl_record_data",
-                   record->path,
-                   record->name)) {
-    SL_LOG_ERROR("failed formatting record path with prefix %s/%s",
-                 record->path,
-                 record->name);
+  if (!sl_misc_format_path(SL_ARRAY_LEN(data_path),
+                           data_path,
+                           path,
+                           name,
+                           "sl_record_data")) {
     goto done;
   }
 
@@ -195,14 +186,11 @@ bool sl_record_append_data(struct sl_record record[const static 1],
   // TODO enum
   if (strcmp(record->layout, "sparse") == 0) {
     char sparse_index_path[256] = {0};
-    if (0 > snprintf(sparse_index_path,
-                     SL_ARRAY_LEN(sparse_index_path),
-                     "%s/%s.sl_record_sparse_index",
-                     record->path,
-                     record->name)) {
-      SL_LOG_ERROR("failed formatting sparse index path with prefix %s/%s",
-                   record->path,
-                   record->name);
+    if (!sl_misc_format_path(SL_ARRAY_LEN(sparse_index_path),
+                             sparse_index_path,
+                             path,
+                             name,
+                             "sl_record_sparse_index")) {
       goto done;
     }
 
@@ -259,14 +247,11 @@ bool sl_record_read_data(struct sl_record record[const static 1],
   bool ok = false;
 
   char data_path[256] = {0};
-  if (0 > snprintf(data_path,
-                   SL_ARRAY_LEN(data_path),
-                   "%s/%s.sl_record_data",
-                   record->path,
-                   record->name)) {
-    SL_LOG_ERROR("failed formatting record path with prefix %s/%s",
-                 record->path,
-                 record->name);
+  if (!sl_misc_format_path(SL_ARRAY_LEN(data_path),
+                           data_path,
+                           path,
+                           name,
+                           "sl_record_data")) {
     goto done;
   }
 
@@ -290,14 +275,11 @@ bool sl_record_read_data(struct sl_record record[const static 1],
   // TODO enum
   if (strcmp(record->layout, "sparse") == 0) {
     char sparse_index_path[256] = {0};
-    if (0 > snprintf(sparse_index_path,
-                     SL_ARRAY_LEN(sparse_index_path),
-                     "%s/%s.sl_record_sparse_index",
-                     record->path,
-                     record->name)) {
-      SL_LOG_ERROR("failed formatting sparse index path with prefix %s/%s",
-                   record->path,
-                   record->name);
+    if (!sl_misc_format_path(SL_ARRAY_LEN(sparse_index_path),
+                             sparse_index_path,
+                             path,
+                             name,
+                             "sl_record_sparse_index")) {
       goto done;
     }
 
