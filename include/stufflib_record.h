@@ -1,5 +1,5 @@
-#ifndef SL_DATASET_H_INCLUDED
-#define SL_DATASET_H_INCLUDED
+#ifndef SL_RECORD_H_INCLUDED
+#define SL_RECORD_H_INCLUDED
 
 #include <stdio.h>
 
@@ -7,7 +7,7 @@
 #include "stufflib_macros.h"
 #include "stufflib_misc.h"
 
-struct sl_ds_dataset {
+struct sl_record {
   char layout[8];
   char type[64];
   char name[128];
@@ -18,37 +18,41 @@ struct sl_ds_dataset {
   size_t dim_size[8];
 };
 
-bool sl_ds_is_valid(const struct sl_ds_dataset ds[const static 1]) {
-  if (!ds->layout || !ds->type || !ds->name || !ds->path || !ds->n_dims) {
+bool sl_record_is_valid(const struct sl_record record[const static 1]) {
+  if (!record->layout || !record->type || !record->name || !record->path ||
+      !record->n_dims) {
     return false;
   }
-  bool is_sparse = strcmp(ds->layout, "sparse") == 0;
-  bool is_dense = strcmp(ds->layout, "dense") == 0;
+  bool is_sparse = strcmp(record->layout, "sparse") == 0;
+  bool is_dense = strcmp(record->layout, "dense") == 0;
   if (!is_sparse && !is_dense) {
     return false;
   }
-  bool is_float = strcmp(ds->type, "float") == 0;
-  bool is_int = strcmp(ds->type, "int") == 0;
+  bool is_float = strcmp(record->type, "float") == 0;
+  bool is_int = strcmp(record->type, "int") == 0;
   if (!is_float && !is_int) {
     return false;
   }
-  for (int d = 0; d < ds->n_dims; ++d) {
-    if (ds->dim_size[d] == 0) {
+  for (int d = 0; d < record->n_dims; ++d) {
+    if (record->dim_size[d] == 0) {
       return false;
     }
   }
   return true;
 }
 
-bool sl_ds_read_metadata(struct sl_ds_dataset ds[const static 1],
-                         const char path[const static 1],
-                         const char name[const static 1]) {
+bool sl_record_read_metadata(struct sl_record record[const static 1],
+                             const char path[const static 1],
+                             const char name[const static 1]) {
   FILE* fp_meta = nullptr;
   bool ok = false;
 
   char inpath[256] = {0};
-  if (0 >
-      snprintf(inpath, SL_ARRAY_LEN(inpath), "%s/%s.sl_ds_meta", path, name)) {
+  if (0 > snprintf(inpath,
+                   SL_ARRAY_LEN(inpath),
+                   "%s/%s.sl_record_meta",
+                   path,
+                   name)) {
     SL_LOG_ERROR("failed formatting metadata path with prefix %s/%s",
                  path,
                  name);
@@ -60,28 +64,28 @@ bool sl_ds_read_metadata(struct sl_ds_dataset ds[const static 1],
     SL_LOG_ERROR("cannot open file %s for reading", inpath);
     goto done;
   }
-  strcpy(ds->path, path);
-  strcpy(ds->name, name);
+  strcpy(record->path, path);
+  strcpy(record->name, name);
 
   if (EOF == fscanf(fp_meta,
                     "name: %s\ntype: %s\nlayout: %s\nsize: %zu\ndims: %d\n",
-                    ds->name,
-                    ds->type,
-                    ds->layout,
-                    &(ds->size),
-                    &(ds->n_dims)) ||
-      ds->n_dims == 0) {
+                    record->name,
+                    record->type,
+                    record->layout,
+                    &(record->size),
+                    &(record->n_dims)) ||
+      record->n_dims == 0) {
     SL_LOG_ERROR("failed reading %s", inpath);
     goto done;
   }
-  for (int d = 0; d < ds->n_dims; ++d) {
-    if (EOF == fscanf(fp_meta, "dim%*d: %zu\n", ds->dim_size + d)) {
+  for (int d = 0; d < record->n_dims; ++d) {
+    if (EOF == fscanf(fp_meta, "dim%*d: %zu\n", record->dim_size + d)) {
       SL_LOG_ERROR("failed reading dimension %d from %s", d, inpath);
       goto done;
     }
   }
 
-  if (!sl_ds_is_valid(ds)) {
+  if (!sl_record_is_valid(record)) {
     SL_LOG_ERROR("read metadata from %s/%s but it is invalid", path, name);
     goto done;
   }
@@ -95,24 +99,24 @@ done:
   return ok;
 }
 
-bool sl_ds_write_metadata(const struct sl_ds_dataset ds[const static 1]) {
+bool sl_record_write_metadata(const struct sl_record record[const static 1]) {
   FILE* fp_meta = nullptr;
   bool ok = false;
 
-  if (!sl_ds_is_valid(ds)) {
-    SL_LOG_ERROR("dataset metadata must not contain nulls");
+  if (!sl_record_is_valid(record)) {
+    SL_LOG_ERROR("record metadata must not contain nulls");
     goto done;
   }
 
   char meta_path[256] = {0};
   if (0 > snprintf(meta_path,
                    SL_ARRAY_LEN(meta_path),
-                   "%s/%s.sl_ds_meta",
-                   ds->path,
-                   ds->name)) {
+                   "%s/%s.sl_record_meta",
+                   record->path,
+                   record->name)) {
     SL_LOG_ERROR("failed formatting metadata path with prefix %s/%s",
-                 ds->path,
-                 ds->name);
+                 record->path,
+                 record->name);
     goto done;
   }
 
@@ -124,16 +128,16 @@ bool sl_ds_write_metadata(const struct sl_ds_dataset ds[const static 1]) {
 
   if (0 > fprintf(fp_meta,
                   "name: %s\ntype: %s\nlayout: %s\nsize: %zu\ndims: %d\n",
-                  ds->name,
-                  ds->type,
-                  ds->layout,
-                  ds->size,
-                  ds->n_dims)) {
+                  record->name,
+                  record->type,
+                  record->layout,
+                  record->size,
+                  record->n_dims)) {
     SL_LOG_ERROR("failed writing %s", meta_path);
     goto done;
   }
-  for (int d = 0; d < ds->n_dims; ++d) {
-    if (0 > fprintf(fp_meta, "dim%d: %zu\n", d, ds->dim_size[d])) {
+  for (int d = 0; d < record->n_dims; ++d) {
+    if (0 > fprintf(fp_meta, "dim%d: %zu\n", d, record->dim_size[d])) {
       SL_LOG_ERROR("failed writing dimension %d to %s", d, meta_path);
       goto done;
     }
@@ -147,27 +151,27 @@ done:
   return ok;
 }
 
-bool sl_ds_append_data(struct sl_ds_dataset ds[const static 1],
-                       void* raw_data,
-                       const size_t count) {
+bool sl_record_append_data(struct sl_record record[const static 1],
+                           void* raw_data,
+                           const size_t count) {
   FILE* fp_data = nullptr;
   FILE* fp_sparse_index = nullptr;
   bool ok = false;
 
-  if (!sl_ds_is_valid(ds)) {
-    SL_LOG_ERROR("dataset metadata must not contain nulls");
+  if (!sl_record_is_valid(record)) {
+    SL_LOG_ERROR("record metadata must not contain nulls");
     goto done;
   }
 
   char data_path[256] = {0};
   if (0 > snprintf(data_path,
                    SL_ARRAY_LEN(data_path),
-                   "%s/%s.sl_ds_data",
-                   ds->path,
-                   ds->name)) {
-    SL_LOG_ERROR("failed formatting dataset path with prefix %s/%s",
-                 ds->path,
-                 ds->name);
+                   "%s/%s.sl_record_data",
+                   record->path,
+                   record->name)) {
+    SL_LOG_ERROR("failed formatting record path with prefix %s/%s",
+                 record->path,
+                 record->name);
     goto done;
   }
 
@@ -179,26 +183,26 @@ bool sl_ds_append_data(struct sl_ds_dataset ds[const static 1],
 
   unsigned char* data = raw_data;
   size_t size = 0;
-  if (strcmp(ds->type, "float")) {
+  if (strcmp(record->type, "float")) {
     size = sizeof(float);
-  } else if (strcmp(ds->type, "int")) {
+  } else if (strcmp(record->type, "int")) {
     size = sizeof(int);
   } else {
-    SL_LOG_ERROR("unknown type '%s'", ds->type);
+    SL_LOG_ERROR("unknown type '%s'", record->type);
     goto done;
   }
 
   // TODO enum
-  if (strcmp(ds->layout, "sparse") == 0) {
+  if (strcmp(record->layout, "sparse") == 0) {
     char sparse_index_path[256] = {0};
     if (0 > snprintf(sparse_index_path,
                      SL_ARRAY_LEN(sparse_index_path),
-                     "%s/%s.sl_ds_sparse_index",
-                     ds->path,
-                     ds->name)) {
+                     "%s/%s.sl_record_sparse_index",
+                     record->path,
+                     record->name)) {
       SL_LOG_ERROR("failed formatting sparse index path with prefix %s/%s",
-                   ds->path,
-                   ds->name);
+                   record->path,
+                   record->name);
       goto done;
     }
 
@@ -209,9 +213,9 @@ bool sl_ds_append_data(struct sl_ds_dataset ds[const static 1],
       goto done;
     }
 
-    size_t prev_pos = ds->pos;
+    size_t prev_pos = record->pos;
     for (size_t i = 0; i < count; ++i) {
-      const size_t pos = ds->pos + i;
+      const size_t pos = record->pos + i;
       unsigned char* value = data + pos * size;
       if (!sl_misc_is_zero(size, value)) {
         if (1 != fwrite(value, size, 1, fp_data)) {
@@ -225,7 +229,7 @@ bool sl_ds_append_data(struct sl_ds_dataset ds[const static 1],
           goto done;
         }
         prev_pos = pos;
-        ds->size += 1;
+        record->size += 1;
       }
     }
   } else {
@@ -235,7 +239,7 @@ bool sl_ds_append_data(struct sl_ds_dataset ds[const static 1],
     }
   }
 
-  ds->pos += count;
+  record->pos += count;
 
   ok = true;
 done:
@@ -248,7 +252,8 @@ done:
   return ok;
 }
 
-bool sl_ds_read_data(struct sl_ds_dataset ds[const static 1], void* raw_data) {
+bool sl_record_read_data(struct sl_record record[const static 1],
+                         void* raw_data) {
   FILE* fp_data = nullptr;
   FILE* fp_sparse_index = nullptr;
   bool ok = false;
@@ -256,12 +261,12 @@ bool sl_ds_read_data(struct sl_ds_dataset ds[const static 1], void* raw_data) {
   char data_path[256] = {0};
   if (0 > snprintf(data_path,
                    SL_ARRAY_LEN(data_path),
-                   "%s/%s.sl_ds_data",
-                   ds->path,
-                   ds->name)) {
-    SL_LOG_ERROR("failed formatting dataset path with prefix %s/%s",
-                 ds->path,
-                 ds->name);
+                   "%s/%s.sl_record_data",
+                   record->path,
+                   record->name)) {
+    SL_LOG_ERROR("failed formatting record path with prefix %s/%s",
+                 record->path,
+                 record->name);
     goto done;
   }
 
@@ -273,26 +278,26 @@ bool sl_ds_read_data(struct sl_ds_dataset ds[const static 1], void* raw_data) {
 
   unsigned char* data = raw_data;
   size_t size = 0;
-  if (strcmp(ds->type, "float")) {
+  if (strcmp(record->type, "float")) {
     size = sizeof(float);
-  } else if (strcmp(ds->type, "int")) {
+  } else if (strcmp(record->type, "int")) {
     size = sizeof(int);
   } else {
-    SL_LOG_ERROR("unknown type '%s'", ds->type);
+    SL_LOG_ERROR("unknown type '%s'", record->type);
     goto done;
   }
 
   // TODO enum
-  if (strcmp(ds->layout, "sparse") == 0) {
+  if (strcmp(record->layout, "sparse") == 0) {
     char sparse_index_path[256] = {0};
     if (0 > snprintf(sparse_index_path,
                      SL_ARRAY_LEN(sparse_index_path),
-                     "%s/%s.sl_ds_sparse_index",
-                     ds->path,
-                     ds->name)) {
+                     "%s/%s.sl_record_sparse_index",
+                     record->path,
+                     record->name)) {
       SL_LOG_ERROR("failed formatting sparse index path with prefix %s/%s",
-                   ds->path,
-                   ds->name);
+                   record->path,
+                   record->name);
       goto done;
     }
 
@@ -303,7 +308,7 @@ bool sl_ds_read_data(struct sl_ds_dataset ds[const static 1], void* raw_data) {
     }
 
     size_t pos = 0;
-    for (size_t i = 0; i < ds->size; ++i) {
+    for (size_t i = 0; i < record->size; ++i) {
       int offset = -1;
       if ((1 != fread(&offset, sizeof(int), 1, fp_sparse_index)) ||
           offset < 0) {
@@ -317,7 +322,7 @@ bool sl_ds_read_data(struct sl_ds_dataset ds[const static 1], void* raw_data) {
       }
     }
   } else {
-    if (ds->size != fread(data, size, ds->size, fp_data)) {
+    if (record->size != fread(data, size, record->size, fp_data)) {
       SL_LOG_ERROR("failed reading data from %s", data_path);
       goto done;
     }
@@ -334,4 +339,4 @@ done:
   return ok;
 }
 
-#endif  // SL_DATASET_H_INCLUDED
+#endif  // SL_RECORD_H_INCLUDED

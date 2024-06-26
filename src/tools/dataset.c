@@ -6,13 +6,13 @@
 #define SL_FILE_BUFFER_CAPACITY (1024 << 10)
 
 #include "stufflib_args.h"
-#include "stufflib_dataset.h"
 #include "stufflib_filesystem.h"
 #include "stufflib_io.h"
 #include "stufflib_linalg.h"
 #include "stufflib_macros.h"
 #include "stufflib_ml.h"
 #include "stufflib_png.h"
+#include "stufflib_record.h"
 
 bool cifar_to_png(const struct sl_args args[const static 1]) {
   // CIFAR dataset parser
@@ -286,18 +286,18 @@ bool spambase(const struct sl_args args[const static 1]) {
   const size_t n_rows = (size_t)data.rows;
   const size_t n_cols = (size_t)data.cols;
 
-  struct sl_ds_dataset dataset = {
+  struct sl_record record = {
       .layout = "sparse",
       .type = "float",
       .name = "spambase",
       .n_dims = 2,
   };
-  strcpy(dataset.path, output_dir);
-  dataset.dim_size[0] = n_rows;
-  dataset.dim_size[1] = n_cols;
+  strcpy(record.path, output_dir);
+  record.dim_size[0] = n_rows;
+  record.dim_size[1] = n_cols;
 
-  if (!sl_ds_append_data(&dataset, data.data, sl_la_matrix_size(&data)) ||
-      !sl_ds_write_metadata(&dataset)) {
+  if (!sl_record_append_data(&record, data.data, sl_la_matrix_size(&data)) ||
+      !sl_record_write_metadata(&record)) {
     SL_LOG_ERROR("failed writing spambase dataset to %s", output_dir);
     goto done;
   }
