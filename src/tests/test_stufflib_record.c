@@ -232,14 +232,10 @@ bool test_append_data(const bool) {
     assert(record.size == 2);
     assert(record.pos == 12);
 
-    unsigned char raw_data[] = {0, 0, 0xa0, 0x40, 0, 0, 0x20, 0xc1};
-    unsigned char raw_sparse_index[] = {0x03, 0, 0, 0, 0x07, 0, 0, 0};
+    unsigned char raw_data[] =
+        {0x03, 0, 0, 0, 0, 0, 0xa0, 0x40, 0x07, 0, 0, 0, 0, 0, 0x20, 0xc1};
 
     assert(sl_record_write_metadata(&record));
-    assert(contains(sl_misc_tmpdir(),
-                    "small4.sl_record_sparse_index",
-                    SL_ARRAY_LEN(raw_sparse_index),
-                    raw_sparse_index));
     assert(contains(sl_misc_tmpdir(),
                     "small4.sl_record_data",
                     SL_ARRAY_LEN(raw_data),
@@ -254,7 +250,7 @@ bool test_read_data(const bool) {
     struct sl_record record = {
         .layout = "dense",
         .type = "float",
-        .name = "small3",
+        .name = "small4",
         .path = "./test-data/record",
         .size = 2,
         .n_dims = 1,

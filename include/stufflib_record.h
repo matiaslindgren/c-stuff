@@ -147,8 +147,7 @@ done:
 bool sl_record_append_data(struct sl_record record[const static 1],
                            void* raw_data,
                            const size_t count) {
-  FILE* fp_data = nullptr;
-  FILE* fp_sparse_index = nullptr;
+  FILE* fp = nullptr;
   bool ok = false;
 
   if (!sl_record_is_valid(record)) {
@@ -156,9 +155,8 @@ bool sl_record_append_data(struct sl_record record[const static 1],
     goto done;
   }
 
-  char data_path[256] = {0};
-  if (!sl_misc_format_path(SL_ARRAY_LEN(data_path),
-                           data_path,
+  char path[256] = {0};
+  if (!sl_misc_format_path(SL_ARRAY_LEN(path),
                            path,
                            record->path,
                            record->name,
@@ -166,9 +164,9 @@ bool sl_record_append_data(struct sl_record record[const static 1],
     goto done;
   }
 
-  fp_data = fopen(data_path, "ab");
-  if (!fp_data) {
-    SL_LOG_ERROR("cannot open file %s for appending data", data_path);
+  fp = fopen(path, "ab");
+  if (!fp) {
+    SL_LOG_ERROR("cannot open file %s for appending data", path);
     goto done;
   }
 
@@ -183,37 +181,19 @@ bool sl_record_append_data(struct sl_record record[const static 1],
     goto done;
   }
 
-  // TODO enum
   if (strcmp(record->layout, "sparse") == 0) {
-    char sparse_index_path[256] = {0};
-    if (!sl_misc_format_path(SL_ARRAY_LEN(sparse_index_path),
-                             sparse_index_path,
-                             path,
-                             name,
-                             "sl_record_sparse_index")) {
-      goto done;
-    }
-
-    fp_sparse_index = fopen(sparse_index_path, "ab");
-    if (!fp_sparse_index) {
-      SL_LOG_ERROR("cannot open file %s for appending sparse index",
-                   sparse_index_path);
-      goto done;
-    }
-
     size_t prev_pos = record->pos;
     for (size_t i = 0; i < count; ++i) {
       const size_t pos = record->pos + i;
       unsigned char* value = data + pos * size;
       if (!sl_misc_is_zero(size, value)) {
-        if (1 != fwrite(value, size, 1, fp_data)) {
-          SL_LOG_ERROR("failed appending data to %s", data_path);
+        const int offset = (int)(pos - prev_pos);
+        if (1 != fwrite(&offset, sizeof(int), 1, fp)) {
+          SL_LOG_ERROR("failed appending offset to %s", path);
           goto done;
         }
-        const int offset = (int)(pos - prev_pos);
-        if (1 != fwrite(&offset, sizeof(int), 1, fp_sparse_index)) {
-          SL_LOG_ERROR("failed appending sparse index to %s",
-                       sparse_index_path);
+        if (1 != fwrite(value, size, 1, fp)) {
+          SL_LOG_ERROR("failed appending data to %s", path);
           goto done;
         }
         prev_pos = pos;
@@ -221,8 +201,8 @@ bool sl_record_append_data(struct sl_record record[const static 1],
       }
     }
   } else {
-    if (count != fwrite(data, size, count, fp_data)) {
-      SL_LOG_ERROR("failed appending data to %s", data_path);
+    if (count != fwrite(data, size, count, fp)) {
+      SL_LOG_ERROR("failed appending data to %s", path);
       goto done;
     }
   }
@@ -231,24 +211,19 @@ bool sl_record_append_data(struct sl_record record[const static 1],
 
   ok = true;
 done:
-  if (fp_data) {
-    fclose(fp_data);
-  }
-  if (fp_sparse_index) {
-    fclose(fp_sparse_index);
+  if (fp) {
+    fclose(fp);
   }
   return ok;
 }
 
 bool sl_record_read_data(struct sl_record record[const static 1],
                          void* raw_data) {
-  FILE* fp_data = nullptr;
-  FILE* fp_sparse_index = nullptr;
+  FILE* fp = nullptr;
   bool ok = false;
 
-  char data_path[256] = {0};
-  if (!sl_misc_format_path(SL_ARRAY_LEN(data_path),
-                           data_path,
+  char path[256] = {0};
+  if (!sl_misc_format_path(SL_ARRAY_LEN(path),
                            path,
                            record->path,
                            record->name,
@@ -256,9 +231,9 @@ bool sl_record_read_data(struct sl_record record[const static 1],
     goto done;
   }
 
-  fp_data = fopen(data_path, "rb");
-  if (!fp_data) {
-    SL_LOG_ERROR("cannot open file %s for reading data", data_path);
+  fp = fopen(path, "rb");
+  if (!fp) {
+    SL_LOG_ERROR("cannot open file %s for reading data", path);
     goto done;
   }
 
@@ -273,51 +248,34 @@ bool sl_record_read_data(struct sl_record record[const static 1],
     goto done;
   }
 
-  // TODO enum
   if (strcmp(record->layout, "sparse") == 0) {
-    char sparse_index_path[256] = {0};
-    if (!sl_misc_format_path(SL_ARRAY_LEN(sparse_index_path),
-                             sparse_index_path,
-                             path,
-                             name,
-                             "sl_record_sparse_index")) {
-      goto done;
-    }
-
-    fp_sparse_index = fopen(sparse_index_path, "rb");
-    if (!fp_sparse_index) {
-      SL_LOG_ERROR("cannot open file %s for reading", sparse_index_path);
-      goto done;
-    }
-
-    size_t pos = 0;
+    size_t data_pos = 0;
     for (size_t i = 0; i < record->size; ++i) {
       int offset = -1;
-      if ((1 != fread(&offset, sizeof(int), 1, fp_sparse_index)) ||
-          offset < 0) {
-        SL_LOG_ERROR("failed reading sparse index from %s", sparse_index_path);
+      if ((1 != fread(&offset, sizeof(int), 1, fp)) || offset < 0) {
+        SL_LOG_ERROR("failed reading index offset from %s at index %zu pos %zu",
+                     path,
+                     i,
+                     data_pos);
         goto done;
       }
-      pos += (size_t)offset;
-      if (1 != fread(data + pos * size, size, 1, fp_data)) {
-        SL_LOG_ERROR("failed reading data from %s", data_path);
+      data_pos += (size_t)offset;
+      if (1 != fread(data + data_pos * size, size, 1, fp)) {
+        SL_LOG_ERROR("failed reading data from %s", path);
         goto done;
       }
     }
   } else {
-    if (record->size != fread(data, size, record->size, fp_data)) {
-      SL_LOG_ERROR("failed reading data from %s", data_path);
+    if (record->size != fread(data, size, record->size, fp)) {
+      SL_LOG_ERROR("failed reading data from %s", path);
       goto done;
     }
   }
 
   ok = true;
 done:
-  if (fp_data) {
-    fclose(fp_data);
-  }
-  if (fp_sparse_index) {
-    fclose(fp_sparse_index);
+  if (fp) {
+    fclose(fp);
   }
   return ok;
 }
