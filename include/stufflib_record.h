@@ -8,8 +8,8 @@
 #include "stufflib_misc.h"
 
 struct sl_record {
-  char layout[8];
-  char type[64];
+  char layout[8];  // TODO enum
+  char type[64];   // TODO enum
   char name[128];
   char path[2048];
   size_t pos;
