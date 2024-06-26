@@ -18,23 +18,22 @@ struct sl_record {
   size_t dim_size[8];
 };
 
-bool sl_record_is_valid(const struct sl_record record[const static 1]) {
-  if (!record->layout || !record->type || !record->name || !record->path ||
-      !record->n_dims) {
+bool sl_record_is_valid(const struct sl_record r[const static 1]) {
+  if (!r->layout || !r->type || !r->name || !r->path || !r->n_dims) {
     return false;
   }
-  bool is_sparse = strcmp(record->layout, "sparse") == 0;
-  bool is_dense = strcmp(record->layout, "dense") == 0;
-  if (!is_sparse && !is_dense) {
+  bool is_sparse = strcmp(r->layout, "sparse") == 0;
+  bool is_dense = strcmp(r->layout, "dense") == 0;
+  if ((!is_sparse && !is_dense) || (is_dense && !r->size)) {
     return false;
   }
-  bool is_float = strcmp(record->type, "float") == 0;
-  bool is_int = strcmp(record->type, "int") == 0;
+  bool is_float = strcmp(r->type, "float") == 0;
+  bool is_int = strcmp(r->type, "int") == 0;
   if (!is_float && !is_int) {
     return false;
   }
-  for (int d = 0; d < record->n_dims; ++d) {
-    if (record->dim_size[d] == 0) {
+  for (int d = 0; d < r->n_dims; ++d) {
+    if (r->dim_size[d] == 0) {
       return false;
     }
   }
