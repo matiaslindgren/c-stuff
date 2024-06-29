@@ -6,6 +6,30 @@
 
 #define SL_ARRAY_LEN(a) (sizeof(a) / sizeof((a)[0]))
 
+#define SL_ASSERT_BINOP(binop, type, fmt, lhs, rhs, ...)                     \
+  do {                                                                       \
+    const type sl_assert_lhs = (type)(lhs);                                  \
+    const type sl_assert_rhs = (type)(rhs);                                  \
+    if (!(sl_assert_lhs binop sl_assert_rhs)) {                              \
+      fprintf(                                                               \
+          stderr,                                                            \
+          ("assertion failed: (" #type ")(" #lhs ") " #binop " (" #type      \
+           ")(" #rhs ") "                                                    \
+           "\n  lhs: " #lhs " = " fmt "\n  rhs: " #rhs " = " fmt             \
+           "\n  function: %s\n  file: %s\n  line: %d\n  msg: \"" __VA_ARGS__ \
+           "\"\n"),                                                          \
+          sl_assert_lhs,                                                     \
+          sl_assert_rhs,                                                     \
+          __func__,                                                          \
+          __FILE__,                                                          \
+          __LINE__);                                                         \
+      abort();                                                               \
+    }                                                                        \
+  } while (false)
+
+#define SL_ASSERT_EQ_LL(...) SL_ASSERT_BINOP(==, long long, "%lld", __VA_ARGS__)
+#define SL_ASSERT_EQ_PTR(...) SL_ASSERT_BINOP(==, void*, "%p", __VA_ARGS__)
+
 #define SL_LOG(level, ...)                             \
   do {                                                 \
     const char* const sl_log_fname = __FILE__;         \

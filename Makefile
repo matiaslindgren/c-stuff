@@ -14,7 +14,8 @@ CFLAGS   ?= \
 	-Wno-unsafe-buffer-usage \
 	-Wno-switch-default \
 	-Wno-switch-enum \
-	-Wno-double-promotion
+	-Wno-double-promotion \
+	-Wno-gnu-zero-variadic-macro-arguments
 LDFLAGS  ?= -lm -fuse-ld=lld -lc
 INCLUDES ?= ./include
 
