@@ -38,6 +38,10 @@ void sl_span_delete(struct sl_span data[static 1]) {
   *data = (struct sl_span){0};
 }
 
+static inline void sl_span_clear(struct sl_span data[const static 1]) {
+  memset(data->data, 0, data->size);
+}
+
 struct sl_span sl_span_copy(struct sl_span src[const static 1]) {
   struct sl_span dst = sl_span_create(src->size);
   if (dst.size) {
