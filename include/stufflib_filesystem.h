@@ -14,7 +14,7 @@ struct sl_span sl_fs_read_file(const char path[const static 1],
                                struct sl_span buffer[const static 1]) {
   struct sl_file f = {0};
   struct sl_span data = {0};
-  if (!sl_file_open(&f, path)) {
+  if (!sl_file_open(&f, path, "rb")) {
     goto done;
   }
   // TODO try seeking to end to get exact size,
@@ -51,7 +51,7 @@ bool sl_fs_read_int64(const char path[const static 1],
                       int64_t values[const count]) {
   bool ok = false;
   struct sl_file f = {0};
-  if (!sl_file_open(&f, path)) {
+  if (!sl_file_open(&f, path, "rb")) {
     goto done;
   }
   if (count != sl_file_read_int64(&f, count, values)) {

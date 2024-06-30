@@ -91,16 +91,4 @@ bool sl_misc_is_zero(size_t count, unsigned char data[count]) {
   return true;
 }
 
-bool sl_misc_format_path(const size_t size,
-                         char buffer[const size],
-                         const char path[const static 1],
-                         const char name[const static 1],
-                         const char suffix[const static 1]) {
-  if (snprintf(buffer, size, "%s/%s.%s", path, name, suffix) >= 5) {
-    return true;
-  }
-  SL_LOG_ERROR("failed formatting %s/%s.%s", path, name, suffix);
-  return false;
-}
-
 #endif  // SL_MISC_H_INCLUDED
