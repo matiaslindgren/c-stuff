@@ -11,18 +11,19 @@
 #include "stufflib_span.h"
 
 struct sl_file {
-  const char* path;
+  char path[1024];
   FILE* file;
 };
 
 bool sl_file_open(struct sl_file f[const static 1],
                   const char path[const static 1]) {
+  *f = (struct sl_file){0};
   f->file = fopen(path, "rb");
   if (!f->file) {
     SL_LOG_ERROR("cannot open '%s'", path);
     return false;
   }
-  f->path = path;
+  strncpy(f->path, path, SL_ARRAY_LEN(f->path));
   return true;
 }
 
