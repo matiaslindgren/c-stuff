@@ -11,6 +11,9 @@
 #include "stufflib_string.h"
 #include "stufflib_tokenizer.h"
 
+static unsigned char reader_buffer_data[1024 << 6] = {0};
+static struct sl_span reader_buffer = {0};
+
 bool concat(const struct sl_args args[const static 1]) {
   {
     const int args_count = sl_args_count_positional(args) - 1;
@@ -31,7 +34,7 @@ bool concat(const struct sl_args args[const static 1]) {
     if (!path) {
       break;
     }
-    struct sl_string content = sl_fs_read_file_utf8(path);
+    struct sl_string content = sl_fs_read_file_utf8(path, &reader_buffer);
     const bool read_ok = content.length > 0;
     if (read_ok) {
       sl_string_extend(&result, &content);
@@ -74,7 +77,7 @@ bool count(const struct sl_args args[const static 1]) {
   bool is_done = false;
 
   char* path = sl_args_get_positional(args, 2);
-  struct sl_string content = sl_fs_read_file_utf8(path);
+  struct sl_string content = sl_fs_read_file_utf8(path, &reader_buffer);
 
   struct sl_span pattern =
       sl_span_view(strlen(pattern_str), (unsigned char*)pattern_str);
@@ -119,7 +122,7 @@ bool slicelines(const struct sl_args args[const static 1]) {
 
   bool is_done = false;
 
-  struct sl_string content = sl_fs_read_file_utf8(path);
+  struct sl_string content = sl_fs_read_file_utf8(path, &reader_buffer);
   if (!content.length) {
     goto done;
   }
@@ -179,7 +182,7 @@ bool replace(const struct sl_args args[const static 1]) {
 
   bool is_done = false;
 
-  struct sl_string content = sl_fs_read_file_utf8(path);
+  struct sl_string content = sl_fs_read_file_utf8(path, &reader_buffer);
   if (!content.length) {
     goto done;
   }
@@ -248,7 +251,7 @@ bool linefreq(const struct sl_args args[const static 1]) {
   bool is_done = false;
 
   struct sl_hashmap freq = sl_hashmap_create();
-  struct sl_string content = sl_fs_read_file_utf8(path);
+  struct sl_string content = sl_fs_read_file_utf8(path, &reader_buffer);
   if (!content.length) {
     goto done;
   }
@@ -316,6 +319,8 @@ void print_usage(const struct sl_args args[const static 1]) {
 
 int main(int argc, char* const argv[argc + 1]) {
   struct sl_args args = {.argc = argc, .argv = argv};
+  reader_buffer =
+      sl_span_view(SL_ARRAY_LEN(reader_buffer_data), reader_buffer_data);
   bool ok = false;
   char* command = sl_args_get_positional(&args, 0);
   if (command) {

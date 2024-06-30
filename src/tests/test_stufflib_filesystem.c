@@ -10,13 +10,16 @@
 #include "stufflib_test_data.h"
 
 bool test_read_file(const bool verbose) {
+  unsigned char buf[128] = {0};
+  struct sl_span buffer = sl_span_view(SL_ARRAY_LEN(buf), buf);
+
   for (size_t i = 0; i < SL_ARRAY_LEN(sl_test_data_file_paths); ++i) {
     if (verbose) {
       printf("reading test file '%s'\n", sl_test_data_file_paths[i]);
     }
-    struct sl_span data = sl_fs_read_file(sl_test_data_file_paths[i]);
+    struct sl_span data = sl_fs_read_file(sl_test_data_file_paths[i], &buffer);
     assert(data.owned);
-    assert(data.size == sl_test_data_file_sizes[i]);
+    SL_ASSERT_EQ_LL(data.size, sl_test_data_file_sizes[i]);
     if (data.size > 0) {
       assert(data.data != nullptr);
     }
@@ -26,6 +29,9 @@ bool test_read_file(const bool verbose) {
 }
 
 bool test_read_file_utf8(const bool verbose) {
+  unsigned char buf[128] = {0};
+  struct sl_span buffer = sl_span_view(SL_ARRAY_LEN(buf), buf);
+
   const char* languages[] = {
       "ar", "bg",  "cs", "de",  "el", "fa", "fi", "fr",  "he",  "hi", "is",
       "ja", "ka",  "ki", "ko",  "ku", "lt", "lv", "nah", "nqo", "pl", "pt",
@@ -54,7 +60,7 @@ bool test_read_file_utf8(const bool verbose) {
     fclose(fp);
     const size_t expected_str_length = strtoull(tmp, 0, 10);
 
-    struct sl_string str = sl_fs_read_file_utf8(input_path);
+    struct sl_string str = sl_fs_read_file_utf8(input_path, &buffer);
     assert(str.length == expected_str_length);
     sl_string_delete(&str);
   }
@@ -62,6 +68,9 @@ bool test_read_file_utf8(const bool verbose) {
 }
 
 bool test_read_lines(const bool verbose) {
+  unsigned char buf[128] = {0};
+  struct sl_span buffer = sl_span_view(SL_ARRAY_LEN(buf), buf);
+
   const char* expected[] = {
       u8"# test-data/txt/wikipedia/water_fi.txt",
       u8"Vesi on huoneenlämmössä",
@@ -76,7 +85,8 @@ bool test_read_lines(const bool verbose) {
       u8"",
   };
 
-  struct sl_string str = sl_fs_read_file_utf8("./test-data/txt/lines.txt");
+  struct sl_string str =
+      sl_fs_read_file_utf8("./test-data/txt/lines.txt", &buffer);
   {
     // TODO create iterlines util
     struct sl_span newline = sl_span_view(1, (unsigned char[]){'\n'});

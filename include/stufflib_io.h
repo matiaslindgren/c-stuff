@@ -10,77 +10,56 @@
 #include "stufflib_misc.h"
 #include "stufflib_span.h"
 
-#ifndef SL_FILE_BUFFER_CAPACITY
-  #define SL_FILE_BUFFER_CAPACITY (1024 << 5)
-#endif
-
-struct sl_file_buffer {
-  const char* filename;
+struct sl_file {
+  const char* path;
   FILE* file;
-  size_t capacity;
-  struct sl_span data;
 };
 
-void sl_file_iter_read_data(struct sl_file_buffer buffer[const static 1]) {
-  buffer->data.size = fread(buffer->data.data,
-                            sizeof(unsigned char),
-                            buffer->capacity,
-                            buffer->file);
-  if (ferror(buffer->file)) {
-    SL_LOG_ERROR("failed reading %zu bytes from %s",
-                 buffer->capacity,
-                 buffer->filename);
+bool sl_file_open(struct sl_file f[const static 1],
+                  const char path[const static 1]) {
+  f->file = fopen(path, "rb");
+  if (!f->file) {
+    SL_LOG_ERROR("cannot open '%s'", path);
+    return false;
+  }
+  f->path = path;
+  return true;
+}
+
+void sl_file_close(struct sl_file f[const static 1]) {
+  if (f->file) {
+    fclose(f->file);
+    *f = (struct sl_file){0};
   }
 }
 
-void* sl_file_iter_get(struct sl_iterator iter[const static 1]) {
-  struct sl_file_buffer* buffer = iter->data;
-  return &(buffer->data);
+static inline bool sl_file_can_read(struct sl_file f[const static 1]) {
+  return f->file && !feof(f->file) && ferror(f->file) == 0;
 }
 
-void sl_file_iter_advance(struct sl_iterator iter[const static 1]) {
-  struct sl_file_buffer* buffer = iter->data;
-  sl_file_iter_read_data(buffer);
-  iter->index += buffer->data.size;
-  iter->pos += 1;
-}
-
-bool sl_file_iter_is_done(struct sl_iterator iter[const static 1]) {
-  struct sl_file_buffer* buffer = iter->data;
-  return !iter->data || ferror(buffer->file) != 0 || buffer->data.size == 0;
-}
-
-struct sl_iterator sl_file_iter_open(const char filename[const static 1]) {
-  struct sl_iterator iter = {};
-
-  FILE* file = fopen(filename, "rb");
-  if (!file) {
-    goto done;
+size_t sl_file_read(struct sl_file f[const static 1],
+                    struct sl_span buffer[const static 1]) {
+  const size_t nread =
+      fread(buffer->data, sizeof(unsigned char), buffer->size, f->file);
+  if (ferror(f->file)) {
+    SL_LOG_ERROR("failed reading %zu bytes from '%s'", buffer->size, f->path);
+    return 0;
   }
+  return nread;
+}
 
-  struct sl_file_buffer* buffer = sl_alloc(1, sizeof(struct sl_file_buffer));
-  *buffer = (struct sl_file_buffer){
-      .file = file,
-      .filename = filename,
-      .capacity = SL_FILE_BUFFER_CAPACITY,
-      .data = sl_span_create(SL_FILE_BUFFER_CAPACITY),
-  };
-  sl_file_iter_read_data(buffer);
-  iter.data = buffer;
-
+size_t sl_file_read_int64(struct sl_file f[const static 1],
+                          const size_t count,
+                          int64_t buffer[const count]) {
+  size_t pos = 0;
+  for (; pos < count && sl_file_can_read(f); ++pos) {
+    if (EOF == fscanf(f->file, " %lld", buffer + pos)) {
+      SL_LOG_ERROR("failed parsing int64 at index %zu from '%s'", pos, f->path);
+      goto done;
+    }
+  }
 done:
-  return iter;
-}
-
-void sl_file_iter_close(struct sl_iterator iter[const static 1]) {
-  if (!iter->data) {
-    return;
-  }
-  struct sl_file_buffer* buffer = iter->data;
-  fclose(buffer->file);
-  sl_span_delete(&buffer->data);
-  sl_free(iter->data);
-  iter->data = nullptr;
+  return pos;
 }
 
 #endif  // SL_IO_H_INCLUDED

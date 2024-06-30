@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define SL_FILE_BUFFER_CAPACITY (1024 << 10)
-
 #include "stufflib_args.h"
 #include "stufflib_filesystem.h"
 #include "stufflib_io.h"
@@ -13,8 +11,12 @@
 #include "stufflib_ml.h"
 #include "stufflib_png.h"
 #include "stufflib_record.h"
+#include "stufflib_span.h"
 
-bool cifar_to_png(const struct sl_args args[const static 1]) {
+static unsigned char reader_buffer_data[1024 << 6] = {0};
+static struct sl_span reader_buffer = {0};
+
+static bool cifar_to_png(const struct sl_args args[const static 1]) {
   // CIFAR dataset parser
   // Data format reference: https://www.cs.toronto.edu/~kriz/cifar.html
   // (accessed 2024-06-01)
@@ -46,7 +48,7 @@ bool cifar_to_png(const struct sl_args args[const static 1]) {
     if (verbose) {
       SL_LOG_INFO("reading metadata '%s'", filename);
     }
-    struct sl_string data = sl_fs_read_file_utf8(filename);
+    struct sl_string data = sl_fs_read_file_utf8(filename, &reader_buffer);
     // TODO create iterlines util
     struct sl_span newline = sl_span_view(1, (unsigned char[]){'\n'});
     struct sl_tokenizer newline_tokenizer =
@@ -89,7 +91,7 @@ bool cifar_to_png(const struct sl_args args[const static 1]) {
              "%s/%s",
              dataset_dir,
              batch_names[batch_num]);
-    struct sl_span data = sl_fs_read_file(filename);
+    struct sl_span data = sl_fs_read_file(filename, &reader_buffer);
     if (verbose) {
       SL_LOG_INFO("batch '%s' contains '%zu' bytes", filename, data.size);
     }
@@ -191,7 +193,7 @@ bool spambase(const struct sl_args args[const static 1]) {
       SL_LOG_INFO("reading csv file '%s'", filename);
     }
 
-    struct sl_string content = sl_fs_read_file_utf8(filename);
+    struct sl_string content = sl_fs_read_file_utf8(filename, &reader_buffer);
     // TODO create iterlines util
     struct sl_span newline = sl_span_view(1, (unsigned char[]){'\n'});
     struct sl_tokenizer newline_tokenizer =
@@ -208,6 +210,7 @@ bool spambase(const struct sl_args args[const static 1]) {
       }
 
       int label = 0;
+      // TODO maybe strof on char file reader buffer
       if (EOF == sscanf((const char*)line->data,
                         ("%f" SL_REPEAT_56(",%f") ",%d"),
                         sl_la_matrix_get(&data, lineno, 0),
@@ -347,6 +350,8 @@ void print_usage(const struct sl_args args[const static 1]) {
 
 int main(int argc, char* const argv[argc + 1]) {
   struct sl_args args = {.argc = argc, .argv = argv};
+  reader_buffer =
+      sl_span_view(SL_ARRAY_LEN(reader_buffer_data), reader_buffer_data);
   bool ok = false;
   const char* command = sl_args_get_positional(&args, 0);
   if (command) {

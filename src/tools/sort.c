@@ -31,6 +31,10 @@ char** sort_doubles(const size_t count, char* lines[count]) {
 int main(int argc, char* const argv[argc + 1]) {
   bool is_done = false;
 
+  unsigned char reader_buffer_data[1024 << 6] = {0};
+  struct sl_span reader_buffer =
+      sl_span_view(SL_ARRAY_LEN(reader_buffer_data), reader_buffer_data);
+
   struct sl_string content = {0};
   char** lines = nullptr;
   size_t num_lines = 0;
@@ -49,7 +53,7 @@ int main(int argc, char* const argv[argc + 1]) {
   }
 
   const char* path = sl_args_get_positional(&args, 1);
-  content = sl_fs_read_file_utf8(path);
+  content = sl_fs_read_file_utf8(path, &reader_buffer);
   struct sl_span newline = sl_span_view(1, (unsigned char[]){'\n'});
 
   struct sl_tokenizer newline_tokenizer =
