@@ -54,7 +54,7 @@ bool sl_fs_read_int64(const char path[const static 1],
   if (!sl_file_open(&f, path, "rb")) {
     goto done;
   }
-  if (count != sl_file_read_int64(&f, count, values)) {
+  if (count != sl_file_parse_int64(&f, count, values)) {
     goto done;
   }
   ok = true;
