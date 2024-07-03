@@ -1,0 +1,8 @@
+name:   large3
+type:   float32
+layout: dense
+size:   65536
+dims:   3
+dim0:   512
+dim1:   32
+dim2:   4

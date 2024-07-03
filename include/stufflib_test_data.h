@@ -87,7 +87,7 @@ static const size_t sl_test_data_file_sizes[] = {
     0,
     11,
     178,
-    292,
+    331,
     1,
     922,
     2'345,

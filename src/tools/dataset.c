@@ -8,9 +8,11 @@
 #include "stufflib_io.h"
 #include "stufflib_linalg.h"
 #include "stufflib_macros.h"
+#include "stufflib_misc.h"
 #include "stufflib_ml.h"
 #include "stufflib_png.h"
 #include "stufflib_record.h"
+#include "stufflib_record_writer.h"
 #include "stufflib_span.h"
 
 static unsigned char reader_buffer_data[1024 << 6] = {0};
@@ -184,7 +186,7 @@ bool spambase(const struct sl_args args[const static 1]) {
   }
 
   struct sl_la_matrix data = sl_la_matrix_create(4601, 57);
-  int classes[4601] = {0};
+  int8_t classes[4601] = {0};
 
   {
     char filename[256] = {0};
@@ -289,19 +291,39 @@ bool spambase(const struct sl_args args[const static 1]) {
   const size_t n_rows = (size_t)data.rows;
   const size_t n_cols = (size_t)data.cols;
 
-  struct sl_record record = {
+  struct sl_record record_samples = {
       .layout = "sparse",
-      .type = "float",
-      .name = "spambase",
+      .type = "float32",
+      .name = "spambase_samples",
+      .size = sl_misc_count_nonzero(sizeof(float),
+                                    n_rows * n_cols,
+                                    (void*)data.data),
       .n_dims = 2,
+      .dim_size = {n_rows, n_cols},
   };
-  strcpy(record.path, output_dir);
-  record.dim_size[0] = n_rows;
-  record.dim_size[1] = n_cols;
+  strcpy(record_samples.path, output_dir);
+  if (!(sl_record_write_metadata(&record_samples) &&
+        sl_record_write_all(&record_samples,
+                            sizeof(float) * n_rows * n_cols,
+                            (void*)(data.data)))) {
+    SL_LOG_ERROR("failed writing spambase dataset samples to '%s'", output_dir);
+    goto done;
+  }
 
-  if (!sl_record_append_data(&record, data.data, sl_la_matrix_size(&data)) ||
-      !sl_record_write_metadata(&record)) {
-    SL_LOG_ERROR("failed writing spambase dataset to %s", output_dir);
+  struct sl_record record_classes = {
+      .layout = "dense",
+      .type = "int8",
+      .name = "spambase_classes",
+      .size = SL_ARRAY_LEN(classes),
+      .n_dims = 1,
+      .dim_size = {n_rows},
+  };
+  strcpy(record_classes.path, output_dir);
+  if (!(sl_record_write_metadata(&record_classes) &&
+        sl_record_write_all(&record_classes,
+                            sizeof(classes),
+                            (void*)classes))) {
+    SL_LOG_ERROR("failed writing spambase dataset classes to '%s'", output_dir);
     goto done;
   }
 

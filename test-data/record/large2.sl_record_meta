@@ -1,8 +1,8 @@
-name: large2
-type:   float
+name:   large2
+type:   float32
 layout: sparse
-size: 10
-dims: 3
-dim0: 1000
-dim1: 2000
-dim2: 3000
+size:   10
+dims:   3
+dim0:   1000
+dim1:   2000
+dim2:   3000

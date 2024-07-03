@@ -91,4 +91,12 @@ bool sl_misc_is_zero(size_t count, unsigned char data[count]) {
   return true;
 }
 
+size_t sl_misc_count_nonzero(size_t size, size_t count, unsigned char* data) {
+  size_t n = 0;
+  for (size_t i = 0; i < count; ++i) {
+    n += sl_misc_is_zero(size, data + i * size);
+  }
+  return n;
+}
+
 #endif  // SL_MISC_H_INCLUDED

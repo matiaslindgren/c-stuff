@@ -5,6 +5,7 @@
 #define SL_MAX(x, y) ((x) < (y) ? (y) : (x))
 
 #define SL_ARRAY_LEN(a) (sizeof(a) / sizeof((a)[0]))
+#define SL_STR_EQ(a, b) (strcmp((a), (b)) == 0)
 
 #define SL_ASSERT_BINOP(binop, type, fmt, lhs, rhs, ...)                     \
   do {                                                                       \

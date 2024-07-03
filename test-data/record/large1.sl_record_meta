@@ -1,5 +1,5 @@
 name:   large1
-type:   float
+type:   float32
 layout: dense
 size:   10000000
 dims:   4

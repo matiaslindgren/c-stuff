@@ -13,18 +13,14 @@ struct sl_file {
   FILE* file;
 };
 
-bool sl_file_format_path(struct sl_file f[const static 1],
+bool sl_file_format_path(const size_t bufsize,
+                         char buffer[const bufsize],
                          const char path[const static 1],
                          const char name[const static 1],
                          const char suffix[const static 1]) {
-  memset(f->path, 0, SL_ARRAY_LEN(f->path));
+  memset(buffer, 0, bufsize);
   if (path[0] && name[0] &&
-      3 <= snprintf(f->path,
-                    SL_ARRAY_LEN(f->path),
-                    "%s/%s%s",
-                    path,
-                    name,
-                    suffix)) {
+      3 <= snprintf(buffer, bufsize, "%s/%s%s", path, name, suffix)) {
     return true;
   }
   return false;
@@ -33,13 +29,13 @@ bool sl_file_format_path(struct sl_file f[const static 1],
 bool sl_file_open(struct sl_file f[const static 1],
                   const char path[const static 1],
                   const char mode[const static 1]) {
-  *f = (struct sl_file){0};
   f->file = fopen(path, mode);
   if (!f->file) {
     // TODO no logging from base libraries
     SL_LOG_ERROR("cannot open '%s'", path);
     return false;
   }
+  memset(f->path, 0, SL_ARRAY_LEN(f->path));
   strncpy(f->path, path, SL_ARRAY_LEN(f->path));
   return true;
 }
@@ -66,9 +62,9 @@ size_t sl_file_read(struct sl_file f[const static 1],
   return nread;
 }
 
-size_t sl_file_read_int64(struct sl_file f[const static 1],
-                          const size_t count,
-                          int64_t buffer[const count]) {
+size_t sl_file_parse_int64(struct sl_file f[const static 1],
+                           const size_t count,
+                           int64_t buffer[const count]) {
   size_t pos = 0;
   for (; pos < count && sl_file_can_read(f); ++pos) {
     if (EOF == fscanf(f->file, " %lld", buffer + pos)) {

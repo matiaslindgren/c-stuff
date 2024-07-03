@@ -1,6 +1,6 @@
-name: small1
-type:   float
+name:   small1
+type:   float32
 layout: dense
-size: 3
-dims: 1
-dim0: 3
+size:   3
+dims:   1
+dim0:   3

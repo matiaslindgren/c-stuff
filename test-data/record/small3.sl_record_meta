@@ -1,0 +1,7 @@
+name: small3
+type: float32
+layout: sparse
+size: 3
+dims: 2
+dim0: 4
+dim1: 3

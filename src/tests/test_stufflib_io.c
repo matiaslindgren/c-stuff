@@ -9,6 +9,24 @@
 #include "stufflib_span.h"
 #include "stufflib_test_data.h"
 
+bool test_format_path(const bool) {
+  char buffer[1024] = {0};
+  const size_t bufsize = SL_ARRAY_LEN(buffer);
+
+  assert(sl_file_format_path(bufsize, buffer, "/a/bbb/c1234", "d", ".txt"));
+  SL_ASSERT_EQ_STR(buffer, "/a/bbb/c1234/d.txt");
+  assert(!sl_file_format_path(bufsize, buffer, "", "b", ".c"));
+  SL_ASSERT_EQ_STR(buffer, "");
+  assert(!sl_file_format_path(bufsize, buffer, "a", "", ".c"));
+  SL_ASSERT_EQ_STR(buffer, "");
+  assert(sl_file_format_path(bufsize, buffer, "a", "b", ""));
+  SL_ASSERT_EQ_STR(buffer, "a/b");
+  assert(sl_file_format_path(bufsize, buffer, "a", "b", ".c"));
+  SL_ASSERT_EQ_STR(buffer, "a/b.c");
+
+  return true;
+}
+
 bool test_open_file(const bool) {
   const char* files[] = {
       "./test-data/txt/empty",
@@ -20,15 +38,13 @@ bool test_open_file(const bool) {
 
   for (size_t i = 0; i < SL_ARRAY_LEN(files); ++i) {
     struct sl_file file = {0};
-    assert(sl_file_open(&file, files[i]));
+    assert(sl_file_open(&file, files[i], "rb"));
     assert(file.file);
-    assert(file.path);
     assert(sl_file_can_read(&file));
     SL_ASSERT_EQ_STR(file.path, files[i]);
     sl_file_close(&file);
     assert(!sl_file_can_read(&file));
     assert(!file.file);
-    assert(!file.path);
   }
 
   return true;
@@ -36,7 +52,7 @@ bool test_open_file(const bool) {
 
 bool test_read_single_char(const bool) {
   struct sl_file file = {0};
-  assert(sl_file_open(&file, "./test-data/txt/one.txt"));
+  assert(sl_file_open(&file, "./test-data/txt/one.txt", "rb"));
   assert(sl_file_can_read(&file));
 
   unsigned char buf[8] = {0};
@@ -56,7 +72,7 @@ bool test_read_single_char(const bool) {
 
 bool test_read_empty_file(const bool) {
   struct sl_file file = {0};
-  assert(sl_file_open(&file, "./test-data/txt/empty"));
+  assert(sl_file_open(&file, "./test-data/txt/empty", "rb"));
   assert(!ferror(file.file));
 
   unsigned char buf[1] = {0};
@@ -75,7 +91,7 @@ bool test_read_entire_file(const bool) {
 
   for (size_t i = 0; i < SL_ARRAY_LEN(sl_test_data_file_paths); ++i) {
     struct sl_file file = {0};
-    assert(sl_file_open(&file, sl_test_data_file_paths[i]));
+    assert(sl_file_open(&file, sl_test_data_file_paths[i], "rb"));
     assert(sl_file_can_read(&file));
     size_t total_size = 0;
     while (sl_file_can_read(&file)) {
@@ -90,14 +106,14 @@ bool test_read_entire_file(const bool) {
   return true;
 }
 
-bool test_read_numbers(const bool) {
+bool test_parse_numbers(const bool) {
   struct sl_file file = {0};
-  assert(sl_file_open(&file, "./test-data/txt/numbers.txt"));
+  assert(sl_file_open(&file, "./test-data/txt/numbers.txt", "rb"));
   assert(sl_file_can_read(&file));
 
   int64_t numbers[100] = {0};
   const size_t len = SL_ARRAY_LEN(numbers);
-  SL_ASSERT_EQ_LL(sl_file_read_int64(&file, len, numbers), len);
+  SL_ASSERT_EQ_LL(sl_file_parse_int64(&file, len, numbers), len);
   for (size_t i = 0; i < len; ++i) {
     SL_ASSERT_EQ_LL(numbers[i], i - 50);
   }
@@ -106,8 +122,9 @@ bool test_read_numbers(const bool) {
   return true;
 }
 
-SL_TEST_MAIN(test_open_file,
+SL_TEST_MAIN(test_format_path,
+             test_open_file,
              test_read_single_char,
              test_read_empty_file,
              test_read_entire_file,
-             test_read_numbers)
+             test_parse_numbers)
