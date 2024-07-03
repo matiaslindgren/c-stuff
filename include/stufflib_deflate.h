@@ -14,6 +14,7 @@
 //    http://www.libpng.org/pub/png/spec/1.2/PNG-Contents.html,
 //    accessed 2023-01-18
 #include <assert.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 

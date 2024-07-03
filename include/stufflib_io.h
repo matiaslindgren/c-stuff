@@ -1,5 +1,7 @@
 #ifndef SL_IO_H_INCLUDED
 #define SL_IO_H_INCLUDED
+#include <inttypes.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -67,7 +69,7 @@ size_t sl_file_parse_int64(struct sl_file f[const static 1],
                            int64_t buffer[const count]) {
   size_t pos = 0;
   for (; pos < count && sl_file_can_read(f); ++pos) {
-    if (EOF == fscanf(f->file, " %lld", buffer + pos)) {
+    if (EOF == fscanf(f->file, " %" PRId64, buffer + pos)) {
       SL_LOG_ERROR("failed parsing int64 at index %zu from '%s'", pos, f->path);
       goto done;
     }

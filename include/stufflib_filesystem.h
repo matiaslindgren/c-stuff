@@ -1,5 +1,6 @@
 #ifndef SL_FILESYSTEM_H_INCLUDED
 #define SL_FILESYSTEM_H_INCLUDED
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

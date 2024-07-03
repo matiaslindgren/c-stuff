@@ -10,6 +10,7 @@
 
 #include <inttypes.h>
 #include <limits.h>
+#include <stdint.h>
 #include <string.h>
 
 #include "stufflib_macros.h"
