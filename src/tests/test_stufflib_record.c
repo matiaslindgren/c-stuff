@@ -585,6 +585,78 @@ bool test_write_data(const bool) {
   return true;
 }
 
+bool test_sparse_write_read(const bool) {
+  {
+    struct sl_record record = {
+        .layout = "sparse",
+        .type = "float32",
+        .name = "empty",
+        .size = 0,
+        .n_dims = 2,
+        .dim_size = {1024 << 10, 1024 << 10},
+    };
+    strcpy(record.path, sl_misc_tmpdir());
+
+    float data1[1] = {0};
+    assert(sl_record_write_all(&record, sizeof(data1[0]), (void*)data1));
+
+    float data2[1] = {0};
+    assert(sl_record_read_all(&record, sizeof(data2), data2));
+    SL_ASSERT_EQ_LL(data1[0], 0);
+    SL_ASSERT_EQ_LL(data2[0], 0);
+  }
+  {
+    struct sl_record record = {
+        .layout = "sparse",
+        .type = "float32",
+        .name = "small5",
+        .size = 16,
+        .n_dims = 2,
+        .dim_size = {20, 5},
+    };
+    strcpy(record.path, sl_misc_tmpdir());
+
+    struct sl_la_matrix data1 = {
+        .rows = 20,
+        .cols = 5,
+        // clang-format off
+      .data = (float[]){
+        1, 0, 0, 0, 0,
+        0, 2, 0, 0, 0,
+        0, 0, 0, 0, 0,
+        0, 0, 0, 4, 0,
+        0, 0, 0, 0, 5,
+        0, 0, 0, 1, 0,
+        0, 0, 2, 0, 0,
+        0, 0, 0, 0, 0,
+        4, 0, 0, 0, 0,
+        0, 5, 0, 0, 0,
+        0, 0, 1, 0, 0,
+        0, 0, 0, 2, 0,
+        0, 0, 0, 0, 3,
+        0, 0, 0, 4, 0,
+        0, 0, 0, 0, 0,
+        0, 6, 0, 0, 0,
+        7, 0, 0, 0, 0,
+        0, 8, 0, 0, 0,
+        0, 0, 9, 0, 0,
+        0, 0, 0, 0, 0,
+      },
+        // clang-format on
+    };
+    assert(
+        sl_record_write_all(&record,
+                            sizeof(data1.data[0]) * sl_la_matrix_size(&data1),
+                            (void*)data1.data));
+
+    float data2[20 * 5] = {0};
+    assert(sl_record_read_all(&record, sizeof(data2), data2));
+    SL_ASSERT_EQ_LL(memcmp(data1.data, data2, sizeof(data2)), 0);
+  }
+
+  return true;
+}
+
 SL_TEST_MAIN(test_write_metadata,
              test_read_metadata,
              test_dense_data_reader,
@@ -592,4 +664,5 @@ SL_TEST_MAIN(test_write_metadata,
              test_read_data,
              test_dense_data_writer,
              test_sparse_data_writer,
-             test_write_data)
+             test_write_data,
+             test_sparse_write_read)
