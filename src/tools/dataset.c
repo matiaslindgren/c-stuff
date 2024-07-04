@@ -187,7 +187,7 @@ bool spambase(const struct sl_args args[const static 1]) {
   }
 
   struct sl_la_matrix data = sl_la_matrix_create(4601, 57);
-  int8_t classes[4601] = {0};
+  int32_t classes[4601] = {0};
 
   {
     char filename[256] = {0};
@@ -293,12 +293,10 @@ bool spambase(const struct sl_args args[const static 1]) {
   const size_t n_cols = (size_t)data.cols;
 
   struct sl_record record_samples = {
-      .layout = "sparse",
+      .layout = "dense",
       .type = "float32",
       .name = "spambase_samples",
-      .size = sl_misc_count_nonzero(sizeof(float),
-                                    n_rows * n_cols,
-                                    (void*)data.data),
+      .size = n_rows * n_cols,
       .n_dims = 2,
       .dim_size = {n_rows, n_cols},
   };
@@ -313,7 +311,7 @@ bool spambase(const struct sl_args args[const static 1]) {
 
   struct sl_record record_classes = {
       .layout = "dense",
-      .type = "int8",
+      .type = "int32",
       .name = "spambase_classes",
       .size = SL_ARRAY_LEN(classes),
       .n_dims = 1,

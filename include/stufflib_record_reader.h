@@ -50,7 +50,7 @@ static inline long long sl_record_reader_ftell(
 }
 
 bool sl_record_reader_is_done(struct sl_record_reader reader[const static 1]) {
-  if (!reader->file) {
+  if (!reader->file || feof(reader->file->file)) {
     return true;
   }
   const long long fpos = sl_record_reader_ftell(reader);
@@ -85,8 +85,12 @@ static inline bool sl_record_reader_read_sparse_data(
       int64_t offset = -1;
       if (1 != fread(&offset, sizeof(offset), 1, reader->file->file) ||
           offset < 0) {
-        SL_LOG_ERROR("failed reading sparse index offset from %s",
-                     reader->file->path);
+        SL_LOG_ERROR(
+            "failed reading sparse index offset from %s at index %zu with "
+            "n_read %zu",
+            reader->file->path,
+            reader->index,
+            reader->n_read);
         return false;
       }
       reader->sparse_offset = (size_t)(offset);
@@ -113,8 +117,11 @@ static inline bool sl_record_reader_read_sparse_data(
                    item_size,
                    1,
                    reader->file->file)) {
-      SL_LOG_ERROR("failed reading sparse data item from %s",
-                   reader->file->path);
+      SL_LOG_ERROR(
+          "failed reading sparse data from %s at index %zu with n_read %zu",
+          reader->file->path,
+          reader->index,
+          reader->n_read);
       return false;
     }
 

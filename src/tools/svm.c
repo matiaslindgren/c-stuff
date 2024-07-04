@@ -1,22 +1,60 @@
-// TODO
-#if 0
-bool spambase(const struct sl_args args[const static 1]) {
-  struct sl_ds_dataset dataset = {
-      .type = "dense",
-      .name = "spambase",
-      .size = (size_t)data.rows * (size_t)data.cols,
-      .n_dims = 3,
-  };
-  strcpy(dataset.path, output_dir);
-  dataset.dim_size[0] = 1;
-  dataset.dim_size[1] = (size_t)data.rows;
-  dataset.dim_size[2] = (size_t)data.cols;
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-  struct sl_la_matrix data = sl_la_matrix_create(4601, 57);
-  int classes[4601] = {0};
+#include "stufflib_args.h"
+#include "stufflib_linalg.h"
+#include "stufflib_macros.h"
+#include "stufflib_ml.h"
+#include "stufflib_record.h"
+#include "stufflib_record_reader.h"
+
+bool spambase(const struct sl_args args[const static 1]) {
+  bool all_ok = false;
+
+  const char* const dataset_dir = sl_args_get_positional(args, 1);
+  const bool verbose = sl_args_parse_flag(args, "-v");
+
+  if (verbose) {
+    SL_LOG_INFO("training SVM on spambase dataset from '%s'", dataset_dir);
+  }
+
+  struct sl_record classes_record;
+  int32_t classes[4601] = {0};
+
+  struct sl_record samples_record;
+  struct sl_la_matrix samples = sl_la_matrix_create(4601, 57);
+
+  if (!sl_record_read_metadata(&classes_record,
+                               dataset_dir,
+                               "spambase_classes")) {
+    SL_LOG_ERROR("failed reading metadata of spambase classes");
+    goto done;
+  }
+
+  if (!sl_record_read_metadata(&samples_record,
+                               dataset_dir,
+                               "spambase_samples")) {
+    SL_LOG_ERROR("failed reading metadata of spambase samples");
+    goto done;
+  }
+
+  if (!sl_record_read_all(&classes_record, sizeof(classes), (void*)classes)) {
+    SL_LOG_ERROR("failed reading spambase classes");
+    goto done;
+  }
+
+  if (!sl_record_read_all(
+          &samples_record,
+          sl_record_item_size(&samples_record) * sl_la_matrix_size(&samples),
+          (void*)(samples.data))) {
+    SL_LOG_ERROR("failed reading spambase samples");
+    goto done;
+  }
 
   struct sl_ml_svm svm = {
-      .w = (struct sl_la_vector){.size = data.cols, .data = (float[57]){0}},
+      .w = (struct sl_la_vector){.size = samples.cols, .data = (float[57]){0}},
       .batch_size = 1,
       .n_epochs = 2,
       .learning_rate = 1e-9f,
@@ -24,17 +62,18 @@ bool spambase(const struct sl_args args[const static 1]) {
 
   struct sl_la_matrix test_data = {
       .rows = 2000,
-      .cols = data.cols,
+      .cols = samples.cols,
   };
-  int test_classes[2000] = {0};
+  int32_t test_classes[2000] = {0};
 
   struct sl_la_matrix train_data = {
-      .rows = data.rows - test_data.rows,
-      .cols = data.cols,
+      .rows = samples.rows - test_data.rows,
+      .cols = samples.cols,
   };
-  int train_classes[SL_ARRAY_LEN(classes) - SL_ARRAY_LEN(test_classes)] = {0};
+  int32_t train_classes[SL_ARRAY_LEN(classes) - SL_ARRAY_LEN(test_classes)] = {
+      0};
 
-  sl_ml_random_train_test_split(&data,
+  sl_ml_random_train_test_split(&samples,
                                 &train_data,
                                 &test_data,
                                 classes,
@@ -67,11 +106,33 @@ bool spambase(const struct sl_args args[const static 1]) {
     sl_ml_classification_print(&report);
   }
 
-  sl_la_matrix_destroy(&data);
-
+  all_ok = true;
+done:
+  sl_la_matrix_destroy(&samples);
   return all_ok;
 }
 
-#endif
+void print_usage(const struct sl_args args[const static 1]) {
+  SL_LOG_ERROR("usage: %s experiment dataset_dir [-v]", args->argv[0]);
+}
 
-int main() { return 0; }
+int main(int argc, char* const argv[argc + 1]) {
+  bool ok = false;
+  struct sl_args args = {.argc = argc, .argv = argv};
+  if (sl_args_count_positional(&args) < 2) {
+    SL_LOG_ERROR("incorrect number of arguments");
+  } else {
+    const char* experiment = sl_args_get_positional(&args, 0);
+    if (experiment) {
+      if (strcmp(experiment, "spambase") == 0) {
+        ok = spambase(&args);
+      } else {
+        SL_LOG_ERROR("unknown experiment %s", experiment);
+      }
+    }
+  }
+  if (!ok) {
+    print_usage(&args);
+  }
+  return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+}
