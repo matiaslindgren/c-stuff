@@ -21,8 +21,8 @@ Download datasets to some directory, which will be referred to as `dataset_path`
 ### CIFAR-10
 
 - [dataset homepage](https://www.cs.toronto.edu/~kriz/cifar.html), last accessed 2024-06-01
-- [download](https://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz)
-- after extraction, should look like
+- download the `.tar.gz` file from [here](https://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz) and uncompress into a directory, for example `cifar-10`.
+- after extraction, it should look like this
 ```
 drwxr-xr-x@          - m  4 Jun  2009 cifar-10
 .rw-r--r--@         61 m  4 Jun  2009 ├── batches.meta.txt
@@ -38,8 +38,8 @@ drwxr-xr-x@          - m  4 Jun  2009 cifar-10
 ### spambase
 
 - [dataset homepage](https://archive.ics.uci.edu/dataset/94/spambase), last accessed 2024-06-09
-- [download](https://archive.ics.uci.edu/static/public/94/spambase.zip)
-- after extraction, should look like
+- download the `.zip` file from [here](https://archive.ics.uci.edu/static/public/94/spambase.zip) and unzip into a directory, for example `spambase`.
+- after extraction, it should look like this
 ```
 drwxr-xr-x@       - m 23 Jun 12:13 spambase
 .rw-r--r--@ 702,942 m 22 May  2023 ├── spambase.data
@@ -50,13 +50,12 @@ drwxr-xr-x@       - m 23 Jun 12:13 spambase
 ### RCV1
 
 - [RCV1 homepage](http://www.ai.mit.edu/projects/jmlr/papers/volume5/lewis04a/lyrl2004_rcv1v2_README.htm), last accessed 2024-06-23
-- download
+- download the compressed data files into a directory, for example `rcv1`
     - [test set batch 0](http://www.ai.mit.edu/projects/jmlr/papers/volume5/lewis04a/a13-vector-files/lyrl2004_vectors_test_pt0.dat.gz)
     - [test set batch 1](http://www.ai.mit.edu/projects/jmlr/papers/volume5/lewis04a/a13-vector-files/lyrl2004_vectors_test_pt1.dat.gz)
     - [test set batch 2](http://www.ai.mit.edu/projects/jmlr/papers/volume5/lewis04a/a13-vector-files/lyrl2004_vectors_test_pt2.dat.gz)
     - [test set batch 3](http://www.ai.mit.edu/projects/jmlr/papers/volume5/lewis04a/a13-vector-files/lyrl2004_vectors_test_pt3.dat.gz)
     - [training set](http://www.ai.mit.edu/projects/jmlr/papers/volume5/lewis04a/a13-vector-files/lyrl2004_vectors_train.dat.gz)
-- **NOTE** that Shalev-Shwartz et al. (2011) seems to use the test set for training and the training set for testing.
 - after extraction, should look like
 ```
 drwxr-xr-x@           - m 23 Jun 12:20 rcv1
@@ -66,6 +65,7 @@ drwxr-xr-x@           - m 23 Jun 12:20 rcv1
 .rw-r--r--@ 343,575,752 m 23 Jun 12:17 ├── lyrl2004_vectors_test_pt3.dat
 .rw-r--r--@  42,955,532 m 23 Jun 12:17 └── lyrl2004_vectors_train.dat
 ```
+- **NOTE** that Shalev-Shwartz et al. (2011) seems to use the test set for training and the training set for testing.
 
 ## png
 
