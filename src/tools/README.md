@@ -24,15 +24,15 @@ Download datasets to some directory, which will be referred to as `dataset_path`
 - download the `.tar.gz` file from [here](https://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz) and uncompress into a directory, for example `cifar-10`.
 - after extraction, it should look like this
 ```
-drwxr-xr-x@          - m  4 Jun  2009 cifar-10
-.rw-r--r--@         61 m  4 Jun  2009 ├── batches.meta.txt
-.rw-r--r--@ 30,730,000 m  4 Jun  2009 ├── data_batch_1.bin
-.rw-r--r--@ 30,730,000 m  4 Jun  2009 ├── data_batch_2.bin
-.rw-r--r--@ 30,730,000 m  4 Jun  2009 ├── data_batch_3.bin
-.rw-r--r--@ 30,730,000 m  4 Jun  2009 ├── data_batch_4.bin
-.rw-r--r--@ 30,730,000 m  4 Jun  2009 ├── data_batch_5.bin
-.rw-r--r--@         88 m  4 Jun  2009 ├── readme.html
-.rw-r--r--@ 30,730,000 m  4 Jun  2009 └── test_batch.bin
+cifar-10
+├── batches.meta.txt
+├── data_batch_1.bin
+├── data_batch_2.bin
+├── data_batch_3.bin
+├── data_batch_4.bin
+├── data_batch_5.bin
+├── readme.html
+└── test_batch.bin
 ```
 
 ### spambase
@@ -41,10 +41,10 @@ drwxr-xr-x@          - m  4 Jun  2009 cifar-10
 - download the `.zip` file from [here](https://archive.ics.uci.edu/static/public/94/spambase.zip) and unzip into a directory, for example `spambase`.
 - after extraction, it should look like this
 ```
-drwxr-xr-x@       - m 23 Jun 12:13 spambase
-.rw-r--r--@ 702,942 m 22 May  2023 ├── spambase.data
-.rw-r--r--@   6,429 m 22 May  2023 ├── spambase.DOCUMENTATION
-.rw-r--r--@   3,566 m 22 May  2023 └── spambase.names
+spambase
+├── spambase.data
+├── spambase.DOCUMENTATION
+└── spambase.names
 ```
 
 ### RCV1
@@ -56,14 +56,16 @@ drwxr-xr-x@       - m 23 Jun 12:13 spambase
     - [test set batch 2](http://www.ai.mit.edu/projects/jmlr/papers/volume5/lewis04a/a13-vector-files/lyrl2004_vectors_test_pt2.dat.gz)
     - [test set batch 3](http://www.ai.mit.edu/projects/jmlr/papers/volume5/lewis04a/a13-vector-files/lyrl2004_vectors_test_pt3.dat.gz)
     - [training set](http://www.ai.mit.edu/projects/jmlr/papers/volume5/lewis04a/a13-vector-files/lyrl2004_vectors_train.dat.gz)
+    - [topic mappings](http://www.ai.mit.edu/projects/jmlr/papers/volume5/lewis04a/a08-topic-qrels/rcv1-v2.topics.qrels.gz)
 - after extraction, should look like
 ```
-drwxr-xr-x@           - m 23 Jun 12:20 rcv1
-.rw-r--r--@ 367,197,611 m 23 Jun 12:17 ├── lyrl2004_vectors_test_pt0.dat
-.rw-r--r--@ 371,378,053 m 23 Jun 12:17 ├── lyrl2004_vectors_test_pt1.dat
-.rw-r--r--@ 364,319,208 m 23 Jun 12:17 ├── lyrl2004_vectors_test_pt2.dat
-.rw-r--r--@ 343,575,752 m 23 Jun 12:17 ├── lyrl2004_vectors_test_pt3.dat
-.rw-r--r--@  42,955,532 m 23 Jun 12:17 └── lyrl2004_vectors_train.dat
+rcv1
+├── lyrl2004_vectors_test_pt0.dat
+├── lyrl2004_vectors_test_pt1.dat
+├── lyrl2004_vectors_test_pt2.dat
+├── lyrl2004_vectors_test_pt3.dat
+├── lyrl2004_vectors_train.dat
+└── rcv1-v2.topics.qrels
 ```
 - **NOTE** that Shalev-Shwartz et al. (2011) seems to use the test set for training and the training set for testing.
 
