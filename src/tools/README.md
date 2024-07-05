@@ -23,29 +23,29 @@ Download datasets to some directory, which will be referred to as `dataset_path`
 - [dataset homepage](https://www.cs.toronto.edu/~kriz/cifar.html), last accessed 2024-06-01
 - [download](https://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz)
 - after extraction, should look like
-        ```
-        drwxr-xr-x@          - m  4 Jun  2009 cifar-10
-        .rw-r--r--@         61 m  4 Jun  2009 ├── batches.meta.txt
-        .rw-r--r--@ 30,730,000 m  4 Jun  2009 ├── data_batch_1.bin
-        .rw-r--r--@ 30,730,000 m  4 Jun  2009 ├── data_batch_2.bin
-        .rw-r--r--@ 30,730,000 m  4 Jun  2009 ├── data_batch_3.bin
-        .rw-r--r--@ 30,730,000 m  4 Jun  2009 ├── data_batch_4.bin
-        .rw-r--r--@ 30,730,000 m  4 Jun  2009 ├── data_batch_5.bin
-        .rw-r--r--@         88 m  4 Jun  2009 ├── readme.html
-        .rw-r--r--@ 30,730,000 m  4 Jun  2009 └── test_batch.bin
-        ```
+```
+drwxr-xr-x@          - m  4 Jun  2009 cifar-10
+.rw-r--r--@         61 m  4 Jun  2009 ├── batches.meta.txt
+.rw-r--r--@ 30,730,000 m  4 Jun  2009 ├── data_batch_1.bin
+.rw-r--r--@ 30,730,000 m  4 Jun  2009 ├── data_batch_2.bin
+.rw-r--r--@ 30,730,000 m  4 Jun  2009 ├── data_batch_3.bin
+.rw-r--r--@ 30,730,000 m  4 Jun  2009 ├── data_batch_4.bin
+.rw-r--r--@ 30,730,000 m  4 Jun  2009 ├── data_batch_5.bin
+.rw-r--r--@         88 m  4 Jun  2009 ├── readme.html
+.rw-r--r--@ 30,730,000 m  4 Jun  2009 └── test_batch.bin
+```
 
 ### spambase
 
 - [dataset homepage](https://archive.ics.uci.edu/dataset/94/spambase), last accessed 2024-06-09
 - [download](https://archive.ics.uci.edu/static/public/94/spambase.zip)
 - after extraction, should look like
-        ```
-        drwxr-xr-x@       - m 23 Jun 12:13 spambase
-        .rw-r--r--@ 702,942 m 22 May  2023 ├── spambase.data
-        .rw-r--r--@   6,429 m 22 May  2023 ├── spambase.DOCUMENTATION
-        .rw-r--r--@   3,566 m 22 May  2023 └── spambase.names
-        ```
+```
+drwxr-xr-x@       - m 23 Jun 12:13 spambase
+.rw-r--r--@ 702,942 m 22 May  2023 ├── spambase.data
+.rw-r--r--@   6,429 m 22 May  2023 ├── spambase.DOCUMENTATION
+.rw-r--r--@   3,566 m 22 May  2023 └── spambase.names
+```
 
 ### RCV1
 
@@ -58,14 +58,14 @@ Download datasets to some directory, which will be referred to as `dataset_path`
     - [training set](http://www.ai.mit.edu/projects/jmlr/papers/volume5/lewis04a/a13-vector-files/lyrl2004_vectors_train.dat.gz)
 - **NOTE** that Shalev-Shwartz et al. (2011) seems to use the test set for training and the training set for testing.
 - after extraction, should look like
-        ```
-        drwxr-xr-x@           - m 23 Jun 12:20 rcv1
-        .rw-r--r--@ 367,197,611 m 23 Jun 12:17 ├── lyrl2004_vectors_test_pt0.dat
-        .rw-r--r--@ 371,378,053 m 23 Jun 12:17 ├── lyrl2004_vectors_test_pt1.dat
-        .rw-r--r--@ 364,319,208 m 23 Jun 12:17 ├── lyrl2004_vectors_test_pt2.dat
-        .rw-r--r--@ 343,575,752 m 23 Jun 12:17 ├── lyrl2004_vectors_test_pt3.dat
-        .rw-r--r--@  42,955,532 m 23 Jun 12:17 └── lyrl2004_vectors_train.dat
-        ```
+```
+drwxr-xr-x@           - m 23 Jun 12:20 rcv1
+.rw-r--r--@ 367,197,611 m 23 Jun 12:17 ├── lyrl2004_vectors_test_pt0.dat
+.rw-r--r--@ 371,378,053 m 23 Jun 12:17 ├── lyrl2004_vectors_test_pt1.dat
+.rw-r--r--@ 364,319,208 m 23 Jun 12:17 ├── lyrl2004_vectors_test_pt2.dat
+.rw-r--r--@ 343,575,752 m 23 Jun 12:17 ├── lyrl2004_vectors_test_pt3.dat
+.rw-r--r--@  42,955,532 m 23 Jun 12:17 └── lyrl2004_vectors_train.dat
+```
 
 ## png
 

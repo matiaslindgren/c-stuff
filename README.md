@@ -39,4 +39,4 @@ make -j4 all test integration_test
 
 ## Tools
 
-See [`./src/tools/README.md`](./src/tools/README.md)
+See [`./src/tools`](./src/tools)
