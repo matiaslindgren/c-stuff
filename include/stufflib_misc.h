@@ -82,7 +82,7 @@ static inline const char* sl_misc_tmpdir() {
   return tmpdir;
 }
 
-bool sl_misc_is_zero(size_t count, unsigned char data[count]) {
+bool sl_misc_is_zero(const size_t count, unsigned char data[count]) {
   for (size_t i = 0; i < count; ++i) {
     if (data[i]) {
       return false;
@@ -91,10 +91,12 @@ bool sl_misc_is_zero(size_t count, unsigned char data[count]) {
   return true;
 }
 
-size_t sl_misc_count_nonzero(size_t size, size_t count, unsigned char* data) {
+size_t sl_misc_count_nonzero(const size_t size,
+                             const size_t count,
+                             unsigned char data[count]) {
   size_t n = 0;
   for (size_t i = 0; i < count; ++i) {
-    n += sl_misc_is_zero(size, data + i * size);
+    n += !sl_misc_is_zero(size, data + i * size);
   }
   return n;
 }
