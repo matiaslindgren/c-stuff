@@ -22,7 +22,7 @@ Download datasets to some directory, which will be referred to as `dataset_path`
 
 - [dataset homepage](https://www.cs.toronto.edu/~kriz/cifar.html), last accessed 2024-06-01
 - download the `.tar.gz` file from [here](https://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz) and uncompress into a directory, for example `cifar-10`.
-- after extraction, it should look like this
+- after extraction, the directory should look like this
 ```
 cifar-10
 ├── batches.meta.txt
@@ -39,7 +39,7 @@ cifar-10
 
 - [dataset homepage](https://archive.ics.uci.edu/dataset/94/spambase), last accessed 2024-06-09
 - download the `.zip` file from [here](https://archive.ics.uci.edu/static/public/94/spambase.zip) and unzip into a directory, for example `spambase`.
-- after extraction, it should look like this
+- after extraction, the directory should look like this
 ```
 spambase
 ├── spambase.data
@@ -57,7 +57,8 @@ spambase
     - [test set batch 3](http://www.ai.mit.edu/projects/jmlr/papers/volume5/lewis04a/a13-vector-files/lyrl2004_vectors_test_pt3.dat.gz)
     - [training set](http://www.ai.mit.edu/projects/jmlr/papers/volume5/lewis04a/a13-vector-files/lyrl2004_vectors_train.dat.gz)
     - [topic mappings](http://www.ai.mit.edu/projects/jmlr/papers/volume5/lewis04a/a08-topic-qrels/rcv1-v2.topics.qrels.gz)
-- after extraction, should look like
+    - [document IDs](http://www.ai.mit.edu/projects/jmlr/papers/volume5/lewis04a/a07-rcv1-doc-ids/rcv1v2-ids.dat.gz)
+- after extraction, the directory should look like this
 ```
 rcv1
 ├── lyrl2004_vectors_test_pt0.dat
@@ -65,7 +66,8 @@ rcv1
 ├── lyrl2004_vectors_test_pt2.dat
 ├── lyrl2004_vectors_test_pt3.dat
 ├── lyrl2004_vectors_train.dat
-└── rcv1-v2.topics.qrels
+├── rcv1-v2.topics.qrels
+└── rcv1v2-ids.dat
 ```
 - **NOTE** that Shalev-Shwartz et al. (2011) seems to use the test set for training and the training set for testing.
 
