@@ -19,6 +19,12 @@
 static unsigned char reader_buffer_data[1024 << 6] = {0};
 static struct sl_span reader_buffer = {0};
 
+#define SL_DATASET_SPAMBASE_SAMPLES 4601
+#define SL_DATASET_SPAMBASE_FEATURES 57
+
+#define SL_DATASET_RCV1_SAMPLES 804'414
+#define SL_DATASET_RCV1_FEATURES 47'236
+
 static bool cifar_to_png(const struct sl_args args[const static 1]) {
   // CIFAR dataset parser
   // Data format reference: https://www.cs.toronto.edu/~kriz/cifar.html
@@ -186,8 +192,9 @@ bool spambase(const struct sl_args args[const static 1]) {
                 output_dir);
   }
 
-  struct sl_la_matrix data = sl_la_matrix_create(4601, 57);
-  int32_t classes[4601] = {0};
+  struct sl_la_matrix data = sl_la_matrix_create(SL_DATASET_SPAMBASE_SAMPLES,
+                                                 SL_DATASET_SPAMBASE_FEATURES);
+  uint16_t classes[SL_DATASET_SPAMBASE_SAMPLES] = {0};
 
   {
     char filename[256] = {0};
@@ -293,10 +300,12 @@ bool spambase(const struct sl_args args[const static 1]) {
   const size_t n_cols = (size_t)data.cols;
 
   struct sl_record record_samples = {
-      .layout = "dense",
+      .layout = "sparse",
       .type = "float32",
       .name = "spambase_samples",
-      .size = n_rows * n_cols,
+      .size = sl_misc_count_nonzero(sizeof(float),
+                                    n_rows * n_cols,
+                                    (void*)data.data),
       .n_dims = 2,
       .dim_size = {n_rows, n_cols},
   };
@@ -311,7 +320,7 @@ bool spambase(const struct sl_args args[const static 1]) {
 
   struct sl_record record_classes = {
       .layout = "dense",
-      .type = "int32",
+      .type = "uint16",
       .name = "spambase_classes",
       .size = SL_ARRAY_LEN(classes),
       .n_dims = 1,
