@@ -12,9 +12,9 @@
 void sl_ml_random_train_test_split(struct sl_la_matrix data[const static 1],
                                    struct sl_la_matrix train[const static 1],
                                    struct sl_la_matrix test[const static 1],
-                                   int32_t classes[const static 1],
-                                   int32_t train_classes[const static 1],
-                                   int32_t test_classes[const static 1]) {
+                                   uint16_t classes[const static 1],
+                                   uint16_t train_classes[const static 1],
+                                   uint16_t test_classes[const static 1]) {
   if (train->rows + test->rows != data->rows) {
     SL_LOG_ERROR("train set size + test set size != data set size");
     return;
@@ -26,15 +26,15 @@ void sl_ml_random_train_test_split(struct sl_la_matrix data[const static 1],
   sl_rand_shuffle_together(data->data,
                            classes,
                            sizeof(float) * (size_t)data->cols,
-                           sizeof(int32_t),
+                           sizeof(uint16_t),
                            (size_t)data->rows);
   test->data = data->data;
   train->data = data->data + test->rows * test->cols;
   const size_t n_test = (size_t)test->rows;
-  memcpy(test_classes, classes, sizeof(int32_t) * n_test);
+  memcpy(test_classes, classes, sizeof(uint16_t) * n_test);
   memcpy(train_classes,
          classes + n_test,
-         sizeof(int32_t) * (size_t)train->rows);
+         sizeof(uint16_t) * (size_t)train->rows);
 }
 
 // https://en.wikipedia.org/wiki/Feature_scaling#Rescaling_(min-max_normalization)
@@ -78,8 +78,8 @@ struct sl_ml_classification {
 void sl_ml_classification_update(
     struct sl_ml_classification cls[const static 1],
     // TODO don't assume true/false
-    const int pred_class,
-    const int real_class) {
+    const uint16_t pred_class,
+    const uint16_t real_class) {
   cls->tp += real_class && pred_class;
   cls->tn += !real_class && !pred_class;
   cls->fp += !real_class && pred_class;
@@ -152,15 +152,15 @@ struct sl_ml_svm {
   float learning_rate;
 };
 
-int sl_ml_svm_predict(struct sl_ml_svm svm[const static 1],
-                      struct sl_la_vector x[const static 1]) {
+uint8_t sl_ml_svm_binary_predict(struct sl_ml_svm svm[const static 1],
+                                 struct sl_la_vector x[const static 1]) {
   return (sl_la_vector_dot(&(svm->w), x) > 0) ? 1 : 0;
 }
 
 // implements mini-batch pegasos by Shalev-Shwartz et al. (2011)
 void sl_ml_svm_linear_fit(struct sl_ml_svm svm[const static 1],
                           struct sl_la_matrix data[const static 1],
-                          const int classes[const static 1]) {
+                          const uint16_t classes[const static 1]) {
   struct sl_la_vector x = sl_la_vector_create(data->cols);
   struct sl_la_vector s = sl_la_vector_create(data->cols);
   int* indices = sl_alloc((size_t)data->rows, sizeof(int));

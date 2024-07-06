@@ -21,7 +21,7 @@ bool spambase(const struct sl_args args[const static 1]) {
   }
 
   struct sl_record classes_record;
-  int32_t classes[4601] = {0};
+  uint16_t classes[4601] = {0};
 
   struct sl_record samples_record;
   struct sl_la_matrix samples = sl_la_matrix_create(4601, 57);
@@ -64,13 +64,13 @@ bool spambase(const struct sl_args args[const static 1]) {
       .rows = 2000,
       .cols = samples.cols,
   };
-  int32_t test_classes[2000] = {0};
+  uint16_t test_classes[2000] = {0};
 
   struct sl_la_matrix train_data = {
       .rows = samples.rows - test_data.rows,
       .cols = samples.cols,
   };
-  int32_t train_classes[SL_ARRAY_LEN(classes) - SL_ARRAY_LEN(test_classes)] = {
+  uint16_t train_classes[SL_ARRAY_LEN(classes) - SL_ARRAY_LEN(test_classes)] = {
       0};
 
   sl_ml_random_train_test_split(&samples,
@@ -89,7 +89,7 @@ bool spambase(const struct sl_args args[const static 1]) {
       struct sl_la_vector x = sl_la_matrix_row_view(&train_data, i);
       sl_ml_classification_update(&report,
                                   train_classes[i],
-                                  sl_ml_svm_predict(&svm, &x));
+                                  sl_ml_svm_binary_predict(&svm, &x));
     }
     SL_LOG_INFO("spambase dataset, random train set, linear SVM");
     sl_ml_classification_print(&report);
@@ -100,7 +100,7 @@ bool spambase(const struct sl_args args[const static 1]) {
       struct sl_la_vector x = sl_la_matrix_row_view(&test_data, i);
       sl_ml_classification_update(&report,
                                   test_classes[i],
-                                  sl_ml_svm_predict(&svm, &x));
+                                  sl_ml_svm_binary_predict(&svm, &x));
     }
     SL_LOG_INFO("spambase dataset, random test set, linear SVM");
     sl_ml_classification_print(&report);

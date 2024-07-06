@@ -119,11 +119,11 @@ bool test_random_train_test_split(const bool) {
                           12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
                           24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35},
     };
-    int labels[] = {0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33};
+    uint16_t labels[] = {0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33};
     struct sl_la_matrix test = {.rows = 4, .cols = 3};
     struct sl_la_matrix train = {.rows = data.rows - test.rows, .cols = 3};
-    int train_classes[12 - 4] = {0};
-    int test_classes[4] = {0};
+    uint16_t train_classes[12 - 4] = {0};
+    uint16_t test_classes[4] = {0};
     sl_ml_random_train_test_split(&data,
                                   &train,
                                   &test,
@@ -144,10 +144,10 @@ bool test_random_train_test_split(const bool) {
       }
     }
     for (size_t i = 0; i < SL_ARRAY_LEN(value_freq); ++i) {
-      assert(value_freq[i] == 1);
+      SL_ASSERT_EQ_LL(value_freq[i], 1);
     }
     for (size_t i = 0; i < SL_ARRAY_LEN(labels); ++i) {
-      assert(label_freq[labels[i]] == 1);
+      SL_ASSERT_EQ_LL(label_freq[labels[i]], 1);
     }
   }
   return true;
@@ -162,7 +162,7 @@ bool test_svm_linear_fit(const bool) {
             .cols = 3,
             .data = (float[]){1, 2, 3, 4, 5, 6, -3, -2, -1, -6, -5, -4},
         };
-        int classes[4] = {0, 0, 1, 1};
+        uint16_t classes[4] = {0, 0, 1, 1};
 
         struct sl_ml_svm svm = {
             .w = (struct sl_la_vector){.size = 3, .data = (float[3]){0}},
@@ -174,7 +174,7 @@ bool test_svm_linear_fit(const bool) {
 
         for (int i = 0; i < data.rows; ++i) {
           struct sl_la_vector x = sl_la_matrix_row_view(&data, i);
-          assert(classes[i] == sl_ml_svm_predict(&svm, &x));
+          assert(classes[i] == sl_ml_svm_binary_predict(&svm, &x));
         }
       }
     }

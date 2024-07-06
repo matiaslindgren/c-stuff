@@ -18,6 +18,30 @@ struct sl_record {
   size_t dim_size[8];
 };
 
+size_t sl_record_item_size(const struct sl_record r[const static 1]) {
+  if (SL_STR_EQ(r->type, "float32")) {
+    return sizeof(float);
+  } else if (SL_STR_EQ(r->type, "int8")) {
+    return sizeof(int8_t);
+  } else if (SL_STR_EQ(r->type, "int16")) {
+    return sizeof(int16_t);
+  } else if (SL_STR_EQ(r->type, "int32")) {
+    return sizeof(int32_t);
+  } else if (SL_STR_EQ(r->type, "int64")) {
+    return sizeof(int64_t);
+  } else if (SL_STR_EQ(r->type, "uint8")) {
+    return sizeof(uint8_t);
+  } else if (SL_STR_EQ(r->type, "uint16")) {
+    return sizeof(uint16_t);
+  } else if (SL_STR_EQ(r->type, "uint32")) {
+    return sizeof(uint32_t);
+  } else if (SL_STR_EQ(r->type, "uint64")) {
+    return sizeof(uint64_t);
+  } else {
+    return 0;
+  }
+}
+
 bool sl_record_validate_metadata(const struct sl_record r[const static 1]) {
   if (!r->layout || !r->type || !r->name || !r->path || !r->n_dims) {
     SL_LOG_ERROR("record contains nulls");
@@ -31,11 +55,7 @@ bool sl_record_validate_metadata(const struct sl_record r[const static 1]) {
     return false;
   }
 
-  bool is_float32 = SL_STR_EQ(r->type, "float32");
-  bool is_int8 = SL_STR_EQ(r->type, "int8");
-  bool is_int32 = SL_STR_EQ(r->type, "int32");
-  bool is_int64 = SL_STR_EQ(r->type, "int64");
-  if (!is_float32 && !is_int8 && !is_int32 && !is_int64) {
+  if (sl_record_item_size(r) == 0) {
     SL_LOG_ERROR("unknown data type '%s'", r->type);
     return false;
   }
@@ -48,21 +68,6 @@ bool sl_record_validate_metadata(const struct sl_record r[const static 1]) {
   }
 
   return true;
-}
-
-size_t sl_record_item_size(struct sl_record r[const static 1]) {
-  if (SL_STR_EQ(r->type, "float32")) {
-    return sizeof(float);
-  } else if (SL_STR_EQ(r->type, "int8")) {
-    return sizeof(int8_t);
-  } else if (SL_STR_EQ(r->type, "int32")) {
-    return sizeof(int32_t);
-  } else if (SL_STR_EQ(r->type, "int64")) {
-    return sizeof(int64_t);
-  } else {
-    SL_LOG_ERROR("cannot infer size of unknown record data type '%s'", r->type);
-    return 0;
-  }
 }
 
 bool sl_record_read_metadata(struct sl_record record[const static 1],
