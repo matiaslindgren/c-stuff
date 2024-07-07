@@ -6,6 +6,8 @@
 - [ ] fix argv parsing of required vs optional args, e.g. negative numbers as positional args are currently not possible
 - [ ] cleanup and comment DEFLATE decoder, implement simple compression
 - [ ] benchmark CRC32 as hash function, collisions etc
+- [ ] implement better hash func?
+- [ ] replace hard-coded `size_t` hashmap value with `void*`
 - [ ] optimize huffman code tree
 - [ ] handle different PNG color types
 - [ ] verify the IO header handles all errors gracefully
@@ -25,6 +27,8 @@
 - [ ] return `struct sl_data` from math functions
 - [ ] store hashes in hash table nodes to avoid recomputing on resize
 - [ ] use power of 2 for underlying array and map hash to index with bitand size, instead of modulo (rely on compiler for this but use pow 2 sizes)
+- [ ] rethink unnecessary buffering when reading files with iterators
+- [ ] simplify line reader iterators
 
 - [x] unify iterator API for getting values, don't transform, only return a single item/range/chunk
 - [x] replace str lib with unicode strings
