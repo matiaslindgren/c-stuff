@@ -1,17 +1,18 @@
 # c-stuff
 
-C scribbles. Minimal dependencies (stdlib, openBLAS).
+C scribbles. "Everything library". Minimal dependencies (stdlib, openBLAS).
 
-## References
+## Tools
 
-or at least some of them
+very limited functionality:
 
-- [Modern C, Jens Gustedt](https://gustedt.gitlabpages.inria.fr/modern-c/)
-- [Effective C, Robert C. Seacord](https://nostarch.com/Effective_C)
-- [The Unicode® Standard Version 15.0 – Core Specification](https://www.unicode.org/versions/Unicode15.0.0)
-- [ZLIB Compressed Data Format Specification version 3.3](https://datatracker.ietf.org/doc/html/rfc1950)
-- [DEFLATE Compressed Data Format Specification version 1.3](https://datatracker.ietf.org/doc/html/rfc1951)
-- [PNG (Portable Network Graphics) Specification, Version 1.2](http://www.libpng.org/pub/png/spec/1.2/PNG-Contents.html)
+* image processing
+* text processing
+* sorting
+* dataset parsing
+* support vector machines
+
+See [`./src/tools`](./src/tools)
 
 ## Requirements
 
@@ -37,6 +38,13 @@ make DEBUG=1 -j4 all test integration_test
 make -j4 all test integration_test
 ```
 
-## Tools
+## References
 
-See [`./src/tools`](./src/tools)
+or at least some of them
+
+- [Modern C, Jens Gustedt](https://gustedt.gitlabpages.inria.fr/modern-c/)
+- [Effective C, Robert C. Seacord](https://nostarch.com/Effective_C)
+- [The Unicode® Standard Version 15.0 – Core Specification](https://www.unicode.org/versions/Unicode15.0.0)
+- [ZLIB Compressed Data Format Specification version 3.3](https://datatracker.ietf.org/doc/html/rfc1950)
+- [DEFLATE Compressed Data Format Specification version 1.3](https://datatracker.ietf.org/doc/html/rfc1951)
+- [PNG (Portable Network Graphics) Specification, Version 1.2](http://www.libpng.org/pub/png/spec/1.2/PNG-Contents.html)

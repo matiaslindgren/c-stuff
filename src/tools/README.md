@@ -69,6 +69,13 @@ rcv1
 ├── rcv1-v2.topics.qrels
 └── rcv1v2-ids.dat
 ```
+- **NOTE** vector files must be sorted by document id (first column)
+```bash
+for file in rcv1/lyrl2004_vectors_*.dat; do
+  sort --general-numeric-sort --output=tmp $file
+  mv tmp $file
+done
+```
 - **NOTE** that Shalev-Shwartz et al. (2011) seems to use the test set for training and the training set for testing.
 
 ## png
