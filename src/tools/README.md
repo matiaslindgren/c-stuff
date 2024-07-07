@@ -291,6 +291,58 @@ Source: [`./src/tools/svm.c`](./src/tools/svm.c)
 ./build/debug/tools/svm experiment dataset_dir [-v]
 ```
 
+### spambase
+
+* linear SVM
+* all features min-max rescaled to `[-1, 1]`
+* random train-test split with 2000 test samples
+* learning rate `1e-9`
+
+```bash
+./build/debug/tools/svm spambase out -v &| jq .
+```
+output
+```json
+{
+  "level": "info",
+  "file": "src/tools/svm.c",
+  "line": 20,
+  "msg": "training SVM on spambase dataset from 'out'"
+}
+{
+  "level": "info",
+  "file": "src/tools/svm.c",
+  "line": 94,
+  "msg": "spambase dataset, random train set, linear SVM"
+}
+{
+  "level": "info",
+  "file": "src/tools/svm.c",
+  "line": 105,
+  "msg": "spambase dataset, random test set, linear SVM"
+}
+{
+  "tp": 854,
+  "tn": 1459,
+  "fp": 210,
+  "fn": 78,
+  "accuracy": 0.889,
+  "precision": 0.803,
+  "recall": 0.916,
+  "f1_score": 0.856
+}
+{
+  "tp": 605,
+  "tn": 1197,
+  "fp": 144,
+  "fn": 54,
+  "accuracy": 0.901,
+  "precision": 0.808,
+  "recall": 0.918,
+  "f1_score": 0.859
+}
+```
+
 ## txt
 
 Source: [`./src/tools/txt.c`](./src/tools/txt.c)
