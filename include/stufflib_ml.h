@@ -1,6 +1,7 @@
 #ifndef SL_ML_H_INCLUDED
 #define SL_ML_H_INCLUDED
 
+#include <assert.h>
 #include <math.h>
 #include <string.h>
 
@@ -39,31 +40,31 @@ void sl_ml_random_train_test_split(struct sl_la_matrix data[const static 1],
 
 // https://en.wikipedia.org/wiki/Feature_scaling#Rescaling_(min-max_normalization)
 // 2024-06-16
-void sl_ml_minmax_rescale(struct sl_la_matrix m[const static 1],
-                          const float a,
-                          const float b) {
-  // TODO maybe with doubles to avoid precision loss
-  struct sl_la_vector v_min = sl_la_vector_create(m->cols);
-  struct sl_la_vector v_max = sl_la_vector_create(m->cols);
+struct sl_ml_minmax_scaler {
+  struct sl_la_vector lo;
+  struct sl_la_vector hi;
+};
 
-  sl_la_matrix_copy_row(&v_min, m, 0);
-  sl_la_matrix_copy_row(&v_max, m, 0);
-  for (int row = 1; row < m->rows; ++row) {
+void sl_ml_minmax_fit(struct sl_ml_minmax_scaler scaler[const static 1],
+                      struct sl_la_matrix m[const static 1]) {
+  assert(scaler->lo.size == m->cols && scaler->hi.size == m->cols);
+  for (int row = 0; row < m->rows; ++row) {
     for (int col = 0; col < m->cols; ++col) {
       const float value = *sl_la_matrix_get(m, row, col);
-      v_min.data[col] = fminf(v_min.data[col], value);
-      v_max.data[col] = fmaxf(v_max.data[col], value);
+      scaler->lo.data[col] = fminf(scaler->lo.data[col], value);
+      scaler->hi.data[col] = fmaxf(scaler->hi.data[col], value);
     }
   }
-  sl_la_vector_scale(&v_min, -1);
-  sl_la_vector_add(&v_max, &v_min);
-  sl_la_matrix_add_axis0(m, &v_min);
-  sl_la_matrix_div_axis0(m, &v_max);
-  sl_la_matrix_mul_axis2(m, b - a);
-  sl_la_matrix_add_axis2(m, a);
+}
 
-  sl_la_vector_destroy(&v_max);
-  sl_la_vector_destroy(&v_min);
+void sl_ml_minmax_apply(struct sl_ml_minmax_scaler scaler[const static 1],
+                        struct sl_la_matrix m[const static 1],
+                        const float a,
+                        const float b) {
+  sl_la_matrix_sub_axis0(m, &(scaler->lo));
+  sl_la_matrix_mul_axis2(m, b - a);
+  sl_la_matrix_diffdiv_axis0(m, &(scaler->hi), &(scaler->lo));
+  sl_la_matrix_add_axis2(m, a);
 }
 
 // https://en.wikipedia.org/wiki/F-score#Diagnostic_testing
@@ -204,5 +205,17 @@ void sl_ml_svm_linear_fit(struct sl_ml_svm svm[const static 1],
   sl_la_vector_destroy(&x);
   sl_free(indices);
 }
+
+#define SL_ML_MINMAX_RESCALE(n_features, dataset, a, b)                \
+  do {                                                                 \
+    struct sl_ml_minmax_scaler sl_minmax_scaler = {                    \
+        .lo = (struct sl_la_vector){.size = (n_features),              \
+                                    .data = (float[(n_features)]){0}}, \
+        .hi = (struct sl_la_vector){.size = (n_features),              \
+                                    .data = (float[(n_features)]){0}}, \
+    };                                                                 \
+    sl_ml_minmax_fit(&sl_minmax_scaler, (dataset));                    \
+    sl_ml_minmax_apply(&sl_minmax_scaler, (dataset), (a), (b));        \
+  } while (false)
 
 #endif  // SL_ML_H_INCLUDED

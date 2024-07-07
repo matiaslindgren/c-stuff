@@ -39,6 +39,24 @@ bool check_matrix_equal(struct sl_la_matrix a[const static 1],
 
 bool test_minmax_normalization(const bool) {
   {
+    struct sl_la_matrix a = {
+        .rows = 4,
+        .cols = 3,
+        .data = (float[]){-6, -2, -1, -3, -3, -8, -1, 6, 10, 8, 10, -4},
+    };
+    struct sl_ml_minmax_scaler scaler = {
+        .lo = (struct sl_la_vector){.size = 3, .data = (float[3]){0}},
+        .hi = (struct sl_la_vector){.size = 3, .data = (float[3]){0}},
+    };
+    sl_ml_minmax_fit(&scaler, &a);
+    assert(sl_math_double_almost(scaler.lo.data[0], -6, SL_LA_FLOAT_EQ_TOL));
+    assert(sl_math_double_almost(scaler.lo.data[1], -3, SL_LA_FLOAT_EQ_TOL));
+    assert(sl_math_double_almost(scaler.lo.data[2], -8, SL_LA_FLOAT_EQ_TOL));
+    assert(sl_math_double_almost(scaler.hi.data[0], 8, SL_LA_FLOAT_EQ_TOL));
+    assert(sl_math_double_almost(scaler.hi.data[1], 10, SL_LA_FLOAT_EQ_TOL));
+    assert(sl_math_double_almost(scaler.hi.data[2], 10, SL_LA_FLOAT_EQ_TOL));
+  }
+  {
     struct sl_la_matrix a1 = {
         .rows = 4,
         .cols = 3,
@@ -58,7 +76,37 @@ bool test_minmax_normalization(const bool) {
                           1.0f, 1.0f,
                           -0.55555556f},
     };
-    sl_ml_minmax_rescale(&a1, -1, 1);
+    struct sl_ml_minmax_scaler scaler = {
+        .lo = (struct sl_la_vector){.size = 3, .data = (float[3]){0}},
+        .hi = (struct sl_la_vector){.size = 3, .data = (float[3]){0}},
+    };
+    sl_ml_minmax_fit(&scaler, &a1);
+    sl_ml_minmax_apply(&scaler, &a1, -1, 1);
+    if (!check_matrix_equal(&a1, &a2)) {
+      return false;
+    }
+  }
+  {
+    struct sl_la_matrix a1 = {
+        .rows = 4,
+        .cols = 3,
+        .data = (float[]){-6, -2, -1, -3, -3, -8, -1, 6, 10, 8, 10, -4},
+    };
+    struct sl_la_matrix a2 = {
+        .rows = 4,
+        .cols = 3,
+        .data = (float[]){-1.0f,
+                          -0.84615385f,
+                          -0.22222222f,
+                          -0.57142857f,
+                          -1.0f,
+                          -1.0f,
+                          -0.28571429f,
+                          0.38461538f, 1.0f,
+                          1.0f, 1.0f,
+                          -0.55555556f},
+    };
+    SL_ML_MINMAX_RESCALE(3, &a1, -1, 1);
     if (!check_matrix_equal(&a1, &a2)) {
       return false;
     }
@@ -80,7 +128,12 @@ bool test_minmax_normalization(const bool) {
                           1.0f, 1.0f,
                           0.22222222f},
     };
-    sl_ml_minmax_rescale(&a1, 0, 1);
+    struct sl_ml_minmax_scaler scaler = {
+        .lo = (struct sl_la_vector){.size = 3, .data = (float[3]){0}},
+        .hi = (struct sl_la_vector){.size = 3, .data = (float[3]){0}},
+    };
+    sl_ml_minmax_fit(&scaler, &a1);
+    sl_ml_minmax_apply(&scaler, &a1, 0, 1);
     if (!check_matrix_equal(&a1, &a2)) {
       return false;
     }
@@ -102,7 +155,12 @@ bool test_minmax_normalization(const bool) {
                           10.0f, 10.0f,
                           3.0f},
     };
-    sl_ml_minmax_rescale(&a1, 1, 10);
+    struct sl_ml_minmax_scaler scaler = {
+        .lo = (struct sl_la_vector){.size = 3, .data = (float[3]){0}},
+        .hi = (struct sl_la_vector){.size = 3, .data = (float[3]){0}},
+    };
+    sl_ml_minmax_fit(&scaler, &a1);
+    sl_ml_minmax_apply(&scaler, &a1, 1, 10);
     if (!check_matrix_equal(&a1, &a2)) {
       return false;
     }
