@@ -80,7 +80,7 @@ done
 
 ## png
 
-Source: [`./src/tools/png.c`](./src/tools/png.c)
+[source](/src/tools/png.c)
 
 Simple PNG decoder.
 
@@ -196,7 +196,7 @@ This example requires `xxd`.
 
 ## sort
 
-Source: [`./src/tools/sort.c`](./src/tools/sort.c)
+[source](/src/tools/sort.c)
 
 Simple line sorting.
 
@@ -286,7 +286,7 @@ find ./test-data/png -name '*.png' -printf '%s\n' > test-data-sizes.txt
 
 ## svm
 
-Source: [`./src/tools/svm.c`](./src/tools/svm.c)
+[source](/src/tools/svm.c)
 ```
 ./build/debug/tools/svm experiment dataset_dir [-v]
 ```
@@ -345,7 +345,7 @@ output
 
 ## txt
 
-Source: [`./src/tools/txt.c`](./src/tools/txt.c)
+[source](/src/tools/txt.c)
 
 ### Usage
 ```
