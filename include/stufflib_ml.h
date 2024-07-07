@@ -108,17 +108,18 @@ static inline double sl_ml_classification_f1_score(
 }
 
 void sl_ml_classification_print(
+    FILE stream[const static 1],
     struct sl_ml_classification cls[const static 1]) {
-  printf("{");
-  printf("\"tp\":%d,", cls->tp);
-  printf("\"tn\":%d,", cls->tn);
-  printf("\"fp\":%d,", cls->fp);
-  printf("\"fn\":%d,", cls->fn);
-  printf("\"accuracy\":%.3f,", sl_ml_classification_accuracy(cls));
-  printf("\"precision\":%.3f,", sl_ml_classification_precision(cls));
-  printf("\"recall\":%.3f,", sl_ml_classification_recall(cls));
-  printf("\"f1_score\":%.3f", sl_ml_classification_f1_score(cls));
-  printf("}\n");
+  fprintf(stream, "{");
+  fprintf(stream, "\"tp\":%d,", cls->tp);
+  fprintf(stream, "\"tn\":%d,", cls->tn);
+  fprintf(stream, "\"fp\":%d,", cls->fp);
+  fprintf(stream, "\"fn\":%d,", cls->fn);
+  fprintf(stream, "\"accuracy\":%.3f,", sl_ml_classification_accuracy(cls));
+  fprintf(stream, "\"precision\":%.3f,", sl_ml_classification_precision(cls));
+  fprintf(stream, "\"recall\":%.3f,", sl_ml_classification_recall(cls));
+  fprintf(stream, "\"f1_score\":%.3f", sl_ml_classification_f1_score(cls));
+  fprintf(stream, "}\n");
 }
 
 // Support Vector Machine

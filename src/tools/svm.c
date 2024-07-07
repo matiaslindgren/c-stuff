@@ -92,7 +92,7 @@ bool spambase(const struct sl_args args[const static 1]) {
                                   sl_ml_svm_binary_predict(&svm, &x));
     }
     SL_LOG_INFO("spambase dataset, random train set, linear SVM");
-    sl_ml_classification_print(&report);
+    sl_ml_classification_print(stderr, &report);
   }
   {
     struct sl_ml_classification report = {0};
@@ -103,7 +103,7 @@ bool spambase(const struct sl_args args[const static 1]) {
                                   sl_ml_svm_binary_predict(&svm, &x));
     }
     SL_LOG_INFO("spambase dataset, random test set, linear SVM");
-    sl_ml_classification_print(&report);
+    sl_ml_classification_print(stderr, &report);
   }
 
   all_ok = true;

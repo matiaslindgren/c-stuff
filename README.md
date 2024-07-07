@@ -4,7 +4,7 @@ C scribbles. "Everything library". Minimal dependencies (stdlib, openBLAS).
 
 ## Tools
 
-very limited functionality:
+Functionality (very limited):
 
 * image processing
 * text processing

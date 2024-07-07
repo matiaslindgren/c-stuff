@@ -316,12 +316,6 @@ output
   "msg": "spambase dataset, random train set, linear SVM"
 }
 {
-  "level": "info",
-  "file": "src/tools/svm.c",
-  "line": 105,
-  "msg": "spambase dataset, random test set, linear SVM"
-}
-{
   "tp": 854,
   "tn": 1459,
   "fp": 210,
@@ -330,6 +324,12 @@ output
   "precision": 0.803,
   "recall": 0.916,
   "f1_score": 0.856
+}
+{
+  "level": "info",
+  "file": "src/tools/svm.c",
+  "line": 105,
+  "msg": "spambase dataset, random test set, linear SVM"
 }
 {
   "tp": 605,
