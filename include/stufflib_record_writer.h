@@ -18,8 +18,9 @@ struct sl_record_writer {
 };
 
 bool sl_record_writer_open(struct sl_record_writer writer[const static 1]) {
-  if (!writer->file || !writer->record) {
-    SL_LOG_ERROR("incorrectly initialized record writer");
+  if (!writer->file || !writer->record ||
+      !sl_record_validate_metadata(writer->record)) {
+    SL_LOG_ERROR("invalid record writer");
     return false;
   }
   char full_path[1024] = {0};
@@ -39,7 +40,9 @@ bool sl_record_writer_open(struct sl_record_writer writer[const static 1]) {
 }
 
 void sl_record_writer_close(struct sl_record_writer writer[const static 1]) {
-  sl_file_close(writer->file);
+  if (writer->file) {
+    sl_file_close(writer->file);
+  }
 }
 
 bool sl_record_writer_write(struct sl_record_writer writer[const static 1],
