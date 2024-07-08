@@ -29,6 +29,7 @@
 - [ ] use power of 2 for underlying array and map hash to index with bitand size, instead of modulo (rely on compiler for this but use pow 2 sizes)
 - [ ] rethink unnecessary buffering when reading files with iterators
 - [ ] simplify line reader iterators
+- [ ] span with item size, length, capacity
 
 - [x] unify iterator API for getting values, don't transform, only return a single item/range/chunk
 - [x] replace str lib with unicode strings
