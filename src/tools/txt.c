@@ -268,16 +268,16 @@ bool linefreq(const struct sl_args args[const static 1]) {
       continue;
     }
     if (!sl_hashmap_contains(&freq, line)) {
-      sl_hashmap_insert(&freq, line, 0);
+      sl_hashmap_insert(&freq, line, sl_hashmap_type_uint64, &((uint64_t){0}));
     }
-    ++(sl_hashmap_get(&freq, line)->value);
+    sl_hashmap_get(&freq, line)->value.uint64 += 1;
   }
 
   for (struct sl_iterator freq_iter = sl_hashmap_iter(&freq);
        !sl_hashmap_iter_is_done(&freq_iter);
        sl_hashmap_iter_advance(&freq_iter)) {
     struct sl_hashmap_slot* slot = sl_hashmap_iter_get(&freq_iter);
-    if (printf("%zu ", slot->value) < 0) {
+    if (printf("%" PRIu64 " ", slot->value.uint64) < 0) {
       goto done;
     }
     struct sl_string key_str = sl_string_from_utf8(&(slot->key));
