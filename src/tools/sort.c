@@ -93,7 +93,7 @@ int main(int argc, char* const argv[argc + 1]) {
   is_done = true;
 
 done:
-  sl_string_delete(&content);
+  sl_string_destroy(&content);
   for (size_t i = 0; i < num_lines; ++i) {
     sl_free(lines[i]);
   }

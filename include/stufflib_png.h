@@ -126,7 +126,7 @@ struct sl_png_image {
 };
 
 void sl_png_chunk_destroy(struct sl_png_chunk chunk) {
-  sl_span_delete(&chunk.data);
+  sl_span_destroy(&chunk.data);
 }
 
 void sl_png_chunks_destroy(struct sl_png_chunks chunks) {
@@ -141,8 +141,8 @@ void sl_png_header_destroy(struct sl_png_header /* header */) {
 }
 
 void sl_png_image_destroy(struct sl_png_image image) {
-  sl_span_delete(&(image.data));
-  sl_span_delete(&(image.filter));
+  sl_span_destroy(&(image.data));
+  sl_span_destroy(&(image.filter));
 }
 
 void sl_png_image_copy(struct sl_png_image dst[static 1],
@@ -483,7 +483,7 @@ void sl_png_unpack_and_pad_image_data(struct sl_png_image image[static 1]) {
   }
 
   image->filter = filter;
-  sl_span_delete(&image->data);
+  sl_span_destroy(&image->data);
   image->data = padded;
 }
 
@@ -604,12 +604,12 @@ struct sl_png_image sl_png_read_image(const char filename[const static 1]) {
   }
 
   sl_png_chunks_destroy(chunks);
-  sl_span_delete(&idat);
+  sl_span_destroy(&idat);
   return image;
 
 error:
   sl_png_chunks_destroy(chunks);
-  sl_span_delete(&idat);
+  sl_span_destroy(&idat);
   sl_png_image_destroy(image);
   return (struct sl_png_image){0};
 }
@@ -689,7 +689,7 @@ bool sl_png_chunk_fwrite(FILE stream[const static 1],
   is_done = true;
 
 done:
-  sl_span_delete(&crc_data);
+  sl_span_destroy(&crc_data);
   return is_done;
 }
 
@@ -731,8 +731,8 @@ done:
   if (fp) {
     fclose(fp);
   }
-  sl_span_delete(&idat);
-  sl_span_delete(&packed_data);
+  sl_span_destroy(&idat);
+  sl_span_destroy(&packed_data);
   return is_done;
 }
 

@@ -21,7 +21,7 @@ bool test_string_init(const bool) {
       assert(str.utf8_data.data[c] == sl_test_data_hello_utf8[i].data[c]);
     }
     assert(str.utf8_data.data[data_size - 1] == 0);
-    sl_string_delete(&str);
+    sl_string_destroy(&str);
   }
   return true;
 }
@@ -34,7 +34,7 @@ bool test_string_utf8_view(const bool) {
   struct sl_span empty_view = sl_string_view_utf8_data(&empty_str);
   assert(empty_view.size == 0);
   assert(empty_view.data == nullptr);
-  sl_string_delete(&empty_str);
+  sl_string_destroy(&empty_str);
   for (size_t i = 0; i < SL_ARRAY_LEN(sl_test_data_hello_utf8); ++i) {
     struct sl_string str = sl_string_from_utf8(sl_test_data_hello_utf8 + i);
     struct sl_span view = sl_string_view_utf8_data(&str);
@@ -42,7 +42,7 @@ bool test_string_utf8_view(const bool) {
     for (size_t c = 0; c < view.size; ++c) {
       assert(view.data[c] == sl_test_data_hello_utf8[i].data[c]);
     }
-    sl_string_delete(&str);
+    sl_string_destroy(&str);
   }
   return true;
 }
@@ -65,10 +65,10 @@ bool test_string_slice(const bool) {
                  sl_test_data_decoded_strings[decoded_pos + begin + iter.pos]);
           // TODO assert iterator slice address equals underlying string
         }
-        sl_string_delete(&substr);
+        sl_string_destroy(&substr);
       }
     }
-    sl_string_delete(&str);
+    sl_string_destroy(&str);
     decoded_pos += sl_test_data_decoded_lengths[i];
   }
   return true;
@@ -80,14 +80,14 @@ bool test_string_is_ascii(const bool) {
         (struct sl_span){.size = 12, .data = (unsigned char*)u8"hello there!"};
     struct sl_string str = sl_string_from_utf8(&hello);
     assert(sl_string_is_ascii(&str));
-    sl_string_delete(&str);
+    sl_string_destroy(&str);
   }
   {
     struct sl_span hello =
         (struct sl_span){.size = 18, .data = (unsigned char*)u8"नमस्ते"};
     struct sl_string str = sl_string_from_utf8(&hello);
     assert(!sl_string_is_ascii(&str));
-    sl_string_delete(&str);
+    sl_string_destroy(&str);
   }
   return true;
 }
@@ -100,7 +100,7 @@ bool test_string_copy_ascii(const bool) {
   sl_string_copy_ascii(buf, &str);
   assert(strlen(buf) == hello.size);
   assert(strcmp(buf, "hello there!") == 0);
-  sl_string_delete(&str);
+  sl_string_destroy(&str);
   return true;
 }
 

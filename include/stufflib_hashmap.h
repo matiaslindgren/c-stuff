@@ -46,16 +46,16 @@ struct sl_hashmap sl_hashmap_create(size_t init_capacity) {
   };
 }
 
-void sl_hashmap_delete_slots(const size_t capacity,
-                             struct sl_hashmap_slot slots[capacity]) {
+void sl_hashmap_destroy_slots(const size_t capacity,
+                              struct sl_hashmap_slot slots[capacity]) {
   for (size_t i = 0; i < capacity; ++i) {
-    sl_span_delete(&(slots[i].key));
+    sl_span_destroy(&(slots[i].key));
   }
   sl_free(slots);
 }
 
-void sl_hashmap_delete(struct sl_hashmap map[const static 1]) {
-  sl_hashmap_delete_slots(map->capacity, map->slots);
+void sl_hashmap_destroy(struct sl_hashmap map[const static 1]) {
+  sl_hashmap_destroy_slots(map->capacity, map->slots);
   *map = (struct sl_hashmap){0};
 }
 
@@ -130,7 +130,7 @@ void sl_hashmap_resize(struct sl_hashmap map[const static 1],
     struct sl_hashmap_slot slot = old_slots[i];
     sl_hashmap_write(map, &(slot.key), slot.hash, slot.type, &(slot.value));
   }
-  sl_hashmap_delete_slots(old_capacity, old_slots);
+  sl_hashmap_destroy_slots(old_capacity, old_slots);
 }
 
 double sl_hashmap_load_factor(struct sl_hashmap map[const static 1]) {

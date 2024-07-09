@@ -23,7 +23,7 @@ bool test_read_file(const bool verbose) {
     if (data.size > 0) {
       assert(data.data != nullptr);
     }
-    sl_span_delete(&data);
+    sl_span_destroy(&data);
   }
   return true;
 }
@@ -62,7 +62,7 @@ bool test_read_file_utf8(const bool verbose) {
 
     struct sl_string str = sl_fs_read_file_utf8(input_path, &buffer);
     assert(str.length == expected_str_length);
-    sl_string_delete(&str);
+    sl_string_destroy(&str);
   }
   return true;
 }
@@ -108,11 +108,11 @@ bool test_read_lines(const bool verbose) {
       assert(memcmp(line.utf8_data.data,
                     expected[lineno],
                     SL_MIN(line_len, line.utf8_data.size)) == 0);
-      sl_string_delete(&line);
+      sl_string_destroy(&line);
       ++lineno;
     }
   }
-  sl_string_delete(&str);
+  sl_string_destroy(&str);
 
   return true;
 }

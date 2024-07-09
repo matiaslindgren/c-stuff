@@ -449,7 +449,7 @@ clang-18 -std=c23 -E -I./include ./src/tools/txt.c \
 5 # 1 "/usr/include/assert.h" 1 3 4
 5 ;
 5 is_done = true;
-5 sl_string_delete(&content);
+5 sl_string_destroy(&content);
 5 "\n"
 ```
 

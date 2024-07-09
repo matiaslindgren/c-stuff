@@ -73,7 +73,7 @@ static bool cifar_to_png(const struct sl_args args[const static 1]) {
       struct sl_string line = sl_string_from_utf8(sl_tokenizer_iter_get(&iter));
       if (line.length == 0 || !sl_string_is_ascii(&line)) {
         SL_LOG_ERROR("all metadata lines must be in ASCII");
-        sl_string_delete(&line);
+        sl_string_destroy(&line);
         goto done;
       }
       sl_string_copy_ascii(labels[lineno], &line);
@@ -81,9 +81,9 @@ static bool cifar_to_png(const struct sl_args args[const static 1]) {
         printf("label %zu: %s\n", lineno, labels[lineno]);
       }
       ++lineno;
-      sl_string_delete(&line);
+      sl_string_destroy(&line);
     }
-    sl_string_delete(&data);
+    sl_string_destroy(&data);
   }
 
   const char* batch_names[] = {
@@ -162,10 +162,10 @@ static bool cifar_to_png(const struct sl_args args[const static 1]) {
       goto invalid_batch;
     }
 
-    sl_span_delete(&data);
+    sl_span_destroy(&data);
     continue;
   invalid_batch:
-    sl_span_delete(&data);
+    sl_span_destroy(&data);
     goto done;
   }
 
@@ -301,7 +301,7 @@ bool spambase(const struct sl_args args[const static 1]) {
       ++lineno;
     }
 
-    sl_string_delete(&content);
+    sl_string_destroy(&content);
 
     if (lineno != data.rows) {
       SL_LOG_ERROR("expected %d samples but parsed %d", data.rows, lineno);
@@ -663,7 +663,7 @@ done:
   }
   sl_free(document_ids);
   sl_free(classes);
-  sl_span_delete(&write_buffer);
+  sl_span_destroy(&write_buffer);
   sl_record_writer_close(&record_writer);
   return all_ok;
 }

@@ -13,8 +13,8 @@ struct sl_string {
   struct sl_span utf8_data;
 };
 
-void sl_string_delete(struct sl_string string[static 1]) {
-  sl_span_delete(&(string->utf8_data));
+void sl_string_destroy(struct sl_string string[static 1]) {
+  sl_span_destroy(&(string->utf8_data));
   *string = (struct sl_string){0};
 }
 
@@ -56,14 +56,14 @@ struct sl_string sl_string_concat(struct sl_string str1[const static 1],
   struct sl_span str2_data = sl_string_view_utf8_data(str2);
   struct sl_span data = sl_span_concat(&str1_data, &str2_data);
   struct sl_string result = sl_string_from_utf8(&data);
-  sl_span_delete(&data);
+  sl_span_destroy(&data);
   return result;
 }
 
 void sl_string_extend(struct sl_string str1[const static 1],
                       struct sl_string str2[const static 1]) {
   struct sl_string result = sl_string_concat(str1, str2);
-  sl_string_delete(str1);
+  sl_string_destroy(str1);
   *str1 = result;
 }
 

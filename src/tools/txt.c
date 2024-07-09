@@ -39,7 +39,7 @@ bool concat(const struct sl_args args[const static 1]) {
     if (read_ok) {
       sl_string_extend(&result, &content);
     }
-    sl_string_delete(&content);
+    sl_string_destroy(&content);
     if (!read_ok) {
       goto done;
     }
@@ -52,7 +52,7 @@ bool concat(const struct sl_args args[const static 1]) {
   is_done = true;
 
 done:
-  sl_string_delete(&result);
+  sl_string_destroy(&result);
   return is_done;
 }
 
@@ -100,7 +100,7 @@ bool count(const struct sl_args args[const static 1]) {
   is_done = true;
 
 done:
-  sl_string_delete(&content);
+  sl_string_destroy(&content);
   return is_done;
 }
 
@@ -140,7 +140,7 @@ bool slicelines(const struct sl_args args[const static 1]) {
       struct sl_string line = sl_string_from_utf8(sl_tokenizer_iter_get(&iter));
       bool write_ok = sl_string_fprint(stdout, &line);
       ++n_printed;
-      sl_string_delete(&line);
+      sl_string_destroy(&line);
       if (!write_ok) {
         goto done;
       }
@@ -154,7 +154,7 @@ bool slicelines(const struct sl_args args[const static 1]) {
   is_done = true;
 
 done:
-  sl_string_delete(&content);
+  sl_string_destroy(&content);
   return is_done;
 }
 
@@ -190,14 +190,14 @@ bool replace(const struct sl_args args[const static 1]) {
   struct sl_span pattern = sl_span_from_str(pattern_str);
   if (sl_span_is_hexadecimal_str(&pattern)) {
     struct sl_span hex_pattern = sl_span_parse_hex(&pattern);
-    sl_span_delete(&pattern);
+    sl_span_destroy(&pattern);
     pattern = hex_pattern;
   }
 
   struct sl_span replacement = sl_span_from_str(replacement_str);
   if (sl_span_is_hexadecimal_str(&replacement)) {
     struct sl_span hex_replacement = sl_span_parse_hex(&replacement);
-    sl_span_delete(&replacement);
+    sl_span_destroy(&replacement);
     replacement = hex_replacement;
   }
 
@@ -209,7 +209,7 @@ bool replace(const struct sl_args args[const static 1]) {
     {
       struct sl_string line = sl_string_from_utf8(sl_tokenizer_iter_get(&iter));
       const bool write_ok = sl_string_fprint(stdout, &line);
-      sl_string_delete(&line);
+      sl_string_destroy(&line);
       if (!write_ok) {
         goto done;
       }
@@ -218,7 +218,7 @@ bool replace(const struct sl_args args[const static 1]) {
     if (!sl_tokenizer_iter_is_done(&iter) && replacement.size) {
       struct sl_string repl = sl_string_from_utf8(&replacement);
       const bool write_ok = sl_string_fprint(stdout, &repl);
-      sl_string_delete(&repl);
+      sl_string_destroy(&repl);
       if (!write_ok) {
         goto done;
       }
@@ -228,9 +228,9 @@ bool replace(const struct sl_args args[const static 1]) {
   is_done = true;
 
 done:
-  sl_string_delete(&content);
-  sl_span_delete(&pattern);
-  sl_span_delete(&replacement);
+  sl_string_destroy(&content);
+  sl_span_destroy(&pattern);
+  sl_span_destroy(&replacement);
   return is_done;
 }
 
@@ -282,7 +282,7 @@ bool linefreq(const struct sl_args args[const static 1]) {
     }
     struct sl_string key_str = sl_string_from_utf8(&(slot->key));
     bool write_ok = sl_string_fprint(stdout, &key_str);
-    sl_string_delete(&key_str);
+    sl_string_destroy(&key_str);
     if (!write_ok || (printf("\n") < 0)) {
       goto done;
     }
@@ -291,8 +291,8 @@ bool linefreq(const struct sl_args args[const static 1]) {
   is_done = true;
 
 done:
-  sl_string_delete(&content);
-  sl_hashmap_delete(&freq);
+  sl_string_destroy(&content);
+  sl_hashmap_destroy(&freq);
   return is_done;
 }
 

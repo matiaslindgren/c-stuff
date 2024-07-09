@@ -37,12 +37,12 @@ struct sl_string sl_fs_read_file_utf8(const char path[const static 1],
 
   if (!sl_unicode_is_valid_utf8(&utf8_data)) {
     SL_LOG_ERROR("cannot decode '%s' as UTF-8", path);
-    sl_span_delete(&utf8_data);
+    sl_span_destroy(&utf8_data);
     return (struct sl_string){0};
   }
 
   struct sl_string content = sl_string_from_utf8(&utf8_data);
-  sl_span_delete(&utf8_data);
+  sl_span_destroy(&utf8_data);
 
   return content;
 }

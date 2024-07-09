@@ -25,9 +25,9 @@ bool test_empty(const bool) {
     assert(map.slots != nullptr);
   }
 
-  sl_hashmap_delete(&map);
+  sl_hashmap_destroy(&map);
   for (size_t i = 0; i < SL_ARRAY_LEN(keys); ++i) {
-    sl_span_delete(keys + i);
+    sl_span_destroy(keys + i);
   }
   return true;
 }
@@ -53,8 +53,8 @@ bool test_insert_single_int(const bool) {
     assert(sl_hashmap_get(&map, &key_hello));
     SL_ASSERT_EQ_LL(sl_hashmap_get(&map, &key_hello)->value.int64, value);
 
-    sl_hashmap_delete(&map);
-    sl_span_delete(&key_hello);
+    sl_hashmap_destroy(&map);
+    sl_span_destroy(&key_hello);
   }
   for (uint64_t value = 0; value <= 20; ++value) {
     struct sl_hashmap map = sl_hashmap_create(2);
@@ -76,8 +76,8 @@ bool test_insert_single_int(const bool) {
     assert(sl_hashmap_get(&map, &key));
     SL_ASSERT_EQ_LL(sl_hashmap_get(&map, &key)->value.uint64, value);
 
-    sl_hashmap_delete(&map);
-    sl_span_delete(&key);
+    sl_hashmap_destroy(&map);
+    sl_span_destroy(&key);
   }
   return true;
 }
@@ -103,9 +103,9 @@ bool test_insert_single_pointer(const bool) {
   assert(sl_hashmap_get(&map, &key));
   SL_ASSERT_EQ_PTR(sl_hashmap_get(&map, &key)->value.any, &value);
 
-  sl_hashmap_delete(&map);
-  sl_span_delete(&key);
-  sl_span_delete(&value);
+  sl_hashmap_destroy(&map);
+  sl_span_destroy(&key);
+  sl_span_destroy(&value);
 
   return true;
 }
@@ -127,9 +127,9 @@ bool test_insert_two_elements_resizes(const bool) {
   SL_ASSERT_EQ_LL(map.size, 2);
   SL_ASSERT_EQ_LL(map.capacity, 4);
 
-  sl_hashmap_delete(&map);
-  sl_span_delete(&key_hello);
-  sl_span_delete(&key_there);
+  sl_hashmap_destroy(&map);
+  sl_span_destroy(&key_hello);
+  sl_span_destroy(&key_there);
   return true;
 }
 
@@ -153,8 +153,8 @@ bool test_update_single_element(const bool) {
     assert(sl_hashmap_get(&map, &key)->type == sl_hashmap_type_uint64);
   }
 
-  sl_hashmap_delete(&map);
-  sl_span_delete(&key);
+  sl_hashmap_destroy(&map);
+  sl_span_destroy(&key);
   return true;
 }
 
@@ -210,14 +210,14 @@ bool test_multiple_resizes_retain_slots(const bool) {
       assert(sl_hashmap_contains(&map, &key2));
       assert(sl_hashmap_get(&map, &key2));
       SL_ASSERT_EQ_LL(sl_hashmap_get(&map, &key2)->value.int64, values[j]);
-      sl_span_delete(&key2);
+      sl_span_destroy(&key2);
     }
     sl_hashmap_insert(&map, &key1, sl_hashmap_type_int64, values + i);
-    sl_span_delete(&key1);
+    sl_span_destroy(&key1);
   }
   SL_ASSERT_EQ_LL(map.size, n);
   SL_ASSERT_EQ_LL(map.capacity, expected_capacities[n]);
-  sl_hashmap_delete(&map);
+  sl_hashmap_destroy(&map);
   return true;
 }
 
@@ -241,7 +241,7 @@ bool test_slot_iterator(const bool) {
     values[i] = i;
     struct sl_span key = sl_span_from_str(keys[i]);
     sl_hashmap_insert(&map, &key, sl_hashmap_type_uint64, values + i);
-    sl_span_delete(&key);
+    sl_span_destroy(&key);
   }
   struct sl_iterator iter = sl_hashmap_iter(&map);
   for (size_t i = 0; i < n; ++i) {
@@ -259,7 +259,7 @@ bool test_slot_iterator(const bool) {
     sl_hashmap_iter_advance(&iter);
   }
   assert(sl_hashmap_iter_is_done(&iter));
-  sl_hashmap_delete(&map);
+  sl_hashmap_destroy(&map);
   return true;
 }
 

@@ -15,7 +15,7 @@ bool test_data_view_one(const bool) {
   assert(data.size == 1);
   assert(!data.owned);
   assert(data.data == &x);
-  sl_span_delete(&data);
+  sl_span_destroy(&data);
   assert(data.data == nullptr);
   return true;
 }
@@ -30,7 +30,7 @@ bool test_data_view_array(const bool) {
   for (size_t i = 0; i < n; ++i) {
     assert(data.data + i == x + i);
   }
-  sl_span_delete(&data);
+  sl_span_destroy(&data);
   assert(data.data == nullptr);
   return true;
 }
@@ -44,7 +44,7 @@ bool test_data_create(const bool) {
   for (size_t i = 0; i < n; ++i) {
     assert(data.data[i] == 0);
   }
-  sl_span_delete(&data);
+  sl_span_destroy(&data);
   assert(data.data == nullptr);
   return true;
 }
@@ -54,7 +54,7 @@ bool test_data_create_empty(const bool) {
   assert(data.size == 0);
   assert(data.owned);
   assert(!data.data);
-  sl_span_delete(&data);
+  sl_span_destroy(&data);
   assert(data.data == nullptr);
   return true;
 }
@@ -88,7 +88,7 @@ bool test_data_create_from_cstr(const bool) {
       assert(memcmp(str.data, cstr, str.size) == 0);
     }
     assert(!sl_span_is_hexadecimal_str(&str));
-    sl_span_delete(&str);
+    sl_span_destroy(&str);
   }
   return true;
 }
@@ -147,8 +147,8 @@ bool test_data_create_from_hexadecimal_cstr(const bool) {
     assert(num.owned);
     assert(num.data);
     assert(memcmp(num.data, bytes[i], num.size) == 0);
-    sl_span_delete(&num);
-    sl_span_delete(&str);
+    sl_span_destroy(&num);
+    sl_span_destroy(&str);
   }
   return true;
 }
@@ -167,7 +167,7 @@ bool test_data_copy_view(const bool) {
     assert(data2.data + i != x + i);
     assert(data2.data[i] == x[i]);
   }
-  sl_span_delete(&data2);
+  sl_span_destroy(&data2);
   assert(data2.data == nullptr);
   return true;
 }
@@ -196,7 +196,7 @@ bool test_data_concat_views(const bool) {
     assert(data2.data + i != data3.data + n1 + i);
     assert(data2.data[i] == data3.data[n1 + i]);
   }
-  sl_span_delete(&data3);
+  sl_span_destroy(&data3);
   assert(data3.data == nullptr);
   return true;
 }
@@ -218,7 +218,7 @@ bool test_data_concat_empty(const bool) {
     assert(data1.data + i != data3.data + i);
     assert(data1.data[i] == data3.data[i]);
   }
-  sl_span_delete(&data3);
+  sl_span_destroy(&data3);
   assert(data3.data == nullptr);
   return true;
 }

@@ -31,7 +31,7 @@ struct sl_span sl_span_create(size_t size) {
   };
 }
 
-void sl_span_delete(struct sl_span data[static 1]) {
+void sl_span_destroy(struct sl_span data[static 1]) {
   if (data->owned && data->data) {
     sl_free(data->data);
   }
@@ -98,7 +98,7 @@ struct sl_span sl_span_concat(struct sl_span data1[const static 1],
 void sl_span_extend(struct sl_span dst[static 1],
                     struct sl_span src[const static 1]) {
   struct sl_span tmp = sl_span_concat(dst, src);
-  sl_span_delete(dst);
+  sl_span_destroy(dst);
   *dst = tmp;
 }
 
