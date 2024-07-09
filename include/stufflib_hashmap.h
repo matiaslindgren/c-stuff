@@ -14,9 +14,6 @@
 #ifndef SL_HASHMAP_MAX_LOAD_FACTOR
   #define SL_HASHMAP_MAX_LOAD_FACTOR 0.5
 #endif
-#ifndef SL_HASHMAP_INIT_CAPACITY
-  #define SL_HASHMAP_INIT_CAPACITY 64
-#endif
 
 enum sl_hashmap_type {
   sl_hashmap_type_empty = 0,
@@ -42,11 +39,10 @@ struct sl_hashmap {
   struct sl_hashmap_slot* slots;
 };
 
-struct sl_hashmap sl_hashmap_create(void) {
+struct sl_hashmap sl_hashmap_create(size_t init_capacity) {
   return (struct sl_hashmap){
-      .capacity = SL_HASHMAP_INIT_CAPACITY,
-      .slots =
-          sl_alloc(SL_HASHMAP_INIT_CAPACITY, sizeof(struct sl_hashmap_slot)),
+      .capacity = init_capacity,
+      .slots = sl_alloc(init_capacity, sizeof(struct sl_hashmap_slot)),
   };
 }
 

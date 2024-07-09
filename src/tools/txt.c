@@ -250,7 +250,7 @@ bool linefreq(const struct sl_args args[const static 1]) {
 
   bool is_done = false;
 
-  struct sl_hashmap freq = sl_hashmap_create();
+  struct sl_hashmap freq = sl_hashmap_create(1024);
   struct sl_string content = sl_fs_read_file_utf8(path, &reader_buffer);
   if (!content.length) {
     goto done;

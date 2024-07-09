@@ -2,15 +2,13 @@
 #include <string.h>
 
 #include "stufflib_args.h"
+#include "stufflib_hashmap.h"
 #include "stufflib_iterator.h"
 #include "stufflib_macros.h"
 #include "stufflib_span.h"
 
-#define SL_HASHMAP_INIT_CAPACITY 2
-#include "stufflib_hashmap.h"
-
 bool test_empty(const bool) {
-  struct sl_hashmap map = sl_hashmap_create();
+  struct sl_hashmap map = sl_hashmap_create(2);
   SL_ASSERT_EQ_LL(map.size, 0);
   SL_ASSERT_EQ_LL(map.capacity, 2);
   assert(map.slots != nullptr);
@@ -36,7 +34,7 @@ bool test_empty(const bool) {
 
 bool test_insert_single_int(const bool) {
   for (int64_t value = -10; value <= 10; ++value) {
-    struct sl_hashmap map = sl_hashmap_create();
+    struct sl_hashmap map = sl_hashmap_create(2);
     struct sl_span key_hello = sl_span_from_str("hello");
 
     SL_ASSERT_EQ_LL(map.size, 0);
@@ -59,7 +57,7 @@ bool test_insert_single_int(const bool) {
     sl_span_delete(&key_hello);
   }
   for (uint64_t value = 0; value <= 20; ++value) {
-    struct sl_hashmap map = sl_hashmap_create();
+    struct sl_hashmap map = sl_hashmap_create(2);
     struct sl_span key = sl_span_from_str("hello");
 
     SL_ASSERT_EQ_LL(map.size, 0);
@@ -85,7 +83,7 @@ bool test_insert_single_int(const bool) {
 }
 
 bool test_insert_single_pointer(const bool) {
-  struct sl_hashmap map = sl_hashmap_create();
+  struct sl_hashmap map = sl_hashmap_create(2);
   struct sl_span key = sl_span_from_str("hello");
   struct sl_span value = sl_span_from_str("there");
 
@@ -113,7 +111,7 @@ bool test_insert_single_pointer(const bool) {
 }
 
 bool test_insert_two_elements_resizes(const bool) {
-  struct sl_hashmap map = sl_hashmap_create();
+  struct sl_hashmap map = sl_hashmap_create(2);
   struct sl_span key_hello = sl_span_from_str("hello");
   struct sl_span key_there = sl_span_from_str("there");
 
@@ -136,7 +134,7 @@ bool test_insert_two_elements_resizes(const bool) {
 }
 
 bool test_update_single_element(const bool) {
-  struct sl_hashmap map = sl_hashmap_create();
+  struct sl_hashmap map = sl_hashmap_create(2);
   struct sl_span key = sl_span_from_str("hello");
 
   {
@@ -161,7 +159,7 @@ bool test_update_single_element(const bool) {
 }
 
 bool test_multiple_resizes_retain_slots(const bool) {
-  struct sl_hashmap map = sl_hashmap_create();
+  struct sl_hashmap map = sl_hashmap_create(2);
   const char* keys[] = {
       "ten",
       "eleven",
@@ -224,7 +222,7 @@ bool test_multiple_resizes_retain_slots(const bool) {
 }
 
 bool test_slot_iterator(const bool) {
-  struct sl_hashmap map = sl_hashmap_create();
+  struct sl_hashmap map = sl_hashmap_create(2);
   const char* keys[] = {
       "ten",
       "eleven",
