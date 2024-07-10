@@ -48,6 +48,10 @@ void* sl_realloc(void* data,
   return new_data;
 }
 
-void sl_free(void* data) { free(data); }
+void sl_free(void* data) {
+  if (data) {
+    free(data);
+  }
+}
 
 #endif  // SL_MEMORY_H_INCLUDED
