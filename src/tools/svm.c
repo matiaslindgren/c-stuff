@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "stufflib_args.h"
+#include "stufflib_dataset.h"
 #include "stufflib_linalg.h"
 #include "stufflib_macros.h"
 #include "stufflib_ml.h"
@@ -17,14 +18,17 @@ bool spambase(const struct sl_args args[const static 1]) {
   const bool verbose = sl_args_parse_flag(args, "-v");
 
   if (verbose) {
-    SL_LOG_INFO("training SVM on spambase dataset from '%s'", dataset_dir);
+    SL_LOG_INFO("training linear SVM on spambase dataset from '%s'",
+                dataset_dir);
   }
 
   struct sl_record classes_record;
-  uint16_t classes[4601] = {0};
+  uint16_t classes[SL_DATASET_SPAMBASE_SAMPLES] = {0};
 
   struct sl_record samples_record;
-  struct sl_la_matrix samples = sl_la_matrix_create(4601, 57);
+  struct sl_la_matrix samples =
+      sl_la_matrix_create(SL_DATASET_SPAMBASE_SAMPLES,
+                          SL_DATASET_SPAMBASE_FEATURES);
 
   if (!sl_record_read_metadata(&classes_record,
                                dataset_dir,
@@ -54,7 +58,9 @@ bool spambase(const struct sl_args args[const static 1]) {
   }
 
   struct sl_ml_svm svm = {
-      .w = (struct sl_la_vector){.size = samples.cols, .data = (float[57]){0}},
+      .w = (struct sl_la_vector){.size = samples.cols,
+                                 .data =
+                                     (float[SL_DATASET_SPAMBASE_FEATURES]){0}},
       .batch_size = 1,
       .n_epochs = 2,
       .learning_rate = 1e-9f,
@@ -80,7 +86,11 @@ bool spambase(const struct sl_args args[const static 1]) {
                                 train_classes,
                                 test_classes);
 
-  SL_ML_MINMAX_RESCALE(57, &samples, -1, 1);
+  SL_ML_MINMAX_SCALER_CREATE(sl_minmax_scaler, SL_DATASET_SPAMBASE_FEATURES);
+  sl_ml_minmax_fit(&sl_minmax_scaler, &train_data);
+  sl_ml_minmax_apply(&sl_minmax_scaler, &train_data, -1, 1);
+  sl_ml_minmax_apply(&sl_minmax_scaler, &test_data, -1, 1);
+
   sl_ml_svm_linear_fit(&svm, &train_data, train_classes);
 
   {

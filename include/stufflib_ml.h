@@ -207,16 +207,19 @@ void sl_ml_svm_linear_fit(struct sl_ml_svm svm[const static 1],
   sl_free(indices);
 }
 
-#define SL_ML_MINMAX_RESCALE(n_features, dataset, a, b)                \
-  do {                                                                 \
-    struct sl_ml_minmax_scaler sl_minmax_scaler = {                    \
-        .lo = (struct sl_la_vector){.size = (n_features),              \
-                                    .data = (float[(n_features)]){0}}, \
-        .hi = (struct sl_la_vector){.size = (n_features),              \
-                                    .data = (float[(n_features)]){0}}, \
-    };                                                                 \
-    sl_ml_minmax_fit(&sl_minmax_scaler, (dataset));                    \
-    sl_ml_minmax_apply(&sl_minmax_scaler, (dataset), (a), (b));        \
+#define SL_ML_MINMAX_SCALER_CREATE(name, n_features)                 \
+  struct sl_ml_minmax_scaler name = {                                \
+      .lo = (struct sl_la_vector){.size = (n_features),              \
+                                  .data = (float[(n_features)]){0}}, \
+      .hi = (struct sl_la_vector){.size = (n_features),              \
+                                  .data = (float[(n_features)]){0}}, \
+  }
+
+#define SL_ML_MINMAX_RESCALE(n_features, dataset, a, b)         \
+  do {                                                          \
+    SL_ML_MINMAX_SCALER_CREATE(sl_minmax_scaler, (n_features)); \
+    sl_ml_minmax_fit(&sl_minmax_scaler, (dataset));             \
+    sl_ml_minmax_apply(&sl_minmax_scaler, (dataset), (a), (b)); \
   } while (false)
 
 #endif  // SL_ML_H_INCLUDED
