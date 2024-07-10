@@ -86,10 +86,10 @@ bool spambase(const struct sl_args args[const static 1]) {
                                 train_classes,
                                 test_classes);
 
-  SL_ML_MINMAX_SCALER_CREATE(sl_minmax_scaler, SL_DATASET_SPAMBASE_FEATURES);
-  sl_ml_minmax_fit(&sl_minmax_scaler, &train_data);
-  sl_ml_minmax_apply(&sl_minmax_scaler, &train_data, -1, 1);
-  sl_ml_minmax_apply(&sl_minmax_scaler, &test_data, -1, 1);
+  SL_ML_MINMAX_SCALER_CREATE(minmax_scaler, SL_DATASET_SPAMBASE_FEATURES);
+  sl_ml_minmax_fit(&minmax_scaler, &train_data);
+  sl_ml_minmax_apply(&minmax_scaler, &train_data, -1, 1);
+  sl_ml_minmax_apply(&minmax_scaler, &test_data, -1, 1);
 
   sl_ml_svm_linear_fit(&svm, &train_data, train_classes);
 
