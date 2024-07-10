@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "stufflib_args.h"
+#include "stufflib_dataset.h"
 #include "stufflib_filesystem.h"
 #include "stufflib_io.h"
 #include "stufflib_linalg.h"
@@ -22,12 +23,6 @@
 
 static unsigned char reader_buffer_data[1024 << 6] = {0};
 static struct sl_span reader_buffer = {0};
-
-#define SL_DATASET_SPAMBASE_SAMPLES 4601
-#define SL_DATASET_SPAMBASE_FEATURES 57
-
-#define SL_DATASET_RCV1_SAMPLES 804'414
-#define SL_DATASET_RCV1_FEATURES 47'236
 
 static bool cifar_to_png(const struct sl_args args[const static 1]) {
   // CIFAR dataset parser
@@ -367,6 +362,7 @@ bool rcv1(const struct sl_args args[const static 1]) {
     return false;
   }
 
+  // TODO way too much code
   bool all_ok = false;
 
   const char* const dataset_dir = sl_args_get_positional(args, 1);
@@ -383,17 +379,30 @@ bool rcv1(const struct sl_args args[const static 1]) {
         output_dir);
   }
 
+  struct sl_rcv1_metadata {
+    size_t index;
+    bool in_trainset;
+    bool is_ccat_class;
+    bool has_value;
+  };
+
   const size_t max_document_id = 2 * SL_DATASET_RCV1_SAMPLES;
 
   FILE* fp = nullptr;
-  size_t* document_ids = sl_alloc(max_document_id, sizeof(size_t));
-  uint8_t* classes = sl_alloc(SL_DATASET_RCV1_SAMPLES, sizeof(uint8_t));
+
+  struct sl_rcv1_metadata* metadata =
+      sl_alloc(max_document_id + 1, sizeof(struct sl_rcv1_metadata));
 
   struct sl_span write_buffer =
       sl_span_create(sizeof(float) * SL_DATASET_RCV1_FEATURES);
-  struct sl_record record = {0};
-  struct sl_file record_file = {0};
-  struct sl_record_writer record_writer = {0};
+
+  struct sl_record train_record = {0};
+  struct sl_file train_record_file = {0};
+  struct sl_record_writer trainset_writer = {0};
+
+  struct sl_record test_record = {0};
+  struct sl_file test_record_file = {0};
+  struct sl_record_writer testset_writer = {0};
 
   {
     const char* filename = "rcv1v2-ids.dat";
@@ -417,13 +426,21 @@ bool rcv1(const struct sl_args args[const static 1]) {
       SL_LOG_INFO("reading RCV1 document IDs from '%s'", path);
     }
 
-    for (size_t id = 0, idx = 0; EOF != fscanf(fp, "%zu ", &id);) {
-      if (id < max_document_id) {
-        document_ids[id] = ++idx;
-      } else {
-        SL_LOG_ERROR("unexpected RCV1 document ID %zu at index %zu", id, idx);
+    for (size_t id = 0, idx = 0; EOF != fscanf(fp, "%zu ", &id); ++idx) {
+      if (id >= max_document_id) {
+        SL_LOG_ERROR("unexpectedly large RCV1 document ID %zu at index %zu",
+                     id,
+                     idx);
         goto done;
       }
+      if (metadata[id].has_value) {
+        SL_LOG_ERROR("duplicate RCV1 document ID %zu at index %zu", id, idx);
+        goto done;
+      }
+      metadata[id] = (struct sl_rcv1_metadata){
+          .index = idx,
+          .has_value = true,
+      };
     }
 
     fclose(fp);
@@ -456,18 +473,56 @@ bool rcv1(const struct sl_args args[const static 1]) {
       char category[16] = {0};
       size_t id = 0;
       while (EOF != fscanf(fp, "%15s %zu %*d ", category, &id)) {
-        if (id < max_document_id && document_ids[id] &&
-            document_ids[id] <= SL_DATASET_RCV1_SAMPLES) {
-          classes[document_ids[id] - 1] = SL_STR_EQ(category, "CCAT");
-        } else {
-          SL_LOG_ERROR("unexpected RCV1 document ID %zu", id);
+        if (id >= max_document_id) {
+          SL_LOG_ERROR(
+              "unexpectedly large RCV1 document ID %zu while parsing topic "
+              "category",
+              id);
           goto done;
         }
+        metadata[id].is_ccat_class = SL_STR_EQ(category, "CCAT");
       }
     }
 
     fclose(fp);
     fp = nullptr;
+  }
+
+  train_record = (struct sl_record){
+      .layout = "sparse",
+      .type = "float32",
+      .name = "rcv1_train_samples",
+      .n_dims = 2,
+      .dim_size = {1, SL_DATASET_RCV1_FEATURES},
+  };
+  strcpy(train_record.path, output_dir);
+  train_record_file = (struct sl_file){0};
+  trainset_writer = (struct sl_record_writer){
+      .file = &train_record_file,
+      .record = &train_record,
+  };
+
+  test_record = (struct sl_record){
+      .layout = "sparse",
+      .type = "float32",
+      .name = "rcv1_test_samples",
+      .n_dims = 2,
+      .dim_size = {1, SL_DATASET_RCV1_FEATURES},
+  };
+  strcpy(test_record.path, output_dir);
+  test_record_file = (struct sl_file){0};
+  testset_writer = (struct sl_record_writer){
+      .file = &test_record_file,
+      .record = &test_record,
+  };
+
+  if (!sl_record_writer_open(&trainset_writer)) {
+    SL_LOG_ERROR("cannot open training set samples record writer");
+    goto done;
+  }
+  if (!sl_record_writer_open(&testset_writer)) {
+    SL_LOG_ERROR("cannot open test set samples record writer");
+    goto done;
   }
 
   const char* batch_names[] = {
@@ -503,157 +558,194 @@ bool rcv1(const struct sl_args args[const static 1]) {
       SL_LOG_INFO("reading RCV1 vectors from '%s'", path);
     }
 
-    {
-      record = (struct sl_record){
-          .layout = "sparse",
-          .type = "float32",
-          .n_dims = 2,
-          .dim_size = {1, SL_DATASET_RCV1_FEATURES},
-      };
-      strcpy(record.name, batch_name);
-      strcpy(record.path, output_dir);
-      record_file = (struct sl_file){0};
-      record_writer = (struct sl_record_writer){
-          .file = &record_file,
-          .record = &record,
-      };
+    size_t lineno = 0;
 
-      if (!sl_record_writer_open(&record_writer)) {
-        SL_LOG_ERROR("cannot open record writer for writing samples");
+    for (char line[32768] = {0}, newline = 0;
+         EOF != fscanf(fp, "%32767[^\n]%c", line, &newline);
+         ++lineno, newline = 0) {
+      if (newline && newline != '\n') {
+        SL_LOG_ERROR(
+            "RCV1 file '%s' lineno %zu: too long line for line buffer of "
+            "length %zu",
+            path,
+            lineno,
+            SL_ARRAY_LEN(line));
         goto done;
       }
 
-      size_t lineno = 0;
-      unsigned long prev_id = 0;
+      char* lhs = line;
+      char* rhs = nullptr;
 
-      for (char line[32768] = {0}, newline = 0;
-           EOF != fscanf(fp, "%32767[^\n]%c", line, &newline);
-           ++lineno, newline = 0) {
-        if (newline && newline != '\n') {
-          SL_LOG_ERROR(
-              "RCV1 file '%s' lineno %zu: too long line for line buffer of "
-              "length %zu",
-              path,
-              lineno,
-              SL_ARRAY_LEN(line));
-          goto done;
-        }
-
-        char* lhs = line;
-        char* rhs = nullptr;
-
-        unsigned long id = strtoul(lhs, &rhs, 10);
-        if (prev_id >= id) {
-          SL_LOG_ERROR(
-              "RCV1 file '%s' lineno %zu document %zu: file must be sorted by "
-              "document ID (previous ID %zu)",
-              path,
-              lineno,
-              id,
-              prev_id);
-          goto done;
-        }
-        prev_id = id;
-        if (id >= max_document_id || document_ids[id] == 0 ||
-            document_ids[id] > SL_DATASET_RCV1_SAMPLES) {
-          SL_LOG_ERROR("RCV1 file '%s' lineno %zu: invalid document ID %zu",
-                       path,
-                       lineno,
-                       id);
-          goto done;
-        }
-
-        if (verbose && lineno % 10'000 == 0) {
-          SL_LOG_INFO("RCV1 file '%s' lineno %zu: document ID %zu index %zu",
-                      path,
-                      lineno,
-                      id,
-                      document_ids[id]);
-        }
-
-        sl_span_clear(&write_buffer);
-
-        for (lhs = rhs; lhs && lhs[0];) {
-          unsigned long feature_id = strtoul(lhs, &rhs, 10);
-          if (lhs == rhs || errno == ERANGE || feature_id == 0 ||
-              feature_id > SL_DATASET_RCV1_FEATURES) {
-            SL_LOG_ERROR(
-                "RCV1 file '%s' lineno %zu: cannot parse invalid feature ID",
-                path,
-                lineno);
-            errno = 0;
-            goto done;
-          }
-
-          lhs = rhs;
-          if (lhs[0] != ':') {
-            SL_LOG_ERROR(
-                "RCV1 file '%s' lineno %zu: expected ':' after feature ID %lu",
-                path,
-                lineno,
-                feature_id);
-            goto done;
-          }
-          ++lhs;
-
-          float value = strtof(lhs, &rhs);
-          if (lhs == rhs || errno == ERANGE) {
-            SL_LOG_ERROR(
-                "RCV1 file '%s' lineno %zu feature %lu: cannot parse float",
-                path,
-                lineno,
-                feature_id);
-            errno = 0;
-            goto done;
-          }
-          lhs = rhs;
-
-          memcpy(write_buffer.data + (feature_id - 1), &value, sizeof(float));
-        }
-
-        if (!sl_record_writer_write(&record_writer, &write_buffer)) {
-          SL_LOG_ERROR("RCV1 file '%s' lineno %zu: failed writing sample",
-                       path,
-                       lineno);
-          goto done;
-        }
-      }
-
-      record.dim_size[0] = lineno;
-      record.size = record_writer.n_written;
-
-      if (!sl_record_write_metadata(&record)) {
-        SL_LOG_ERROR("RCV1 file '%s': failed writing metadata of '%s'",
+      unsigned long id = strtoul(lhs, &rhs, 10);
+      if (id >= max_document_id || !metadata[id].has_value) {
+        SL_LOG_ERROR("RCV1 file '%s' lineno %zu: unknown document with ID %zu",
                      path,
-                     batch_name);
+                     lineno,
+                     id);
         goto done;
       }
 
-      sl_record_writer_close(&record_writer);
+      metadata[id].in_trainset =
+          SL_STR_EQ(batch_name, "lyrl2004_vectors_train");
+
+      if (verbose && lineno % 10'000 == 0) {
+        SL_LOG_INFO(
+            "RCV1 file '%s' lineno %zu: document ID %zu sample index %zu",
+            path,
+            lineno,
+            id,
+            metadata[id].index);
+      }
+
+      sl_span_clear(&write_buffer);
+
+      for (lhs = rhs; lhs && lhs[0];) {
+        unsigned long feature_id = strtoul(lhs, &rhs, 10);
+        if (lhs == rhs || errno == ERANGE || feature_id == 0 ||
+            feature_id > SL_DATASET_RCV1_FEATURES) {
+          SL_LOG_ERROR(
+              "RCV1 file '%s' lineno %zu: cannot parse invalid feature ID",
+              path,
+              lineno);
+          errno = 0;
+          goto done;
+        }
+
+        lhs = rhs;
+        if (lhs[0] != ':') {
+          SL_LOG_ERROR(
+              "RCV1 file '%s' lineno %zu: expected ':' after feature ID %lu",
+              path,
+              lineno,
+              feature_id);
+          goto done;
+        }
+        ++lhs;
+
+        float value = strtof(lhs, &rhs);
+        if (lhs == rhs || errno == ERANGE) {
+          SL_LOG_ERROR(
+              "RCV1 file '%s' lineno %zu feature %lu: cannot parse float",
+              path,
+              lineno,
+              feature_id);
+          errno = 0;
+          goto done;
+        }
+        lhs = rhs;
+
+        memcpy(write_buffer.data + (feature_id - 1), &value, sizeof(float));
+      }
+
+      if (metadata[id].in_trainset) {
+        // TODO len N buffer instead of len 1
+        train_record.dim_size[0] += 1;
+        if (!sl_record_writer_write(&trainset_writer, &write_buffer)) {
+          SL_LOG_ERROR(
+              "RCV1 file '%s' lineno %zu: failed training set writing sample",
+              path,
+              lineno);
+          goto done;
+        }
+      } else {
+        test_record.dim_size[0] += 1;
+        if (!sl_record_writer_write(&testset_writer, &write_buffer)) {
+          SL_LOG_ERROR(
+              "RCV1 file '%s' lineno %zu: failed writing test set sample",
+              path,
+              lineno);
+          goto done;
+        }
+      }
     }
 
     fclose(fp);
     fp = nullptr;
   }
 
-  {
-    record = (struct sl_record){
-        .layout = "dense",
-        .type = "uint8",
-        .name = "rcv1_ccat_classes",
-        .size = SL_DATASET_RCV1_SAMPLES,
-        .n_dims = 1,
-        .dim_size = {SL_DATASET_RCV1_SAMPLES},
-    };
-    strcpy(record.path, output_dir);
-    if (!(sl_record_write_metadata(&record) &&
-          sl_record_write_all(&record,
-                              sizeof(classes[0]) * SL_DATASET_RCV1_SAMPLES,
-                              (void*)classes))) {
-      SL_LOG_ERROR("failed writing RCV1 dataset CCAT classes to '%s'",
-                   output_dir);
-      goto done;
+  train_record.size = trainset_writer.n_written;
+  test_record.size = testset_writer.n_written;
+
+  if (!sl_record_write_metadata(&train_record)) {
+    SL_LOG_ERROR("failed writing RCV1 metadata for training set samples");
+    goto done;
+  }
+  if (!sl_record_write_metadata(&test_record)) {
+    SL_LOG_ERROR("failed writing RCV1 metadata for test set samples");
+    goto done;
+  }
+
+  sl_record_writer_close(&trainset_writer);
+  sl_record_writer_close(&testset_writer);
+
+  train_record = (struct sl_record){
+      .layout = "dense",
+      .type = "uint8",
+      .name = "rcv1_train_classes",
+      .size = 1,
+      .n_dims = 1,
+      .dim_size = {SL_DATASET_RCV1_SAMPLES},
+  };
+  strcpy(train_record.path, output_dir);
+  train_record_file = (struct sl_file){0};
+  trainset_writer = (struct sl_record_writer){
+      .file = &train_record_file,
+      .record = &train_record,
+  };
+
+  test_record = (struct sl_record){
+      .layout = "dense",
+      .type = "uint8",
+      .name = "rcv1_test_classes",
+      .size = 1,
+      .n_dims = 1,
+      .dim_size = {SL_DATASET_RCV1_SAMPLES},
+  };
+  strcpy(test_record.path, output_dir);
+  test_record_file = (struct sl_file){0};
+  testset_writer = (struct sl_record_writer){
+      .file = &test_record_file,
+      .record = &test_record,
+  };
+
+  if (!sl_record_writer_open(&trainset_writer)) {
+    SL_LOG_ERROR("cannot open training set classes record writer");
+    goto done;
+  }
+  if (!sl_record_writer_open(&testset_writer)) {
+    SL_LOG_ERROR("cannot open test set classes record writer");
+    goto done;
+  }
+
+  struct sl_span class_buffer = {.size = 1, .data = (uint8_t[1]){0}};
+  for (size_t id = 0; id <= max_document_id; ++id) {
+    if (metadata[id].has_value) {
+      class_buffer.data[0] = metadata[id].is_ccat_class;
+      if (metadata[id].in_trainset) {
+        if (!sl_record_writer_write(&trainset_writer, &class_buffer)) {
+          SL_LOG_ERROR("RCV1 document %zu: failed writing training set class",
+                       id);
+          goto done;
+        }
+      } else {
+        if (!sl_record_writer_write(&testset_writer, &class_buffer)) {
+          SL_LOG_ERROR("RCV1 document %zu: failed writing test set class", id);
+          goto done;
+        }
+      }
     }
+  }
+
+  train_record.size = trainset_writer.n_written;
+  test_record.size = testset_writer.n_written;
+
+  if (!sl_record_write_metadata(&train_record)) {
+    SL_LOG_ERROR("failed writing RCV1 metadata for training set classes");
+    goto done;
+  }
+  if (!sl_record_write_metadata(&test_record)) {
+    SL_LOG_ERROR("failed writing RCV1 metadata for test set classes");
+    goto done;
   }
 
   all_ok = true;
@@ -661,10 +753,10 @@ done:
   if (fp) {
     fclose(fp);
   }
-  sl_free(document_ids);
-  sl_free(classes);
+  sl_free(metadata);
   sl_span_destroy(&write_buffer);
-  sl_record_writer_close(&record_writer);
+  sl_record_writer_close(&trainset_writer);
+  sl_record_writer_close(&testset_writer);
   return all_ok;
 }
 

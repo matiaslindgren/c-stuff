@@ -50,8 +50,12 @@ bool sl_record_validate_metadata(const struct sl_record r[const static 1]) {
 
   bool is_sparse = SL_STR_EQ(r->layout, "sparse");
   bool is_dense = SL_STR_EQ(r->layout, "dense");
-  if ((!is_sparse && !is_dense) || (is_dense && !r->size)) {
-    SL_LOG_ERROR("invalid data layout '%s'", r->layout);
+  if (!is_sparse && !is_dense) {
+    SL_LOG_ERROR("unknown data layout '%s'", r->layout);
+    return false;
+  }
+  if (is_dense && !r->size) {
+    SL_LOG_ERROR("dense data layout must have a size");
     return false;
   }
 
