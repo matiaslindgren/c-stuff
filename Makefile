@@ -79,7 +79,7 @@ JQ_MAKE_COMPILE_COMMANDS := [inputs|{\
 	output: match("-o ([^ ]+)").captures[0].string \
 	}]
 
-$(BUILD_DIR)/compile_commands.json: $(BUILD_DIR)/
+compile_commands.json:
 	@$(MAKE) --always-make --dry-run \
 		| grep -wE '^\S*clang' \
 		| jq -nR '$(JQ_MAKE_COMPILE_COMMANDS)' > $@

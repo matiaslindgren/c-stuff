@@ -2,6 +2,8 @@
 
 C scribbles. "Everything library". Minimal dependencies (stdlib, openBLAS).
 
+Unstable API, don't depend on this.
+
 ## Tools
 
 Functionality (very limited):
@@ -20,7 +22,7 @@ See [`./src/tools`](./src/tools)
 * `clang-18`
 * probably many more depending on your OS/distro
 
-See the [LLVM docs](https://apt.llvm.org/) or stufflib's [CI config](./.github/workflows/c.yml) on how to new Clang versions (or used Docker).
+See the [LLVM docs](https://apt.llvm.org/) or stufflib's [CI config](./.github/workflows/c.yml) on how to new Clang versions (or use Docker).
 
 ### (Optional) Run in Docker
 
@@ -31,11 +33,30 @@ If you can't install Clang 18 using a package manager, you can use Docker:
 ./scripts/run_image.sh
 ```
 
-## Build and test
+## Makefile targets
 
+### Build and test
+
+Unoptimized, with sanitizers (address and UB):
 ```sh
 make DEBUG=1 -j4 all test integration_test
+```
+
+Optimized:
+```sh
 make -j4 all test integration_test
+```
+
+### Keep the code tidy
+
+```sh
+make fmt
+```
+
+### Generate compilation database
+
+```sh
+make DEBUG=1 compile_commands.json
 ```
 
 ## References
