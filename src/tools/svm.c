@@ -123,6 +123,179 @@ done:
   return all_ok;
 }
 
+#define SL_SVM_RCV1_BATCH_SIZE 10'000
+
+bool rcv1(const struct sl_args args[const static 1]) {
+  bool all_ok = false;
+
+  const char* const dataset_dir = sl_args_get_positional(args, 1);
+  const bool verbose = sl_args_parse_flag(args, "-v");
+
+  if (verbose) {
+    SL_LOG_INFO("training linear SVM on RCV1 dataset from '%s'", dataset_dir);
+  }
+
+  struct sl_record train_samples_record = {0};
+  struct sl_file train_record_file = {0};
+  struct sl_record_reader train_samples_reader = {
+      .file = &train_record_file,
+      .record = &train_samples_record,
+  };
+
+  struct sl_record train_classes_record = {0};
+  uint8_t* train_classes = nullptr;
+
+  struct sl_record test_samples_record = {0};
+  struct sl_file test_record_file = {0};
+  struct sl_record_reader test_samples_reader = {
+      .file = &test_record_file,
+      .record = &test_samples_record,
+  };
+
+  struct sl_record test_classes_record = {0};
+  uint8_t* test_classes = nullptr;
+
+  struct sl_la_matrix train_batch =
+      sl_la_matrix_create(SL_SVM_RCV1_BATCH_SIZE, SL_DATASET_RCV1_FEATURES);
+
+  if (!sl_record_read_metadata(&train_samples_record,
+                               dataset_dir,
+                               "rcv1_train_samples")) {
+    SL_LOG_ERROR("failed reading metadata of RCV1 training set samples");
+    goto done;
+  }
+  if (!sl_record_read_metadata(&test_samples_record,
+                               dataset_dir,
+                               "rcv1_test_samples")) {
+    SL_LOG_ERROR("failed reading metadata of RCV1 testing set samples");
+    goto done;
+  }
+
+  if (!sl_record_read_metadata(&train_classes_record,
+                               dataset_dir,
+                               "rcv1_train_classes")) {
+    SL_LOG_ERROR("failed reading metadata of RCV1 training set classes");
+    goto done;
+  }
+  if (!sl_record_read_metadata(&test_classes_record,
+                               dataset_dir,
+                               "rcv1_test_classes")) {
+    SL_LOG_ERROR("failed reading metadata of RCV1 testing set classes");
+    goto done;
+  }
+
+  const size_t class_size = sl_record_item_size(&train_classes_record);
+
+  train_classes = sl_alloc(train_classes_record.size, class_size);
+  test_classes = sl_alloc(test_classes_record.size, class_size);
+
+  if (!sl_record_read_all(&train_classes_record,
+                          train_classes_record.size * class_size,
+                          (void*)train_classes)) {
+    SL_LOG_ERROR("failed reading RCV1 training set classes");
+    goto done;
+  }
+  if (!sl_record_read_all(&test_classes_record,
+                          test_classes_record.size * class_size,
+                          (void*)test_classes)) {
+    SL_LOG_ERROR("failed reading RCV1 testing set classes");
+    goto done;
+  }
+
+  if (!sl_record_reader_open(&train_samples_reader)) {
+    SL_LOG_ERROR("failed opening RCV1 training set samples record reader");
+    goto done;
+  }
+
+  SL_ML_MINMAX_SCALER_CREATE(minmax_scaler, SL_DATASET_RCV1_FEATURES);
+  while (!sl_record_reader_is_done(&train_samples_reader)) {
+    if (!sl_record_reader_read(
+            &train_samples_reader,
+            &((struct sl_span){
+                .size = sizeof(float) * sl_la_matrix_size(&train_batch),
+                .data = (void*)train_batch.data}))) {
+      SL_LOG_ERROR(
+          "failed reading RCV1 training set samples batch during minmax scaler "
+          "fit");
+      goto done;
+    }
+    sl_ml_minmax_fit(&minmax_scaler, &train_batch);
+  }
+
+  sl_record_reader_close(&train_samples_reader);
+
+  train_record_file = (struct sl_file){0};
+  train_samples_reader = (struct sl_record_reader){
+      .file = &train_record_file,
+      .record = &train_samples_record,
+  };
+
+  if (!sl_record_reader_open(&train_samples_reader)) {
+    SL_LOG_ERROR("failed opening RCV1 training set samples record reader");
+    goto done;
+  }
+  if (!sl_record_reader_open(&test_samples_reader)) {
+    SL_LOG_ERROR("failed opening RCV1 testing set samples record reader");
+    goto done;
+  }
+
+  struct sl_ml_svm svm = {
+      .w = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_RCV1_FEATURES),
+      .s = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_RCV1_FEATURES),
+      .x = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_RCV1_FEATURES),
+      .shuffle_buffer = (size_t[SL_SVM_RCV1_BATCH_SIZE]){0},
+      .batch_size = 1,
+      .n_epochs = 1,
+      .learning_rate = 1e-6f,
+  };
+
+  uint16_t classes_buffer[SL_SVM_RCV1_BATCH_SIZE] = {0};
+  struct sl_span read_buffer =
+      sl_span_view(sizeof(float) * sl_la_matrix_size(&train_batch),
+                   (void*)train_batch.data);
+  for (size_t offset = 0; !sl_record_reader_is_done(&train_samples_reader);
+       ++offset) {
+    SL_LOG_INFO("RCV1 batch %zu: reading buffer", offset);
+    sl_span_clear(&read_buffer);
+    if (!sl_record_reader_read(&train_samples_reader, &read_buffer)) {
+      SL_LOG_ERROR(
+          "failed reading RCV1 training set samples batch during svm fit");
+      goto done;
+    }
+    SL_LOG_INFO("RCV1 batch %zu: apply minmax", offset);
+    sl_ml_minmax_apply(&minmax_scaler, &train_batch, -1, 1);
+    SL_LOG_INFO("RCV1 batch %zu: copy classes", offset);
+    for (size_t i = 0; i < SL_SVM_RCV1_BATCH_SIZE; ++i) {
+      const size_t class_idx =
+          (size_t)train_batch.rows * sizeof(uint8_t) * offset + i;
+      classes_buffer[i] =
+          class_idx < train_classes_record.size ? train_classes[class_idx] : 0;
+    }
+    SL_LOG_INFO("RCV1 batch %zu: fit svm", offset);
+    sl_ml_svm_linear_fit(&svm, &train_batch, classes_buffer);
+    {
+      struct sl_ml_classification report = {0};
+      for (int i = 0; i < SL_SVM_RCV1_BATCH_SIZE; ++i) {
+        struct sl_la_vector x = sl_la_matrix_row_view(&train_batch, i);
+        sl_ml_classification_update(&report,
+                                    classes_buffer[i],
+                                    sl_ml_svm_binary_predict(&svm, &x));
+      }
+      SL_LOG_INFO("RCV1 batch %zu: train set, linear SVM", offset);
+      sl_ml_classification_print(stderr, &report);
+    }
+  }
+
+  all_ok = true;
+done:
+  sl_free(train_classes);
+  sl_free(test_classes);
+  sl_record_reader_close(&train_samples_reader);
+  sl_record_reader_close(&test_samples_reader);
+  sl_la_matrix_destroy(&train_batch);
+  return all_ok;
+}
+
 void print_usage(const struct sl_args args[const static 1]) {
   SL_LOG_ERROR("usage: %s experiment dataset_dir [-v]", args->argv[0]);
 }
@@ -137,6 +310,8 @@ int main(int argc, char* const argv[argc + 1]) {
     if (experiment) {
       if (strcmp(experiment, "spambase") == 0) {
         ok = spambase(&args);
+      } else if (strcmp(experiment, "rcv1") == 0) {
+        ok = rcv1(&args);
       } else {
         SL_LOG_ERROR("unknown experiment %s", experiment);
       }
