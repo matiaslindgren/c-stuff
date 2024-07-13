@@ -68,8 +68,22 @@ fmt: $(HEADERS) $(TOOLS_SRC) $(TESTS_SRC)
 $(BUILD_DIR) $(TOOLS_DIR) $(TESTS_DIR):
 	mkdir -p $@
 
-$(TOOLS) $(TESTS): $(BUILD_DIR)/%: src/%.c $(HEADERS) | $(TOOLS_DIR) $(TESTS_DIR)
+$(TOOLS) $(TESTS): $(BUILD_DIR)/%: $(SOURCE_DIR)/%.c $(HEADERS) | $(TOOLS_DIR) $(TESTS_DIR)
 	$(CLANG) $(CFLAGS) -I $(INCLUDES) -o $@ $< $(LDFLAGS)
+
+
+JQ_MAKE_COMPILE_COMMANDS := [inputs|{\
+	directory: "$(abspath .)", \
+	command: ., \
+	file: match("('$(SOURCE_DIR)'[^ ]*)").captures[0].string, \
+	output: match("-o ([^ ]+)").captures[0].string \
+	}]
+
+$(BUILD_DIR)/compile_commands.json: $(BUILD_DIR)/
+	@$(MAKE) --always-make --dry-run \
+		| grep -wE '^\S*clang' \
+		| jq -nR '$(JQ_MAKE_COMPILE_COMMANDS)' > $@
+
 
 TEST_ARGS :=
 ifeq (${STUFFLIB_TEST_VERBOSE}, 1)
