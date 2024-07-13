@@ -247,7 +247,7 @@ void sl_la_matrix_diffdiv_axis0(struct sl_la_matrix m[const static 1],
                                 struct sl_la_vector rhs[const static 1]) {
   assert(m->cols == lhs->size && m->cols == rhs->size);
   for (int row = 0; row < m->rows; ++row) {
-    // TODO blas invert values?
+    // TODO extremely slow
     for (int col = 0; col < m->cols; ++col) {
       *sl_la_matrix_get(m, row, col) /= lhs->data[col] - rhs->data[col];
     }

@@ -492,7 +492,7 @@ bool rcv1(const struct sl_args args[const static 1]) {
       .type = "float32",
       .name = "rcv1_train_samples",
       .n_dims = 2,
-      .dim_size = {1, SL_DATASET_RCV1_FEATURES},
+      .dim_size = {0, SL_DATASET_RCV1_FEATURES},
   };
   strcpy(train_record.path, output_dir);
   train_record_file = (struct sl_file){0};
@@ -506,7 +506,7 @@ bool rcv1(const struct sl_args args[const static 1]) {
       .type = "float32",
       .name = "rcv1_test_samples",
       .n_dims = 2,
-      .dim_size = {1, SL_DATASET_RCV1_FEATURES},
+      .dim_size = {0, SL_DATASET_RCV1_FEATURES},
   };
   strcpy(test_record.path, output_dir);
   test_record_file = (struct sl_file){0};
@@ -683,7 +683,7 @@ bool rcv1(const struct sl_args args[const static 1]) {
       .name = "rcv1_train_classes",
       .size = 1,
       .n_dims = 1,
-      .dim_size = {SL_DATASET_RCV1_SAMPLES},
+      .dim_size = {0},
   };
   strcpy(train_record.path, output_dir);
   train_record_file = (struct sl_file){0};
@@ -698,7 +698,7 @@ bool rcv1(const struct sl_args args[const static 1]) {
       .name = "rcv1_test_classes",
       .size = 1,
       .n_dims = 1,
-      .dim_size = {SL_DATASET_RCV1_SAMPLES},
+      .dim_size = {0},
   };
   strcpy(test_record.path, output_dir);
   test_record_file = (struct sl_file){0};
@@ -735,8 +735,8 @@ bool rcv1(const struct sl_args args[const static 1]) {
     }
   }
 
-  train_record.size = trainset_writer.n_written;
-  test_record.size = testset_writer.n_written;
+  train_record.size = train_record.dim_size[0] = trainset_writer.n_written;
+  test_record.size = test_record.dim_size[0] = testset_writer.n_written;
 
   if (!sl_record_write_metadata(&train_record)) {
     SL_LOG_ERROR("failed writing RCV1 metadata for training set classes");

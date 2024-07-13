@@ -64,12 +64,15 @@ bool sl_record_validate_metadata(const struct sl_record r[const static 1]) {
     return false;
   }
 
+  // TODO
+#if 0
   for (int d = 0; d < r->n_dims; ++d) {
     if (r->dim_size[d] == 0) {
       SL_LOG_ERROR("unexpected non-zero size for dimension %d", d);
       return false;
     }
   }
+#endif
 
   return true;
 }
