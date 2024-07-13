@@ -87,7 +87,11 @@ bool spambase(const struct sl_args args[const static 1]) {
                                 train_classes,
                                 test_classes);
 
-  SL_ML_MINMAX_SCALER_CREATE(minmax_scaler, SL_DATASET_SPAMBASE_FEATURES);
+  struct sl_ml_minmax_scaler minmax_scaler = {
+      .lo = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_SPAMBASE_FEATURES),
+      .hi = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_SPAMBASE_FEATURES),
+      .buffer = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_SPAMBASE_FEATURES),
+  };
   sl_ml_minmax_fit(&minmax_scaler, &train_data);
   sl_ml_minmax_apply(&minmax_scaler, &train_data, -1, 1);
   sl_ml_minmax_apply(&minmax_scaler, &test_data, -1, 1);
@@ -207,7 +211,12 @@ bool rcv1(const struct sl_args args[const static 1]) {
     goto done;
   }
 
-  SL_ML_MINMAX_SCALER_CREATE(minmax_scaler, SL_DATASET_RCV1_FEATURES);
+  struct sl_ml_minmax_scaler minmax_scaler = {
+      .lo = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_RCV1_FEATURES),
+      .hi = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_RCV1_FEATURES),
+      .buffer = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_RCV1_FEATURES),
+  };
+
   while (!sl_record_reader_is_done(&train_samples_reader)) {
     if (!sl_record_reader_read(
             &train_samples_reader,

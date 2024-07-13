@@ -43,6 +43,7 @@ void sl_ml_random_train_test_split(struct sl_la_matrix data[const static 1],
 struct sl_ml_minmax_scaler {
   struct sl_la_vector lo;
   struct sl_la_vector hi;
+  struct sl_la_vector buffer;
 };
 
 void sl_ml_minmax_fit(struct sl_ml_minmax_scaler scaler[const static 1],
@@ -61,10 +62,17 @@ void sl_ml_minmax_apply(struct sl_ml_minmax_scaler scaler[const static 1],
                         struct sl_la_matrix m[const static 1],
                         const float a,
                         const float b) {
-  sl_la_matrix_sub_axis0(m, &(scaler->lo));
-  sl_la_matrix_mul_axis2(m, b - a);
-  sl_la_matrix_diffdiv_axis0(m, &(scaler->hi), &(scaler->lo));
+  struct sl_la_vector* scale = &(scaler->buffer);
+  sl_la_vector_copy(scale, &(scaler->hi));
+  sl_la_vector_sub(scale, &(scaler->lo));
+  for (int i = 0; i < scale->size; ++i) {
+    // TODO blas?
+    scale->data[i] = (b - a) / scale->data[i];
+  }
+  sl_la_matrix_mul_axis0(m, scale);
   sl_la_matrix_add_axis2(m, a);
+  sl_la_vector_mul(scale, &(scaler->lo));
+  sl_la_matrix_sub_axis0(m, scale);
 }
 
 // https://en.wikipedia.org/wiki/F-score#Diagnostic_testing
@@ -204,17 +212,13 @@ void sl_ml_svm_linear_fit(struct sl_ml_svm svm[const static 1],
   }
 }
 
-#define SL_ML_MINMAX_SCALER_CREATE(name, n_features)                 \
-  struct sl_ml_minmax_scaler name = {                                \
-      .lo = (struct sl_la_vector){.size = (n_features),              \
-                                  .data = (float[(n_features)]){0}}, \
-      .hi = (struct sl_la_vector){.size = (n_features),              \
-                                  .data = (float[(n_features)]){0}}, \
-  }
-
 #define SL_ML_MINMAX_RESCALE(n_features, dataset, a, b)         \
   do {                                                          \
-    SL_ML_MINMAX_SCALER_CREATE(sl_minmax_scaler, (n_features)); \
+    struct sl_ml_minmax_scaler sl_minmax_scaler = {             \
+        .lo = SL_LA_VECTOR_CREATE_INLINE((n_features)),         \
+        .hi = SL_LA_VECTOR_CREATE_INLINE((n_features)),         \
+        .buffer = SL_LA_VECTOR_CREATE_INLINE((n_features)),     \
+    };                                                          \
     sl_ml_minmax_fit(&sl_minmax_scaler, (dataset));             \
     sl_ml_minmax_apply(&sl_minmax_scaler, (dataset), (a), (b)); \
   } while (false)

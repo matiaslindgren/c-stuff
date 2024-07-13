@@ -47,6 +47,7 @@ bool test_minmax_normalization(const bool) {
     struct sl_ml_minmax_scaler scaler = {
         .lo = SL_LA_VECTOR_CREATE_INLINE(3),
         .hi = SL_LA_VECTOR_CREATE_INLINE(3),
+        .buffer = SL_LA_VECTOR_CREATE_INLINE(3),
     };
     sl_ml_minmax_fit(&scaler, &a);
     assert(sl_math_double_almost(scaler.lo.data[0], -6, SL_LA_FLOAT_EQ_TOL));
@@ -79,6 +80,7 @@ bool test_minmax_normalization(const bool) {
     struct sl_ml_minmax_scaler scaler = {
         .lo = SL_LA_VECTOR_CREATE_INLINE(3),
         .hi = SL_LA_VECTOR_CREATE_INLINE(3),
+        .buffer = SL_LA_VECTOR_CREATE_INLINE(3),
     };
     sl_ml_minmax_fit(&scaler, &a1);
     sl_ml_minmax_apply(&scaler, &a1, -1, 1);
@@ -131,6 +133,7 @@ bool test_minmax_normalization(const bool) {
     struct sl_ml_minmax_scaler scaler = {
         .lo = SL_LA_VECTOR_CREATE_INLINE(3),
         .hi = SL_LA_VECTOR_CREATE_INLINE(3),
+        .buffer = SL_LA_VECTOR_CREATE_INLINE(3),
     };
     sl_ml_minmax_fit(&scaler, &a1);
     sl_ml_minmax_apply(&scaler, &a1, 0, 1);
@@ -158,6 +161,7 @@ bool test_minmax_normalization(const bool) {
     struct sl_ml_minmax_scaler scaler = {
         .lo = SL_LA_VECTOR_CREATE_INLINE(3),
         .hi = SL_LA_VECTOR_CREATE_INLINE(3),
+        .buffer = SL_LA_VECTOR_CREATE_INLINE(3),
     };
     sl_ml_minmax_fit(&scaler, &a1);
     sl_ml_minmax_apply(&scaler, &a1, 1, 10);

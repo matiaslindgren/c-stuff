@@ -221,6 +221,30 @@ bool test_matrix_sub_axis0(const bool) {
   return true;
 }
 
+bool test_matrix_mul_axis0(const bool) {
+  {
+    struct sl_la_matrix a1 = {
+        .rows = 4,
+        .cols = 3,
+        .data = (float[]){2, -7, 3, 7, 1, -5, -3, 9, -5, -1, 6, -1},
+    };
+    struct sl_la_matrix a2 = {
+        .rows = 4,
+        .cols = 3,
+        .data = (float[]){2, 0, -6, 7, 0, 10, -3, 0, 10, -1, 0, 2},
+    };
+    struct sl_la_vector v = {
+        .size = 3,
+        .data = (float[]){1, 0, -2},
+    };
+    sl_la_matrix_mul_axis0(&a1, &v);
+    if (!check_matrix_equal(&a1, &a2)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool test_matrix_diffdiv_axis0(const bool) {
   {
     struct sl_la_matrix a1 = {
@@ -477,6 +501,7 @@ SL_TEST_MAIN(test_matrix_get,
              test_matrix_trace,
              test_matrix_add_axis0,
              test_matrix_sub_axis0,
+             test_matrix_mul_axis0,
              test_matrix_diffdiv_axis0,
              test_matrix_multiply_square,
              test_matrix_multiply_zeros,
