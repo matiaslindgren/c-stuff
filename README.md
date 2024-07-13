@@ -18,6 +18,9 @@ See [`./src/tools`](./src/tools)
 
 ## Requirements
 
+It is assumed the target platform is a reasonably common, new OS, with large amounts of RAM (hundreds of MiBs or more).
+The current Makefile assumes either Linux or macOS.
+
 * `make`
 * `clang-18`
 * probably many more depending on your OS/distro
