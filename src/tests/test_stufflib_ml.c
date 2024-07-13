@@ -45,8 +45,8 @@ bool test_minmax_normalization(const bool) {
         .data = (float[]){-6, -2, -1, -3, -3, -8, -1, 6, 10, 8, 10, -4},
     };
     struct sl_ml_minmax_scaler scaler = {
-        .lo = (struct sl_la_vector){.size = 3, .data = (float[3]){0}},
-        .hi = (struct sl_la_vector){.size = 3, .data = (float[3]){0}},
+        .lo = SL_LA_VECTOR_CREATE_INLINE(3),
+        .hi = SL_LA_VECTOR_CREATE_INLINE(3),
     };
     sl_ml_minmax_fit(&scaler, &a);
     assert(sl_math_double_almost(scaler.lo.data[0], -6, SL_LA_FLOAT_EQ_TOL));
@@ -77,8 +77,8 @@ bool test_minmax_normalization(const bool) {
                           -0.55555556f},
     };
     struct sl_ml_minmax_scaler scaler = {
-        .lo = (struct sl_la_vector){.size = 3, .data = (float[3]){0}},
-        .hi = (struct sl_la_vector){.size = 3, .data = (float[3]){0}},
+        .lo = SL_LA_VECTOR_CREATE_INLINE(3),
+        .hi = SL_LA_VECTOR_CREATE_INLINE(3),
     };
     sl_ml_minmax_fit(&scaler, &a1);
     sl_ml_minmax_apply(&scaler, &a1, -1, 1);
@@ -129,8 +129,8 @@ bool test_minmax_normalization(const bool) {
                           0.22222222f},
     };
     struct sl_ml_minmax_scaler scaler = {
-        .lo = (struct sl_la_vector){.size = 3, .data = (float[3]){0}},
-        .hi = (struct sl_la_vector){.size = 3, .data = (float[3]){0}},
+        .lo = SL_LA_VECTOR_CREATE_INLINE(3),
+        .hi = SL_LA_VECTOR_CREATE_INLINE(3),
     };
     sl_ml_minmax_fit(&scaler, &a1);
     sl_ml_minmax_apply(&scaler, &a1, 0, 1);
@@ -156,8 +156,8 @@ bool test_minmax_normalization(const bool) {
                           3.0f},
     };
     struct sl_ml_minmax_scaler scaler = {
-        .lo = (struct sl_la_vector){.size = 3, .data = (float[3]){0}},
-        .hi = (struct sl_la_vector){.size = 3, .data = (float[3]){0}},
+        .lo = SL_LA_VECTOR_CREATE_INLINE(3),
+        .hi = SL_LA_VECTOR_CREATE_INLINE(3),
     };
     sl_ml_minmax_fit(&scaler, &a1);
     sl_ml_minmax_apply(&scaler, &a1, 1, 10);
@@ -223,7 +223,10 @@ bool test_svm_linear_fit(const bool) {
         uint16_t classes[4] = {0, 0, 1, 1};
 
         struct sl_ml_svm svm = {
-            .w = (struct sl_la_vector){.size = 3, .data = (float[3]){0}},
+            .w = SL_LA_VECTOR_CREATE_INLINE(3),
+            .s = SL_LA_VECTOR_CREATE_INLINE(3),
+            .x = SL_LA_VECTOR_CREATE_INLINE(3),
+            .shuffle_buffer = (size_t[4]){0},
             .batch_size = batch_size,
             .n_epochs = n_epochs,
             .learning_rate = 1e-6f,

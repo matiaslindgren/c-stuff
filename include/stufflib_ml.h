@@ -149,6 +149,9 @@ void sl_ml_classification_print(
 // 2024-06-22
 struct sl_ml_svm {
   struct sl_la_vector w;
+  struct sl_la_vector x;
+  struct sl_la_vector s;
+  size_t* shuffle_buffer;
   int batch_size;
   int n_epochs;
   float learning_rate;
@@ -163,13 +166,11 @@ uint8_t sl_ml_svm_binary_predict(struct sl_ml_svm svm[const static 1],
 void sl_ml_svm_linear_fit(struct sl_ml_svm svm[const static 1],
                           struct sl_la_matrix data[const static 1],
                           const uint16_t classes[const static 1]) {
-  struct sl_la_vector x = sl_la_vector_create(data->cols);
-  struct sl_la_vector s = sl_la_vector_create(data->cols);
-  int* indices = sl_alloc((size_t)data->rows, sizeof(int));
-
-  for (int i = 0; i < data->rows; ++i) {
-    indices[i] = i;
+  for (size_t i = 0; i < (size_t)data->rows; ++i) {
+    svm->shuffle_buffer[i] = i;
   }
+  sl_la_vector_clear(&(svm->x));
+  sl_la_vector_clear(&(svm->s));
 
   const int k = svm->batch_size;
   const float lambda = svm->learning_rate;
@@ -179,32 +180,28 @@ void sl_ml_svm_linear_fit(struct sl_ml_svm svm[const static 1],
 
   for (int t = 1; t <= n_iterations; ++t) {
     if (batch_begin + k >= data->rows) {
-      sl_rand_shuffle(indices, sizeof(int), (size_t)data->rows);
+      sl_rand_shuffle(svm->shuffle_buffer, sizeof(size_t), (size_t)data->rows);
       batch_begin = 0;
     }
 
     const float eta = 1.0f / (lambda * (float)t);
-    sl_la_vector_clear(&s);
+    sl_la_vector_clear(&(svm->s));
 
     for (int i = 0; i < k; ++i) {
-      const int idx = indices[batch_begin + i];
-      sl_la_matrix_copy_row(&x, data, idx);
+      const size_t idx = svm->shuffle_buffer[batch_begin + i];
+      sl_la_matrix_copy_row(&(svm->x), data, (int)idx);
       const float y = (classes[idx] == 1) ? 1 : -1;
-      if (y * sl_la_vector_dot(&(svm->w), &x) < 1) {
-        sl_la_vector_scale(&x, y);
-        sl_la_vector_add(&s, &x);
+      if (y * sl_la_vector_dot(&(svm->w), &(svm->x)) < 1) {
+        sl_la_vector_scale(&(svm->x), y);
+        sl_la_vector_add(&(svm->s), &(svm->x));
       }
     }
     batch_begin += k;
 
     sl_la_vector_scale(&(svm->w), 1 - eta * lambda);
-    sl_la_vector_scale(&s, eta / (float)k);
-    sl_la_vector_add(&(svm->w), &s);
+    sl_la_vector_scale(&(svm->s), eta / (float)k);
+    sl_la_vector_add(&(svm->w), &(svm->s));
   }
-
-  sl_la_vector_destroy(&s);
-  sl_la_vector_destroy(&x);
-  sl_free(indices);
 }
 
 #define SL_ML_MINMAX_SCALER_CREATE(name, n_features)                 \

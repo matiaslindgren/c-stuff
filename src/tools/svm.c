@@ -58,9 +58,10 @@ bool spambase(const struct sl_args args[const static 1]) {
   }
 
   struct sl_ml_svm svm = {
-      .w = (struct sl_la_vector){.size = samples.cols,
-                                 .data =
-                                     (float[SL_DATASET_SPAMBASE_FEATURES]){0}},
+      .w = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_SPAMBASE_FEATURES),
+      .s = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_SPAMBASE_FEATURES),
+      .x = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_SPAMBASE_FEATURES),
+      .shuffle_buffer = (size_t[SL_DATASET_SPAMBASE_SAMPLES]){0},
       .batch_size = 1,
       .n_epochs = 2,
       .learning_rate = 1e-9f,

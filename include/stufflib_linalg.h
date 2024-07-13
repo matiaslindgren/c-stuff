@@ -56,6 +56,11 @@ struct sl_la_vector sl_la_vector_create(const int size) {
   };
 }
 
+#define SL_LA_VECTOR_CREATE_INLINE(length)            \
+  (struct sl_la_vector) {                             \
+    .size = (length), .data = (float[(length)]) { 0 } \
+  }
+
 void sl_la_vector_destroy(struct sl_la_vector v[const static 1]) {
   sl_free(v->data);
   *v = (struct sl_la_vector){0};
