@@ -585,7 +585,7 @@ bool test_write_data(const bool) {
   return true;
 }
 
-bool test_sparse_write_read(const bool) {
+bool test_sparse_write_and_read(const bool) {
   {
     struct sl_record record = {
         .layout = "sparse",
@@ -619,30 +619,12 @@ bool test_sparse_write_read(const bool) {
     struct sl_la_matrix data1 = {
         .rows = 20,
         .cols = 5,
-        // clang-format off
-      .data = (float[]){
-        1, 0, 0, 0, 0,
-        0, 2, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 0, 0, 4, 0,
-        0, 0, 0, 0, 5,
-        0, 0, 0, 1, 0,
-        0, 0, 2, 0, 0,
-        0, 0, 0, 0, 0,
-        4, 0, 0, 0, 0,
-        0, 5, 0, 0, 0,
-        0, 0, 1, 0, 0,
-        0, 0, 0, 2, 0,
-        0, 0, 0, 0, 3,
-        0, 0, 0, 4, 0,
-        0, 0, 0, 0, 0,
-        0, 6, 0, 0, 0,
-        7, 0, 0, 0, 0,
-        0, 8, 0, 0, 0,
-        0, 0, 9, 0, 0,
-        0, 0, 0, 0, 0,
-      },
-        // clang-format on
+        .data = (float[]){1, 0,  0, 0, 0, 0, -2, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0,
+                          0, 4,  0, 0, 0, 0, 0,  -5, 0, 0, 0, 1, 0, 0, 0, -2, 0,
+                          0, 0,  0, 0, 0, 0, 4,  0,  0, 0, 0, 0, 5, 0, 0, 0,  0,
+                          0, -1, 0, 0, 0, 0, 0,  -2, 0, 0, 0, 0, 0, 3, 0, 0,  0,
+                          4, 0,  0, 0, 0, 0, 0,  0,  6, 0, 0, 0, 7, 0, 0, 0,  0,
+                          0, 8,  0, 0, 0, 0, 0,  -9, 0, 0, 0, 0, 0, 0, 0},
     };
     assert(
         sl_record_write_all(&record,
@@ -653,6 +635,74 @@ bool test_sparse_write_read(const bool) {
     assert(sl_record_read_all(&record, sizeof(data2), data2));
     SL_ASSERT_EQ_LL(memcmp(data1.data, data2, sizeof(data2)), 0);
   }
+  return true;
+}
+
+bool test_sparse_batch_write_and_read(const bool) {
+  struct sl_record record = {
+      .layout = "sparse",
+      .type = "float32",
+      .name = "small5",
+      .size = 16,
+      .n_dims = 2,
+      .dim_size = {20, 5},
+  };
+  strcpy(record.path, sl_misc_tmpdir());
+
+  struct sl_la_matrix data1 = {
+      .rows = 20,
+      .cols = 5,
+      .data = (float[]){1, 0,  0, 0, 0, 0, -2, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0,
+                        0, 4,  0, 0, 0, 0, 0,  -5, 0, 0, 0, 1, 0, 0, 0, -2, 0,
+                        0, 0,  0, 0, 0, 0, 4,  0,  0, 0, 0, 0, 5, 0, 0, 0,  0,
+                        0, -1, 0, 0, 0, 0, 0,  -2, 0, 0, 0, 0, 0, 3, 0, 0,  0,
+                        4, 0,  0, 0, 0, 0, 0,  0,  6, 0, 0, 0, 7, 0, 0, 0,  0,
+                        0, 8,  0, 0, 0, 0, 0,  -9, 0, 0, 0, 0, 0, 0, 0},
+  };
+
+  const size_t batch_size = 5;
+  const size_t buffer_size = batch_size * record.dim_size[1];
+  const size_t batch_count = (record.dim_size[0] + batch_size - 1) / batch_size;
+
+  {
+    struct sl_file file = {0};
+    struct sl_record_writer writer = {
+        .file = &file,
+        .record = &record,
+    };
+    assert(sl_record_writer_open(&writer));
+    for (size_t batch_idx = 0; batch_idx < batch_count; ++batch_idx) {
+      assert(sl_record_writer_write(
+          &writer,
+          &((struct sl_span){
+              .size = sizeof(float) * buffer_size,
+              .data = (void*)(data1.data + batch_idx * buffer_size),
+          })));
+    }
+    sl_record_writer_close(&writer);
+  }
+
+  float data2[20 * 5] = {0};
+  {
+    struct sl_file file = {0};
+    struct sl_record_reader reader = {
+        .file = &file,
+        .record = &record,
+    };
+    assert(sl_record_reader_open(&reader));
+    for (size_t batch_idx = 0; batch_idx < batch_count; ++batch_idx) {
+      assert(!sl_record_reader_is_done(&reader));
+      assert(sl_record_reader_read(
+          &reader,
+          &((struct sl_span){
+              .size = sizeof(float) * buffer_size,
+              .data = (void*)(data2 + batch_idx * buffer_size),
+          })));
+    }
+    assert(sl_record_reader_is_done(&reader));
+    sl_record_reader_close(&reader);
+  }
+  SL_ASSERT_EQ_LL(memcmp(data1.data, data2, sizeof(data2)), 0);
 
   return true;
 }
@@ -665,4 +715,5 @@ SL_TEST_MAIN(test_write_metadata,
              test_dense_data_writer,
              test_sparse_data_writer,
              test_write_data,
-             test_sparse_write_read)
+             test_sparse_write_and_read,
+             test_sparse_batch_write_and_read)
