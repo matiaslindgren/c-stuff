@@ -51,6 +51,8 @@ bool test_parse_one_flag(const bool) {
       "- w",
       "--w",
       "--v",
+      "--w-1",
+      "--v-abc",
       "",
       "-w",
       "-v",
@@ -119,6 +121,8 @@ bool test_parse_two_flags(const bool) {
       "- w",
       "--w",
       "--v",
+      "--w-v",
+      "--v-w",
       "",
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(should_not_match); ++i) {
