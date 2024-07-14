@@ -260,10 +260,11 @@ bool rcv1(const struct sl_args args[const static 1]) {
       for (int col = 0; col < train_batch.cols; ++col) {
         const float value = *sl_la_matrix_get(&train_batch, row, col);
         if (value < 0 || value > 1) {
-          SL_LOG_ERROR("invalid RCV1 training sample at (%d, %d): %g",
-                       row,
-                       col,
-                       value);
+          SL_LOG_ERROR(
+              "invalid RCV1 training sample at (%d, %d): %g is not in [0, 1]",
+              row,
+              col,
+              value);
           goto done;
         }
       }
