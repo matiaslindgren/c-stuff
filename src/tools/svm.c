@@ -131,6 +131,7 @@ bool rcv1(const struct sl_args args[const static 1]) {
 
   const char* const dataset_dir = sl_args_get_positional(args, 1);
   const bool verbose = sl_args_parse_flag(args, "-v");
+  const bool flip_train_test = sl_args_parse_flag(args, "--flip-train-test");
 
   if (verbose) {
     SL_LOG_INFO("RCV1: training linear SVM, reading dataset from '%s'",
@@ -167,28 +168,32 @@ bool rcv1(const struct sl_args args[const static 1]) {
     SL_LOG_INFO("RCV1: reading metadata records");
   }
 
-  if (!sl_record_read_metadata(&train_samples_record,
-                               dataset_dir,
-                               "rcv1_train_samples")) {
+  if (!sl_record_read_metadata(
+          &train_samples_record,
+          dataset_dir,
+          flip_train_test ? "rcv1_test_samples" : "rcv1_train_samples")) {
     SL_LOG_ERROR("failed reading metadata of RCV1 training set samples");
     goto done;
   }
-  if (!sl_record_read_metadata(&test_samples_record,
-                               dataset_dir,
-                               "rcv1_test_samples")) {
+  if (!sl_record_read_metadata(
+          &test_samples_record,
+          dataset_dir,
+          flip_train_test ? "rcv1_train_samples" : "rcv1_test_samples")) {
     SL_LOG_ERROR("failed reading metadata of RCV1 testing set samples");
     goto done;
   }
 
-  if (!sl_record_read_metadata(&train_classes_record,
-                               dataset_dir,
-                               "rcv1_train_classes")) {
+  if (!sl_record_read_metadata(
+          &train_classes_record,
+          dataset_dir,
+          flip_train_test ? "rcv1_test_classes" : "rcv1_train_classes")) {
     SL_LOG_ERROR("failed reading metadata of RCV1 training set classes");
     goto done;
   }
-  if (!sl_record_read_metadata(&test_classes_record,
-                               dataset_dir,
-                               "rcv1_test_classes")) {
+  if (!sl_record_read_metadata(
+          &test_classes_record,
+          dataset_dir,
+          flip_train_test ? "rcv1_train_classes" : "rcv1_test_classes")) {
     SL_LOG_ERROR("failed reading metadata of RCV1 testing set classes");
     goto done;
   }
