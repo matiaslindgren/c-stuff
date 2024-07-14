@@ -28,6 +28,8 @@ jobs:
     - name: install clang
       run: sudo apt update --yes && sudo apt install --yes clang-${{ matrix.llvm }} lld-${{ matrix.llvm }}
     - uses: actions/checkout@v4
+    - run: make DEBUG=${{ matrix.debug }} TRACE=${{ matrix.debug }} compile_commands.json
+    - run: cat compile_commands.json
     - run: make -j4 DEBUG=${{ matrix.debug }} TRACE=${{ matrix.debug }} all
     - run: make -j4 DEBUG=${{ matrix.debug }} TRACE=${{ matrix.debug }} test
     - run: make -j4 DEBUG=${{ matrix.debug }} TRACE=${{ matrix.debug }} integration_test
