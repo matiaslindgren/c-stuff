@@ -38,7 +38,7 @@ TMP_DIR     := $(shell mktemp --directory)
 DEBUG=0
 ifeq ($(DEBUG), 1)
 	BUILD_DIR := $(OUTPUT_DIR)/debug
-	CFLAGS    += -O1 -g -fsanitize=address,undefined -DDEBUG
+	CFLAGS    += -O1 -g -fsanitize=address,undefined
 	ifeq ($(TRACE), 1)
 		CFLAGS += -DSL_VERBOSITY=3
 	else
@@ -46,7 +46,7 @@ ifeq ($(DEBUG), 1)
 	endif
 else
 	BUILD_DIR := $(OUTPUT_DIR)/release
-	CFLAGS    += -O3 -march=native -DNDEBUG
+	CFLAGS    += -O3 -march=native -DSL_VERBOSITY=1
 endif
 
 HEADERS     := $(wildcard $(INCLUDE_DIR)/*.h)
