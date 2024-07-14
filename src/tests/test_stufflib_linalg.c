@@ -412,60 +412,6 @@ bool test_vector_dot(const bool) {
   return true;
 }
 
-bool test_vector_scale_add(const bool) {
-  {
-    struct sl_la_vector v1 = {
-        .size = 5,
-        .data = (float[]){-1, 0, 1, 2, 3},
-    };
-    struct sl_la_vector v2 = {
-        .size = 5,
-        .data = (float[]){-1, 0, 1, 2, 3},
-    };
-    struct sl_la_vector w1 = {
-        .size = 5,
-        .data = (float[]){1, 2, 3, 4, 5},
-    };
-    struct sl_la_vector w2 = {
-        .size = 5,
-        .data = (float[]){1, 2, 3, 4, 5},
-    };
-    sl_la_vector_scale_add(&w1, 0, &v1);
-    if (!check_vector_equal(&v1, &v2)) {
-      return false;
-    }
-    if (!check_vector_equal(&w1, &w2)) {
-      return false;
-    }
-  }
-  {
-    struct sl_la_vector v1 = {
-        .size = 5,
-        .data = (float[]){-1, 0, 1, 2, 3},
-    };
-    struct sl_la_vector v2 = {
-        .size = 5,
-        .data = (float[]){-1, 0, 1, 2, 3},
-    };
-    struct sl_la_vector w1 = {
-        .size = 5,
-        .data = (float[]){1, 2, 3, 4, 5},
-    };
-    struct sl_la_vector w2 = {
-        .size = 5,
-        .data = (float[]){-1, 2, 5, 8, 11},
-    };
-    sl_la_vector_scale_add(&w1, 2, &v1);
-    if (!check_vector_equal(&v1, &v2)) {
-      return false;
-    }
-    if (!check_vector_equal(&w1, &w2)) {
-      return false;
-    }
-  }
-  return true;
-}
-
 bool test_vector_add(const bool) {
   {
     struct sl_la_vector v1 = {
@@ -495,6 +441,35 @@ bool test_vector_add(const bool) {
   return true;
 }
 
+bool test_vector_sub(const bool) {
+  {
+    struct sl_la_vector v1 = {
+        .size = 5,
+        .data = (float[]){-1, 0, 1, 2, 3},
+    };
+    struct sl_la_vector v2 = {
+        .size = 5,
+        .data = (float[]){-2, -1, 0, 1, 2},
+    };
+    struct sl_la_vector w1 = {
+        .size = 5,
+        .data = (float[]){1, 1, 1, 1, 1},
+    };
+    struct sl_la_vector w2 = {
+        .size = 5,
+        .data = (float[]){1, 1, 1, 1, 1},
+    };
+    sl_la_vector_sub(&v1, &w1);
+    if (!check_vector_equal(&v1, &v2)) {
+      return false;
+    }
+    if (!check_vector_equal(&w1, &w2)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 SL_TEST_MAIN(test_matrix_get,
              test_matrix_equal,
              test_matrix_create,
@@ -510,5 +485,5 @@ SL_TEST_MAIN(test_matrix_get,
              test_vector_scale,
              test_vector_equal,
              test_vector_dot,
-             test_vector_scale_add,
-             test_vector_add)
+             test_vector_add,
+             test_vector_sub)

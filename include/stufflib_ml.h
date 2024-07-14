@@ -43,18 +43,18 @@ void sl_ml_random_train_test_split(struct sl_la_matrix data[const static 1],
 struct sl_ml_minmax_scaler {
   struct sl_la_vector lo;
   struct sl_la_vector hi;
-  struct sl_la_vector buffer;
+  struct sl_la_vector scale;
+  struct sl_la_vector offset;
+  bool is_cached;
 };
 
 void sl_ml_minmax_fit(struct sl_ml_minmax_scaler scaler[const static 1],
                       struct sl_la_matrix m[const static 1]) {
   assert(scaler->lo.size == m->cols && scaler->hi.size == m->cols);
+  scaler->is_cached = false;
   for (int row = 0; row < m->rows; ++row) {
-    for (int col = 0; col < m->cols; ++col) {
-      const float value = *sl_la_matrix_get(m, row, col);
-      scaler->lo.data[col] = fminf(scaler->lo.data[col], value);
-      scaler->hi.data[col] = fmaxf(scaler->hi.data[col], value);
-    }
+    sl_la_vec_min(m->cols, scaler->lo.data, sl_la_matrix_get_row(m, row));
+    sl_la_vec_max(m->cols, scaler->hi.data, sl_la_matrix_get_row(m, row));
   }
 }
 
@@ -62,17 +62,19 @@ void sl_ml_minmax_apply(struct sl_ml_minmax_scaler scaler[const static 1],
                         struct sl_la_matrix m[const static 1],
                         const float a,
                         const float b) {
-  struct sl_la_vector* scale = &(scaler->buffer);
-  sl_la_vector_copy(scale, &(scaler->hi));
-  sl_la_vector_sub(scale, &(scaler->lo));
-  for (int i = 0; i < scale->size; ++i) {
-    // TODO blas?
-    scale->data[i] = (b - a) / scale->data[i];
+  struct sl_la_vector* scale = &(scaler->scale);
+  struct sl_la_vector* offset = &(scaler->offset);
+  if (!scaler->is_cached) {
+    // TODO BLAS
+    for (int i = 0; i < scale->size; ++i) {
+      const float s = (b - a) / (scaler->hi.data[i] - scaler->lo.data[i]);
+      scale->data[i] = s;
+      offset->data[i] = a - s * (scaler->lo.data[i]);
+    }
+    scaler->is_cached = true;
   }
   sl_la_matrix_mul_axis0(m, scale);
-  sl_la_matrix_add_axis2(m, a);
-  sl_la_vector_mul(scale, &(scaler->lo));
-  sl_la_matrix_sub_axis0(m, scale);
+  sl_la_matrix_add_axis0(m, offset);
 }
 
 // https://en.wikipedia.org/wiki/F-score#Diagnostic_testing
@@ -212,13 +214,18 @@ void sl_ml_svm_linear_fit(struct sl_ml_svm svm[const static 1],
   }
 }
 
+#define SL_ML_MINMAX_SCALER_CREATE_INLINE(n_features)   \
+  (struct sl_ml_minmax_scaler) {                        \
+    .lo = SL_LA_VECTOR_CREATE_INLINE((n_features)),     \
+    .hi = SL_LA_VECTOR_CREATE_INLINE((n_features)),     \
+    .scale = SL_LA_VECTOR_CREATE_INLINE((n_features)),  \
+    .offset = SL_LA_VECTOR_CREATE_INLINE((n_features)), \
+  }
+
 #define SL_ML_MINMAX_RESCALE(n_features, dataset, a, b)         \
   do {                                                          \
-    struct sl_ml_minmax_scaler sl_minmax_scaler = {             \
-        .lo = SL_LA_VECTOR_CREATE_INLINE((n_features)),         \
-        .hi = SL_LA_VECTOR_CREATE_INLINE((n_features)),         \
-        .buffer = SL_LA_VECTOR_CREATE_INLINE((n_features)),     \
-    };                                                          \
+    struct sl_ml_minmax_scaler sl_minmax_scaler =               \
+        SL_ML_MINMAX_SCALER_CREATE_INLINE((n_features));        \
     sl_ml_minmax_fit(&sl_minmax_scaler, (dataset));             \
     sl_ml_minmax_apply(&sl_minmax_scaler, (dataset), (a), (b)); \
   } while (false)

@@ -34,6 +34,42 @@
   #define SL_LA_FLOAT_FORMAT "%+15.12e"
 #endif
 
+static inline void sl_la_vec_add(const int count,
+                                 float lhs[restrict count],
+                                 const float rhs[restrict count]) {
+  cblas_saxpy(count, 1, rhs, 1, lhs, 1);
+}
+
+static inline void sl_la_vec_sub(const int count,
+                                 float lhs[restrict count],
+                                 const float rhs[restrict count]) {
+  cblas_saxpy(count, -1, rhs, 1, lhs, 1);
+}
+
+static inline void sl_la_vec_mul(const int count,
+                                 float lhs[restrict count],
+                                 const float rhs[restrict count]) {
+  for (int i = 0; i < count; ++i) {
+    lhs[i] *= rhs[i];
+  }
+}
+
+static inline void sl_la_vec_min(const int count,
+                                 float lhs[restrict count],
+                                 const float rhs[restrict count]) {
+  for (int i = 0; i < count; ++i) {
+    lhs[i] = fminf(lhs[i], rhs[i]);
+  }
+}
+
+static inline void sl_la_vec_max(const int count,
+                                 float lhs[restrict count],
+                                 const float rhs[restrict count]) {
+  for (int i = 0; i < count; ++i) {
+    lhs[i] = fmaxf(lhs[i], rhs[i]);
+  }
+}
+
 // TODO generic n dim row-major tensor?
 // vector and matrix as views instead of alloc
 
@@ -119,32 +155,25 @@ float sl_la_vector_dot(const struct sl_la_vector a[const static 1],
   return cblas_sdot(a->size, a->data, 1, b->data, 1);
 }
 
-void sl_la_vector_scale_add(const struct sl_la_vector a[const static 1],
-                            const float alpha,
-                            const struct sl_la_vector b[const static 1]) {
-  assert(a->size == b->size);
-  cblas_saxpy(a->size, alpha, b->data, 1, a->data, 1);
-}
-
 static inline void sl_la_vector_add(
     const struct sl_la_vector a[const static 1],
     const struct sl_la_vector b[const static 1]) {
-  sl_la_vector_scale_add(a, 1, b);
+  assert(a->size == b->size);
+  sl_la_vec_add(a->size, a->data, b->data);
 }
 
 static inline void sl_la_vector_sub(
     const struct sl_la_vector a[const static 1],
     const struct sl_la_vector b[const static 1]) {
-  sl_la_vector_scale_add(a, -1, b);
+  assert(a->size == b->size);
+  sl_la_vec_sub(a->size, a->data, b->data);
 }
 
 static inline void sl_la_vector_mul(
-    const struct sl_la_vector a[const static 1],
-    const struct sl_la_vector b[const static 1]) {
-  assert(a->size == b->size);
-  for (int i = 0; i < a->size; ++i) {
-    a->data[i] *= b->data[i];
-  }
+    struct sl_la_vector lhs[const static 1],
+    const struct sl_la_vector rhs[const static 1]) {
+  assert(lhs->size == rhs->size);
+  sl_la_vec_mul(lhs->size, lhs->data, rhs->data);
 }
 
 static inline void sl_la_vector_copy(struct sl_la_vector dst[const static 1],
@@ -254,29 +283,31 @@ static inline void sl_la_matrix_saxpy_axis0(
   }
 }
 
-static inline void sl_la_matrix_add_axis0(struct sl_la_matrix m[const static 1],
-                            struct sl_la_vector v[const static 1]) {
+static inline void sl_la_matrix_add_axis0(
+    struct sl_la_matrix m[const static 1],
+    struct sl_la_vector v[const static 1]) {
   sl_la_matrix_saxpy_axis0(m, v, 1);
 }
 
-static inline void sl_la_matrix_sub_axis0(struct sl_la_matrix m[const static 1],
-                            struct sl_la_vector v[const static 1]) {
+static inline void sl_la_matrix_sub_axis0(
+    struct sl_la_matrix m[const static 1],
+    struct sl_la_vector v[const static 1]) {
   sl_la_matrix_saxpy_axis0(m, v, -1);
 }
 
-static inline void sl_la_matrix_mul_axis0(struct sl_la_matrix m[const static 1],
-                            struct sl_la_vector v[const static 1]) {
-  assert(m->cols == v->size && m->cols == v->size);
+static inline void sl_la_matrix_mul_axis0(
+    struct sl_la_matrix m[const static 1],
+    struct sl_la_vector v[const static 1]) {
+  assert(m->cols == v->size);
   for (int row = 0; row < m->rows; ++row) {
-    for (int col = 0; col < m->cols; ++col) {
-      *sl_la_matrix_get(m, row, col) *= v->data[col];
-    }
+    sl_la_vec_mul(m->cols, sl_la_matrix_get_row(m, row), v->data);
   }
 }
 
-static inline void sl_la_matrix_diffdiv_axis0(struct sl_la_matrix m[const static 1],
-                                struct sl_la_vector lhs[const static 1],
-                                struct sl_la_vector rhs[const static 1]) {
+static inline void sl_la_matrix_diffdiv_axis0(
+    struct sl_la_matrix m[const static 1],
+    struct sl_la_vector lhs[const static 1],
+    struct sl_la_vector rhs[const static 1]) {
   assert(m->cols == lhs->size && m->cols == rhs->size);
   for (int row = 0; row < m->rows; ++row) {
     // TODO extremely slow
@@ -287,14 +318,14 @@ static inline void sl_la_matrix_diffdiv_axis0(struct sl_la_matrix m[const static
 }
 
 static inline void sl_la_matrix_add_axis2(struct sl_la_matrix m[const static 1],
-                            const float x) {
+                                          const float x) {
   for (int i = 0; i < m->rows * m->cols; ++i) {
     m->data[i] += x;
   }
 }
 
 static inline void sl_la_matrix_mul_axis2(struct sl_la_matrix m[const static 1],
-                            const float x) {
+                                          const float x) {
   cblas_sscal(m->rows * m->cols, x, m->data, 1);
 }
 

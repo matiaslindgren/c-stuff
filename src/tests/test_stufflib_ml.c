@@ -44,11 +44,7 @@ bool test_minmax_normalization(const bool) {
         .cols = 3,
         .data = (float[]){-6, -2, -1, -3, -3, -8, -1, 6, 10, 8, 10, -4},
     };
-    struct sl_ml_minmax_scaler scaler = {
-        .lo = SL_LA_VECTOR_CREATE_INLINE(3),
-        .hi = SL_LA_VECTOR_CREATE_INLINE(3),
-        .buffer = SL_LA_VECTOR_CREATE_INLINE(3),
-    };
+    struct sl_ml_minmax_scaler scaler = SL_ML_MINMAX_SCALER_CREATE_INLINE(3);
     sl_ml_minmax_fit(&scaler, &a);
     assert(sl_math_double_almost(scaler.lo.data[0], -6, SL_LA_FLOAT_EQ_TOL));
     assert(sl_math_double_almost(scaler.lo.data[1], -3, SL_LA_FLOAT_EQ_TOL));
@@ -77,11 +73,7 @@ bool test_minmax_normalization(const bool) {
                           1.0f, 1.0f,
                           -0.55555556f},
     };
-    struct sl_ml_minmax_scaler scaler = {
-        .lo = SL_LA_VECTOR_CREATE_INLINE(3),
-        .hi = SL_LA_VECTOR_CREATE_INLINE(3),
-        .buffer = SL_LA_VECTOR_CREATE_INLINE(3),
-    };
+    struct sl_ml_minmax_scaler scaler = SL_ML_MINMAX_SCALER_CREATE_INLINE(3);
     sl_ml_minmax_fit(&scaler, &a1);
     sl_ml_minmax_apply(&scaler, &a1, -1, 1);
     if (!check_matrix_equal(&a1, &a2)) {
@@ -130,11 +122,7 @@ bool test_minmax_normalization(const bool) {
                           1.0f, 1.0f,
                           0.22222222f},
     };
-    struct sl_ml_minmax_scaler scaler = {
-        .lo = SL_LA_VECTOR_CREATE_INLINE(3),
-        .hi = SL_LA_VECTOR_CREATE_INLINE(3),
-        .buffer = SL_LA_VECTOR_CREATE_INLINE(3),
-    };
+    struct sl_ml_minmax_scaler scaler = SL_ML_MINMAX_SCALER_CREATE_INLINE(3);
     sl_ml_minmax_fit(&scaler, &a1);
     sl_ml_minmax_apply(&scaler, &a1, 0, 1);
     if (!check_matrix_equal(&a1, &a2)) {
@@ -158,11 +146,7 @@ bool test_minmax_normalization(const bool) {
                           10.0f, 10.0f,
                           3.0f},
     };
-    struct sl_ml_minmax_scaler scaler = {
-        .lo = SL_LA_VECTOR_CREATE_INLINE(3),
-        .hi = SL_LA_VECTOR_CREATE_INLINE(3),
-        .buffer = SL_LA_VECTOR_CREATE_INLINE(3),
-    };
+    struct sl_ml_minmax_scaler scaler = SL_ML_MINMAX_SCALER_CREATE_INLINE(3);
     sl_ml_minmax_fit(&scaler, &a1);
     sl_ml_minmax_apply(&scaler, &a1, 1, 10);
     if (!check_matrix_equal(&a1, &a2)) {
