@@ -39,14 +39,16 @@ DEBUG=0
 ifeq ($(DEBUG), 1)
 	BUILD_DIR := $(OUTPUT_DIR)/debug
 	CFLAGS    += -O1 -g -fsanitize=address,undefined
-	ifeq ($(TRACE), 1)
-		CFLAGS += -DSL_VERBOSITY=3
-	else
-		CFLAGS += -DSL_VERBOSITY=2
-	endif
 else
 	BUILD_DIR := $(OUTPUT_DIR)/release
-	CFLAGS    += -O3 -march=native -DSL_VERBOSITY=1
+	CFLAGS    += -O3 -march=native
+endif
+
+TRACE=0
+ifeq ($(TRACE), 1)
+	CFLAGS += -DSL_VERBOSITY=3
+else
+	CFLAGS += -DSL_VERBOSITY=2
 endif
 
 HEADERS     := $(wildcard $(INCLUDE_DIR)/*.h)
