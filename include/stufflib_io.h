@@ -31,6 +31,7 @@ bool sl_file_format_path(const size_t bufsize,
 bool sl_file_open(struct sl_file f[const static 1],
                   const char path[const static 1],
                   const char mode[const static 1]) {
+  SL_LOG_TRACE("fopen %s in mode %s", path, mode);
   f->file = fopen(path, mode);
   if (!f->file) {
     // TODO no logging from base libraries

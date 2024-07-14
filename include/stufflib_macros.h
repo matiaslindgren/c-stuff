@@ -1,6 +1,10 @@
 #ifndef SL_MACROS_H_INCLUDED
 #define SL_MACROS_H_INCLUDED
 
+#define SL_NOOP(...) \
+  do {               \
+  } while (false)
+
 #define SL_MIN(x, y) ((x) < (y) ? (x) : (y))
 #define SL_MAX(x, y) ((x) < (y) ? (y) : (x))
 
@@ -68,8 +72,32 @@
     fprintf(stderr, "\"}\n");                          \
   } while (false)
 
-#define SL_LOG_INFO(...) SL_LOG("info", __VA_ARGS__)
-#define SL_LOG_ERROR(...) SL_LOG("error", __VA_ARGS__)
+// SL_VERBOSITY
+// 0: none
+// 1: error
+// 2: info
+// 3: trace
+#ifndef SL_VERBOSITY
+  #define SL_VERBOSITY 2
+#endif
+
+#if SL_VERBOSITY > 2
+  #define SL_LOG_TRACE(...) SL_LOG("trace", __VA_ARGS__)
+#else
+  #define SL_LOG_TRACE(...) SL_NOOP(__VA_ARGS__)
+#endif
+
+#if SL_VERBOSITY > 1
+  #define SL_LOG_INFO(...) SL_LOG("info", __VA_ARGS__)
+#else
+  #define SL_LOG_INFO(...) SL_NOOP(__VA_ARGS__)
+#endif
+
+#if SL_VERBOSITY > 0
+  #define SL_LOG_ERROR(...) SL_LOG("error", __VA_ARGS__)
+#else
+  #define SL_LOG_ERROR(...) SL_NOOP(__VA_ARGS__)
+#endif
 
 #define SL_TEST_MAIN(...)                                    \
   int main(int argc, char* const argv[argc + 1]) {           \
