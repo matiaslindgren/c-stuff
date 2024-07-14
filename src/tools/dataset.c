@@ -392,8 +392,8 @@ bool rcv1(const struct sl_args args[const static 1]) {
   struct sl_rcv1_metadata* metadata =
       sl_alloc(max_document_id + 1, sizeof(struct sl_rcv1_metadata));
 
-  struct sl_span write_buffer =
-      sl_span_create(sizeof(float) * SL_DATASET_RCV1_FEATURES);
+  struct sl_la_vector batch =
+      SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_RCV1_FEATURES);
 
   struct sl_record train_record = {0};
   struct sl_file train_record_file = {0};
@@ -596,7 +596,7 @@ bool rcv1(const struct sl_args args[const static 1]) {
             metadata[id].index);
       }
 
-      sl_span_clear(&write_buffer);
+      sl_la_vector_clear(&batch);
 
       for (lhs = rhs; lhs && lhs[0];) {
         unsigned long feature_id = strtoul(lhs, &rhs, 10);
@@ -631,10 +631,24 @@ bool rcv1(const struct sl_args args[const static 1]) {
           errno = 0;
           goto done;
         }
-        lhs = rhs;
+        if (value < 0 || value > 1) {
+          SL_LOG_ERROR(
+              "RCV1 file '%s' lineno %zu feature %lu value %g not in [0, 1]",
+              path,
+              lineno,
+              feature_id,
+              value);
+          errno = 0;
+          goto done;
+        }
+        batch.data[feature_id - 1] = value;
 
-        memcpy(write_buffer.data + (feature_id - 1), &value, sizeof(float));
+        lhs = rhs;
       }
+
+      struct sl_span write_buffer =
+          sl_span_view(sizeof(float) * (size_t)(batch.size),
+                       (void*)(batch.data));
 
       if (metadata[id].in_trainset) {
         // TODO len N buffer instead of len 1
@@ -753,7 +767,6 @@ done:
     fclose(fp);
   }
   sl_free(metadata);
-  sl_span_destroy(&write_buffer);
   sl_record_writer_close(&trainset_writer);
   sl_record_writer_close(&testset_writer);
   return all_ok;
