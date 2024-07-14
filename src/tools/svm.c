@@ -208,11 +208,24 @@ bool rcv1(const struct sl_args args[const static 1]) {
     SL_LOG_ERROR("failed reading RCV1 training set classes");
     goto done;
   }
+  for (size_t i = 0; i < train_classes_record.size; ++i) {
+    if (train_classes[i] > 1) {
+      SL_LOG_ERROR("invalid RCV1 training class %u", train_classes[i]);
+      goto done;
+    }
+  }
+
   if (!sl_record_read_all(&test_classes_record,
                           test_classes_record.size * class_size,
                           (void*)test_classes)) {
     SL_LOG_ERROR("failed reading RCV1 testing set classes");
     goto done;
+  }
+  for (size_t i = 0; i < test_classes_record.size; ++i) {
+    if (test_classes[i] > 1) {
+      SL_LOG_ERROR("invalid RCV1 testing class %u", test_classes[i]);
+      goto done;
+    }
   }
 
   if (!sl_record_reader_open(&train_samples_reader)) {
@@ -237,6 +250,18 @@ bool rcv1(const struct sl_args args[const static 1]) {
       SL_LOG_ERROR("RCV1 batch %zu minmax: failed reading samples batch",
                    batch_idx);
       goto done;
+    }
+    for (int row = 0; row < train_batch.rows; ++row) {
+      for (int col = 0; col < train_batch.cols; ++col) {
+        const float value = *sl_la_matrix_get(&train_batch, row, col);
+        if (value < 0 || value > 1) {
+          SL_LOG_ERROR("invalid RCV1 training sample at (%d, %d): %g",
+                       row,
+                       col,
+                       value);
+          goto done;
+        }
+      }
     }
     if (verbose) {
       SL_LOG_INFO("RCV1 batch %zu minmax: fit", batch_idx);
