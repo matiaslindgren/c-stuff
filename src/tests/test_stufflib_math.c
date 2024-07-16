@@ -216,6 +216,19 @@ bool test_round_up_pow2(const bool) {
   return true;
 }
 
+bool test_is_finite(const bool) {
+  assert(sl_math_is_finite(1, (float[]){0}));
+  assert(sl_math_is_finite(1, (float[]){1}));
+  assert(sl_math_is_finite(1, (float[]){-1}));
+  assert(sl_math_is_finite(10, (float[10]){0}));
+  assert(!sl_math_is_finite(4, (float[]){0, 1, 2, (float)exp(1000)}));
+  assert(!sl_math_is_finite(1, (float[]){NAN}));
+  assert(!sl_math_is_finite(1, (float[]){INFINITY}));
+  assert(!sl_math_is_finite(3, (float[]){0, NAN, 0}));
+  assert(!sl_math_is_finite(3, (float[]){0, INFINITY, 0}));
+  return true;
+}
+
 SL_TEST_MAIN(test_factorize_primes,
              test_factorize_4,
              test_factorize_25,
@@ -227,4 +240,5 @@ SL_TEST_MAIN(test_factorize_primes,
              test_double_almost,
              test_numerical_diff,
              test_linalg,
-             test_round_up_pow2)
+             test_round_up_pow2,
+             test_is_finite)

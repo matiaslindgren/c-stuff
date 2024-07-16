@@ -140,6 +140,10 @@ static inline struct sl_la_vector sl_la_matrix_row_view(
   };
 }
 
+bool sl_la_vector_is_finite(struct sl_la_vector v[const static 1]) {
+  return sl_math_is_finite(v->size, v->data);
+}
+
 void sl_la_vector_scale(struct sl_la_vector v[const static 1],
                         const float alpha) {
   cblas_sscal(v->size, alpha, v->data, 1);

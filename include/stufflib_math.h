@@ -145,4 +145,14 @@ void sl_math_linalg_matmul(const size_t nrows,
   }
 }
 
+static inline bool sl_math_is_finite(const int count,
+                                     const float values[restrict count]) {
+  for (int i = 0; i < count; ++i) {
+    if (!isfinite(values[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
 #endif  // SL_MATH_H_INCLUDED
