@@ -179,8 +179,6 @@ void sl_ml_svm_linear_fit(struct sl_ml_svm svm[const static 1],
   for (size_t i = 0; i < (size_t)data->rows; ++i) {
     svm->shuffle_buffer[i] = i;
   }
-  sl_la_vector_clear(&(svm->x));
-  sl_la_vector_clear(&(svm->s));
 
   const int k = svm->batch_size;
   const float lambda = svm->learning_rate;
