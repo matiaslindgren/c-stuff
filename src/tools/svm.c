@@ -124,7 +124,7 @@ done:
   return all_ok;
 }
 
-#define SL_SVM_RCV1_BATCH_SIZE 10'000
+#define SL_SVM_RCV1_BUFFER_LEN 10'000
 
 bool rcv1(const struct sl_args args[const static 1]) {
   bool all_ok = false;
@@ -158,11 +158,11 @@ bool rcv1(const struct sl_args args[const static 1]) {
   struct sl_record test_classes_record = {0};
   uint8_t* test_classes = nullptr;
 
-  struct sl_la_matrix train_batch =
-      sl_la_matrix_create(SL_SVM_RCV1_BATCH_SIZE, SL_DATASET_RCV1_FEATURES);
+  struct sl_la_matrix samples_batch =
+      sl_la_matrix_create(SL_SVM_RCV1_BUFFER_LEN, SL_DATASET_RCV1_FEATURES);
   struct sl_span read_buffer =
-      sl_span_view(sizeof(float) * sl_la_matrix_size(&train_batch),
-                   (void*)train_batch.data);
+      sl_span_view(sizeof(float) * sl_la_matrix_size(&samples_batch),
+                   (void*)samples_batch.data);
 
   if (verbose) {
     SL_LOG_INFO("RCV1: reading metadata records");
@@ -248,17 +248,17 @@ bool rcv1(const struct sl_args args[const static 1]) {
   for (size_t batch_idx = 0; !sl_record_reader_is_done(&train_samples_reader);
        ++batch_idx) {
     if (verbose) {
-      SL_LOG_INFO("RCV1 batch %zu minmax: read batch", batch_idx);
+      SL_LOG_INFO("RCV1 train batch %zu minmax: read batch", batch_idx);
     }
     sl_span_clear(&read_buffer);
     if (!sl_record_reader_read(&train_samples_reader, &read_buffer)) {
-      SL_LOG_ERROR("RCV1 batch %zu minmax: failed reading samples batch",
+      SL_LOG_ERROR("RCV1 train batch %zu minmax: failed reading samples batch",
                    batch_idx);
       goto done;
     }
-    for (int row = 0; row < train_batch.rows; ++row) {
-      for (int col = 0; col < train_batch.cols; ++col) {
-        const float value = *sl_la_matrix_get(&train_batch, row, col);
+    for (int row = 0; row < samples_batch.rows; ++row) {
+      for (int col = 0; col < samples_batch.cols; ++col) {
+        const float value = *sl_la_matrix_get(&samples_batch, row, col);
         if (value < 0 || value > 1) {
           SL_LOG_ERROR(
               "invalid RCV1 training sample at (%d, %d): %g is not in [0, 1]",
@@ -270,9 +270,9 @@ bool rcv1(const struct sl_args args[const static 1]) {
       }
     }
     if (verbose) {
-      SL_LOG_INFO("RCV1 batch %zu minmax: fit", batch_idx);
+      SL_LOG_INFO("RCV1 train batch %zu minmax: fit", batch_idx);
     }
-    sl_ml_minmax_fit(&minmax_scaler, &train_batch);
+    sl_ml_minmax_fit(&minmax_scaler, &samples_batch);
   }
 
   sl_record_reader_close(&train_samples_reader);
@@ -300,17 +300,18 @@ bool rcv1(const struct sl_args args[const static 1]) {
       .w = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_RCV1_FEATURES),
       .s = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_RCV1_FEATURES),
       .x = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_RCV1_FEATURES),
-      .shuffle_buffer = (size_t[SL_SVM_RCV1_BATCH_SIZE]){0},
-      .batch_size = 1,
+      .shuffle_buffer = (size_t[SL_SVM_RCV1_BUFFER_LEN]){0},
+      .batch_size = 100,
       .n_epochs = 1,
-      .learning_rate = 1e-6f,
+      // learning rate from Shalev-Shwartz et al. (2011)
+      .learning_rate = 1e-4f,
   };
 
-  uint16_t classes_buffer[SL_SVM_RCV1_BATCH_SIZE] = {0};
+  uint16_t classes_buffer[SL_SVM_RCV1_BUFFER_LEN] = {0};
   for (size_t batch_idx = 0; !sl_record_reader_is_done(&train_samples_reader);
        ++batch_idx) {
     if (verbose) {
-      SL_LOG_INFO("RCV1 batch %zu: reading buffer", batch_idx);
+      SL_LOG_INFO("RCV1 train batch %zu: reading buffer", batch_idx);
     }
     sl_span_clear(&read_buffer);
     if (!sl_record_reader_read(&train_samples_reader, &read_buffer)) {
@@ -320,31 +321,75 @@ bool rcv1(const struct sl_args args[const static 1]) {
     }
 
     if (verbose) {
-      SL_LOG_INFO("RCV1 batch %zu: apply minmax", batch_idx);
+      SL_LOG_INFO("RCV1 train batch %zu: apply minmax", batch_idx);
     }
-    sl_ml_minmax_apply(&minmax_scaler, &train_batch, -1, 1);
+    sl_ml_minmax_apply(&minmax_scaler, &samples_batch, -1, 1);
 
     if (verbose) {
-      SL_LOG_INFO("RCV1 batch %zu: copy classes", batch_idx);
+      SL_LOG_INFO("RCV1 train batch %zu: copy classes", batch_idx);
     }
-    for (size_t i = 0; i < SL_SVM_RCV1_BATCH_SIZE; ++i) {
-      const size_t class_idx =
-          (size_t)train_batch.rows * sizeof(uint8_t) * batch_idx + i;
+    for (size_t i = 0; i < SL_SVM_RCV1_BUFFER_LEN; ++i) {
+      const size_t class_idx = (size_t)samples_batch.rows * batch_idx + i;
       classes_buffer[i] =
           class_idx < train_classes_record.size ? train_classes[class_idx] : 0;
     }
 
     if (verbose) {
-      SL_LOG_INFO("RCV1 batch %zu: fit svm", batch_idx);
+      SL_LOG_INFO("RCV1 train batch %zu: fit svm", batch_idx);
     }
-    sl_ml_svm_linear_fit(&svm, &train_batch, classes_buffer);
+    sl_ml_svm_linear_fit(&svm, &samples_batch, classes_buffer);
+
+    if (!sl_la_vector_is_finite(&(svm.w))) {
+      SL_LOG_ERROR("RCV1 train batch %zu: SVM weights has NaNs", batch_idx);
+      goto done;
+    }
 
     if (verbose) {
-      SL_LOG_INFO("RCV1 batch %zu: results", batch_idx);
+      SL_LOG_INFO("RCV1 train batch %zu: results", batch_idx);
     }
     struct sl_ml_classification report = {0};
-    for (int i = 0; i < SL_SVM_RCV1_BATCH_SIZE; ++i) {
-      struct sl_la_vector x = sl_la_matrix_row_view(&train_batch, i);
+    for (int i = 0; i < SL_SVM_RCV1_BUFFER_LEN; ++i) {
+      struct sl_la_vector x = sl_la_matrix_row_view(&samples_batch, i);
+      sl_ml_classification_update(&report,
+                                  classes_buffer[i],
+                                  sl_ml_svm_binary_predict(&svm, &x));
+    }
+    sl_ml_classification_print(stderr, &report);
+  }
+
+  for (size_t batch_idx = 0; !sl_record_reader_is_done(&test_samples_reader);
+       ++batch_idx) {
+    if (verbose) {
+      SL_LOG_INFO("RCV1 test batch %zu: reading buffer", batch_idx);
+    }
+    sl_span_clear(&read_buffer);
+    if (!sl_record_reader_read(&test_samples_reader, &read_buffer)) {
+      SL_LOG_ERROR(
+          "failed reading RCV1 testing set samples batch during svm "
+          "evaluation");
+      goto done;
+    }
+
+    if (verbose) {
+      SL_LOG_INFO("RCV1 test batch %zu: apply minmax", batch_idx);
+    }
+    sl_ml_minmax_apply(&minmax_scaler, &samples_batch, -1, 1);
+
+    if (verbose) {
+      SL_LOG_INFO("RCV1 test batch %zu: copy classes", batch_idx);
+    }
+    for (size_t i = 0; i < SL_SVM_RCV1_BUFFER_LEN; ++i) {
+      const size_t class_idx = (size_t)samples_batch.rows * batch_idx + i;
+      classes_buffer[i] =
+          class_idx < test_classes_record.size ? test_classes[class_idx] : 0;
+    }
+
+    if (verbose) {
+      SL_LOG_INFO("RCV1 test batch %zu: results", batch_idx);
+    }
+    struct sl_ml_classification report = {0};
+    for (int i = 0; i < SL_SVM_RCV1_BUFFER_LEN; ++i) {
+      struct sl_la_vector x = sl_la_matrix_row_view(&samples_batch, i);
       sl_ml_classification_update(&report,
                                   classes_buffer[i],
                                   sl_ml_svm_binary_predict(&svm, &x));
@@ -358,7 +403,7 @@ done:
   sl_free(test_classes);
   sl_record_reader_close(&train_samples_reader);
   sl_record_reader_close(&test_samples_reader);
-  sl_la_matrix_destroy(&train_batch);
+  sl_la_matrix_destroy(&samples_batch);
   return all_ok;
 }
 
