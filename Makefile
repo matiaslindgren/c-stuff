@@ -5,17 +5,15 @@ CFLAGS   ?= \
 	-std=c23 \
 	-Weverything \
 	-Werror \
-	-Wno-missing-prototypes \
-	-Wno-pre-c23-compat \
+	-Wstrict-prototypes \
 	-Wno-c99-compat \
-	-Wno-vla \
 	-Wno-declaration-after-statement \
+	-Wno-gnu-zero-variadic-macro-arguments \
 	-Wno-padded \
-	-Wno-unsafe-buffer-usage \
+	-Wno-pre-c23-compat \
 	-Wno-switch-default \
-	-Wno-switch-enum \
-	-Wno-double-promotion \
-	-Wno-gnu-zero-variadic-macro-arguments
+	-Wno-unsafe-buffer-usage \
+	-Wno-vla
 LDFLAGS  ?= -lm -fuse-ld=lld -lc
 INCLUDES ?= ./include
 
