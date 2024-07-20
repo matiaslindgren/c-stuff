@@ -66,8 +66,9 @@ make DEBUG=1 compile_commands.json
 
 or at least some of them
 
-- [Modern C, Jens Gustedt](https://gustedt.gitlabpages.inria.fr/modern-c/)
-- [Effective C, Robert C. Seacord](https://nostarch.com/Effective_C)
+- [Modern C (November 2019), Jens Gustedt](https://www.manning.com/books/modern-c)
+- [Effective C (August 2020), Robert C. Seacord](https://nostarch.com/Effective_C)
+- [Fluent C (October 2022), Christopher Preschern](https://learning.oreilly.com/library/view/fluent-c/9781492097273)
 - [The Unicode® Standard Version 15.0 – Core Specification](https://www.unicode.org/versions/Unicode15.0.0)
 - [ZLIB Compressed Data Format Specification version 3.3](https://datatracker.ietf.org/doc/html/rfc1950)
 - [DEFLATE Compressed Data Format Specification version 1.3](https://datatracker.ietf.org/doc/html/rfc1951)
