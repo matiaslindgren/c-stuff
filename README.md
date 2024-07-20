@@ -72,3 +72,4 @@ or at least some of them
 - [ZLIB Compressed Data Format Specification version 3.3](https://datatracker.ietf.org/doc/html/rfc1950)
 - [DEFLATE Compressed Data Format Specification version 1.3](https://datatracker.ietf.org/doc/html/rfc1951)
 - [PNG (Portable Network Graphics) Specification, Version 1.2](http://www.libpng.org/pub/png/spec/1.2/PNG-Contents.html)
+- [Beej's Guide to Network Programming, v3.1.11](https://beej.us/guide/bgnet/html/split/index.html)
