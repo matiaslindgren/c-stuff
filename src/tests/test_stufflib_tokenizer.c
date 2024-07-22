@@ -2,12 +2,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "stufflib_args.h"
-#include "stufflib_macros.h"
-#include "stufflib_span.h"
-#include "stufflib_tokenizer.h"
+#include "stufflib/args/args.h"
+#include "stufflib/macros/macros.h"
+#include "stufflib/span/span.h"
+#include "stufflib/tokenizer/tokenizer.h"
 
-bool test_tokenize_empty(const bool) {
+static bool test_tokenize_empty(const bool) {
   struct sl_span empty1 = {0};
   struct sl_span empty2 = {0};
   unsigned char x[] = {1, 2, 3};
@@ -29,7 +29,7 @@ bool test_tokenize_empty(const bool) {
   return true;
 }
 
-bool test_tokenize_one(const bool) {
+static bool test_tokenize_one(const bool) {
   unsigned char x1[] = {1, 2, 3, 1, 2, 3};
   unsigned char x2[] = {2};
   const size_t n1 = SL_ARRAY_LEN(x1);
@@ -53,7 +53,7 @@ bool test_tokenize_one(const bool) {
   return true;
 }
 
-bool test_tokenize_many(const bool) {
+static bool test_tokenize_many(const bool) {
   unsigned char x1[] = {1, 2, 3, 1, 2, 3};
   unsigned char x2[] = {2, 3, 1};
   const size_t n1 = SL_ARRAY_LEN(x1);
@@ -78,7 +78,7 @@ bool test_tokenize_many(const bool) {
   return true;
 }
 
-bool test_tokenize_delimiters(const bool) {
+static bool test_tokenize_delimiters(const bool) {
   unsigned char x1[] = {0, 0, 0};
   unsigned char x2[] = {0};
   const size_t n1 = SL_ARRAY_LEN(x1);
@@ -95,7 +95,7 @@ bool test_tokenize_delimiters(const bool) {
   return true;
 }
 
-bool test_tokenize_iter(const bool) {
+static bool test_tokenize_iter(const bool) {
   unsigned char data_str[] = {
       2, 3, 4, 0, 1, 5, 6, 0, 1, 8, 9, 10, 11, 0, 1, 12, 0, 1, 0, 1,
   };

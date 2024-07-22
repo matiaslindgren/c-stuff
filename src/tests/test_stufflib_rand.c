@@ -4,11 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib_args.h"
-#include "stufflib_macros.h"
-#include "stufflib_rand.h"
+#include "stufflib/args/args.h"
+#include "stufflib/macros/macros.h"
+#include "stufflib/rand/rand.h"
 
-bool test_rand_fill(const bool) {
+static bool test_rand_fill(const bool) {
   const size_t n = 1000;
   double x[n];
   sl_rand_fill_double(n, x, 0);
@@ -26,7 +26,7 @@ bool test_rand_fill(const bool) {
   return true;
 }
 
-bool test_rand_set_zero(const bool) {
+static bool test_rand_set_zero(const bool) {
   const size_t n = 1000;
   double x[n];
   for (size_t i = 0; i < n; ++i) {
@@ -47,7 +47,7 @@ bool test_rand_set_zero(const bool) {
   return true;
 }
 
-bool test_randint(const bool) {
+static bool test_randint(const bool) {
   assert(sl_rand_int(0, 0) == 0);
   assert(sl_rand_int(1, 0) == 1);
   assert(sl_rand_int(0, 1) == 0);
@@ -67,7 +67,7 @@ bool test_randint(const bool) {
   return true;
 }
 
-bool test_rand_shuffle(const bool verbose) {
+static bool test_rand_shuffle(const bool verbose) {
   {
     unsigned char v[] = {0};
     sl_rand_shuffle(v, 1, 1);
@@ -111,7 +111,7 @@ bool test_rand_shuffle(const bool verbose) {
   return true;
 }
 
-bool test_rand_shuffle_together(const bool verbose) {
+static bool test_rand_shuffle_together(const bool verbose) {
   for (int iter = 0; iter < 100; ++iter) {
     size_t v1[16] = {0};
     char v2[16] = {0};

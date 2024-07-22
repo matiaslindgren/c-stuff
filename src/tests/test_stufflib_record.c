@@ -4,17 +4,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "stufflib_args.h"
-#include "stufflib_io.h"
-#include "stufflib_linalg.h"
-#include "stufflib_macros.h"
-#include "stufflib_math.h"
-#include "stufflib_memory.h"
-#include "stufflib_misc.h"
-#include "stufflib_record.h"
-#include "stufflib_record_reader.h"
-#include "stufflib_record_writer.h"
-#include "stufflib_span.h"
+#include "stufflib/args/args.h"
+#include "stufflib/io/io.h"
+#include "stufflib/linalg/linalg.h"
+#include "stufflib/macros/macros.h"
+#include "stufflib/math/math.h"
+#include "stufflib/memory/memory.h"
+#include "stufflib/misc/misc.h"
+#include "stufflib/record/reader.h"
+#include "stufflib/record/record.h"
+#include "stufflib/record/writer.h"
+#include "stufflib/span/span.h"
 
 bool contains(const char dir[static const 1],
               const char name[static const 1],
@@ -56,7 +56,7 @@ bool contains_str(const char dir[static const 1],
   return contains(dir, name, strlen(expected), (unsigned char*)expected);
 }
 
-bool test_write_metadata(const bool) {
+static bool test_write_metadata(const bool) {
   {
     struct sl_record record = {
         .layout = "dense",
@@ -125,7 +125,7 @@ bool test_write_metadata(const bool) {
   return true;
 }
 
-bool test_read_metadata(const bool) {
+static bool test_read_metadata(const bool) {
   {
     struct sl_record record;
     assert(sl_record_read_metadata(&record, "./test-data/record", "small1"));
@@ -207,7 +207,7 @@ bool test_read_metadata(const bool) {
   return true;
 }
 
-bool test_dense_data_reader(const bool) {
+static bool test_dense_data_reader(const bool) {
   struct sl_record record = {0};
   assert(sl_record_read_metadata(&record, "./test-data/record", "large3"));
 
@@ -266,7 +266,7 @@ bool test_dense_data_reader(const bool) {
   return true;
 }
 
-bool test_sparse_data_reader(const bool) {
+static bool test_sparse_data_reader(const bool) {
   int64_t nonzero_index[100] = {0};
   int64_t nonzero_values[100] = {0};
   const size_t nonzero_count = SL_ARRAY_LEN(nonzero_index);
@@ -349,7 +349,7 @@ bool test_sparse_data_reader(const bool) {
   return true;
 }
 
-bool test_read_data(const bool) {
+static bool test_read_data(const bool) {
   {
     struct sl_record record = {
         .layout = "dense",
@@ -386,7 +386,7 @@ bool test_read_data(const bool) {
   return true;
 }
 
-bool test_dense_data_writer(const bool) {
+static bool test_dense_data_writer(const bool) {
   struct sl_record record = {
       .layout = "dense",
       .type = "float32",
@@ -445,7 +445,7 @@ bool test_dense_data_writer(const bool) {
   return true;
 }
 
-bool test_sparse_data_writer(const bool) {
+static bool test_sparse_data_writer(const bool) {
   size_t nonzero_index[] =
       {0, 1, 2, 100, 105, 9'012, 12'303, 12'304, 25'000, 90'123};
   int32_t nonzero_values[] =
@@ -518,7 +518,7 @@ bool test_sparse_data_writer(const bool) {
   return true;
 }
 
-bool test_write_data(const bool) {
+static bool test_write_data(const bool) {
   {
     struct sl_record record = {
         .layout = "dense",
@@ -585,7 +585,7 @@ bool test_write_data(const bool) {
   return true;
 }
 
-bool test_sparse_write_and_read(const bool) {
+static bool test_sparse_write_and_read(const bool) {
   {
     struct sl_record record = {
         .layout = "sparse",
@@ -638,7 +638,7 @@ bool test_sparse_write_and_read(const bool) {
   return true;
 }
 
-bool test_sparse_batch_write_and_read(const bool) {
+static bool test_sparse_batch_write_and_read(const bool) {
   struct sl_record record = {
       .layout = "sparse",
       .type = "float32",

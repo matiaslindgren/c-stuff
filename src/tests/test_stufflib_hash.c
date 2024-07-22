@@ -4,12 +4,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib_args.h"
-#include "stufflib_hash.h"
-#include "stufflib_macros.h"
-#include "stufflib_misc.h"
+#include "stufflib/args/args.h"
+#include "stufflib/hash/hash.h"
+#include "stufflib/macros/macros.h"
+#include "stufflib/misc/misc.h"
 
-bool test_single_byte(const bool) {
+static bool test_single_byte(const bool) {
   for (uint8_t i = 0; i < 10; ++i) {
     unsigned char data[] = {
         i,
@@ -32,7 +32,7 @@ bool test_single_byte(const bool) {
   return true;
 }
 
-bool test_two_bytes_big_endian(const bool) {
+static bool test_two_bytes_big_endian(const bool) {
   for (uint16_t i = 0x100; i < 0x100 + 10; ++i) {
     unsigned char data[] = {
         (i & 0xff00) >> 8,
@@ -56,7 +56,7 @@ bool test_two_bytes_big_endian(const bool) {
   return true;
 }
 
-bool test_small_strings(const bool) {
+static bool test_small_strings(const bool) {
   const char* inputs[] = {
       "",
       "0",

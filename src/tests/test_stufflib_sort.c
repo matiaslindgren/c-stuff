@@ -5,12 +5,12 @@
 #include <string.h>
 #include <time.h>
 
-#include "stufflib_args.h"
-#include "stufflib_macros.h"
-#include "stufflib_rand.h"
-#include "stufflib_sort.h"
+#include "stufflib/args/args.h"
+#include "stufflib/macros/macros.h"
+#include "stufflib/rand/rand.h"
+#include "stufflib/sort/sort.h"
 
-bool test_compare_doubles(const bool verbose) {
+static bool test_compare_doubles(const bool verbose) {
   (void)verbose;
   double* a = calloc(2, sizeof(double));
   double* b = calloc(2, sizeof(double));
@@ -39,7 +39,8 @@ bool test_compare_doubles(const bool verbose) {
   return true;
 }
 
-bool test_sort_doubles(sl_sort_double* sort_doubles, const bool verbose) {
+static bool test_sort_doubles(sl_sort_double* sort_doubles,
+                              const bool verbose) {
   const size_t num_tests_per_size = 5;
   const size_t array_sizes[] = {1, 2, 10, 1000, 10000, 100000};
 
@@ -90,28 +91,28 @@ double* test_stdlib_qsort_double(const size_t count, double src[count]) {
   return src;
 }
 
-bool test_quicksort_doubles(const bool verbose) {
+static bool test_quicksort_doubles(const bool verbose) {
   if (verbose) {
     printf("test quicksort doubles\n");
   }
   return test_sort_doubles(sl_sort_quicksort_double, verbose);
 }
 
-bool test_mergesort_doubles(const bool verbose) {
+static bool test_mergesort_doubles(const bool verbose) {
   if (verbose) {
     printf("test mergesort doubles\n");
   }
   return test_sort_doubles(sl_sort_mergesort_double, verbose);
 }
 
-bool test_qsort_doubles(const bool verbose) {
+static bool test_qsort_doubles(const bool verbose) {
   if (verbose) {
     printf("test stdlib qsort doubles\n");
   }
   return test_sort_doubles(test_stdlib_qsort_double, verbose);
 }
 
-bool test_compare_strings(const bool verbose) {
+static bool test_compare_strings(const bool verbose) {
   (void)verbose;
   const char* a[] = {"hello", "there"};
   const char* b[] = {"ok", " "};
@@ -134,7 +135,7 @@ bool test_compare_strings(const bool verbose) {
   return true;
 }
 
-bool test_sort_strings(sl_sort_str* sort_strings, const bool verbose) {
+static bool test_sort_strings(sl_sort_str* sort_strings, const bool verbose) {
   const size_t n = 5;
 
   char** s = calloc(n, sizeof(char*));
@@ -175,21 +176,21 @@ char** test_stdlib_qsort_str(const size_t count, char* src[count]) {
   return src;
 }
 
-bool test_quicksort_strings(const bool verbose) {
+static bool test_quicksort_strings(const bool verbose) {
   if (verbose) {
     printf("test quicksort strings\n");
   }
   return test_sort_strings(sl_sort_quicksort_str, verbose);
 }
 
-bool test_mergesort_strings(const bool verbose) {
+static bool test_mergesort_strings(const bool verbose) {
   if (verbose) {
     printf("test mergesort strings\n");
   }
   return test_sort_strings(sl_sort_mergesort_str, verbose);
 }
 
-bool test_qsort_strings(const bool verbose) {
+static bool test_qsort_strings(const bool verbose) {
   if (verbose) {
     printf("test stdlib qsort strings\n");
   }
@@ -220,8 +221,9 @@ int sl_test_compare_named_vec3(const void* a, const void* b) {
   return res;
 }
 
-bool test_sort_named_vec3(sl_test_sort_named_vec3* sl_test_sort_named_vec3,
-                          const bool verbose) {
+static bool test_sort_named_vec3(
+    sl_test_sort_named_vec3* sl_test_sort_named_vec3,
+    const bool verbose) {
   struct sl_test_named_vec3 items[] = {
       {-1, 0,   0,  "f"},
       {-1, 0,   1,  "e"},
@@ -294,21 +296,21 @@ struct sl_test_named_vec3* sl_test_stdlib_qsort_named_vec3s(
   return src;
 }
 
-bool test_quicksort_custom_obj(const bool verbose) {
+static bool test_quicksort_custom_obj(const bool verbose) {
   if (verbose) {
     printf("test quicksort custom_obj\n");
   }
   return test_sort_named_vec3(sl_test_quicksort_named_vec3s, verbose);
 }
 
-bool test_mergesort_custom_obj(const bool verbose) {
+static bool test_mergesort_custom_obj(const bool verbose) {
   if (verbose) {
     printf("test mergesort custom objects\n");
   }
   return test_sort_named_vec3(sl_test_mergesort_named_vec3s, verbose);
 }
 
-bool test_qsort_custom_obj(const bool verbose) {
+static bool test_qsort_custom_obj(const bool verbose) {
   if (verbose) {
     printf("test stdlib qsort custom objects\n");
   }

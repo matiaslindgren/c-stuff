@@ -3,13 +3,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib_args.h"
-#include "stufflib_iterator.h"
-#include "stufflib_macros.h"
-#include "stufflib_span.h"
-#include "stufflib_unicode.h"
+#include "stufflib/args/args.h"
+#include "stufflib/iterator/iterator.h"
+#include "stufflib/macros/macros.h"
+#include "stufflib/span/span.h"
+#include "stufflib/unicode/unicode.h"
 
-bool test_data(const bool) {
+static bool test_data(const bool) {
   struct sl_span data = {
       .size = 5,
       .data = (unsigned char[5]){0, 1, 2, 3, 4},
@@ -45,7 +45,7 @@ struct sl_iterator sl_cstr_iter(char str[const static 1]) {
   return (struct sl_iterator){.index = 0, .data = str};
 }
 
-bool test_cstr(const bool) {
+static bool test_cstr(const bool) {
   char* strings[] = {
       "",
       " ",

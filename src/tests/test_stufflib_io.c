@@ -4,13 +4,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib_args.h"
-#include "stufflib_io.h"
-#include "stufflib_macros.h"
-#include "stufflib_span.h"
-#include "stufflib_test_data.h"
+#include "./test_data.h"
+#include "stufflib/args/args.h"
+#include "stufflib/io/io.h"
+#include "stufflib/macros/macros.h"
+#include "stufflib/span/span.h"
 
-bool test_format_path(const bool) {
+static bool test_format_path(const bool) {
   char buffer[1024] = {0};
   const size_t bufsize = SL_ARRAY_LEN(buffer);
 
@@ -28,7 +28,7 @@ bool test_format_path(const bool) {
   return true;
 }
 
-bool test_open_file(const bool) {
+static bool test_open_file(const bool) {
   const char* files[] = {
       "./test-data/txt/empty",
       "./test-data/txt/hello.txt",
@@ -51,7 +51,7 @@ bool test_open_file(const bool) {
   return true;
 }
 
-bool test_read_single_char(const bool) {
+static bool test_read_single_char(const bool) {
   struct sl_file file = {0};
   assert(sl_file_open(&file, "./test-data/txt/one.txt", "rb"));
   assert(sl_file_can_read(&file));
@@ -71,7 +71,7 @@ bool test_read_single_char(const bool) {
   return true;
 }
 
-bool test_read_empty_file(const bool) {
+static bool test_read_empty_file(const bool) {
   struct sl_file file = {0};
   assert(sl_file_open(&file, "./test-data/txt/empty", "rb"));
   assert(!ferror(file.file));
@@ -86,7 +86,7 @@ bool test_read_empty_file(const bool) {
   return true;
 }
 
-bool test_read_entire_file(const bool) {
+static bool test_read_entire_file(const bool) {
   unsigned char buf[1024] = {0};
   struct sl_span buffer = sl_span_view(SL_ARRAY_LEN(buf), buf);
 
@@ -107,7 +107,7 @@ bool test_read_entire_file(const bool) {
   return true;
 }
 
-bool test_parse_numbers(const bool) {
+static bool test_parse_numbers(const bool) {
   struct sl_file file = {0};
   assert(sl_file_open(&file, "./test-data/txt/numbers.txt", "rb"));
   assert(sl_file_can_read(&file));

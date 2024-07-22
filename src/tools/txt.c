@@ -3,13 +3,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib_args.h"
-#include "stufflib_filesystem.h"
-#include "stufflib_hashmap.h"
-#include "stufflib_iterator.h"
-#include "stufflib_span.h"
-#include "stufflib_string.h"
-#include "stufflib_tokenizer.h"
+#include "stufflib/args/args.h"
+#include "stufflib/filesystem/filesystem.h"
+#include "stufflib/hashmap/hashmap.h"
+#include "stufflib/iterator/iterator.h"
+#include "stufflib/span/span.h"
+#include "stufflib/string/string.h"
+#include "stufflib/tokenizer/tokenizer.h"
 
 static unsigned char reader_buffer_data[1024 << 6] = {0};
 static struct sl_span reader_buffer = {0};

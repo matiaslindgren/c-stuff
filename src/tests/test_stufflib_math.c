@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib_args.h"
-#include "stufflib_macros.h"
-#include "stufflib_math.h"
-#include "stufflib_rand.h"
+#include "stufflib/args/args.h"
+#include "stufflib/macros/macros.h"
+#include "stufflib/math/math.h"
+#include "stufflib/rand/rand.h"
 
 #define SL_ASSERT_FACTORIZATION_OK(verbose, x, factors)              \
   do {                                                               \
@@ -19,7 +19,7 @@
     }                                                                \
   } while (false)
 
-bool test_factorize_primes(const bool verbose) {
+static bool test_factorize_primes(const bool verbose) {
   const size_t primes[] = {2, 3, 5, 7, 11, 13, 17};
   for (size_t i = 0; i < SL_ARRAY_LEN(primes); ++i) {
     size_t* f = sl_math_factorize(primes[i]);
@@ -31,7 +31,7 @@ bool test_factorize_primes(const bool verbose) {
   return true;
 }
 
-bool test_factorize_4(const bool verbose) {
+static bool test_factorize_4(const bool verbose) {
   const size_t n = 4;
   size_t* f = sl_math_factorize(n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
@@ -42,7 +42,7 @@ bool test_factorize_4(const bool verbose) {
   return true;
 }
 
-bool test_factorize_25(const bool verbose) {
+static bool test_factorize_25(const bool verbose) {
   const size_t n = 25;
   size_t* f = sl_math_factorize(n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
@@ -53,7 +53,7 @@ bool test_factorize_25(const bool verbose) {
   return true;
 }
 
-bool test_factorize_30(const bool verbose) {
+static bool test_factorize_30(const bool verbose) {
   const size_t n = 30;
   size_t* f = sl_math_factorize(n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
@@ -65,7 +65,7 @@ bool test_factorize_30(const bool verbose) {
   return true;
 }
 
-bool test_factorize_864(const bool verbose) {
+static bool test_factorize_864(const bool verbose) {
   const size_t n = 864;
   size_t* f = sl_math_factorize(n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
@@ -82,7 +82,7 @@ bool test_factorize_864(const bool verbose) {
   return true;
 }
 
-bool test_factorize_2022(const bool verbose) {
+static bool test_factorize_2022(const bool verbose) {
   const size_t n = 2022;
   size_t* f = sl_math_factorize(n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
@@ -94,7 +94,7 @@ bool test_factorize_2022(const bool verbose) {
   return true;
 }
 
-bool test_factorize_202212(const bool verbose) {
+static bool test_factorize_202212(const bool verbose) {
   const size_t n = 202212;
   size_t* f = sl_math_factorize(n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
@@ -109,7 +109,7 @@ bool test_factorize_202212(const bool verbose) {
   return true;
 }
 
-bool test_factorize_20221210(const bool verbose) {
+static bool test_factorize_20221210(const bool verbose) {
   const size_t n = 20221210;
   size_t* f = sl_math_factorize(n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
@@ -122,7 +122,7 @@ bool test_factorize_20221210(const bool verbose) {
   return true;
 }
 
-bool test_linalg(const bool) {
+static bool test_linalg(const bool) {
   const double cmp_eps = 1e-16;
 
   const double v1[] = {1, 2, 3, 4};
@@ -147,7 +147,7 @@ bool test_linalg(const bool) {
 
 double pow2(double x) { return pow(x, 2); }
 
-bool test_numerical_diff(const bool verbose) {
+static bool test_numerical_diff(const bool verbose) {
   const size_t n = 10000;
   double x[n];
   sl_rand_fill_double(n, x, 10);
@@ -189,7 +189,7 @@ bool test_numerical_diff(const bool verbose) {
   return true;
 }
 
-bool test_double_almost(const bool) {
+static bool test_double_almost(const bool) {
   if (!sl_math_double_almost(1, 1.5, 1)) {
     return false;
   }
@@ -199,7 +199,7 @@ bool test_double_almost(const bool) {
   return true;
 }
 
-bool test_round_up_pow2(const bool) {
+static bool test_round_up_pow2(const bool) {
   assert(sl_math_next_power_of_two(0) == 1);
   assert(sl_math_next_power_of_two(1) == 2);
   assert(sl_math_next_power_of_two(2) == 4);
@@ -216,7 +216,7 @@ bool test_round_up_pow2(const bool) {
   return true;
 }
 
-bool test_is_finite(const bool) {
+static bool test_is_finite(const bool) {
   assert(sl_math_is_finite(1, (float[]){0}));
   assert(sl_math_is_finite(1, (float[]){1}));
   assert(sl_math_is_finite(1, (float[]){-1}));

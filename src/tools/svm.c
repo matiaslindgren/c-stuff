@@ -3,13 +3,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib_args.h"
-#include "stufflib_dataset.h"
-#include "stufflib_linalg.h"
-#include "stufflib_macros.h"
-#include "stufflib_ml.h"
-#include "stufflib_record.h"
-#include "stufflib_record_reader.h"
+#include "stufflib/args/args.h"
+#include "stufflib/dataset/dataset.h"
+#include "stufflib/linalg/linalg.h"
+#include "stufflib/macros/macros.h"
+#include "stufflib/ml/ml.h"
+#include "stufflib/record/reader.h"
+#include "stufflib/record/record.h"
 
 bool spambase(const struct sl_args args[const static 1]) {
   bool all_ok = false;

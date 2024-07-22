@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib_args.h"
-#include "stufflib_macros.h"
+#include "stufflib/args/args.h"
+#include "stufflib/macros/macros.h"
 
-bool test_parse_positional(const bool) {
+static bool test_parse_positional(const bool) {
   char* const argv[] = {
       "bin/path",
       "arg1",
@@ -28,7 +28,7 @@ bool test_parse_positional(const bool) {
   return true;
 }
 
-bool test_parse_one_flag(const bool) {
+static bool test_parse_one_flag(const bool) {
   char* const argv[] = {
       "bin/path",
       "-x",
@@ -64,7 +64,7 @@ bool test_parse_one_flag(const bool) {
   return true;
 }
 
-bool test_parse_positional_after_optional(const bool) {
+static bool test_parse_positional_after_optional(const bool) {
   char* const argv[] = {
       "bin/path",
       "-v",
@@ -89,7 +89,7 @@ bool test_parse_positional_after_optional(const bool) {
   return true;
 }
 
-bool test_parse_two_flags(const bool) {
+static bool test_parse_two_flags(const bool) {
   char* const argv[] = {
       "bin/path",
       "-w",
@@ -132,7 +132,7 @@ bool test_parse_two_flags(const bool) {
   return true;
 }
 
-bool test_parse_optional_ints(const bool) {
+static bool test_parse_optional_ints(const bool) {
   char* const argv[] = {
       "bin/path",
       "-w=1",

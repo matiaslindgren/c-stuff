@@ -5,13 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib_args.h"
-#include "stufflib_macros.h"
-#include "stufflib_span.h"
-#include "stufflib_string.h"
-#include "stufflib_test_data.h"
+#include "./test_data.h"
+#include "stufflib/args/args.h"
+#include "stufflib/macros/macros.h"
+#include "stufflib/span/span.h"
+#include "stufflib/string/string.h"
 
-bool test_string_init(const bool) {
+static bool test_string_init(const bool) {
   for (size_t i = 0; i < SL_ARRAY_LEN(sl_test_data_hello_utf8); ++i) {
     struct sl_string str = sl_string_from_utf8(sl_test_data_hello_utf8 + i);
     assert(str.length == sl_test_data_decoded_lengths[i]);
@@ -26,7 +26,7 @@ bool test_string_init(const bool) {
   return true;
 }
 
-bool test_string_utf8_view(const bool) {
+static bool test_string_utf8_view(const bool) {
   struct sl_string empty_str = sl_string_from_utf8(&(struct sl_span){0});
   assert(empty_str.length == 0);
   assert(empty_str.utf8_data.size == 1);
@@ -47,7 +47,7 @@ bool test_string_utf8_view(const bool) {
   return true;
 }
 
-bool test_string_slice(const bool) {
+static bool test_string_slice(const bool) {
   size_t decoded_pos = 0;
   for (size_t i = 0; i < SL_ARRAY_LEN(sl_test_data_hello_utf8); ++i) {
     struct sl_string str = sl_string_from_utf8(sl_test_data_hello_utf8 + i);
@@ -74,7 +74,7 @@ bool test_string_slice(const bool) {
   return true;
 }
 
-bool test_string_is_ascii(const bool) {
+static bool test_string_is_ascii(const bool) {
   {
     struct sl_span hello =
         (struct sl_span){.size = 12, .data = (unsigned char*)u8"hello there!"};
@@ -92,7 +92,7 @@ bool test_string_is_ascii(const bool) {
   return true;
 }
 
-bool test_string_copy_ascii(const bool) {
+static bool test_string_copy_ascii(const bool) {
   struct sl_span hello =
       (struct sl_span){.size = 12, .data = (unsigned char*)u8"hello there!"};
   struct sl_string str = sl_string_from_utf8(&hello);

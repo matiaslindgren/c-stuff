@@ -1,4 +1,9 @@
-SHELL := /bin/sh
+SHELL := /bin/bash
+
+MODULE_DIR  := ./stufflib
+PROGRAM_DIR := ./src
+OUTPUT_DIR  := ./build
+TEMP_DIR    := $(shell mktemp --directory)
 
 CLANG    := clang-18
 CFLAGS   ?= \
@@ -15,7 +20,7 @@ CFLAGS   ?= \
 	-Wno-unsafe-buffer-usage \
 	-Wno-vla
 LDFLAGS  ?= -lm -fuse-ld=lld -lc
-INCLUDES ?= ./include
+INCLUDES ?= $(MODULE_DIR)
 
 ifeq ($(shell uname), Darwin)
 	SDK_PATH := $(shell xcrun --show-sdk-path)
@@ -27,13 +32,8 @@ else
 	LDFLAGS += -lopenblas
 endif
 
-INCLUDE_DIR := $(abspath ./include)
-SOURCE_DIR  := $(abspath ./src)
-OUTPUT_DIR  := ./build
-TMP_DIR     := $(shell mktemp --directory)
-
 # todo separate: asan, ubsan, valgrind
-DEBUG=0
+DEBUG := 1
 ifeq ($(DEBUG), 1)
 	BUILD_DIR := $(OUTPUT_DIR)/debug
 	CFLAGS    += -O1 -g -fsanitize=address,undefined
@@ -42,45 +42,42 @@ else
 	CFLAGS    += -O3 -march=native
 endif
 
-TRACE=0
+TRACE := 0
 ifeq ($(TRACE), 1)
 	CFLAGS += -DSL_VERBOSITY=3
 else
 	CFLAGS += -DSL_VERBOSITY=2
 endif
 
-HEADERS     := $(wildcard $(INCLUDE_DIR)/*.h)
-TOOLS_SRC   := $(wildcard $(SOURCE_DIR)/tools/*.c)
-TESTS_SRC   := $(wildcard $(SOURCE_DIR)/tests/*.c)
-TOOLS_FILES := $(notdir $(basename $(TOOLS_SRC)))
-TESTS_FILES := $(notdir $(basename $(TESTS_SRC)))
-TOOLS_DIR   := $(BUILD_DIR)/tools
-TESTS_DIR   := $(BUILD_DIR)/tests
-TOOLS       := $(addprefix $(TOOLS_DIR)/,$(TOOLS_FILES))
-TESTS       := $(addprefix $(TESTS_DIR)/,$(TESTS_FILES))
+MODULE_DIRS  := $(wildcard $(MODULE_DIR)/stufflib/*)
+HEADER_PATHS := $(foreach dir,$(MODULE_DIRS),$(wildcard $(dir)/*.h))
+MODULES_SRC  := $(foreach dir,$(MODULE_DIRS),$(wildcard $(dir)/*.c))
+MODULES_OUT  := $(subst .c,,$(subst $(MODULE_DIR),$(BUILD_DIR),$(MODULES_SRC)))
+MODULES_DEP  := $(subst .c,.d,$(subst $(MODULE_DIR),$(BUILD_DIR),$(MODULES_SRC)))
+MODULES_OBJ  := $(subst .c,.o,$(subst $(MODULE_DIR),$(BUILD_DIR),$(MODULES_SRC)))
+
+PROGRAM_DIRS := $(wildcard $(PROGRAM_DIR)/*)
+PROGRAMS_SRC := $(foreach dir,$(PROGRAM_DIRS),$(wildcard $(dir)/*.c))
+PROGRAMS_OUT := $(subst .c,,$(subst $(PROGRAM_DIR),$(BUILD_DIR),$(PROGRAMS_SRC)))
+PROGRAMS_DEP := $(subst .c,.d,$(subst $(PROGRAM_DIR),$(BUILD_DIR),$(PROGRAMS_SRC)))
+PROGRAMS_OBJ := $(subst .c,.o,$(subst $(PROGRAM_DIR),$(BUILD_DIR),$(PROGRAMS_SRC)))
 
 .PHONY: all
-all: $(TOOLS) $(TESTS)
+all: $(PROGRAMS_OUT)
 
 .PHONY: clean
 clean:
 	$(RM) -r $(OUTPUT_DIR)
 
 .PHONY: fmt
-fmt: $(HEADERS) $(TOOLS_SRC) $(TESTS_SRC)
+fmt: $(HEADER_PATHS) $(MODULES_SRC) $(PROGRAMS_SRC)
 	@clang-format --verbose -i $^
-
-$(BUILD_DIR) $(TOOLS_DIR) $(TESTS_DIR):
-	mkdir -p $@
-
-$(TOOLS) $(TESTS): $(BUILD_DIR)/%: $(SOURCE_DIR)/%.c $(HEADERS) | $(TOOLS_DIR) $(TESTS_DIR)
-	$(CLANG) $(CFLAGS) -I $(INCLUDES) -o $@ $< $(LDFLAGS)
 
 
 JQ_MAKE_COMPILE_COMMANDS := [inputs|{\
 	directory: "$(abspath .)", \
 	command: ., \
-	file: match("('$(SOURCE_DIR)'[^ ]*)").captures[0].string, \
+	file: match("(('$(MODULE_DIR)'|'$(PROGRAM_DIR)')[^ ]*)").captures[0].string, \
 	output: match("-o ([^ ]+)").captures[0].string \
 	}]
 
@@ -89,29 +86,57 @@ compile_commands.json:
 		| grep -wE '^\S*clang' \
 		| jq -nR '$(JQ_MAKE_COMPILE_COMMANDS)' > $@
 
+$(BUILD_DIRS):
+	mkdir -p $@
 
-TEST_ARGS :=
-ifeq (${STUFFLIB_TEST_VERBOSE}, 1)
-	TEST_ARGS += -v
-endif
+# todo: maybe use implicit rules
+$(MODULES_OBJ): $(BUILD_DIR)/%.o: $(MODULE_DIR)/%.c $(HEADER_PATHS) | $(BUILD_DIRS)
+	$(CLANG) $(CFLAGS) -I $(INCLUDES) -c $< -o $@
 
-RUN_TESTS := $(addprefix run_,$(TESTS_FILES))
-.PHONY: test
-test: $(RUN_TESTS)
-.PHONY: $(RUN_TESTS)
-$(RUN_TESTS): run_%: $(TESTS_DIR)/%
-	@env SL_TMP_DIR=$(TMP_DIR) $< $(TEST_ARGS)
+$(MODULES_DEP): $(BUILD_DIR)/%.d: $(MODULE_DIR)/%.c | $(BUILD_DIRS)
+	$(CLANG) $(CFLAGS) -I $(INCLUDES) -MMD -MF $@ $<
 
-TIMEOUT_CMD := $(shell which timeout)
-ifeq ($(TIMEOUT_CMD),)
-	TIMEOUT_CMD :=
-else
-	TIMEOUT_CMD += --kill-after=4m 2m
-endif
+$(PROGRAMS_OBJ): $(BUILD_DIR)/%.o: $(PROGRAMS_DIR)/%.c $(HEADER_PATHS) | $(BUILD_DIRS)
+	$(CLANG) $(CFLAGS) -I $(INCLUDES) -c $< -o $@
 
-RUN_INTEGRATION_TESTS := $(addprefix integration_test_,$(TOOLS_FILES))
-.PHONY: integration_test
-integration_test: $(RUN_INTEGRATION_TESTS)
-.PHONY: $(RUN_INTEGRATION_TESTS)
-$(RUN_INTEGRATION_TESTS): integration_test_%: ./tests/test_%_tool.bash $(BUILD_DIR)/tools/%
-	$(TIMEOUT_CMD) $^ $(TEST_ARGS)
+$(PROGRAMS_DEP): $(BUILD_DIR)/%.d: $(PROGRAMS_DIR)/%.c $(HEADER_PATHS) | $(BUILD_DIRS)
+	$(CLANG) $(CFLAGS) -I $(INCLUDES) -MMD -MF $@ $<
+
+$(MODULES_OUT) $(PROGRAMS_OUT): $(BUILD_DIR)/%: $(BUILD_DIR)/%.d $(BUILD_DIR)/%.o
+	$(CLANG) $(CFLAGS) $< -o $@ $(LDFLAGS)
+
+# https://www.gnu.org/software/make/manual/make.html#Automatic-Prerequisites
+
+# TEST_ARGS :=
+# ifeq (${STUFFLIB_TEST_VERBOSE}, 1)
+# 	TEST_ARGS += -v
+# endif
+
+# RUN_TESTS := $(addprefix run_,$(TESTS_FILES))
+# .PHONY: test
+# test: $(RUN_TESTS)
+# .PHONY: $(RUN_TESTS)
+# $(RUN_TESTS): run_%: $(TESTS_DIR)/%
+# 	@env SL_TEMP_DIR=$(TEMP_DIR) $< $(TEST_ARGS)
+
+# TIMEOUT_CMD := $(shell which timeout)
+# ifeq ($(TIMEOUT_CMD),)
+# 	TIMEOUT_CMD :=
+# else
+# 	TIMEOUT_CMD += --kill-after=4m 2m
+# endif
+
+# RUN_INTEGRATION_TESTS := $(addprefix integration_test_,$(TOOLS_FILES))
+# .PHONY: integration_test
+# integration_test: $(RUN_INTEGRATION_TESTS)
+# .PHONY: $(RUN_INTEGRATION_TESTS)
+# $(RUN_INTEGRATION_TESTS): integration_test_%: ./tests/test_%_tool.bash $(BUILD_DIR)/tools/%
+# 	$(TIMEOUT_CMD) $^ $(TEST_ARGS)
+
+#.SECONDEXPANSION:
+
+#SED_GET_DEPS = $(shell sed -En 's|\#include [<"]stufflib/([^/]+/[^.]+).h[">]|\1|p' ./src/$*.c)
+
+#$(OUT_PATHS): $(BUILD_DIR)/%: $(BUILD_DIR)/%.o $$(addsuffix .o,$$(addprefix $(BUILD_DIR)/,$${SED_GET_DEPS}))
+#	@echo $@ $^
+#	#$(CLANG) $(CFLAGS) $< -o $@ $(LDFLAGS)

@@ -3,12 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib_args.h"
-#include "stufflib_macros.h"
-#include "stufflib_misc.h"
-#include "stufflib_png.h"
+#include "stufflib/args/args.h"
+#include "stufflib/macros/macros.h"
+#include "stufflib/misc/misc.h"
+#include "stufflib/png/png.h"
 
-bool test_read_single_pixel_chunks(const bool verbose) {
+static bool test_read_single_pixel_chunks(const bool verbose) {
   for (size_t i = 0; i < 3; ++i) {
     const char* png_path = (const char*[]){
         "./test-data/png/ff0000-1x1-rgb-nocomp.png",
@@ -31,7 +31,7 @@ bool test_read_single_pixel_chunks(const bool verbose) {
   return true;
 }
 
-bool test_read_large_image_with_many_chunks(const bool verbose) {
+static bool test_read_large_image_with_many_chunks(const bool verbose) {
   const char* png_path = "./test-data/png/asan.png";
   if (verbose) {
     printf("%s\n", png_path);
@@ -53,7 +53,7 @@ bool test_read_large_image_with_many_chunks(const bool verbose) {
   return true;
 }
 
-bool test_read_single_pixel_header(const bool verbose) {
+static bool test_read_single_pixel_header(const bool verbose) {
   for (size_t i = 0; i < 3; ++i) {
     const char* png_path = (const char*[]){
         "./test-data/png/ff0000-1x1-rgb-nocomp.png",
@@ -78,7 +78,7 @@ bool test_read_single_pixel_header(const bool verbose) {
   return true;
 }
 
-bool test_read_img_header(const bool verbose) {
+static bool test_read_img_header(const bool verbose) {
   {
     const char* png_path = "./test-data/png/white-square-rgba-dynamic.png";
     if (verbose) {
@@ -184,7 +184,7 @@ static inline int test_read_single_pixel(const char* png_path,
   return true;
 }
 
-bool test_read_single_pixel_no_compression(const bool verbose) {
+static bool test_read_single_pixel_no_compression(const bool verbose) {
   for (size_t on_pixel = 0; on_pixel < 3; ++on_pixel) {
     const char* png_path = (const char*[]){
         "./test-data/png/ff0000-1x1-rgb-nocomp.png",
@@ -198,7 +198,7 @@ bool test_read_single_pixel_no_compression(const bool verbose) {
   return true;
 }
 
-bool test_read_single_pixel_with_fixed_compression(const bool verbose) {
+static bool test_read_single_pixel_with_fixed_compression(const bool verbose) {
   for (size_t on_pixel = 0; on_pixel < 3; ++on_pixel) {
     const char* png_path = (const char*[]){
         "./test-data/png/ff0000-1x1-rgb-fixed.png",
@@ -212,7 +212,7 @@ bool test_read_single_pixel_with_fixed_compression(const bool verbose) {
   return true;
 }
 
-bool test_read_rgba_image_with_dynamic_compression(const bool verbose) {
+static bool test_read_rgba_image_with_dynamic_compression(const bool verbose) {
   const char* png_path = "./test-data/png/white-square-rgba-dynamic.png";
   if (verbose) {
     printf("%s\n", png_path);
@@ -245,7 +245,8 @@ bool test_read_rgba_image_with_dynamic_compression(const bool verbose) {
   return true;
 }
 
-bool test_read_small_images_with_dynamic_compression(const bool verbose) {
+static bool test_read_small_images_with_dynamic_compression(
+    const bool verbose) {
   for (size_t i = 0; i < 3; ++i) {
     const char* png_path = (const char*[]){
         "./test-data/png/0099ee-80x160-rgb-dynamic.png",
@@ -288,7 +289,8 @@ bool test_read_small_images_with_dynamic_compression(const bool verbose) {
   return true;
 }
 
-bool test_read_large_images_with_dynamic_compression(const bool verbose) {
+static bool test_read_large_images_with_dynamic_compression(
+    const bool verbose) {
   {
     const char* png_path = "./test-data/png/aabbcc-1600x1600-rgb-dynamic.png";
     if (verbose) {
@@ -383,7 +385,7 @@ int test_read_write_read(const bool verbose, const char* img0_path) {
   return true;
 }
 
-bool test_read_write_read_single_pixel(const bool verbose) {
+static bool test_read_write_read_single_pixel(const bool verbose) {
   const char* paths[] = {
       "./test-data/png/ff0000-1x1-rgb-nocomp.png",
       "./test-data/png/00ff00-1x1-rgb-nocomp.png",
@@ -398,7 +400,7 @@ bool test_read_write_read_single_pixel(const bool verbose) {
   return true;
 }
 
-bool test_read_write_read_small(const bool verbose) {
+static bool test_read_write_read_small(const bool verbose) {
   const char* paths[] = {
       "./test-data/png/0099ee-80x160-rgb-dynamic.png",
       "./test-data/png/cc1177-80x160-rgb-dynamic.png",
@@ -413,7 +415,7 @@ bool test_read_write_read_small(const bool verbose) {
   return true;
 }
 
-bool test_read_write_read_large(const bool verbose) {
+static bool test_read_write_read_large(const bool verbose) {
   const char* paths[] = {
       "./test-data/png/aabbcc-1600x1600-rgb-dynamic.png",
       "./test-data/png/github-profile-rgb-dynamic.png",

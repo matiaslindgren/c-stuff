@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib_args.h"
-#include "stufflib_macros.h"
-#include "stufflib_unionfind.h"
+#include "stufflib/args/args.h"
+#include "stufflib/macros/macros.h"
+#include "stufflib/unionfind/unionfind.h"
 
 int sl_uf_assert_roots_ok(const struct sl_unionfind uf,
                           size_t expected_roots[static 1]) {
@@ -18,7 +18,7 @@ int sl_uf_assert_roots_ok(const struct sl_unionfind uf,
   return true;
 }
 
-bool test_union_until_single_set(const bool) {
+static bool test_union_until_single_set(const bool) {
   struct sl_unionfind uf = {0};
   if (!sl_unionfind_init(&uf, 10)) {
     SL_LOG_ERROR("unable to allocate union find structure");
@@ -83,7 +83,7 @@ bool test_union_until_single_set(const bool) {
   return true;
 }
 
-bool test_union_self(const bool) {
+static bool test_union_self(const bool) {
   struct sl_unionfind uf = {0};
   if (!sl_unionfind_init(&uf, 3)) {
     SL_LOG_ERROR("unable to allocate union find structure");

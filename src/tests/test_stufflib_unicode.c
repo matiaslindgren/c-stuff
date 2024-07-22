@@ -5,14 +5,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib_args.h"
-#include "stufflib_iterator.h"
-#include "stufflib_macros.h"
-#include "stufflib_span.h"
-#include "stufflib_test_data.h"
-#include "stufflib_unicode.h"
+#include "./test_data.h"
+#include "stufflib/args/args.h"
+#include "stufflib/iterator/iterator.h"
+#include "stufflib/macros/macros.h"
+#include "stufflib/span/span.h"
+#include "stufflib/unicode/unicode.h"
 
-bool test_validate_utf8(const bool) {
+static bool test_validate_utf8(const bool) {
   struct sl_span invalid_utf8[] = {
       {.size = 1,                   .data = (unsigned char[]){0x80}},
       {.size = 2,             .data = (unsigned char[]){0xc0, 0x80}},
@@ -31,7 +31,7 @@ bool test_validate_utf8(const bool) {
   return true;
 }
 
-bool test_decode_codepoints(const bool) {
+static bool test_decode_codepoints(const bool) {
   size_t codepoint_pos = 0;
   for (size_t i_str = 0; i_str < SL_ARRAY_LEN(sl_test_data_hello_utf8);
        ++i_str) {
@@ -56,7 +56,7 @@ bool test_decode_codepoints(const bool) {
   return true;
 }
 
-bool test_unicode_iterator(const bool) {
+static bool test_unicode_iterator(const bool) {
   size_t codepoint_pos = 0;
   for (size_t i_str = 0; i_str < SL_ARRAY_LEN(sl_test_data_hello_utf8);
        ++i_str) {
@@ -81,7 +81,7 @@ bool test_unicode_iterator(const bool) {
   return true;
 }
 
-bool test_unicode_length(const bool) {
+static bool test_unicode_length(const bool) {
   for (size_t i_str = 0; i_str < SL_ARRAY_LEN(sl_test_data_hello_utf8);
        ++i_str) {
     const size_t str_len = sl_unicode_length(sl_test_data_hello_utf8 + i_str);
@@ -90,7 +90,7 @@ bool test_unicode_length(const bool) {
   return true;
 }
 
-bool test_decode_utf8_files(const bool verbose) {
+static bool test_decode_utf8_files(const bool verbose) {
   const char* languages[] = {
       "ar", "bg",  "cs", "de",  "el", "fa", "fi", "fr",  "he",  "hi", "is",
       "ja", "ka",  "ki", "ko",  "ku", "lt", "lv", "nah", "nqo", "pl", "pt",

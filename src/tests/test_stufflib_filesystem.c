@@ -1,15 +1,15 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "stufflib_args.h"
-#include "stufflib_filesystem.h"
-#include "stufflib_iterator.h"
-#include "stufflib_macros.h"
-#include "stufflib_span.h"
-#include "stufflib_string.h"
-#include "stufflib_test_data.h"
+#include "./test_data.h"
+#include "stufflib/args/args.h"
+#include "stufflib/filesystem/filesystem.h"
+#include "stufflib/iterator/iterator.h"
+#include "stufflib/macros/macros.h"
+#include "stufflib/span/span.h"
+#include "stufflib/string/string.h"
 
-bool test_read_file(const bool verbose) {
+static bool test_read_file(const bool verbose) {
   unsigned char buf[128] = {0};
   struct sl_span buffer = sl_span_view(SL_ARRAY_LEN(buf), buf);
 
@@ -28,7 +28,7 @@ bool test_read_file(const bool verbose) {
   return true;
 }
 
-bool test_read_file_utf8(const bool verbose) {
+static bool test_read_file_utf8(const bool verbose) {
   unsigned char buf[128] = {0};
   struct sl_span buffer = sl_span_view(SL_ARRAY_LEN(buf), buf);
 
@@ -67,7 +67,7 @@ bool test_read_file_utf8(const bool verbose) {
   return true;
 }
 
-bool test_read_lines(const bool verbose) {
+static bool test_read_lines(const bool verbose) {
   unsigned char buf[128] = {0};
   struct sl_span buffer = sl_span_view(SL_ARRAY_LEN(buf), buf);
 

@@ -5,11 +5,11 @@
 
 #define SL_LA_FLOAT_EQ_TOL 1e-6
 
-#include "stufflib_args.h"
-#include "stufflib_linalg.h"
-#include "stufflib_macros.h"
-#include "stufflib_math.h"
-#include "stufflib_ml.h"
+#include "stufflib/args/args.h"
+#include "stufflib/linalg/linalg.h"
+#include "stufflib/macros/macros.h"
+#include "stufflib/math/math.h"
+#include "stufflib/ml/ml.h"
 
 bool check_vector_equal(struct sl_la_vector a[const static 1],
                         struct sl_la_vector b[const static 1]) {
@@ -37,7 +37,7 @@ bool check_matrix_equal(struct sl_la_matrix a[const static 1],
   return true;
 }
 
-bool test_minmax_normalization(const bool) {
+static bool test_minmax_normalization(const bool) {
   {
     struct sl_la_matrix a = {
         .rows = 4,
@@ -156,7 +156,7 @@ bool test_minmax_normalization(const bool) {
   return true;
 }
 
-bool test_random_train_test_split(const bool) {
+static bool test_random_train_test_split(const bool) {
   for (int iter = 0; iter < 1000; ++iter) {
     struct sl_la_matrix data = {
         .rows = 12,
@@ -199,7 +199,7 @@ bool test_random_train_test_split(const bool) {
   return true;
 }
 
-bool test_svm_linear_fit(const bool) {
+static bool test_svm_linear_fit(const bool) {
   for (int iter = 0; iter < 1000; ++iter) {
     for (int batch_size = 1; batch_size < 3; ++batch_size) {
       for (int n_epochs = 1; n_epochs < 10; ++n_epochs) {
