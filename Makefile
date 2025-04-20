@@ -9,12 +9,13 @@ TEMP_DIR   = $(eval TEMP_DIR := $(shell mktemp --directory))
 
 CLANG  := clang-20
 CFLAGS ?= \
-	-std=c23 \
+	-std=gnu23 \
 	-Weverything \
 	-Werror \
 	-Wstrict-prototypes \
 	-Wno-c99-compat \
 	-Wno-declaration-after-statement \
+	-Wno-disabled-macro-expansion \
 	-Wno-gnu-zero-variadic-macro-arguments \
 	-Wno-missing-prototypes \
 	-Wno-padded \
