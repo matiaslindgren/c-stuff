@@ -7,12 +7,17 @@ source ${self_dir}/common.bash $@
 server_tool="$1"
 nohup $server_tool > server.out 2>&1 &
 server_pid=$!
-trap "kill $server_pid" EXIT TERM
 
 while [ ! -s server.out ]; do
   sleep 1
 done
-trap "rm server.out" EXIT TERM
+
+function cleanup {
+  kill $server_pid
+  rm -f server.out
+  rm -f client.out
+}
+trap cleanup EXIT TERM
 
 function check_no_server_errors {
   if [ "$(jq .level server.out | grep error --count)" -gt 0 ]; then
