@@ -1,8 +1,10 @@
+*.[do]
 .cache
 build
 compile_commands.json
 datasets
 hello.txt
 llvm-*
+out
 test-data-sizes.txt
 there.txt

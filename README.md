@@ -14,7 +14,7 @@ Functionality (very limited):
 * dataset parsing
 * support vector machines
 
-See [`./src/tools`](./src/tools)
+See [`./tools`](./tools)
 
 ## Requirements
 
@@ -22,14 +22,14 @@ It is assumed the target platform is a reasonably common, new OS, with large amo
 The current Makefile assumes either Linux or macOS.
 
 * `make`
-* `clang-18`
+* `clang-20
 * probably many more depending on your OS/distro
 
 See the [LLVM docs](https://apt.llvm.org/) or stufflib's [CI config](./.github/workflows/c.yml) on how to new Clang versions (or use Docker).
 
 ### (Optional) Run in Docker
 
-If you can't install Clang 18 using a package manager, you can use Docker:
+If you can't install Clang 20 using a package manager, you can use Docker:
 
 ```sh
 ./scripts/build_image.sh
@@ -42,12 +42,12 @@ If you can't install Clang 18 using a package manager, you can use Docker:
 
 Unoptimized, with sanitizers (address and UB):
 ```sh
-make DEBUG=1 -j4 all test integration_test
+make -j4 all test integration_test
 ```
 
 Optimized:
 ```sh
-make -j4 all test integration_test
+make RELEASE=1 -j4 all test integration_test
 ```
 
 ### Keep the code tidy
@@ -59,7 +59,7 @@ make fmt
 ### Generate compilation database
 
 ```sh
-make DEBUG=1 compile_commands.json
+make compile_commands.json
 ```
 
 ## References
@@ -74,3 +74,5 @@ or at least some of them
 - [DEFLATE Compressed Data Format Specification version 1.3](https://datatracker.ietf.org/doc/html/rfc1951)
 - [PNG (Portable Network Graphics) Specification, Version 1.2](http://www.libpng.org/pub/png/spec/1.2/PNG-Contents.html)
 - [Beej's Guide to Network Programming, v3.1.11](https://beej.us/guide/bgnet/html/split/index.html)
+- [GNU Make papers (November 2014), Paul D. Smith](https://make.mad-scientist.net/papers/)
+- [The GNU Make Book (April 2015), John Graham-Cumming](https://nostarch.com/gnumake)

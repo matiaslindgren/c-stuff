@@ -10,10 +10,10 @@ jobs:
   build-and-test:
     strategy:
       matrix:
-        debug: [0, 1]
-        llvm: [18]
-    name: "debug: ${{ matrix.debug }}, llvm: ${{ matrix.llvm }}"
-    runs-on: ubuntu-22.04
+        release: [0, 1]
+        llvm: [20]
+    name: "release: ${{ matrix.release }}, llvm: ${{ matrix.llvm }}"
+    runs-on: ubuntu-24.04
     env:
       STUFFLIB_TEST_VERBOSE: 1
     steps:
@@ -28,9 +28,9 @@ jobs:
     - name: install clang
       run: sudo apt update --yes && sudo apt install --yes clang-${{ matrix.llvm }} lld-${{ matrix.llvm }}
     - uses: actions/checkout@v4
-    - run: make DEBUG=${{ matrix.debug }} TRACE=${{ matrix.debug }} compile_commands.json
+    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.release }} compile_commands.json
     - run: cat compile_commands.json
-    - run: make -j4 DEBUG=${{ matrix.debug }} TRACE=${{ matrix.debug }} all
-    - run: make -j4 DEBUG=${{ matrix.debug }} TRACE=${{ matrix.debug }} test
-    - run: make -j4 DEBUG=${{ matrix.debug }} TRACE=${{ matrix.debug }} integration_test
-    - run: make DEBUG=${{ matrix.debug }} TRACE=${{ matrix.debug }} clean
+    - run: make -j4 RELEASE=${{ matrix.release }} TRACE=${{ matrix.release }} all
+    - run: make -j4 RELEASE=${{ matrix.release }} TRACE=${{ matrix.release }} test
+    - run: make -j4 RELEASE=${{ matrix.release }} TRACE=${{ matrix.release }} integration_test
+    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.release }} clean
