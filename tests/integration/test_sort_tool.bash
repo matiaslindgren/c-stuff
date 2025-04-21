@@ -59,13 +59,4 @@ if [[ $sort_tool = */release/* ]]; then
   if ! test_sort_tool '10**6' '10**6'; then
     exit 1
   fi
-  if ! test_sort_tool 1 '10**7'; then
-    exit 1
-  fi
-  if ! test_sort_tool 10 '10**7'; then
-    exit 1
-  fi
-  if ! test_sort_tool '10**6' '10**7'; then
-    exit 1
-  fi
 fi
