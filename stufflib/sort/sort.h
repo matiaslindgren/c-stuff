@@ -15,6 +15,37 @@ typedef void* sl_sort(void*, const size_t, const size_t, sl_sort_compare*);
 typedef double* sl_sort_double(const size_t, double*);
 typedef char** sl_sort_str(const size_t, char**);
 
+void* sl_sort_internal_insertsort(const size_t count,
+                                  const size_t size,
+                                  void* restrict src_raw,
+                                  void* restrict tmp_raw,
+                                  sl_sort_compare* const compare) {
+  unsigned char* src = src_raw;
+  unsigned char* swap_tmp = tmp_raw;
+  for (size_t rhs = 1; rhs < count; ++rhs) {
+    memcpy(swap_tmp, src + rhs * size, size);
+    size_t lhs = rhs;
+    for (; lhs > 0 && compare(src + (lhs - 1) * size, swap_tmp) > 0; --lhs) {
+      memcpy(src + lhs * size, src + (lhs - 1) * size, size);
+    }
+    memcpy(src + lhs * size, swap_tmp, size);
+  }
+  return src;
+}
+
+void* sl_sort_insertsort(void* src,
+                         const size_t count,
+                         const size_t size,
+                         sl_sort_compare* const compare) {
+  assert(count);
+  assert(size);
+  assert(src);
+  void* tmp = sl_alloc(1, size);
+  sl_sort_internal_insertsort(count, size, src, tmp, compare);
+  sl_free(tmp);
+  return src;
+}
+
 void sl_sort_internal_mergesort_merge(const size_t size,
                                       void* restrict src_raw,
                                       void* restrict dst_raw,
@@ -110,6 +141,8 @@ size_t sl_sort_internal_hoare_partition(const size_t size,
   }
 }
 
+#define SL_INSERTSORT_THRESHOLD 24
+
 void sl_sort_internal_quicksort(const size_t count,
                                 const size_t size,
                                 void* src,
@@ -118,6 +151,11 @@ void sl_sort_internal_quicksort(const size_t count,
                                 const size_t hi,
                                 sl_sort_compare* const compare) {
   if (lo >= hi || lo >= count || hi >= count) {
+    return;
+  }
+  if (hi - lo < SL_INSERTSORT_THRESHOLD) {
+    unsigned char* src_bytes = src;
+    sl_sort_insertsort(src_bytes + lo * size, hi - lo + 1, size, compare);
     return;
   }
   const size_t pivot =
@@ -146,6 +184,10 @@ int sl_sort_compare_double(const void* lhs_data, const void* rhs_data) {
   return (lhs[0] > rhs[0]) - (lhs[0] < rhs[0]);
 }
 
+double* sl_sort_insertsort_double(const size_t count, double src[count]) {
+  return sl_sort_insertsort(src, count, sizeof(double), sl_sort_compare_double);
+}
+
 double* sl_sort_quicksort_double(const size_t count, double src[count]) {
   return sl_sort_quicksort(src, count, sizeof(double), sl_sort_compare_double);
 }
@@ -158,6 +200,10 @@ int sl_sort_compare_str(const void* lhs_data, const void* rhs_data) {
   const char* const* lhs = lhs_data;
   const char* const* rhs = rhs_data;
   return strcmp(lhs[0], rhs[0]);
+}
+
+char** sl_sort_insertsort_str(const size_t count, char* src[count]) {
+  return sl_sort_insertsort(src, count, sizeof(char*), sl_sort_compare_str);
 }
 
 char** sl_sort_quicksort_str(const size_t count, char* src[count]) {

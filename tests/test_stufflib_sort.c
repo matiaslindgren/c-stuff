@@ -40,12 +40,16 @@ static bool test_compare_doubles(const bool verbose) {
 }
 
 static bool test_sort_doubles(sl_sort_double* sort_doubles,
-                              const bool verbose) {
+                              const bool verbose,
+                              const size_t max_len) {
   const size_t num_tests_per_size = 5;
-  const size_t array_sizes[] = {1, 2, 10, 1000, 10000, 100000};
+  const size_t array_sizes[] = {1, 2, 10, 1000, 10000, 100000, 500000};
 
   for (size_t s = 0; s < sizeof(array_sizes) / sizeof(array_sizes[0]); ++s) {
     const size_t n = array_sizes[s];
+    if (n > max_len) {
+      break;
+    }
 
     double* x = calloc(n, sizeof(double));
     if (!x) {
@@ -91,25 +95,32 @@ double* test_stdlib_qsort_double(const size_t count, double src[count]) {
   return src;
 }
 
+static bool test_insertsort_doubles(const bool verbose) {
+  if (verbose) {
+    printf("test insertsort doubles\n");
+  }
+  return test_sort_doubles(sl_sort_insertsort_double, verbose, 10000);
+}
+
 static bool test_quicksort_doubles(const bool verbose) {
   if (verbose) {
     printf("test quicksort doubles\n");
   }
-  return test_sort_doubles(sl_sort_quicksort_double, verbose);
+  return test_sort_doubles(sl_sort_quicksort_double, verbose, 1000000);
 }
 
 static bool test_mergesort_doubles(const bool verbose) {
   if (verbose) {
     printf("test mergesort doubles\n");
   }
-  return test_sort_doubles(sl_sort_mergesort_double, verbose);
+  return test_sort_doubles(sl_sort_mergesort_double, verbose, 1000000);
 }
 
 static bool test_qsort_doubles(const bool verbose) {
   if (verbose) {
     printf("test stdlib qsort doubles\n");
   }
-  return test_sort_doubles(test_stdlib_qsort_double, verbose);
+  return test_sort_doubles(test_stdlib_qsort_double, verbose, 1000000);
 }
 
 static bool test_compare_strings(const bool verbose) {
@@ -174,6 +185,13 @@ static bool test_sort_strings(sl_sort_str* sort_strings, const bool verbose) {
 char** test_stdlib_qsort_str(const size_t count, char* src[count]) {
   qsort((void*)src, count, sizeof(char*), sl_sort_compare_str);
   return src;
+}
+
+static bool test_insertsort_strings(const bool verbose) {
+  if (verbose) {
+    printf("test insertsort strings\n");
+  }
+  return test_sort_strings(sl_sort_insertsort_str, verbose);
 }
 
 static bool test_quicksort_strings(const bool verbose) {
@@ -268,19 +286,28 @@ static bool test_sort_named_vec3(
   return true;
 }
 
-struct sl_test_named_vec3* sl_test_mergesort_named_vec3s(
+struct sl_test_named_vec3* sl_test_insertsort_named_vec3s(
     const size_t count,
     struct sl_test_named_vec3 src[count]) {
-  return sl_sort_mergesort((void*)src,
-                           count,
-                           sizeof(struct sl_test_named_vec3),
-                           sl_test_compare_named_vec3);
+  return sl_sort_insertsort((void*)src,
+                            count,
+                            sizeof(struct sl_test_named_vec3),
+                            sl_test_compare_named_vec3);
 }
 
 struct sl_test_named_vec3* sl_test_quicksort_named_vec3s(
     const size_t count,
     struct sl_test_named_vec3 src[count]) {
   return sl_sort_quicksort((void*)src,
+                           count,
+                           sizeof(struct sl_test_named_vec3),
+                           sl_test_compare_named_vec3);
+}
+
+struct sl_test_named_vec3* sl_test_mergesort_named_vec3s(
+    const size_t count,
+    struct sl_test_named_vec3 src[count]) {
+  return sl_sort_mergesort((void*)src,
                            count,
                            sizeof(struct sl_test_named_vec3),
                            sl_test_compare_named_vec3);
@@ -294,6 +321,13 @@ struct sl_test_named_vec3* sl_test_stdlib_qsort_named_vec3s(
         sizeof(struct sl_test_named_vec3),
         sl_test_compare_named_vec3);
   return src;
+}
+
+static bool test_insertsort_custom_obj(const bool verbose) {
+  if (verbose) {
+    printf("test insertsort custom_obj\n");
+  }
+  return test_sort_named_vec3(sl_test_insertsort_named_vec3s, verbose);
 }
 
 static bool test_quicksort_custom_obj(const bool verbose) {
@@ -319,12 +353,15 @@ static bool test_qsort_custom_obj(const bool verbose) {
 
 SL_TEST_MAIN(test_compare_doubles,
              test_compare_strings,
+             test_insertsort_doubles,
              test_quicksort_doubles,
              test_mergesort_doubles,
              test_qsort_doubles,
+             test_insertsort_strings,
              test_quicksort_strings,
              test_mergesort_strings,
              test_qsort_strings,
+             test_insertsort_custom_obj,
              test_quicksort_custom_obj,
              test_mergesort_custom_obj,
              test_qsort_custom_obj)
