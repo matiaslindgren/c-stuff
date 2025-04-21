@@ -31,6 +31,6 @@ jobs:
     - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.release }} compile_commands.json
     - run: cat compile_commands.json
     - run: make -j4 RELEASE=${{ matrix.release }} TRACE=${{ matrix.release }} all
-    - run: make -j4 RELEASE=${{ matrix.release }} TRACE=${{ matrix.release }} test
-    - run: make -j4 RELEASE=${{ matrix.release }} TRACE=${{ matrix.release }} integration_test
+    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.release }} test
+    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.release }} integration_test
     - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.release }} clean

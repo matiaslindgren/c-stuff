@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -xue
+set -ue
 
 self_dir=$(dirname "$0")
 source ${self_dir}/common.bash $@
