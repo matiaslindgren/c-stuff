@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 set -ue
 
-if [ $# -eq 1 ]; then
-  if [ "$1" == "-v" ]; then
-    set -x
-  fi
+if [ $# -gt 0 ]; then
+  for arg in $@; do
+    if [ "$arg" == "-v" ]; then
+      set -x
+    fi
+  done
 fi
 
 required_commands=(
