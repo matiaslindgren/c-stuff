@@ -28,9 +28,9 @@ jobs:
     - name: install clang
       run: sudo apt update --yes && sudo apt install --yes clang-${{ matrix.llvm }} lld-${{ matrix.llvm }}
     - uses: actions/checkout@v4
-    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.release }} compile_commands.json
+    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.release == 0 }} compile_commands.json
     - run: cat compile_commands.json
-    - run: make -j4 RELEASE=${{ matrix.release }} TRACE=${{ matrix.release }} all
-    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.release }} test
-    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.release }} integration_test
-    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.release }} clean
+    - run: make -j4 RELEASE=${{ matrix.release }} TRACE=${{ matrix.release == 0 }} all
+    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.release == 0 }} test
+    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.release == 0 }} integration_test
+    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.release == 0 }} clean
