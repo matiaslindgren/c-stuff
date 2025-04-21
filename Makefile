@@ -2,8 +2,6 @@ SHELL := /bin/bash
 
 # TODO dedicated subdir, not repo root
 MODULE_DIR := ./stufflib
-TEST_DIR   := ./tests
-TOOL_DIR   := ./tools
 OUTPUT_DIR := ./build
 TEMP_DIR   = $(eval TEMP_DIR := $(shell mktemp --directory))
 
@@ -95,11 +93,11 @@ ifeq (${STUFFLIB_TEST_VERBOSE}, 1)
 	TEST_ARGS += -v
 endif
 
-RUN_TESTS := $(addprefix run_,$(TEST_PATHS))
+RUN_TESTS := $(addprefix run_,$(notdir $(TEST_PATHS)))
 .PHONY: test
 test: $(RUN_TESTS)
 .PHONY: $(RUN_TESTS)
-$(RUN_TESTS): run_%: %
+$(RUN_TESTS): run_%: $(BUILD_DIR)/tests/%
 	@env SL_TEMP_DIR=$(TEMP_DIR) $< $(TEST_ARGS)
 
 TIMEOUT_CMD := $(shell which timeout)
