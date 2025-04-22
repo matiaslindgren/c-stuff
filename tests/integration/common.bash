@@ -31,4 +31,4 @@ fi
 
 root_dir=$(dirname $0)/../../
 test_dir=$(mktemp --directory)
-trap "rm -rf $test_dir" EXIT SIGTERM
+trap "rm -rf $test_dir" EXIT
