@@ -10,8 +10,13 @@ jobs:
   build-and-test:
     strategy:
       matrix:
-        release: [0, 1]
-        llvm: [20]
+        include:
+          - release: 0
+            trace: 1
+            llvm: 20
+          - release: 1
+            trace: 0
+            llvm: 20
     name: "release: ${{ matrix.release }}, llvm: ${{ matrix.llvm }}"
     runs-on: ubuntu-24.04
     env:
@@ -28,9 +33,9 @@ jobs:
     - name: install clang
       run: sudo apt update --yes && sudo apt install --yes clang-${{ matrix.llvm }} lld-${{ matrix.llvm }}
     - uses: actions/checkout@v4
-    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.release == 0 }} compile_commands.json
+    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.trace }} compile_commands.json
     - run: cat compile_commands.json
-    - run: make -j4 RELEASE=${{ matrix.release }} TRACE=${{ matrix.release == 0 }} all
-    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.release == 0 }} test
-    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.release == 0 }} integration_test
-    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.release == 0 }} clean
+    - run: make -j4 RELEASE=${{ matrix.release }} TRACE=${{ matrix.trace }} all
+    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.trace }} test
+    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.trace }} integration_test
+    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.trace }} clean
