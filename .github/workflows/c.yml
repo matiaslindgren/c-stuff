@@ -55,7 +55,7 @@ jobs:
       STUFFLIB_TEST_VERBOSE: 1
     steps:
     - name: install LLVM ${{ matrix.llvm }}
-      run: brew install llvm@${{ matrix.llvm }}
+      run: brew install llvm@${{ matrix.llvm }} lld@${{ matrix.llvm }}
     - uses: actions/checkout@v4
     - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.trace }} compile_commands.json
     - run: cat compile_commands.json
