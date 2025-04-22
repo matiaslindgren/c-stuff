@@ -16,6 +16,7 @@ RUN apt update --yes \
        clang-format-${LLVM_VERSION} \
        libopenblas-dev \
        coreutils \
+       net-tools \
        make \
        xxd \
        jq
