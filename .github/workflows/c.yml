@@ -17,7 +17,7 @@ jobs:
           - release: 1
             trace: 0
             llvm: 20
-    name: "build & test: release=${{ matrix.release }} trace=${{ matrix.trace }} llvm=${{ matrix.llvm }}"
+    name: "release=${{ matrix.release }} trace=${{ matrix.trace }} llvm=${{ matrix.llvm }}"
     runs-on: ubuntu-24.04
     env:
       STUFFLIB_TEST_VERBOSE: 1
