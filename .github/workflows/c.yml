@@ -7,7 +7,7 @@ on:
       - '*.md'
 
 jobs:
-  build-and-test:
+  test-ubuntu:
     strategy:
       matrix:
         include:
@@ -30,8 +30,32 @@ jobs:
       run: |
         sudo add-apt-repository --yes "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-${{ matrix.llvm }} main"
         sudo add-apt-repository --yes "deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-${{ matrix.llvm }} main"
-    - name: install clang
+    - name: install LLVM ${{ matrix.llvm }}
       run: sudo apt update --yes && sudo apt install --yes clang-${{ matrix.llvm }} lld-${{ matrix.llvm }}
+    - uses: actions/checkout@v4
+    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.trace }} compile_commands.json
+    - run: cat compile_commands.json
+    - run: make -j4 RELEASE=${{ matrix.release }} TRACE=${{ matrix.trace }} all
+    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.trace }} test
+    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.trace }} integration_test
+    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.trace }} clean
+  test-macos:
+    strategy:
+      matrix:
+        include:
+          - release: 0
+            trace: 1
+            llvm: 20
+          - release: 1
+            trace: 0
+            llvm: 20
+    name: "release=${{ matrix.release }} trace=${{ matrix.trace }} llvm=${{ matrix.llvm }}"
+    runs-on: macos-15-large
+    env:
+      STUFFLIB_TEST_VERBOSE: 1
+    steps:
+    - name: install LLVM ${{ matrix.llvm }}
+      run: brew install llvm@${{ matrix.llvm }}
     - uses: actions/checkout@v4
     - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.trace }} compile_commands.json
     - run: cat compile_commands.json
