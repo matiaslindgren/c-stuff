@@ -11,6 +11,16 @@ struct sl_args {
   char* const* argv;
 };
 
+bool sl_args_contains_help_flag(const struct sl_args args[const static 1]) {
+  for (int i = 1; i < args->argc; ++i) {
+    if (strcmp(args->argv[i], "-h") == 0 ||
+        strcmp(args->argv[i], "--help") == 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool sl_args_is_flag(const struct sl_args args[const static 1], const int i) {
   return i < args->argc && args->argv[i][0] == '-';
 }
