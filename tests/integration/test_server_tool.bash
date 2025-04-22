@@ -19,7 +19,9 @@ server_pid=$!
 function cleanup {
   set +e
   kill $server_pid
+  cat server.out
   rm -f server.out
+  cat client.out
   rm -f client.out
 }
 trap cleanup EXIT
