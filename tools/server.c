@@ -152,7 +152,7 @@ int main(int argc, char *const argv[argc + 1]) {
       msg_buffer[msg_len] = 0;
     }
 
-    SL_LOG_TRACE("received message '%s' on %d", msg_buffer);
+    SL_LOG_TRACE("received message '%s' on %d", msg_buffer, fd_conn);
 
 #if 0
     if (0 > snprintf(msg_buffer, SL_ARRAY_LEN(msg_buffer), "hello\r\n")) {
