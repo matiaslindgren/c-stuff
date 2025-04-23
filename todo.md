@@ -1,11 +1,14 @@
 # TODO
 
+- [ ] header-only TCP server object
+- [ ] on top of TCP API: header-only HTTP server object
+- [ ] on top of HTTP API: header-only websocket server object
+- [ ] no logging in headers, take error msg buffer (always in compilation unit) as out param
 - [ ] unify initialization and destruction API
 - [ ] replace dynamic allocations with paged memory arena
-- [ ] fix argv parsing of required vs optional args, e.g. negative numbers as positional args are currently not possible
+- [ ] fix argv parsing of required vs optional args, e.g. negative numbers as positional args are currently not possible (use -- for end of optionals)
 - [ ] cleanup and comment DEFLATE decoder, implement simple compression
 - [ ] implement better hash func?
-- [ ] replace hard-coded `size_t` hashmap value with `void*`
 - [ ] optimize huffman code tree
 - [ ] handle different PNG color types
 - [ ] verify the IO header handles all errors gracefully
@@ -16,16 +19,15 @@
 - [ ] replace all c-strings with unicode
 - [ ] ensure unicode decode/encode conforms to standard
 - [ ] separate tests from other headers
-- [ ] refactor entire stufflib into components, compile as static library, link manually
+- [ ] ?compile as static library, link manually
 - [ ] `printf` for unicode (`wchar_t` and `wprintf`?)
 - [ ] try to replace `void*` casts with `_Generic`
 - [ ] return `struct sl_data` from math functions
-- [ ] store hashes in hash table nodes to avoid recomputing on resize
 - [ ] use power of 2 for underlying array and map hash to index with bitand size, instead of modulo (rely on compiler for this but use pow 2 sizes)
 - [ ] rethink unnecessary buffering when reading files with iterators
 - [ ] simplify line reader iterators
 - [ ] span with item size, length, capacity
-- [ ] benchmark
+- [ ] benchmark (linux perf-stat, macos sample)
     - CRC32 as hash function, collisions etc
     - sorting, especially edge cases
     - utf-8 decoder
@@ -37,6 +39,9 @@
 - [x] cleanup hashmap of unnecessary code, doesn't need e.g. insert
 - [x] implement non-allocating args parser
 - [x] implement log levels and replace `STUFFLIB_LOG` macros as no-ops if level too low
+- [x] replace hard-coded `size_t` hashmap value with `void*`
+- [x] refactor entire stufflib into components
+- [x] store hashes in hash table nodes to avoid recomputing on resize
 
 ## read
 - https://www.cl.cam.ac.uk/~mgk25/unicode.html
