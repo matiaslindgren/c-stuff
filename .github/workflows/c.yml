@@ -7,59 +7,56 @@ on:
       - '*.md'
 
 jobs:
-  test-ubuntu:
+  build-and-test:
     strategy:
       matrix:
-        include:
+        llvm:
+          - 20
+        platform:
+          - ubuntu-24.04
+          - macos-15
+        make:
           - release: 0
             trace: 1
-            llvm: 20
           - release: 1
             trace: 0
-            llvm: 20
-    name: "runs-on=ubuntu-24.04 release=${{ matrix.release }} trace=${{ matrix.trace }} llvm=${{ matrix.llvm }}"
-    runs-on: ubuntu-24.04
+
+    name: "runs-on=${{ matrix.platform }} release=${{ matrix.make.release }} trace=${{ matrix.make.trace }} llvm=${{ matrix.llvm }}"
+    runs-on: ${{ matrix.platform }}
     env:
       STUFFLIB_TEST_VERBOSE: 1
+
     steps:
-    - name: install OpenBLAS
-      run: sudo apt update --yes && sudo apt install --yes libopenblas-dev
-    - name: trust LLVM apt repositories
-      run: wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-    - name: add LLVM apt repositories
+    - name: install linux dependencies
+      if: ${{ startsWith(matrix.platform, 'ubuntu') }}
       run: |
+        sudo apt update --yes && sudo apt install --yes libopenblas-dev
+        wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
         sudo add-apt-repository --yes "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-${{ matrix.llvm }} main"
         sudo add-apt-repository --yes "deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-${{ matrix.llvm }} main"
-    - name: install LLVM ${{ matrix.llvm }}
-      run: sudo apt update --yes && sudo apt install --yes clang-${{ matrix.llvm }} lld-${{ matrix.llvm }}
+        sudo apt update --yes && sudo apt install --yes clang-${{ matrix.llvm }} lld-${{ matrix.llvm }}
+
+    - name: install macOS dependencies
+      if: ${{ startsWith(matrix.platform, 'macos') }}
+      run: |
+        brew install llvm@${{ matrix.llvm }} lld@${{ matrix.llvm }}
+
     - uses: actions/checkout@v4
-    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.trace }} compile_commands.json
+      name: checkout c-stuff git repo
+
+    - run: make -j4 RELEASE=${{ matrix.make.release }} TRACE=${{ matrix.make.trace }} all
+      name: build everything
+
+    - run: make RELEASE=${{ matrix.make.release }} TRACE=${{ matrix.make.trace }} compile_commands.json
+      name: make compile_commands.json
+
     - run: cat compile_commands.json
-    - run: make -j4 RELEASE=${{ matrix.release }} TRACE=${{ matrix.trace }} all
-    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.trace }} test
-    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.trace }} integration_test
-    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.trace }} clean
-  test-macos:
-    strategy:
-      matrix:
-        include:
-          - release: 0
-            trace: 1
-            llvm: 20
-          - release: 1
-            trace: 0
-            llvm: 20
-    name: "runs-on=macos-15 release=${{ matrix.release }} trace=${{ matrix.trace }} llvm=${{ matrix.llvm }}"
-    runs-on: macos-15
-    env:
-      STUFFLIB_TEST_VERBOSE: 1
-    steps:
-    - name: install LLVM ${{ matrix.llvm }}
-      run: brew install llvm@${{ matrix.llvm }} lld@${{ matrix.llvm }}
-    - uses: actions/checkout@v4
-    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.trace }} compile_commands.json
-    - run: cat compile_commands.json
-    - run: make -j4 RELEASE=${{ matrix.release }} TRACE=${{ matrix.trace }} all
-    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.trace }} test
-    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.trace }} integration_test
-    - run: make RELEASE=${{ matrix.release }} TRACE=${{ matrix.trace }} clean
+
+    - run: make RELEASE=${{ matrix.make.release }} TRACE=${{ matrix.make.trace }} test
+      name: test
+
+    - run: make RELEASE=${{ matrix.make.release }} TRACE=${{ matrix.make.trace }} integration_test
+      name: integration test
+
+    - run: make RELEASE=${{ matrix.make.release }} TRACE=${{ matrix.make.trace }} clean
+      name: cleanup
