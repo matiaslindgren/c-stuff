@@ -18,10 +18,17 @@ server_pid=$!
 
 function cleanup {
   set +e
+
   kill $server_pid
-  cat server.out
+
+  if [ -o xtrace ]; then
+    cat server.out
+  fi
   rm -f server.out
-  cat client.out
+
+  if [ -o xtrace ]; then
+    cat client.out
+  fi
   rm -f client.out
 }
 trap cleanup EXIT
