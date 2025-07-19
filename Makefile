@@ -21,7 +21,7 @@ CFLAGS ?= \
 	-Wno-switch-default \
 	-Wno-unsafe-buffer-usage \
 	-Wno-vla
-LDFLAGS  ?= -lm -fuse-ld=lld -lc
+LDFLAGS  ?= -lm -lc
 INCLUDES := -I.
 
 ifeq ($(shell uname), Darwin)
