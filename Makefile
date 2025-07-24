@@ -145,7 +145,7 @@ JQ_MAKE_COMPILE_COMMANDS := [inputs|{\
 	}]
 
 compile_commands.json: ALWAYS_BUILD
-	@$(MAKE) --always-make --dry-run all \
+	@$(MAKE) --always-make --dry-run all objects \
 		| grep -wE '^$(CC)' \
 		| jq -nR '$(JQ_MAKE_COMPILE_COMMANDS)' > $@
 
