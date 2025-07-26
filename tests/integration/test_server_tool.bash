@@ -5,15 +5,35 @@ self_dir=$(dirname "$0")
 source ${self_dir}/common.bash $@
 
 listen_port=8080
-send_message="hello TCP server"
+bind_host=127.0.0.1
+message_content="hello TCP server"
+
+case "$OSTYPE" in
+  darwin*)
+    cmd__socket_in_use="netstat -a -n -p tcp | grep --quiet '${bind_host}.${listen_port}'"
+    ;;
+  linux*)
+    cmd__socket_in_use="netstat --all --numeric --tcp | grep --quiet '${bind_host}:${listen_port}'"
+    ;;
+  *)
+    printf "unknown OSTYPE='%s'\n" "$OSTYPE"
+    exit 1
+    ;;
+esac
 
 # wait until TCP sockets from previous runs end their TIME_WAIT state
-while $(netstat -n | grep -Eq '^tcp.*127\.0\.0\.1[:.]'${listen_port}); do
-  sleep 1
-done
+cmd__wait_until_socket_is_free="\
+  while $cmd__socket_in_use; do \
+    echo 'waiting for port ${listen_port} to be released'; \
+    sleep 5; \
+  done"
+if ! timeout 1m bash -c "$cmd__wait_until_socket_is_free"; then
+  printf "timed out waiting for '%s'\n" "$cmd__socket_in_use"
+  exit 1
+fi
 
 server_tool="$1"
-nohup $server_tool 127.0.0.1 $listen_port > server.out 2>&1 &
+nohup $server_tool $bind_host $listen_port > server.out 2>&1 &
 server_pid=$!
 
 function cleanup {
@@ -49,14 +69,14 @@ check_no_server_errors
 python3 -c "\
 import socket
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    s.connect(('127.0.0.1', $listen_port))
-    s.sendall(b'$send_message')
+    s.connect(('$bind_host', $listen_port))
+    s.sendall(b'$message_content')
     data = s.recv(1024)
     print(data.decode('utf-8').strip())
 " > client.out 2>&1
 
 check_no_server_errors
-if ! grep --silent "$send_message" client.out; then
+if ! grep --quiet "$message_content" client.out; then
   cat client.out
   exit 1
 fi
