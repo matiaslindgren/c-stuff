@@ -39,7 +39,7 @@ jobs:
     - name: install macOS dependencies
       if: ${{ startsWith(matrix.platform, 'macos') }}
       run: |
-        brew install llvm@${{ matrix.llvm }} lld@${{ matrix.llvm }}
+        brew install coreutils llvm@${{ matrix.llvm }} lld@${{ matrix.llvm }}
 
     - uses: actions/checkout@v4
       name: checkout c-stuff git repo
