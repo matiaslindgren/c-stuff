@@ -11,10 +11,11 @@ jobs:
     strategy:
       matrix:
         llvm:
-          - 20
+          - 21
         platform:
           - ubuntu-24.04
           - macos-15
+          - macos-26
         make:
           - release: 0
             trace: 1

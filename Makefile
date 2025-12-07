@@ -5,7 +5,7 @@ MODULE_DIR := ./stufflib
 OUTPUT_DIR := ./build
 TEMP_DIR   = $(eval TEMP_DIR := $(shell mktemp --directory))
 
-CLANG  := clang-20
+CLANG  := clang-21
 CFLAGS ?= \
 	-std=gnu23 \
 	-Weverything \
@@ -15,9 +15,14 @@ CFLAGS ?= \
 	-Wno-declaration-after-statement \
 	-Wno-disabled-macro-expansion \
 	-Wno-gnu-zero-variadic-macro-arguments \
+	-Wno-implicit-int-enum-cast \
+	-Wno-implicit-void-ptr-cast \
+	-Wno-jump-misses-init \
 	-Wno-missing-prototypes \
+	-Wno-nrvo \
 	-Wno-padded \
 	-Wno-pre-c23-compat \
+	-Wno-sign-conversion \
 	-Wno-switch-default \
 	-Wno-unsafe-buffer-usage \
 	-Wno-vla
@@ -126,7 +131,7 @@ $(DEPEND_PATHS): $(BUILD_DIR)/%.d: %.c | $(BUILD_DIRS)
 -include $(DEPEND_PATHS)
 
 $(OBJECT_PATHS): $(BUILD_DIR)/%.o: %.c | $(BUILD_DIRS)
-	$(CC) $< $(CFLAGS) $(INCLUDES) -c -o $@
+	$(CC) -x c $< $(CFLAGS) $(INCLUDES) -c -o $@
 
 $(PROGRAM_PATHS): %: %.o
 	$(CC) $< $(CFLAGS) -o $@ $(LDFLAGS)
