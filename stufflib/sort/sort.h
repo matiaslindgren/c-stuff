@@ -15,12 +15,14 @@ typedef void* sl_sort(void*, const size_t, const size_t, sl_sort_compare*);
 typedef double* sl_sort_double(const size_t, double*);
 typedef char** sl_sort_str(const size_t, char**);
 
-void* sl_sort_internal_insertsort(const size_t count,
-                                  const size_t size,
-                                  void* restrict src_raw,
-                                  void* restrict tmp_raw,
-                                  sl_sort_compare* const compare) {
-  unsigned char* src = src_raw;
+void* sl_sort_internal_insertsort(
+    const size_t count,
+    const size_t size,
+    void* restrict src_raw,
+    void* restrict tmp_raw,
+    sl_sort_compare* const compare
+) {
+  unsigned char* src      = src_raw;
   unsigned char* swap_tmp = tmp_raw;
   for (size_t rhs = 1; rhs < count; ++rhs) {
     memcpy(swap_tmp, src + rhs * size, size);
@@ -33,10 +35,12 @@ void* sl_sort_internal_insertsort(const size_t count,
   return src;
 }
 
-void* sl_sort_insertsort(void* src,
-                         const size_t count,
-                         const size_t size,
-                         sl_sort_compare* const compare) {
+void* sl_sort_insertsort(
+    void* src,
+    const size_t count,
+    const size_t size,
+    sl_sort_compare* const compare
+) {
   assert(count);
   assert(size);
   assert(src);
@@ -46,18 +50,20 @@ void* sl_sort_insertsort(void* src,
   return src;
 }
 
-void sl_sort_internal_mergesort_merge(const size_t size,
-                                      void* restrict src_raw,
-                                      void* restrict dst_raw,
-                                      const size_t begin,
-                                      const size_t mid,
-                                      const size_t end,
-                                      sl_sort_compare* const compare) {
+void sl_sort_internal_mergesort_merge(
+    const size_t size,
+    void* restrict src_raw,
+    void* restrict dst_raw,
+    const size_t begin,
+    const size_t mid,
+    const size_t end,
+    sl_sort_compare* const compare
+) {
   unsigned char* src = src_raw;
   unsigned char* dst = dst_raw;
-  size_t lhs = begin;
-  size_t rhs = mid;
-  size_t out = begin;
+  size_t lhs         = begin;
+  size_t rhs         = mid;
+  size_t out         = begin;
   while (lhs < mid && rhs < end) {
     if (compare(src + lhs * size, src + rhs * size) < 0) {
       memcpy(dst + out * size, src + lhs * size, size);
@@ -80,12 +86,14 @@ void sl_sort_internal_mergesort_merge(const size_t size,
   }
 }
 
-void sl_sort_internal_mergesort(const size_t size,
-                                void* restrict src,
-                                void* restrict dst,
-                                const size_t begin,
-                                const size_t end,
-                                sl_sort_compare* const compare) {
+void sl_sort_internal_mergesort(
+    const size_t size,
+    void* restrict src,
+    void* restrict dst,
+    const size_t begin,
+    const size_t end,
+    sl_sort_compare* const compare
+) {
   assert(begin <= end);
   if (end - begin <= 1) {
     return;
@@ -96,10 +104,12 @@ void sl_sort_internal_mergesort(const size_t size,
   sl_sort_internal_mergesort_merge(size, src, dst, begin, mid, end, compare);
 }
 
-void* sl_sort_mergesort(void* src,
-                        const size_t count,
-                        const size_t size,
-                        sl_sort_compare* const compare) {
+void* sl_sort_mergesort(
+    void* src,
+    const size_t count,
+    const size_t size,
+    sl_sort_compare* const compare
+) {
   assert(count);
   assert(src);
   void* tmp = sl_alloc(count, size);
@@ -110,14 +120,16 @@ void* sl_sort_mergesort(void* src,
   return src;
 }
 
-size_t sl_sort_internal_hoare_partition(const size_t size,
-                                        void* restrict src_raw,
-                                        void* restrict tmp_raw,
-                                        const size_t lo,
-                                        const size_t hi,
-                                        sl_sort_compare* const compare) {
-  unsigned char* src = src_raw;
-  unsigned char* pivot = tmp_raw;
+size_t sl_sort_internal_hoare_partition(
+    const size_t size,
+    void* restrict src_raw,
+    void* restrict tmp_raw,
+    const size_t lo,
+    const size_t hi,
+    sl_sort_compare* const compare
+) {
+  unsigned char* src      = src_raw;
+  unsigned char* pivot    = tmp_raw;
   unsigned char* swap_tmp = pivot + size;
 
   const size_t pivot_idx = sl_misc_midpoint(lo, hi);
@@ -143,13 +155,15 @@ size_t sl_sort_internal_hoare_partition(const size_t size,
 
 #define SL_INSERTSORT_THRESHOLD 24
 
-void sl_sort_internal_quicksort(const size_t count,
-                                const size_t size,
-                                void* src,
-                                void* tmp,
-                                const size_t lo,
-                                const size_t hi,
-                                sl_sort_compare* const compare) {
+void sl_sort_internal_quicksort(
+    const size_t count,
+    const size_t size,
+    void* src,
+    void* tmp,
+    const size_t lo,
+    const size_t hi,
+    sl_sort_compare* const compare
+) {
   if (lo >= hi || lo >= count || hi >= count) {
     return;
   }
@@ -158,16 +172,17 @@ void sl_sort_internal_quicksort(const size_t count,
     sl_sort_insertsort(src_bytes + lo * size, hi - lo + 1, size, compare);
     return;
   }
-  const size_t pivot =
-      sl_sort_internal_hoare_partition(size, src, tmp, lo, hi, compare);
+  const size_t pivot = sl_sort_internal_hoare_partition(size, src, tmp, lo, hi, compare);
   sl_sort_internal_quicksort(count, size, src, tmp, lo, pivot, compare);
   sl_sort_internal_quicksort(count, size, src, tmp, pivot + 1, hi, compare);
 }
 
-void* sl_sort_quicksort(void* src,
-                        const size_t count,
-                        const size_t size,
-                        sl_sort_compare* const compare) {
+void* sl_sort_quicksort(
+    void* src,
+    const size_t count,
+    const size_t size,
+    sl_sort_compare* const compare
+) {
   assert(count);
   assert(size);
   assert(src);

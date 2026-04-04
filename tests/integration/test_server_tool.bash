@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
-set -ue
+set -o nounset
+set -o pipefail
+set -o errexit
+set -o errtrace
+trap 'echo error:$? line:$LINENO cmd:$BASH_COMMAND' ERR
+
 
 self_dir=$(dirname "$0")
 source ${self_dir}/common.bash $@
@@ -58,7 +63,7 @@ while [ ! -s server.out ]; do
 done
 
 function check_no_server_errors {
-  if [ "$(jq .level server.out | grep error --count)" -gt 0 ]; then
+  if jq .level server.out | grep --quiet error; then
     cat server.out
     exit 1
   fi

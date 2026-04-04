@@ -27,7 +27,7 @@ void print_usage(const struct sl_args args[const static 1]) {
   fprintf(stderr, "usage: %s [-h | --help] host port\n", args->argv[0]);
 }
 
-int main(int argc, char *const argv[argc + 1]) {
+int main(int argc, char* const argv[argc + 1]) {
   struct sockaddr_in serveraddr = {
       .sin_family = AF_INET,
   };
@@ -84,7 +84,7 @@ int main(int argc, char *const argv[argc + 1]) {
     goto end;
   }
 
-  if (0 > bind(fd_listen, (struct sockaddr *)&serveraddr, sizeof(serveraddr))) {
+  if (0 > bind(fd_listen, (struct sockaddr*)&serveraddr, sizeof(serveraddr))) {
     SL_LOG_ERROR("failed binding address to socket %d", fd_listen);
     perror("error");  // TODO into SL_LOG
     ok = false;
@@ -100,7 +100,7 @@ int main(int argc, char *const argv[argc + 1]) {
 
   {
     struct sigaction sa = {
-        .sa_flags = 0,
+        .sa_flags   = 0,
         .sa_handler = stop_server_on_sigterm,
     };
     sigemptyset(&sa.sa_mask);
@@ -117,8 +117,7 @@ int main(int argc, char *const argv[argc + 1]) {
 
   for (char msg_buffer[4096] = {}; sl_server_running;) {
     int fd_conn = -1;
-    if (0 >
-        (fd_conn = accept(fd_listen, (struct sockaddr *)nullptr, nullptr))) {
+    if (0 > (fd_conn = accept(fd_listen, (struct sockaddr*)nullptr, nullptr))) {
       if (errno == EINTR) {
         SL_LOG_INFO("received interrupt signal, will not accept connections");
         goto end_loop;
@@ -134,8 +133,7 @@ int main(int argc, char *const argv[argc + 1]) {
 
     {
       ssize_t msg_len = 0;
-      if (0 >
-          (msg_len = recv(fd_conn, msg_buffer, SL_ARRAY_LEN(msg_buffer), 0))) {
+      if (0 > (msg_len = recv(fd_conn, msg_buffer, SL_ARRAY_LEN(msg_buffer), 0))) {
         SL_LOG_ERROR("failed reading message on %d", fd_conn);
         perror("error");  // TODO into SL_LOG
         ok = false;
@@ -146,7 +144,8 @@ int main(int argc, char *const argv[argc + 1]) {
         SL_LOG_ERROR(
             "message sent by client is too large (%zd), truncating to %zu",
             msg_len,
-            SL_ARRAY_LEN(msg_buffer));
+            SL_ARRAY_LEN(msg_buffer)
+        );
         msg_len = (ssize_t)(SL_ARRAY_LEN(msg_buffer) - 1);
       }
       msg_buffer[msg_len] = 0;

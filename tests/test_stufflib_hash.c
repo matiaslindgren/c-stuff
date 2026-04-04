@@ -14,7 +14,7 @@ static bool test_single_byte(const bool) {
     unsigned char data[] = {
         i,
     };
-    const uint32_t crc32 = sl_hash_crc32_bytes(1, data);
+    const uint32_t crc32    = sl_hash_crc32_bytes(1, data);
     const uint32_t expected = (uint32_t[]){
         3523407757,
         2768625435,
@@ -38,7 +38,7 @@ static bool test_two_bytes_big_endian(const bool) {
         (i & 0xff00) >> 8,
         i & 0x00ff,
     };
-    const uint32_t crc32 = sl_hash_crc32_bytes(2, data);
+    const uint32_t crc32    = sl_hash_crc32_bytes(2, data);
     const uint32_t expected = (uint32_t[]){
         1489118142,
         801444648,
@@ -67,7 +67,7 @@ static bool test_small_strings(const bool) {
       "\n",
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(inputs); ++i) {
-    const uint32_t crc32 = sl_hash_crc32_str(inputs[i]);
+    const uint32_t crc32    = sl_hash_crc32_str(inputs[i]);
     const uint32_t expected = (uint32_t[]){
         0,
         4108050209,

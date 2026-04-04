@@ -16,10 +16,12 @@ struct sl_tokenizer {
   struct sl_span token;
 };
 
-struct sl_span sl_tokenizer_next_token(struct sl_span data[const static 1],
-                                       struct sl_span delimiter[const static 1],
-                                       size_t data_begin) {
-  struct sl_span tail = sl_span_slice(data, data_begin, data->size);
+struct sl_span sl_tokenizer_next_token(
+    struct sl_span data[const static 1],
+    struct sl_span delimiter[const static 1],
+    size_t data_begin
+) {
+  struct sl_span tail      = sl_span_slice(data, data_begin, data->size);
   struct sl_span token_end = sl_span_find(&tail, delimiter);
   if (!token_end.data) {
     return tail;
@@ -31,18 +33,15 @@ struct sl_span sl_tokenizer_next_token(struct sl_span data[const static 1],
   return sl_span_view((size_t)token_size, tail.data);
 }
 
-struct sl_tokenizer sl_tokenizer_create(
-    struct sl_span data[const static 1],
-    struct sl_span delimiter[const static 1]) {
-  struct sl_span data_view = sl_span_view(data->size, data->data);
-  struct sl_span delimiter_view =
-      sl_span_view(delimiter->size, delimiter->data);
-  struct sl_span first_token =
-      sl_tokenizer_next_token(&data_view, &delimiter_view, 0);
+struct sl_tokenizer
+sl_tokenizer_create(struct sl_span data[const static 1], struct sl_span delimiter[const static 1]) {
+  struct sl_span data_view      = sl_span_view(data->size, data->data);
+  struct sl_span delimiter_view = sl_span_view(delimiter->size, delimiter->data);
+  struct sl_span first_token    = sl_tokenizer_next_token(&data_view, &delimiter_view, 0);
   return (struct sl_tokenizer){
-      .data = data_view,
+      .data      = data_view,
       .delimiter = delimiter_view,
-      .token = first_token,
+      .token     = first_token,
   };
 }
 
@@ -53,10 +52,8 @@ void* sl_tokenizer_iter_get(struct sl_iterator iter[const static 1]) {
 
 void sl_tokenizer_iter_advance(struct sl_iterator iter[const static 1]) {
   struct sl_tokenizer* tok = iter->data;
-  size_t next_token_begin = iter->index + tok->token.size + tok->delimiter.size;
-  tok->token = sl_tokenizer_next_token(&(tok->data),
-                                       &(tok->delimiter),
-                                       next_token_begin);
+  size_t next_token_begin  = iter->index + tok->token.size + tok->delimiter.size;
+  tok->token  = sl_tokenizer_next_token(&(tok->data), &(tok->delimiter), next_token_begin);
   iter->index = SL_MIN(next_token_begin, tok->data.size);
   ++(iter->pos);
 }

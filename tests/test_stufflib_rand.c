@@ -74,9 +74,9 @@ static bool test_rand_shuffle(const bool verbose) {
     assert(v[0] == 0);
   }
   {
-    unsigned char v[16] = {0};
+    unsigned char v[16]                  = {0};
     int freq_unshuffled[SL_ARRAY_LEN(v)] = {0};
-    const size_t n = SL_ARRAY_LEN(v);
+    const size_t n                       = SL_ARRAY_LEN(v);
     for (unsigned char i = 0; i < n; ++i) {
       v[i] = i;
     }
@@ -113,8 +113,8 @@ static bool test_rand_shuffle(const bool verbose) {
 
 static bool test_rand_shuffle_together(const bool verbose) {
   for (int iter = 0; iter < 100; ++iter) {
-    size_t v1[16] = {0};
-    char v2[16] = {0};
+    size_t v1[16]  = {0};
+    char v2[16]    = {0};
     const size_t n = SL_ARRAY_LEN(v1);
     for (size_t i = 0; i < n; ++i) {
       v1[i] = i;
@@ -135,8 +135,10 @@ static bool test_rand_shuffle_together(const bool verbose) {
   return true;
 }
 
-SL_TEST_MAIN(test_rand_fill,
-             test_rand_set_zero,
-             test_randint,
-             test_rand_shuffle,
-             test_rand_shuffle_together)
+SL_TEST_MAIN(
+    test_rand_fill,
+    test_rand_set_zero,
+    test_randint,
+    test_rand_shuffle,
+    test_rand_shuffle_together
+)

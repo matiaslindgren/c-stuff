@@ -2,7 +2,7 @@
 #define SL_MISC_H_INCLUDED
 
 #ifndef SL_MISC_SWAP_MAX_SIZE
-  #define SL_MISC_SWAP_MAX_SIZE 1024
+  #define SL_MISC_SWAP_MAX_SIZE 1'024
 #endif
 
 #include <assert.h>
@@ -12,8 +12,7 @@
 
 #include "stufflib/macros/macros.h"
 
-size_t sl_misc_parse_lil_endian(const size_t size,
-                                const unsigned char data[size]) {
+size_t sl_misc_parse_lil_endian(const size_t size, const unsigned char data[size]) {
   size_t x = 0;
   for (size_t i = size - 1; i < size; --i) {
     x <<= CHAR_BIT;
@@ -22,8 +21,7 @@ size_t sl_misc_parse_lil_endian(const size_t size,
   return x;
 }
 
-size_t sl_misc_parse_big_endian(const size_t size,
-                                const unsigned char data[size]) {
+size_t sl_misc_parse_big_endian(const size_t size, const unsigned char data[size]) {
   size_t x = 0;
   for (size_t i = 0; i < size; ++i) {
     x <<= CHAR_BIT;
@@ -32,9 +30,8 @@ size_t sl_misc_parse_big_endian(const size_t size,
   return x;
 }
 
-unsigned char* sl_misc_encode_lil_endian(const size_t size,
-                                         unsigned char dst[size],
-                                         const size_t value) {
+unsigned char*
+sl_misc_encode_lil_endian(const size_t size, unsigned char dst[size], const size_t value) {
   size_t tmp = value;
   for (size_t i = 0; i < size; ++i) {
     dst[i] = tmp & 0xff;
@@ -43,9 +40,8 @@ unsigned char* sl_misc_encode_lil_endian(const size_t size,
   return dst;
 }
 
-unsigned char* sl_misc_encode_big_endian(const size_t size,
-                                         unsigned char dst[size],
-                                         const size_t value) {
+unsigned char*
+sl_misc_encode_big_endian(const size_t size, unsigned char dst[size], const size_t value) {
   size_t tmp = value;
   for (size_t i = size - 1; i < size; --i) {
     dst[i] = tmp & 0xff;
@@ -66,9 +62,11 @@ size_t sl_misc_vmax_size_t(const size_t n, const size_t v[n]) {
   return res;
 }
 
-void sl_misc_swap(unsigned char a[const static 1],
-                  unsigned char b[const static 1],
-                  const size_t count) {
+void sl_misc_swap(
+    unsigned char a[const static 1],
+    unsigned char b[const static 1],
+    const size_t count
+) {
   assert(count < SL_MISC_SWAP_MAX_SIZE);
   static unsigned char tmp[SL_MISC_SWAP_MAX_SIZE] = {0};
   memcpy(tmp, a, count);
@@ -93,9 +91,7 @@ bool sl_misc_is_zero(const size_t count, unsigned char data[count]) {
   return true;
 }
 
-size_t sl_misc_count_nonzero(const size_t size,
-                             const size_t count,
-                             unsigned char data[count]) {
+size_t sl_misc_count_nonzero(const size_t size, const size_t count, unsigned char data[count]) {
   size_t n = 0;
   for (size_t i = 0; i < count; ++i) {
     n += !sl_misc_is_zero(size, data + i * size);

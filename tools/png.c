@@ -21,9 +21,8 @@ bool segment(const struct sl_args args[const static 1]) {
 
   const char* const png_src_path = sl_args_get_positional(args, 1);
   const char* const png_dst_path = sl_args_get_positional(args, 2);
-  const size_t threshold_percent =
-      sl_args_parse_ull(args, "--threshold-percent", 10);
-  const bool verbose = sl_args_parse_flag(args, "-v");
+  const size_t threshold_percent = sl_args_parse_ull(args, "--threshold-percent", 10);
+  const bool verbose             = sl_args_parse_flag(args, "-v");
 
   if (verbose) {
     printf("read %s\n", png_src_path);
@@ -63,7 +62,7 @@ bool info(const struct sl_args args[const static 1]) {
   bool is_done = false;
 
   struct sl_png_chunks chunks = {0};
-  struct sl_png_image img = {0};
+  struct sl_png_image img     = {0};
 
   const char* const png_path = sl_args_get_positional(args, 1);
 
@@ -102,7 +101,7 @@ bool dump_raw(const struct sl_args args[const static 1]) {
 
   bool is_done = false;
 
-  const char* const png_path = sl_args_get_positional(args, 1);
+  const char* const png_path      = sl_args_get_positional(args, 1);
   struct sl_png_chunks img_chunks = sl_png_read_chunks(png_path);
   if (!img_chunks.count) {
     SL_LOG_ERROR("failed reading PNG IDAT chunks from %s", png_path);
@@ -117,10 +116,7 @@ bool dump_raw(const struct sl_args args[const static 1]) {
       }
       const struct sl_png_chunk chunk = img_chunks.chunks[i];
       if (strncmp(sl_png_chunk_types[chunk.type], block_type, 4) == 0) {
-        fwrite(chunk.data.data,
-               sizeof(chunk.data.data[0]),
-               chunk.data.size,
-               stdout);
+        fwrite(chunk.data.data, sizeof(chunk.data.data[0]), chunk.data.size, stdout);
         break;
       }
     }
@@ -146,12 +142,13 @@ void print_usage(const struct sl_args args[const static 1]) {
        "\n"),
       args->argv[0],
       args->argv[0],
-      args->argv[0]);
+      args->argv[0]
+  );
 }
 
 int main(int argc, char* const argv[argc + 1]) {
   struct sl_args args = {.argc = argc, .argv = argv};
-  bool ok = false;
+  bool ok             = false;
   const char* command = sl_args_get_positional(&args, 0);
   if (command) {
     if (strcmp(command, "segment") == 0) {

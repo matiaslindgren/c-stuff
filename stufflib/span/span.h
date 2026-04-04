@@ -19,16 +19,16 @@ struct sl_span sl_span_view(size_t size, unsigned char data[size]) {
   assert(size);
   return (struct sl_span){
       .owned = false,
-      .size = size,
-      .data = data,
+      .size  = size,
+      .data  = data,
   };
 }
 
 struct sl_span sl_span_create(size_t size) {
   return (struct sl_span){
       .owned = true,
-      .size = size,
-      .data = size ? sl_alloc(size, sizeof(unsigned char)) : nullptr,
+      .size  = size,
+      .data  = size ? sl_alloc(size, sizeof(unsigned char)) : nullptr,
   };
 }
 
@@ -69,11 +69,11 @@ bool sl_span_is_hexadecimal_str(struct sl_span src[const static 1]) {
 
 struct sl_span sl_span_parse_hex(struct sl_span src[const static 1]) {
   assert(sl_span_is_hexadecimal_str(src));
-  size_t num_bytes = ((src->size - 2) + 1) / 2;
+  size_t num_bytes   = ((src->size - 2) + 1) / 2;
   struct sl_span dst = sl_span_create(num_bytes);
   for (size_t i_byte = 0; i_byte < dst.size; ++i_byte) {
-    size_t i1 = 2 * i_byte + 2;
-    size_t i2 = 2 * i_byte + 3;
+    size_t i1   = 2 * i_byte + 2;
+    size_t i2   = 2 * i_byte + 3;
     char byte[] = {
         (char)(src->data[i1]),
         (char)(i2 < src->size ? src->data[i2] : 0),
@@ -84,8 +84,8 @@ struct sl_span sl_span_parse_hex(struct sl_span src[const static 1]) {
   return dst;
 }
 
-struct sl_span sl_span_concat(struct sl_span data1[const static 1],
-                              struct sl_span data2[const static 1]) {
+struct sl_span
+sl_span_concat(struct sl_span data1[const static 1], struct sl_span data2[const static 1]) {
   struct sl_span dst = sl_span_create(data1->size + data2->size);
   if (data1->size) {
     memcpy(dst.data, data1->data, data1->size);
@@ -96,27 +96,24 @@ struct sl_span sl_span_concat(struct sl_span data1[const static 1],
   return dst;
 }
 
-void sl_span_extend(struct sl_span dst[static 1],
-                    struct sl_span src[const static 1]) {
+void sl_span_extend(struct sl_span dst[static 1], struct sl_span src[const static 1]) {
   struct sl_span tmp = sl_span_concat(dst, src);
   sl_span_destroy(dst);
   *dst = tmp;
 }
 
-struct sl_span sl_span_slice(struct sl_span data[const static 1],
-                             size_t begin,
-                             size_t end_or_max) {
+struct sl_span sl_span_slice(struct sl_span data[const static 1], size_t begin, size_t end_or_max) {
   size_t end = SL_MIN(end_or_max, data->size);
   if (begin >= end) {
     return (struct sl_span){0};
   }
-  size_t slice_size = end - begin;
+  size_t slice_size          = end - begin;
   unsigned char* slice_begin = data->data + begin;
   return sl_span_view(slice_size, slice_begin);
 }
 
-struct sl_span sl_span_find(struct sl_span data[const static 1],
-                            struct sl_span pattern[const static 1]) {
+struct sl_span
+sl_span_find(struct sl_span data[const static 1], struct sl_span pattern[const static 1]) {
   if (data->size && pattern->size) {
     for (size_t begin = 0; begin + pattern->size <= data->size; ++begin) {
       unsigned char* subseq = data->data + begin;
@@ -129,8 +126,7 @@ struct sl_span sl_span_find(struct sl_span data[const static 1],
   return (struct sl_span){0};
 }
 
-int sl_span_compare(struct sl_span lhs[const static 1],
-                    struct sl_span rhs[const static 1]) {
+int sl_span_compare(struct sl_span lhs[const static 1], struct sl_span rhs[const static 1]) {
   if (lhs->data && rhs->data) {
     return memcmp(lhs->data, rhs->data, SL_MIN(lhs->size, rhs->size));
   }

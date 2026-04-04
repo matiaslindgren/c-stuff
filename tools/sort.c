@@ -18,7 +18,7 @@ void print_usage(const struct sl_args args[const static 1]) {
 int compare_as_doubles(const void* lhs_data, const void* rhs_data) {
   const char* const* lhs = lhs_data;
   const char* const* rhs = rhs_data;
-  const double lhs_num = strtod(lhs[0], 0);
+  const double lhs_num   = strtod(lhs[0], 0);
   assert(errno != ERANGE);
   const double rhs_num = strtod(rhs[0], 0);
   assert(errno != ERANGE);
@@ -33,32 +33,30 @@ int main(int argc, char* const argv[argc + 1]) {
   bool is_done = false;
 
   unsigned char reader_buffer_data[1024 << 6] = {0};
-  struct sl_span reader_buffer =
-      sl_span_view(SL_ARRAY_LEN(reader_buffer_data), reader_buffer_data);
+  struct sl_span reader_buffer = sl_span_view(SL_ARRAY_LEN(reader_buffer_data), reader_buffer_data);
 
   struct sl_string content = {0};
-  char** lines = nullptr;
-  size_t num_lines = 0;
+  char** lines             = nullptr;
+  size_t num_lines         = 0;
 
   struct sl_args args = {.argc = argc, .argv = argv};
   if (sl_args_count_positional(&args) != 2) {
     print_usage(&args);
     goto done;
   }
-  const char* sort_as = sl_args_get_positional(&args, 0);
+  const char* sort_as        = sl_args_get_positional(&args, 0);
   const bool sort_as_numeric = strcmp(sort_as, "numeric") == 0;
-  const bool sort_as_ascii = strcmp(sort_as, "ascii") == 0;
+  const bool sort_as_ascii   = strcmp(sort_as, "ascii") == 0;
   if (!(sort_as_numeric || sort_as_ascii)) {
     print_usage(&args);
     goto done;
   }
 
-  const char* path = sl_args_get_positional(&args, 1);
-  content = sl_fs_read_file_utf8(path, &reader_buffer);
+  const char* path       = sl_args_get_positional(&args, 1);
+  content                = sl_fs_read_file_utf8(path, &reader_buffer);
   struct sl_span newline = sl_span_view(1, (unsigned char[]){'\n'});
 
-  struct sl_tokenizer newline_tokenizer =
-      sl_tokenizer_create(&(content.utf8_data), &newline);
+  struct sl_tokenizer newline_tokenizer = sl_tokenizer_create(&(content.utf8_data), &newline);
   for (struct sl_iterator iter = sl_tokenizer_iter(&newline_tokenizer);
        !sl_tokenizer_iter_is_done(&iter);
        sl_tokenizer_iter_advance(&iter)) {
@@ -69,8 +67,8 @@ int main(int argc, char* const argv[argc + 1]) {
       continue;
     }
     struct sl_string line = sl_string_from_utf8(token);
-    lines = sl_realloc(lines, num_lines, num_lines + 1, sizeof(char*));
-    lines[num_lines++] = (char*)line.utf8_data.data;
+    lines                 = sl_realloc(lines, num_lines, num_lines + 1, sizeof(char*));
+    lines[num_lines++]    = (char*)line.utf8_data.data;
   }
 
   if (sort_as_numeric) {

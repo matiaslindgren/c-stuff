@@ -14,13 +14,13 @@
 
 static bool test_validate_utf8(const bool) {
   struct sl_span invalid_utf8[] = {
-      {.size = 1,                   .data = (unsigned char[]){0x80}},
-      {.size = 2,             .data = (unsigned char[]){0xc0, 0x80}},
-      {.size = 2,             .data = (unsigned char[]){0xe0, 0x80}},
-      {.size = 2,             .data = (unsigned char[]){0xf0, 0x80}},
-      {.size = 3,       .data = (unsigned char[]){0xf0, 0x80, 0x80}},
+      {.size = 1, .data = (unsigned char[]){0x80}                  },
+      {.size = 2, .data = (unsigned char[]){0xc0, 0x80}            },
+      {.size = 2, .data = (unsigned char[]){0xe0, 0x80}            },
+      {.size = 2, .data = (unsigned char[]){0xf0, 0x80}            },
+      {.size = 3, .data = (unsigned char[]){0xf0, 0x80, 0x80}      },
       {.size = 4, .data = (unsigned char[]){0xff, 0x80, 0x80, 0x80}},
-      {.size = 5,       .data = (unsigned char[]){0, 1, 2, 0xf4, 0}},
+      {.size = 5, .data = (unsigned char[]){0, 1, 2, 0xf4, 0}      },
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(invalid_utf8); ++i) {
     assert(!sl_unicode_is_valid_utf8(invalid_utf8 + i));
@@ -33,20 +33,18 @@ static bool test_validate_utf8(const bool) {
 
 static bool test_decode_codepoints(const bool) {
   size_t codepoint_pos = 0;
-  for (size_t i_str = 0; i_str < SL_ARRAY_LEN(sl_test_data_hello_utf8);
-       ++i_str) {
+  for (size_t i_str = 0; i_str < SL_ARRAY_LEN(sl_test_data_hello_utf8); ++i_str) {
     struct sl_span utf8_data = sl_test_data_hello_utf8[i_str];
-    size_t byte_pos = 0;
+    size_t byte_pos          = 0;
     while (byte_pos < utf8_data.size) {
-      const uint32_t expected_codepoint =
-          sl_test_data_decoded_strings[codepoint_pos];
-      const size_t codepoint_width =
-          sl_unicode_codepoint_width_from_utf8(utf8_data.size - byte_pos,
-                                               utf8_data.data + byte_pos);
+      const uint32_t expected_codepoint = sl_test_data_decoded_strings[codepoint_pos];
+      const size_t codepoint_width      = sl_unicode_codepoint_width_from_utf8(
+          utf8_data.size - byte_pos,
+          utf8_data.data + byte_pos
+      );
       assert(codepoint_width == sl_unicode_codepoint_width(expected_codepoint));
-      const uint32_t codepoint =
-          sl_unicode_codepoint_from_utf8(codepoint_width,
-                                         utf8_data.data + byte_pos);
+      const uint32_t codepoint
+          = sl_unicode_codepoint_from_utf8(codepoint_width, utf8_data.data + byte_pos);
       assert(codepoint == expected_codepoint);
       ++codepoint_pos;
       byte_pos += codepoint_width;
@@ -58,19 +56,19 @@ static bool test_decode_codepoints(const bool) {
 
 static bool test_unicode_iterator(const bool) {
   size_t codepoint_pos = 0;
-  for (size_t i_str = 0; i_str < SL_ARRAY_LEN(sl_test_data_hello_utf8);
-       ++i_str) {
+  for (size_t i_str = 0; i_str < SL_ARRAY_LEN(sl_test_data_hello_utf8); ++i_str) {
     struct sl_span utf8_data = sl_test_data_hello_utf8[i_str];
-    size_t str_len = 0;
-    size_t byte_pos = 0;
-    struct sl_iterator iter = sl_unicode_iter(sl_test_data_hello_utf8 + i_str);
+    size_t str_len           = 0;
+    size_t byte_pos          = 0;
+    struct sl_iterator iter  = sl_unicode_iter(sl_test_data_hello_utf8 + i_str);
     for (; !sl_unicode_iter_is_done(&iter); sl_unicode_iter_advance(&iter)) {
       assert(iter.index == byte_pos);
       const uint32_t codepoint = sl_unicode_iter_decode_item(&iter);
       assert(codepoint == sl_test_data_decoded_strings[codepoint_pos]);
-      const size_t codepoint_width =
-          sl_unicode_codepoint_width_from_utf8(utf8_data.size - byte_pos,
-                                               utf8_data.data + byte_pos);
+      const size_t codepoint_width = sl_unicode_codepoint_width_from_utf8(
+          utf8_data.size - byte_pos,
+          utf8_data.data + byte_pos
+      );
       byte_pos += codepoint_width;
       ++str_len;
       ++codepoint_pos;
@@ -82,8 +80,7 @@ static bool test_unicode_iterator(const bool) {
 }
 
 static bool test_unicode_length(const bool) {
-  for (size_t i_str = 0; i_str < SL_ARRAY_LEN(sl_test_data_hello_utf8);
-       ++i_str) {
+  for (size_t i_str = 0; i_str < SL_ARRAY_LEN(sl_test_data_hello_utf8); ++i_str) {
     const size_t str_len = sl_unicode_length(sl_test_data_hello_utf8 + i_str);
     assert(str_len == sl_test_data_decoded_lengths[i_str]);
   }
@@ -103,10 +100,12 @@ static bool test_decode_utf8_files(const bool verbose) {
     };
     {
       char input_path[200] = {0};
-      snprintf(input_path,
-               SL_ARRAY_LEN(input_path),
-               "./test-data/txt/wikipedia/water_%s.txt",
-               languages[i]);
+      snprintf(
+          input_path,
+          SL_ARRAY_LEN(input_path),
+          "./test-data/txt/wikipedia/water_%s.txt",
+          languages[i]
+      );
       if (verbose) {
         printf("%s\n", input_path);
       }
@@ -124,13 +123,15 @@ static bool test_decode_utf8_files(const bool verbose) {
     }
 
     uint32_t expected_codepoints[10000] = {0};
-    size_t str_len = 0;
+    size_t str_len                      = 0;
     {
       char codepoints_path[200] = {0};
-      snprintf(codepoints_path,
-               SL_ARRAY_LEN(codepoints_path),
-               "./test-data/txt/wikipedia/water_%s_codepoints.txt",
-               languages[i]);
+      snprintf(
+          codepoints_path,
+          SL_ARRAY_LEN(codepoints_path),
+          "./test-data/txt/wikipedia/water_%s_codepoints.txt",
+          languages[i]
+      );
       FILE* fp = fopen(codepoints_path, "rb");
       if (!fp) {
         SL_LOG_ERROR("cannot open %s", codepoints_path);
@@ -147,8 +148,7 @@ static bool test_decode_utf8_files(const bool verbose) {
     }
 
     size_t codepoint_pos = 0;
-    for (struct sl_iterator iter = sl_unicode_iter(&utf8_data);
-         !sl_unicode_iter_is_done(&iter);
+    for (struct sl_iterator iter = sl_unicode_iter(&utf8_data); !sl_unicode_iter_is_done(&iter);
          sl_unicode_iter_advance(&iter)) {
       assert(codepoint_pos < str_len);
       const uint32_t codepoint = sl_unicode_iter_decode_item(&iter);
@@ -160,8 +160,10 @@ static bool test_decode_utf8_files(const bool verbose) {
   return true;
 }
 
-SL_TEST_MAIN(test_validate_utf8,
-             test_decode_codepoints,
-             test_unicode_iterator,
-             test_unicode_length,
-             test_decode_utf8_files)
+SL_TEST_MAIN(
+    test_validate_utf8,
+    test_decode_codepoints,
+    test_unicode_iterator,
+    test_unicode_length,
+    test_decode_utf8_files
+)

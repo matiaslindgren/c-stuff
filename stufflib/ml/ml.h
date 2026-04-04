@@ -12,12 +12,14 @@
 #include "stufflib/memory/memory.h"
 #include "stufflib/rand/rand.h"
 
-void sl_ml_random_train_test_split(struct sl_la_matrix data[const static 1],
-                                   struct sl_la_matrix train[const static 1],
-                                   struct sl_la_matrix test[const static 1],
-                                   uint16_t classes[const static 1],
-                                   uint16_t train_classes[const static 1],
-                                   uint16_t test_classes[const static 1]) {
+void sl_ml_random_train_test_split(
+    struct sl_la_matrix data[const static 1],
+    struct sl_la_matrix train[const static 1],
+    struct sl_la_matrix test[const static 1],
+    uint16_t classes[const static 1],
+    uint16_t train_classes[const static 1],
+    uint16_t test_classes[const static 1]
+) {
   if (train->rows + test->rows != data->rows) {
     SL_LOG_ERROR("train set size + test set size != data set size");
     return;
@@ -26,18 +28,18 @@ void sl_ml_random_train_test_split(struct sl_la_matrix data[const static 1],
     SL_LOG_ERROR("number of features must be equal when doing a split");
     return;
   }
-  sl_rand_shuffle_together(data->data,
-                           classes,
-                           sizeof(float) * (size_t)data->cols,
-                           sizeof(uint16_t),
-                           (size_t)data->rows);
-  test->data = data->data;
-  train->data = data->data + test->rows * test->cols;
+  sl_rand_shuffle_together(
+      data->data,
+      classes,
+      sizeof(float) * (size_t)data->cols,
+      sizeof(uint16_t),
+      (size_t)data->rows
+  );
+  test->data          = data->data;
+  train->data         = data->data + test->rows * test->cols;
   const size_t n_test = (size_t)test->rows;
   memcpy(test_classes, classes, sizeof(uint16_t) * n_test);
-  memcpy(train_classes,
-         classes + n_test,
-         sizeof(uint16_t) * (size_t)train->rows);
+  memcpy(train_classes, classes + n_test, sizeof(uint16_t) * (size_t)train->rows);
 }
 
 // https://en.wikipedia.org/wiki/Feature_scaling#Rescaling_(min-max_normalization)
@@ -50,8 +52,10 @@ struct sl_ml_minmax_scaler {
   bool is_cached;
 };
 
-void sl_ml_minmax_fit(struct sl_ml_minmax_scaler scaler[const static 1],
-                      struct sl_la_matrix m[const static 1]) {
+void sl_ml_minmax_fit(
+    struct sl_ml_minmax_scaler scaler[const static 1],
+    struct sl_la_matrix m[const static 1]
+) {
   assert(scaler->lo.size == m->cols && scaler->hi.size == m->cols);
   scaler->is_cached = false;
   for (int row = 0; row < m->rows; ++row) {
@@ -60,17 +64,19 @@ void sl_ml_minmax_fit(struct sl_ml_minmax_scaler scaler[const static 1],
   }
 }
 
-void sl_ml_minmax_apply(struct sl_ml_minmax_scaler scaler[const static 1],
-                        struct sl_la_matrix m[const static 1],
-                        const float a,
-                        const float b) {
-  struct sl_la_vector* scale = &(scaler->scale);
+void sl_ml_minmax_apply(
+    struct sl_ml_minmax_scaler scaler[const static 1],
+    struct sl_la_matrix m[const static 1],
+    const float a,
+    const float b
+) {
+  struct sl_la_vector* scale  = &(scaler->scale);
   struct sl_la_vector* offset = &(scaler->offset);
   if (!scaler->is_cached) {
     // TODO BLAS
     for (int i = 0; i < scale->size; ++i) {
-      const float s = (b - a) / (scaler->hi.data[i] - scaler->lo.data[i]);
-      scale->data[i] = s;
+      const float s   = (b - a) / (scaler->hi.data[i] - scaler->lo.data[i]);
+      scale->data[i]  = s;
       offset->data[i] = a - s * (scaler->lo.data[i]);
     }
     scaler->is_cached = true;
@@ -92,36 +98,34 @@ void sl_ml_classification_update(
     struct sl_ml_classification cls[const static 1],
     // TODO don't assume true/false
     const uint16_t pred_class,
-    const uint16_t real_class) {
+    const uint16_t real_class
+) {
   cls->tp += real_class && pred_class;
   cls->tn += !real_class && !pred_class;
   cls->fp += !real_class && pred_class;
   cls->fn += real_class && !pred_class;
 }
 
-double sl_ml_classification_accuracy(
-    struct sl_ml_classification cls[const static 1]) {
+double sl_ml_classification_accuracy(struct sl_ml_classification cls[const static 1]) {
   return (double)(cls->tp + cls->tn) / (cls->tp + cls->tn + cls->fp + cls->fn);
 }
 
-double sl_ml_classification_precision(
-    struct sl_ml_classification cls[const static 1]) {
+double sl_ml_classification_precision(struct sl_ml_classification cls[const static 1]) {
   return (double)cls->tp / (cls->tp + cls->fp);
 }
 
-double sl_ml_classification_recall(
-    struct sl_ml_classification cls[const static 1]) {
+double sl_ml_classification_recall(struct sl_ml_classification cls[const static 1]) {
   return (double)cls->tp / (cls->tp + cls->fn);
 }
 
-double sl_ml_classification_f1_score(
-    struct sl_ml_classification cls[const static 1]) {
+double sl_ml_classification_f1_score(struct sl_ml_classification cls[const static 1]) {
   return (double)(2 * cls->tp) / (2 * cls->tp + cls->fp + cls->fn);
 }
 
 void sl_ml_classification_print(
     FILE stream[const static 1],
-    struct sl_ml_classification cls[const static 1]) {
+    struct sl_ml_classification cls[const static 1]
+) {
   fprintf(stream, "{");
   fprintf(stream, "\"tp\":%d,", cls->tp);
   fprintf(stream, "\"tn\":%d,", cls->tn);
@@ -169,21 +173,25 @@ struct sl_ml_svm {
   float learning_rate;
 };
 
-uint8_t sl_ml_svm_binary_predict(struct sl_ml_svm svm[const static 1],
-                                 struct sl_la_vector x[const static 1]) {
+uint8_t sl_ml_svm_binary_predict(
+    struct sl_ml_svm svm[const static 1],
+    struct sl_la_vector x[const static 1]
+) {
   return (sl_la_vector_dot(&(svm->w), x) > 0) ? 1 : 0;
 }
 
 // implements mini-batch pegasos by Shalev-Shwartz et al. (2011)
-void sl_ml_svm_linear_fit(struct sl_ml_svm svm[const static 1],
-                          struct sl_la_matrix data[const static 1],
-                          const uint16_t classes[const static 1]) {
+void sl_ml_svm_linear_fit(
+    struct sl_ml_svm svm[const static 1],
+    struct sl_la_matrix data[const static 1],
+    const uint16_t classes[const static 1]
+) {
   for (size_t i = 0; i < (size_t)data->rows; ++i) {
     svm->shuffle_buffer[i] = i;
   }
 
-  const int k = svm->batch_size;
-  const float lambda = svm->learning_rate;
+  const int k            = svm->batch_size;
+  const float lambda     = svm->learning_rate;
   const int n_iterations = svm->n_epochs * data->rows / svm->batch_size;
 
   int batch_begin = data->rows;
@@ -216,18 +224,17 @@ void sl_ml_svm_linear_fit(struct sl_ml_svm svm[const static 1],
 
 #define SL_ML_MINMAX_SCALER_CREATE_INLINE(n_features)   \
   (struct sl_ml_minmax_scaler) {                        \
-    .lo = SL_LA_VECTOR_CREATE_INLINE((n_features)),     \
-    .hi = SL_LA_VECTOR_CREATE_INLINE((n_features)),     \
-    .scale = SL_LA_VECTOR_CREATE_INLINE((n_features)),  \
+    .lo     = SL_LA_VECTOR_CREATE_INLINE((n_features)), \
+    .hi     = SL_LA_VECTOR_CREATE_INLINE((n_features)), \
+    .scale  = SL_LA_VECTOR_CREATE_INLINE((n_features)), \
     .offset = SL_LA_VECTOR_CREATE_INLINE((n_features)), \
   }
 
-#define SL_ML_MINMAX_RESCALE(n_features, dataset, a, b)         \
-  do {                                                          \
-    struct sl_ml_minmax_scaler sl_minmax_scaler =               \
-        SL_ML_MINMAX_SCALER_CREATE_INLINE((n_features));        \
-    sl_ml_minmax_fit(&sl_minmax_scaler, (dataset));             \
-    sl_ml_minmax_apply(&sl_minmax_scaler, (dataset), (a), (b)); \
+#define SL_ML_MINMAX_RESCALE(n_features, dataset, a, b)                                            \
+  do {                                                                                             \
+    struct sl_ml_minmax_scaler sl_minmax_scaler = SL_ML_MINMAX_SCALER_CREATE_INLINE((n_features)); \
+    sl_ml_minmax_fit(&sl_minmax_scaler, (dataset));                                                \
+    sl_ml_minmax_apply(&sl_minmax_scaler, (dataset), (a), (b));                                    \
   } while (false)
 
 #endif  // SL_ML_H_INCLUDED

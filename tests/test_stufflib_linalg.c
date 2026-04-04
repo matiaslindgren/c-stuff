@@ -12,8 +12,10 @@ bool fequal(const double a, const double b) {
   return sl_math_double_almost(a, b, 1e-9);
 }
 
-bool check_vector_equal(struct sl_la_vector a[const static 1],
-                        struct sl_la_vector b[const static 1]) {
+bool check_vector_equal(
+    struct sl_la_vector a[const static 1],
+    struct sl_la_vector b[const static 1]
+) {
   if (!sl_la_vector_equal(a, b)) {
     fprintf(stderr, "!expected vectors a and b to be equal\n");
     fprintf(stderr, "a:\n");
@@ -25,8 +27,10 @@ bool check_vector_equal(struct sl_la_vector a[const static 1],
   return true;
 }
 
-bool check_matrix_equal(struct sl_la_matrix a[const static 1],
-                        struct sl_la_matrix b[const static 1]) {
+bool check_matrix_equal(
+    struct sl_la_matrix a[const static 1],
+    struct sl_la_matrix b[const static 1]
+) {
   if (!sl_la_matrix_equal(a, b)) {
     fprintf(stderr, "!expected matrices a and b to be equal\n");
     fprintf(stderr, "a:\n");
@@ -164,7 +168,7 @@ static bool test_matrix_trace(const bool) {
       .cols = 3,
       .data = (float[]){0, 1, 2, 3, 4, 5, 6, 7, 8}
   };
-  double tr = sl_la_matrix_trace(&a);
+  double tr       = sl_la_matrix_trace(&a);
   double expected = 0 + 4 + 8;
   if (fequal(tr, expected)) {
     return true;
@@ -255,14 +259,16 @@ static bool test_matrix_diffdiv_axis0(const bool) {
     struct sl_la_matrix a2 = {
         .rows = 4,
         .cols = 3,
-        .data = (float[]){-0.666666667f,
+        .data = (float[]){
+                          -0.666666667f,
                           -7.0f,
                           -1.50f,
                           -2.333333333f,
                           1.0f, 2.50f,
                           1.0f, 9.0f,
                           2.50f, 0.333333333f,
-                          6.0f, 0.50f},
+                          6.0f, 0.50f
+        },
     };
     struct sl_la_vector lhs = {
         .size = 3,
@@ -311,7 +317,7 @@ static bool test_matrix_multiply_zeros(const bool) {
       .cols = 3,
       .data = (float[3 * 3]){0},
   };
-  struct sl_la_matrix result = b;
+  struct sl_la_matrix result   = b;
   struct sl_la_matrix expected = b;
   sl_la_matrix_multiply(&a, &b, &result);
   return check_matrix_equal(&result, &expected);
@@ -348,7 +354,7 @@ static bool test_matrix_frobenius_norm(const bool) {
       .cols = 3,
       .data = (float[]){0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
   };
-  double norm = sl_la_matrix_frobenius_norm(&a);
+  double norm     = sl_la_matrix_frobenius_norm(&a);
   double expected = 22.494443758403985;
   if (fequal(norm, expected)) {
     return true;
@@ -470,20 +476,22 @@ static bool test_vector_sub(const bool) {
   return true;
 }
 
-SL_TEST_MAIN(test_matrix_get,
-             test_matrix_equal,
-             test_matrix_create,
-             test_matrix_trace,
-             test_matrix_add_axis0,
-             test_matrix_sub_axis0,
-             test_matrix_mul_axis0,
-             test_matrix_diffdiv_axis0,
-             test_matrix_multiply_square,
-             test_matrix_multiply_zeros,
-             test_matrix_multiply,
-             test_matrix_frobenius_norm,
-             test_vector_scale,
-             test_vector_equal,
-             test_vector_dot,
-             test_vector_add,
-             test_vector_sub)
+SL_TEST_MAIN(
+    test_matrix_get,
+    test_matrix_equal,
+    test_matrix_create,
+    test_matrix_trace,
+    test_matrix_add_axis0,
+    test_matrix_sub_axis0,
+    test_matrix_mul_axis0,
+    test_matrix_diffdiv_axis0,
+    test_matrix_multiply_square,
+    test_matrix_multiply_zeros,
+    test_matrix_multiply,
+    test_matrix_frobenius_norm,
+    test_vector_scale,
+    test_vector_equal,
+    test_vector_dot,
+    test_vector_add,
+    test_vector_sub
+)

@@ -154,9 +154,8 @@ static bool test_read_img_header(const bool verbose) {
   return true;
 }
 
-static inline int test_read_single_pixel(const char* png_path,
-                                         const size_t on_index,
-                                         const bool verbose) {
+static inline int
+test_read_single_pixel(const char* png_path, const size_t on_index, const bool verbose) {
   if (verbose) {
     printf("%s\n", png_path);
   }
@@ -175,7 +174,7 @@ static inline int test_read_single_pixel(const char* png_path,
 
   assert(pixel.data.size == 9 * 3);
   unsigned char expected_data[9 * 3] = {0};
-  expected_data[4 * 3 + on_index] = 255;
+  expected_data[4 * 3 + on_index]    = 255;
   for (size_t i = 0; i < SL_ARRAY_LEN(expected_data); ++i) {
     assert(pixel.data.data[i] == expected_data[i]);
   }
@@ -224,9 +223,9 @@ static bool test_read_rgba_image_with_dynamic_compression(const bool verbose) {
   if (verbose) {
     sl_png_dump_img_meta(stdout, white_square);
   }
-  const size_t width = 26;
+  const size_t width  = 26;
   const size_t height = 28;
-  const size_t bpp = 4;
+  const size_t bpp    = 4;
   assert(white_square.header.width == width);
   assert(white_square.header.height == height);
   assert(white_square.header.bit_depth == 8);
@@ -234,8 +233,7 @@ static bool test_read_rgba_image_with_dynamic_compression(const bool verbose) {
   assert(white_square.data.size == bpp * (width + 2) * (height + 2));
   for (size_t y = 1; y < height + 1; ++y) {
     for (size_t x = 1; x < width + 1; ++x) {
-      const unsigned char* px =
-          white_square.data.data + bpp * (y * (width + 2) + x);
+      const unsigned char* px = white_square.data.data + bpp * (y * (width + 2) + x);
       for (size_t byte = 0; byte < bpp; ++byte) {
         assert(px[byte] == 0xff);
       }
@@ -245,8 +243,7 @@ static bool test_read_rgba_image_with_dynamic_compression(const bool verbose) {
   return true;
 }
 
-static bool test_read_small_images_with_dynamic_compression(
-    const bool verbose) {
+static bool test_read_small_images_with_dynamic_compression(const bool verbose) {
   for (size_t i = 0; i < 3; ++i) {
     const char* png_path = (const char*[]){
         "./test-data/png/0099ee-80x160-rgb-dynamic.png",
@@ -269,7 +266,7 @@ static bool test_read_small_images_with_dynamic_compression(
     if (verbose) {
       sl_png_dump_img_meta(stdout, img);
     }
-    const size_t width = 80;
+    const size_t width  = 80;
     const size_t height = 160;
     assert(img.header.width == width);
     assert(img.header.height == height);
@@ -289,8 +286,7 @@ static bool test_read_small_images_with_dynamic_compression(
   return true;
 }
 
-static bool test_read_large_images_with_dynamic_compression(
-    const bool verbose) {
+static bool test_read_large_images_with_dynamic_compression(const bool verbose) {
   {
     const char* png_path = "./test-data/png/aabbcc-1600x1600-rgb-dynamic.png";
     if (verbose) {
@@ -334,7 +330,7 @@ static bool test_read_large_images_with_dynamic_compression(
     if (verbose) {
       sl_png_dump_img_meta(stdout, asan);
     }
-    const size_t width = 958;
+    const size_t width  = 958;
     const size_t height = 458;
     assert(asan.header.width == width);
     assert(asan.header.height == height);
@@ -361,20 +357,19 @@ int test_read_write_read(const bool verbose, const char* img0_path) {
   }
 
   char img1_path[200] = {0};
-  assert(0 < snprintf(img1_path,
-                      SL_ARRAY_LEN(img1_path),
-                      "%s/sl_test.png",
-                      sl_misc_tmpdir()));
+  assert(0 < snprintf(img1_path, SL_ARRAY_LEN(img1_path), "%s/sl_test.png", sl_misc_tmpdir()));
   assert(sl_png_write_image(img0, img1_path));
 
   struct sl_png_image img1 = sl_png_read_image(img1_path);
   if (img1.data.size != img0.data.size) {
-    fprintf(stderr,
-            "written %s img size %zu is not equal to size %zu of original %s\n",
-            img1_path,
-            img1.data.size,
-            img0.data.size,
-            img0_path);
+    fprintf(
+        stderr,
+        "written %s img size %zu is not equal to size %zu of original %s\n",
+        img1_path,
+        img1.data.size,
+        img0.data.size,
+        img0_path
+    );
     return false;
   }
   if (verbose) {
@@ -430,15 +425,17 @@ static bool test_read_write_read_large(const bool verbose) {
   return true;
 }
 
-SL_TEST_MAIN(test_read_single_pixel_chunks,
-             test_read_large_image_with_many_chunks,
-             test_read_single_pixel_header,
-             test_read_img_header,
-             test_read_single_pixel_no_compression,
-             test_read_single_pixel_with_fixed_compression,
-             test_read_rgba_image_with_dynamic_compression,
-             test_read_small_images_with_dynamic_compression,
-             test_read_large_images_with_dynamic_compression,
-             test_read_write_read_single_pixel,
-             test_read_write_read_small,
-             test_read_write_read_large)
+SL_TEST_MAIN(
+    test_read_single_pixel_chunks,
+    test_read_large_image_with_many_chunks,
+    test_read_single_pixel_header,
+    test_read_img_header,
+    test_read_single_pixel_no_compression,
+    test_read_single_pixel_with_fixed_compression,
+    test_read_rgba_image_with_dynamic_compression,
+    test_read_small_images_with_dynamic_compression,
+    test_read_large_images_with_dynamic_compression,
+    test_read_write_read_single_pixel,
+    test_read_write_read_small,
+    test_read_write_read_large
+)

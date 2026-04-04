@@ -11,7 +11,7 @@
 #include "stufflib/span/span.h"
 
 static bool test_format_path(const bool) {
-  char buffer[1024] = {0};
+  char buffer[1024]    = {0};
   const size_t bufsize = SL_ARRAY_LEN(buffer);
 
   assert(sl_file_format_path(bufsize, buffer, "/a/bbb/c1234", "d", ".txt"));
@@ -56,7 +56,7 @@ static bool test_read_single_char(const bool) {
   assert(sl_file_open(&file, "./test-data/txt/one.txt", "rb"));
   assert(sl_file_can_read(&file));
 
-  unsigned char buf[8] = {0};
+  unsigned char buf[8]  = {0};
   struct sl_span buffer = sl_span_view(SL_ARRAY_LEN(buf), buf);
 
   SL_ASSERT_EQ_LL(sl_file_read(&file, &buffer), 1);
@@ -76,7 +76,7 @@ static bool test_read_empty_file(const bool) {
   assert(sl_file_open(&file, "./test-data/txt/empty", "rb"));
   assert(!ferror(file.file));
 
-  unsigned char buf[1] = {0};
+  unsigned char buf[1]  = {0};
   struct sl_span buffer = sl_span_view(SL_ARRAY_LEN(buf), buf);
   assert(sl_file_can_read(&file));
   SL_ASSERT_EQ_LL(sl_file_read(&file, &buffer), 0);
@@ -88,7 +88,7 @@ static bool test_read_empty_file(const bool) {
 
 static bool test_read_entire_file(const bool) {
   unsigned char buf[1024] = {0};
-  struct sl_span buffer = sl_span_view(SL_ARRAY_LEN(buf), buf);
+  struct sl_span buffer   = sl_span_view(SL_ARRAY_LEN(buf), buf);
 
   for (size_t i = 0; i < SL_ARRAY_LEN(sl_test_data_file_paths); ++i) {
     struct sl_file file = {0};
@@ -113,7 +113,7 @@ static bool test_parse_numbers(const bool) {
   assert(sl_file_can_read(&file));
 
   int64_t numbers[100] = {0};
-  const size_t len = SL_ARRAY_LEN(numbers);
+  const size_t len     = SL_ARRAY_LEN(numbers);
   SL_ASSERT_EQ_LL(sl_file_parse_int64(&file, len, numbers), len);
   for (size_t i = 0; i < len; ++i) {
     SL_ASSERT_EQ_LL(numbers[i], i - 50);
@@ -123,9 +123,11 @@ static bool test_parse_numbers(const bool) {
   return true;
 }
 
-SL_TEST_MAIN(test_format_path,
-             test_open_file,
-             test_read_single_char,
-             test_read_empty_file,
-             test_read_entire_file,
-             test_parse_numbers)
+SL_TEST_MAIN(
+    test_format_path,
+    test_open_file,
+    test_read_single_char,
+    test_read_empty_file,
+    test_read_entire_file,
+    test_parse_numbers
+)

@@ -14,7 +14,7 @@
 #include "stufflib/span/span.h"
 
 static const uint32_t sl_unicode_error_value = UINT32_MAX;
-static const size_t sl_unicode_error_width = 0;
+static const size_t sl_unicode_error_width   = 0;
 
 size_t sl_unicode_codepoint_width(uint32_t value) {
   if (value < 0x000080) {
@@ -32,8 +32,7 @@ size_t sl_unicode_codepoint_width(uint32_t value) {
   return sl_unicode_error_width;
 }
 
-size_t sl_unicode_codepoint_width_from_utf8(size_t size,
-                                            unsigned char bytes[const size]) {
+size_t sl_unicode_codepoint_width_from_utf8(size_t size, unsigned char bytes[const size]) {
   // See Table 3-7 in Chapter 3
   enum decode_state {
     start = 0,
@@ -52,12 +51,12 @@ size_t sl_unicode_codepoint_width_from_utf8(size_t size,
   } state = start;
 
   size_t max_width = SL_MIN(4, size);
-  size_t width = 0;
+  size_t width     = 0;
 
   while (state != ill_formed && state != end && width < max_width) {
-    unsigned char byte = bytes[width++];
+    unsigned char byte              = bytes[width++];
     enum decode_state current_state = state;
-    state = ill_formed;
+    state                           = ill_formed;
     switch (current_state) {
       case start: {
         if (byte <= 0x7f) {
@@ -150,8 +149,7 @@ error:
   return sl_unicode_error_width;
 }
 
-uint32_t sl_unicode_codepoint_from_utf8(size_t width,
-                                        unsigned char bytes[const width]) {
+uint32_t sl_unicode_codepoint_from_utf8(size_t width, unsigned char bytes[const width]) {
   switch (width) {
     case 4: {
       uint32_t byte1 = bytes[0] & 0x07;
@@ -184,9 +182,8 @@ uint32_t sl_unicode_codepoint_from_utf8(size_t width,
 bool sl_unicode_is_valid_utf8(struct sl_span data[const static 1]) {
   size_t byte_pos = 0;
   while (byte_pos < data->size) {
-    size_t codepoint_width =
-        sl_unicode_codepoint_width_from_utf8(data->size - byte_pos,
-                                             data->data + byte_pos);
+    size_t codepoint_width
+        = sl_unicode_codepoint_width_from_utf8(data->size - byte_pos, data->data + byte_pos);
     if (codepoint_width == sl_unicode_error_width) {
       return false;
     }
@@ -197,7 +194,7 @@ bool sl_unicode_is_valid_utf8(struct sl_span data[const static 1]) {
 
 size_t sl_unicode_iter_item_width(struct sl_iterator iter[const static 1]) {
   struct sl_span* data = iter->data;
-  unsigned char* item = data->data + iter->index;
+  unsigned char* item  = data->data + iter->index;
   return sl_unicode_codepoint_width_from_utf8(data->size - iter->index, item);
 }
 
@@ -221,8 +218,10 @@ void* sl_unicode_iter_get(struct sl_iterator iter[const static 1]) {
 }
 
 uint32_t sl_unicode_iter_decode_item(struct sl_iterator iter[const static 1]) {
-  return sl_unicode_codepoint_from_utf8(sl_unicode_iter_item_width(iter),
-                                        sl_unicode_iter_get(iter));
+  return sl_unicode_codepoint_from_utf8(
+      sl_unicode_iter_item_width(iter),
+      sl_unicode_iter_get(iter)
+  );
 }
 
 struct sl_iterator sl_unicode_iter(struct sl_span data[const static 1]) {

@@ -1,9 +1,23 @@
 BasedOnStyle: Google
-ColumnLimit: 80
-InsertTrailingCommas: Wrapped
-BinPackArguments: false
-BinPackParameters: false
+ColumnLimit: 100
+
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+AlignAfterOpenBracket: BlockIndent
+AlignArrayOfStructures: Left
+AlignOperands: Align
 AllowAllArgumentsOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: false
-AlignArrayOfStructures: Right
+AllowShortBlocksOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: None
+BinPackArguments: false
+BinPackParameters: false
+BreakBeforeBinaryOperators: All
 IndentPPDirectives: BeforeHash
+InsertTrailingCommas: Wrapped
+DerivePointerAlignment: false
+PointerAlignment: Left
+IntegerLiteralSeparator:
+  Decimal: 3

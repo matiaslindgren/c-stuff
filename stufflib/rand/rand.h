@@ -10,13 +10,11 @@
 void sl_rand_fill_double(const size_t n, double dst[n], double scale) {
   for (size_t i = 0; i < n; ++i) {
     double r = rand() - RAND_MAX / 2;
-    dst[i] = scale * (r / RAND_MAX);
+    dst[i]   = scale * (r / RAND_MAX);
   }
 }
 
-void sl_rand_set_zero_double(const size_t n,
-                             double dst[n],
-                             double probability) {
+void sl_rand_set_zero_double(const size_t n, double dst[n], double probability) {
   probability = fmax(0, fmin(1, probability));
   for (size_t i = 0; i < n; ++i) {
     if ((1.0 * rand() / RAND_MAX) < probability) {
@@ -46,11 +44,13 @@ void sl_rand_shuffle(void* data, const size_t size, const size_t count) {
   }
 }
 
-void sl_rand_shuffle_together(void* data1,
-                              void* data2,
-                              const size_t size1,
-                              const size_t size2,
-                              const size_t count) {
+void sl_rand_shuffle_together(
+    void* data1,
+    void* data2,
+    const size_t size1,
+    const size_t size2,
+    const size_t count
+) {
   // sl_rand_shuffle but with two arrays of same length
   if (size1 <= 0 || size2 <= 0 || count < 2) {
     return;

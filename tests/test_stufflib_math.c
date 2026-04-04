@@ -33,7 +33,7 @@ static bool test_factorize_primes(const bool verbose) {
 
 static bool test_factorize_4(const bool verbose) {
   const size_t n = 4;
-  size_t* f = sl_math_factorize(n);
+  size_t* f      = sl_math_factorize(n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   assert(f[0] == 2);
   assert(f[1] == 2);
@@ -44,7 +44,7 @@ static bool test_factorize_4(const bool verbose) {
 
 static bool test_factorize_25(const bool verbose) {
   const size_t n = 25;
-  size_t* f = sl_math_factorize(n);
+  size_t* f      = sl_math_factorize(n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   assert(f[0] == 5);
   assert(f[1] == 5);
@@ -55,7 +55,7 @@ static bool test_factorize_25(const bool verbose) {
 
 static bool test_factorize_30(const bool verbose) {
   const size_t n = 30;
-  size_t* f = sl_math_factorize(n);
+  size_t* f      = sl_math_factorize(n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   assert(f[0] == 2);
   assert(f[1] == 3);
@@ -67,7 +67,7 @@ static bool test_factorize_30(const bool verbose) {
 
 static bool test_factorize_864(const bool verbose) {
   const size_t n = 864;
-  size_t* f = sl_math_factorize(n);
+  size_t* f      = sl_math_factorize(n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   assert(f[0] == 2);
   assert(f[1] == 2);
@@ -84,7 +84,7 @@ static bool test_factorize_864(const bool verbose) {
 
 static bool test_factorize_2022(const bool verbose) {
   const size_t n = 2022;
-  size_t* f = sl_math_factorize(n);
+  size_t* f      = sl_math_factorize(n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   assert(f[0] == 2);
   assert(f[1] == 3);
@@ -96,7 +96,7 @@ static bool test_factorize_2022(const bool verbose) {
 
 static bool test_factorize_202212(const bool verbose) {
   const size_t n = 202212;
-  size_t* f = sl_math_factorize(n);
+  size_t* f      = sl_math_factorize(n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   assert(f[0] == 2);
   assert(f[1] == 2);
@@ -111,7 +111,7 @@ static bool test_factorize_202212(const bool verbose) {
 
 static bool test_factorize_20221210(const bool verbose) {
   const size_t n = 20221210;
-  size_t* f = sl_math_factorize(n);
+  size_t* f      = sl_math_factorize(n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   assert(f[0] == 2);
   assert(f[1] == 5);
@@ -127,8 +127,8 @@ static bool test_linalg(const bool) {
 
   const double v1[] = {1, 2, 3, 4};
   const double v2[] = {0, -2, 4, -6};
-  const size_t n = SL_ARRAY_LEN(v1);
-  const double dot = sl_math_linalg_dot(n, v1, v2);
+  const size_t n    = SL_ARRAY_LEN(v1);
+  const double dot  = sl_math_linalg_dot(n, v1, v2);
   assert(sl_math_double_almost(dot, -16, cmp_eps));
 
   double m[3][4] = {
@@ -145,7 +145,9 @@ static bool test_linalg(const bool) {
   return true;
 }
 
-double pow2(double x) { return pow(x, 2); }
+double pow2(double x) {
+  return pow(x, 2);
+}
 
 static bool test_numerical_diff(const bool verbose) {
   const size_t n = 10000;
@@ -154,32 +156,36 @@ static bool test_numerical_diff(const bool verbose) {
   sl_rand_set_zero_double(n, x, 0.01);
 
   if (verbose) {
-    printf("%4s %8s %8s %8s %9s %9s %9s %9s\n",
-           "i",
-           "x[i]",
-           "cos(x)",
-           "sin(x)",
-           "2x",
-           "cos'(x)",
-           "sin'(x)",
-           "pow2'(x)");
+    printf(
+        "%4s %8s %8s %8s %9s %9s %9s %9s\n",
+        "i",
+        "x[i]",
+        "cos(x)",
+        "sin(x)",
+        "2x",
+        "cos'(x)",
+        "sin'(x)",
+        "pow2'(x)"
+    );
   }
   for (size_t i = 0; i < n; ++i) {
-    double cos_x = cos(x[i]);
-    double sin_x = sin(x[i]);
-    double d_cos_x = sl_math_diff(cos, x[i]);
-    double d_sin_x = sl_math_diff(sin, x[i]);
+    double cos_x    = cos(x[i]);
+    double sin_x    = sin(x[i]);
+    double d_cos_x  = sl_math_diff(cos, x[i]);
+    double d_sin_x  = sl_math_diff(sin, x[i]);
     double d_pow2_x = sl_math_diff(pow2, x[i]);
     if (verbose) {
-      printf("%4zu %8.1g %8.3g %8.3g %9.3g %9.3g %9.3g %9.3f\n",
-             i,
-             x[i],
-             cos_x,
-             sin_x,
-             2 * x[i],
-             d_cos_x,
-             d_sin_x,
-             d_pow2_x);
+      printf(
+          "%4zu %8.1g %8.3g %8.3g %9.3g %9.3g %9.3g %9.3f\n",
+          i,
+          x[i],
+          cos_x,
+          sin_x,
+          2 * x[i],
+          d_cos_x,
+          d_sin_x,
+          d_pow2_x
+      );
     }
     assert(sl_math_double_almost(d_cos_x, -sin_x, 1e-3));
     assert(sl_math_double_almost(d_sin_x, cos_x, 1e-3));
@@ -229,16 +235,18 @@ static bool test_is_finite(const bool) {
   return true;
 }
 
-SL_TEST_MAIN(test_factorize_primes,
-             test_factorize_4,
-             test_factorize_25,
-             test_factorize_30,
-             test_factorize_864,
-             test_factorize_2022,
-             test_factorize_202212,
-             test_factorize_20221210,
-             test_double_almost,
-             test_numerical_diff,
-             test_linalg,
-             test_round_up_pow2,
-             test_is_finite)
+SL_TEST_MAIN(
+    test_factorize_primes,
+    test_factorize_4,
+    test_factorize_25,
+    test_factorize_30,
+    test_factorize_864,
+    test_factorize_2022,
+    test_factorize_202212,
+    test_factorize_20221210,
+    test_double_almost,
+    test_numerical_diff,
+    test_linalg,
+    test_round_up_pow2,
+    test_is_finite
+)

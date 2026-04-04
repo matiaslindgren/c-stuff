@@ -13,7 +13,7 @@ static bool test_parse_positional(const bool) {
       "arg2",
       0,
   };
-  const int argc = SL_ARRAY_LEN(argv) - 1;
+  const int argc      = SL_ARRAY_LEN(argv) - 1;
   struct sl_args args = {.argc = argc, .argv = argv};
 
   assert(sl_args_count_positional(&args) == 2);
@@ -34,7 +34,7 @@ static bool test_parse_one_flag(const bool) {
       "-x",
       0,
   };
-  const int argc = SL_ARRAY_LEN(argv) - 1;
+  const int argc      = SL_ARRAY_LEN(argv) - 1;
   struct sl_args args = {.argc = argc, .argv = argv};
 
   assert(sl_args_count_positional(&args) == 0);
@@ -71,7 +71,7 @@ static bool test_parse_positional_after_optional(const bool) {
       "arg1",
       0,
   };
-  const int argc = SL_ARRAY_LEN(argv) - 1;
+  const int argc      = SL_ARRAY_LEN(argv) - 1;
   struct sl_args args = {.argc = argc, .argv = argv};
 
   assert(sl_args_count_positional(&args) == 1);
@@ -96,7 +96,7 @@ static bool test_parse_two_flags(const bool) {
       "-v",
       0,
   };
-  const int argc = SL_ARRAY_LEN(argv) - 1;
+  const int argc      = SL_ARRAY_LEN(argv) - 1;
   struct sl_args args = {.argc = argc, .argv = argv};
 
   assert(sl_args_count_positional(&args) == 0);
@@ -142,7 +142,7 @@ static bool test_parse_optional_ints(const bool) {
       "--num-stuff=100",
       0,
   };
-  const int argc = SL_ARRAY_LEN(argv) - 1;
+  const int argc      = SL_ARRAY_LEN(argv) - 1;
   struct sl_args args = {.argc = argc, .argv = argv};
 
   assert(sl_args_count_positional(&args) == 0);
@@ -179,8 +179,10 @@ static bool test_parse_optional_ints(const bool) {
   return true;
 }
 
-SL_TEST_MAIN(test_parse_positional,
-             test_parse_one_flag,
-             test_parse_positional_after_optional,
-             test_parse_two_flags,
-             test_parse_optional_ints)
+SL_TEST_MAIN(
+    test_parse_positional,
+    test_parse_one_flag,
+    test_parse_positional_after_optional,
+    test_parse_two_flags,
+    test_parse_optional_ints
+)

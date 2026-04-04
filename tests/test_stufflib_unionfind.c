@@ -7,8 +7,7 @@
 #include "stufflib/macros/macros.h"
 #include "stufflib/unionfind/unionfind.h"
 
-int sl_uf_assert_roots_ok(const struct sl_unionfind uf,
-                          size_t expected_roots[static 1]) {
+int sl_uf_assert_roots_ok(const struct sl_unionfind uf, size_t expected_roots[static 1]) {
   for (size_t i = 0; i < uf.count; ++i) {
     const size_t root = sl_unionfind_find_root(&uf, i);
     if (root != expected_roots[i]) {

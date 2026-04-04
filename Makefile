@@ -5,12 +5,14 @@ MODULE_DIR := ./stufflib
 OUTPUT_DIR := ./build
 TEMP_DIR   = $(eval TEMP_DIR := $(shell mktemp --directory))
 
-CLANG  := clang-21
+CLANG  := clang-22
 CFLAGS ?= \
-	-std=gnu23 \
+	-std=c23 \
 	-Weverything \
 	-Werror \
 	-Wstrict-prototypes \
+	-Wno-c++-compat \
+	-Wno-nrvo \
 	-Wno-c99-compat \
 	-Wno-declaration-after-statement \
 	-Wno-disabled-macro-expansion \
@@ -34,9 +36,11 @@ ifeq ($(shell uname), Darwin)
 	SDK_PATH := $(shell xcrun --show-sdk-path)
 	LDFLAGS  += -Wl,-syslibroot,$(SDK_PATH),-framework,Accelerate
 	INCLUDES += -isysroot $(SDK_PATH)
+	CLANG_FORMAT :=  $(shell brew --prefix llvm)/bin/clang-format
 else
 	CC      := $(CLANG)
 	LDFLAGS += -lopenblas
+	CLANG_FORMAT := clang-format
 endif
 
 # todo separate: asan, ubsan, valgrind
@@ -76,19 +80,19 @@ OBJECT_PATHS := $(MODULE_OBJECTS) $(PROGRAM_OBJECTS)
 DEPEND_PATHS := $(subst .o,.d,$(OBJECT_PATHS))
 BUILD_DIRS   := $(sort $(dir $(OBJECT_PATHS)))
 
+.PHONY: all
+all: $(PROGRAM_PATHS)
+
 .PHONY: clean
 clean:
 	$(RM) -r $(OUTPUT_DIR)
 
 .PHONY: fmt
 fmt: $(MODULE_HEADERS) $(MODULE_SOURCES) $(PROGRAM_SOURCES)
-	@clang-format --verbose -i $^
+	@$(CLANG_FORMAT) --verbose -i $^
 
 $(BUILD_DIR) $(BUILD_DIRS):
 	mkdir -p $@
-
-.PHONY: all
-all: $(PROGRAM_PATHS)
 
 .PHONY: objects
 objects: $(OBJECT_PATHS)

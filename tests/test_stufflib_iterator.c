@@ -14,7 +14,7 @@ static bool test_data(const bool) {
       .size = 5,
       .data = (unsigned char[5]){0, 1, 2, 3, 4},
   };
-  size_t i = 0;
+  size_t i                = 0;
   struct sl_iterator iter = sl_span_iter(&data);
   for (; !sl_span_iter_is_done(&iter); sl_span_iter_advance(&iter)) {
     assert(iter.index == i);
@@ -57,8 +57,8 @@ static bool test_cstr(const bool) {
       "0",
   };
   for (size_t i_str = 0; i_str < SL_ARRAY_LEN(strings); ++i_str) {
-    size_t i = 0;
-    char* str = strings[i_str];
+    size_t i                = 0;
+    char* str               = strings[i_str];
     struct sl_iterator iter = sl_cstr_iter(str);
     for (; !sl_cstr_iter_is_done(&iter); sl_cstr_iter_advance(&iter)) {
       assert(iter.index == i);

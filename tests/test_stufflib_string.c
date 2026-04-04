@@ -37,7 +37,7 @@ static bool test_string_utf8_view(const bool) {
   sl_string_destroy(&empty_str);
   for (size_t i = 0; i < SL_ARRAY_LEN(sl_test_data_hello_utf8); ++i) {
     struct sl_string str = sl_string_from_utf8(sl_test_data_hello_utf8 + i);
-    struct sl_span view = sl_string_view_utf8_data(&str);
+    struct sl_span view  = sl_string_view_utf8_data(&str);
     assert(view.size == sl_test_data_hello_utf8[i].size);
     for (size_t c = 0; c < view.size; ++c) {
       assert(view.data[c] == sl_test_data_hello_utf8[i].data[c]);
@@ -53,16 +53,13 @@ static bool test_string_slice(const bool) {
     struct sl_string str = sl_string_from_utf8(sl_test_data_hello_utf8 + i);
     for (size_t substr_len = 0; substr_len <= str.length; ++substr_len) {
       for (size_t begin = 0; begin + substr_len <= str.length; ++begin) {
-        struct sl_string substr =
-            sl_string_slice(&str, begin, begin + substr_len);
+        struct sl_string substr = sl_string_slice(&str, begin, begin + substr_len);
         assert(substr.length == substr_len);
         struct sl_span view = sl_string_view_utf8_data(&substr);
-        for (struct sl_iterator iter = sl_unicode_iter(&view);
-             !sl_unicode_iter_is_done(&iter);
+        for (struct sl_iterator iter = sl_unicode_iter(&view); !sl_unicode_iter_is_done(&iter);
              sl_unicode_iter_advance(&iter)) {
           const uint32_t codepoint = sl_unicode_iter_decode_item(&iter);
-          assert(codepoint ==
-                 sl_test_data_decoded_strings[decoded_pos + begin + iter.pos]);
+          assert(codepoint == sl_test_data_decoded_strings[decoded_pos + begin + iter.pos]);
           // TODO assert iterator slice address equals underlying string
         }
         sl_string_destroy(&substr);
@@ -76,15 +73,13 @@ static bool test_string_slice(const bool) {
 
 static bool test_string_is_ascii(const bool) {
   {
-    struct sl_span hello =
-        (struct sl_span){.size = 12, .data = (unsigned char*)u8"hello there!"};
+    struct sl_span hello = (struct sl_span){.size = 12, .data = (unsigned char*)u8"hello there!"};
     struct sl_string str = sl_string_from_utf8(&hello);
     assert(sl_string_is_ascii(&str));
     sl_string_destroy(&str);
   }
   {
-    struct sl_span hello =
-        (struct sl_span){.size = 18, .data = (unsigned char*)u8"नमस्ते"};
+    struct sl_span hello = (struct sl_span){.size = 18, .data = (unsigned char*)u8"नमस्ते"};
     struct sl_string str = sl_string_from_utf8(&hello);
     assert(!sl_string_is_ascii(&str));
     sl_string_destroy(&str);
@@ -93,10 +88,9 @@ static bool test_string_is_ascii(const bool) {
 }
 
 static bool test_string_copy_ascii(const bool) {
-  struct sl_span hello =
-      (struct sl_span){.size = 12, .data = (unsigned char*)u8"hello there!"};
+  struct sl_span hello = (struct sl_span){.size = 12, .data = (unsigned char*)u8"hello there!"};
   struct sl_string str = sl_string_from_utf8(&hello);
-  char buf[100] = {0};
+  char buf[100]        = {0};
   sl_string_copy_ascii(buf, &str);
   assert(strlen(buf) == hello.size);
   assert(strcmp(buf, "hello there!") == 0);
@@ -104,8 +98,10 @@ static bool test_string_copy_ascii(const bool) {
   return true;
 }
 
-SL_TEST_MAIN(test_string_init,
-             test_string_utf8_view,
-             test_string_slice,
-             test_string_is_ascii,
-             test_string_copy_ascii)
+SL_TEST_MAIN(
+    test_string_init,
+    test_string_utf8_view,
+    test_string_slice,
+    test_string_is_ascii,
+    test_string_copy_ascii
+)

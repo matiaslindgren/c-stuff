@@ -9,9 +9,10 @@ on:
 jobs:
   build-and-test:
     strategy:
+      fail-fast: false
       matrix:
         llvm:
-          - 21
+          - 22
         platform:
           - ubuntu-24.04
           - macos-15

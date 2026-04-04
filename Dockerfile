@@ -1,7 +1,7 @@
 FROM debian:sid-slim
 
 ENV LANG=C.UTF-8
-ARG LLVM_VERSION=21
+ARG LLVM_VERSION=22
 
 RUN apt update --yes \
     && apt install --yes curl \

@@ -11,7 +11,7 @@
 
 static bool test_read_file(const bool verbose) {
   unsigned char buf[128] = {0};
-  struct sl_span buffer = sl_span_view(SL_ARRAY_LEN(buf), buf);
+  struct sl_span buffer  = sl_span_view(SL_ARRAY_LEN(buf), buf);
 
   for (size_t i = 0; i < SL_ARRAY_LEN(sl_test_data_file_paths); ++i) {
     if (verbose) {
@@ -30,7 +30,7 @@ static bool test_read_file(const bool verbose) {
 
 static bool test_read_file_utf8(const bool verbose) {
   unsigned char buf[128] = {0};
-  struct sl_span buffer = sl_span_view(SL_ARRAY_LEN(buf), buf);
+  struct sl_span buffer  = sl_span_view(SL_ARRAY_LEN(buf), buf);
 
   const char* languages[] = {
       "ar", "bg",  "cs", "de",  "el", "fa", "fi", "fr",  "he",  "hi", "is",
@@ -39,19 +39,23 @@ static bool test_read_file_utf8(const bool verbose) {
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(languages); ++i) {
     char input_path[200] = {0};
-    snprintf(input_path,
-             SL_ARRAY_LEN(input_path),
-             "./test-data/txt/wikipedia/water_%s.txt",
-             languages[i]);
+    snprintf(
+        input_path,
+        SL_ARRAY_LEN(input_path),
+        "./test-data/txt/wikipedia/water_%s.txt",
+        languages[i]
+    );
     if (verbose) {
       printf("%s\n", input_path);
     }
 
     char length_path[200] = {0};
-    snprintf(length_path,
-             SL_ARRAY_LEN(length_path),
-             "./test-data/txt/wikipedia/water_%s_length.txt",
-             languages[i]);
+    snprintf(
+        length_path,
+        SL_ARRAY_LEN(length_path),
+        "./test-data/txt/wikipedia/water_%s_length.txt",
+        languages[i]
+    );
 
     FILE* fp = fopen(length_path, "rb");
     assert(fp);
@@ -69,7 +73,7 @@ static bool test_read_file_utf8(const bool verbose) {
 
 static bool test_read_lines(const bool verbose) {
   unsigned char buf[128] = {0};
-  struct sl_span buffer = sl_span_view(SL_ARRAY_LEN(buf), buf);
+  struct sl_span buffer  = sl_span_view(SL_ARRAY_LEN(buf), buf);
 
   const unsigned char* expected[] = {
       u8"# test-data/txt/wikipedia/water_fi.txt",
@@ -85,14 +89,12 @@ static bool test_read_lines(const bool verbose) {
       u8"",
   };
 
-  struct sl_string str =
-      sl_fs_read_file_utf8("./test-data/txt/lines.txt", &buffer);
+  struct sl_string str = sl_fs_read_file_utf8("./test-data/txt/lines.txt", &buffer);
   {
     // TODO create iterlines util
-    struct sl_span newline = sl_span_view(1, (unsigned char[]){'\n'});
-    struct sl_tokenizer newline_tokenizer =
-        sl_tokenizer_create(&(str.utf8_data), &newline);
-    size_t lineno = 0;
+    struct sl_span newline                = sl_span_view(1, (unsigned char[]){'\n'});
+    struct sl_tokenizer newline_tokenizer = sl_tokenizer_create(&(str.utf8_data), &newline);
+    size_t lineno                         = 0;
     for (struct sl_iterator iter = sl_tokenizer_iter(&newline_tokenizer);
          !sl_tokenizer_iter_is_done(&iter);
          sl_tokenizer_iter_advance(&iter)) {
@@ -105,9 +107,14 @@ static bool test_read_lines(const bool verbose) {
       }
       assert(lineno < SL_ARRAY_LEN(expected));
       const size_t line_len = strlen((const char*)expected[lineno]);
-      assert(memcmp(line.utf8_data.data,
-                    (const char*)expected[lineno],
-                    SL_MIN(line_len, line.utf8_data.size)) == 0);
+      assert(
+          memcmp(
+              line.utf8_data.data,
+              (const char*)expected[lineno],
+              SL_MIN(line_len, line.utf8_data.size)
+          )
+          == 0
+      );
       sl_string_destroy(&line);
       ++lineno;
     }

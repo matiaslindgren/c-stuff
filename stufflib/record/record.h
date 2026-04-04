@@ -12,7 +12,7 @@ struct sl_record {
   char layout[8];  // TODO enum
   char type[64];   // TODO enum
   char name[128];
-  char path[2048];
+  char path[2'048];
   size_t size;
   int n_dims;
   size_t dim_size[8];
@@ -49,7 +49,7 @@ bool sl_record_validate_metadata(const struct sl_record r[const static 1]) {
   }
 
   bool is_sparse = SL_STR_EQ(r->layout, "sparse");
-  bool is_dense = SL_STR_EQ(r->layout, "dense");
+  bool is_dense  = SL_STR_EQ(r->layout, "dense");
   if (!is_sparse && !is_dense) {
     SL_LOG_ERROR("unknown data layout '%s'", r->layout);
     return false;
@@ -77,19 +77,17 @@ bool sl_record_validate_metadata(const struct sl_record r[const static 1]) {
   return true;
 }
 
-bool sl_record_read_metadata(struct sl_record record[const static 1],
-                             const char path[const static 1],
-                             const char name[const static 1]) {
+bool sl_record_read_metadata(
+    struct sl_record record[const static 1],
+    const char path[const static 1],
+    const char name[const static 1]
+) {
   bool ok = false;
 
   struct sl_file file = {0};
   {
-    char full_path[1024] = {0};
-    if (!sl_file_format_path(SL_ARRAY_LEN(full_path),
-                             full_path,
-                             path,
-                             name,
-                             ".sl_record_meta")) {
+    char full_path[1'024] = {0};
+    if (!sl_file_format_path(SL_ARRAY_LEN(full_path), full_path, path, name, ".sl_record_meta")) {
       goto done;
     }
     if (!sl_file_open(&file, full_path, "r")) {
@@ -99,14 +97,17 @@ bool sl_record_read_metadata(struct sl_record record[const static 1],
   strcpy(record->path, path);
   strcpy(record->name, name);
 
-  if (EOF == fscanf(file.file,
-                    "name: %s\ntype: %s\nlayout: %s\nsize: %zu\ndims: %d\n",
-                    record->name,
-                    record->type,
-                    record->layout,
-                    &(record->size),
-                    &(record->n_dims)) ||
-      record->n_dims == 0) {
+  if (EOF
+          == fscanf(
+              file.file,
+              "name: %s\ntype: %s\nlayout: %s\nsize: %zu\ndims: %d\n",
+              record->name,
+              record->type,
+              record->layout,
+              &(record->size),
+              &(record->n_dims)
+          )
+      || record->n_dims == 0) {
     SL_LOG_ERROR("failed reading %s", file.path);
     goto done;
   }
@@ -129,7 +130,7 @@ done:
 }
 
 bool sl_record_write_metadata(const struct sl_record record[const static 1]) {
-  bool ok = false;
+  bool ok             = false;
   struct sl_file file = {0};
 
   if (!sl_record_validate_metadata(record)) {
@@ -137,15 +138,15 @@ bool sl_record_write_metadata(const struct sl_record record[const static 1]) {
   }
 
   {
-    char full_path[1024] = {0};
-    if (!sl_file_format_path(SL_ARRAY_LEN(full_path),
-                             full_path,
-                             record->path,
-                             record->name,
-                             ".sl_record_meta")) {
-      SL_LOG_ERROR("cannot format metadata path '%s/%s'",
-                   record->path,
-                   record->name);
+    char full_path[1'024] = {0};
+    if (!sl_file_format_path(
+            SL_ARRAY_LEN(full_path),
+            full_path,
+            record->path,
+            record->name,
+            ".sl_record_meta"
+        )) {
+      SL_LOG_ERROR("cannot format metadata path '%s/%s'", record->path, record->name);
       goto done;
     }
     if (!sl_file_open(&file, full_path, "w")) {
@@ -154,13 +155,15 @@ bool sl_record_write_metadata(const struct sl_record record[const static 1]) {
     }
   }
 
-  if (0 > fprintf(file.file,
-                  "name: %s\ntype: %s\nlayout: %s\nsize: %zu\ndims: %d\n",
-                  record->name,
-                  record->type,
-                  record->layout,
-                  record->size,
-                  record->n_dims)) {
+  if (0 > fprintf(
+          file.file,
+          "name: %s\ntype: %s\nlayout: %s\nsize: %zu\ndims: %d\n",
+          record->name,
+          record->type,
+          record->layout,
+          record->size,
+          record->n_dims
+      )) {
     SL_LOG_ERROR("failed writing to record metadata '%s'", file.path);
     goto done;
   }
