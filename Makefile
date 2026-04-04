@@ -7,7 +7,7 @@ TEMP_DIR   = $(eval TEMP_DIR := $(shell mktemp --directory))
 
 CLANG  := clang-22
 CFLAGS ?= \
-	-std=c23 \
+	-std=gnu23 \
 	-Weverything \
 	-Werror \
 	-Wstrict-prototypes \
