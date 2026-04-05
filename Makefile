@@ -5,7 +5,7 @@ MODULE_DIR := ./stufflib
 OUTPUT_DIR := ./build
 TEMP_DIR   = $(eval TEMP_DIR := $(shell mktemp --directory))
 
-CLANG  := clang-21
+LLVM_VERSION  := 21
 CFLAGS ?= \
 	-std=gnu23 \
 	-Weverything \
@@ -32,13 +32,13 @@ LDFLAGS  ?= -lm -lc
 INCLUDES := -I.
 
 ifeq ($(shell uname), Darwin)
-	CC       := $(shell brew --prefix llvm)/bin/$(CLANG)
+	CC       := $(shell brew --prefix llvm@$(LLVM_VERSION))/bin/clang-$(LLVM_VERSION)
 	SDK_PATH := $(shell xcrun --show-sdk-path)
 	LDFLAGS  += -Wl,-syslibroot,$(SDK_PATH),-framework,Accelerate
 	INCLUDES += -isysroot $(SDK_PATH)
-	CLANG_FORMAT :=  $(shell brew --prefix llvm)/bin/clang-format
+	CLANG_FORMAT :=  $(shell brew --prefix llvm@$(LLVM_VERSION))/bin/clang-format
 else
-	CC      := $(CLANG)
+	CC      := clang-$(LLVM_VERSION)
 	LDFLAGS += -lopenblas
 	CLANG_FORMAT := clang-format
 endif
