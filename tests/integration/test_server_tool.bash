@@ -12,13 +12,23 @@ source ${self_dir}/common.bash $@
 listen_port=8080
 bind_host=127.0.0.1
 message_content="hello TCP server"
+netstat_cmd=
+
+if command -v netstat &>/dev/null; then
+  netstat_cmd=netstat
+elif command -v ss &>/dev/null; then
+  netstat_cmd=ss
+else
+  printf "cannot find netstat util\n"
+  exit 1
+fi
 
 case "$OSTYPE" in
   darwin*)
-    cmd__socket_in_use="netstat -a -n -p tcp | grep --quiet '${bind_host}.${listen_port}'"
+    cmd__socket_in_use="$netstat_cmd -a -n -p tcp | grep --quiet '${bind_host}.${listen_port}'"
     ;;
   linux*)
-    cmd__socket_in_use="netstat --all --numeric --tcp | grep --quiet '${bind_host}:${listen_port}'"
+    cmd__socket_in_use="$netstat_cmd --all --numeric --tcp | grep --quiet '${bind_host}:${listen_port}'"
     ;;
   *)
     printf "unknown OSTYPE='%s'\n" "$OSTYPE"
