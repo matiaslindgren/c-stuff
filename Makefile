@@ -135,7 +135,7 @@ $(DEPEND_PATHS): $(BUILD_DIR)/%.d: %.c | $(BUILD_DIRS)
 -include $(DEPEND_PATHS)
 
 $(OBJECT_PATHS): $(BUILD_DIR)/%.o: %.c | $(BUILD_DIRS)
-	$(CC) -x c $< $(CFLAGS) $(INCLUDES) -c -o $@
+	$(CC) $< $(CFLAGS) $(INCLUDES) -c -o $@
 
 $(PROGRAM_PATHS): %: %.o
 	$(CC) $< $(CFLAGS) -o $@ $(LDFLAGS)
