@@ -44,10 +44,6 @@ void sl_file_close(struct sl_file f[const static 1]) {
   }
 }
 
-bool sl_file_can_read(struct sl_file f[const static 1]) {
-  return f->file && !feof(f->file) && ferror(f->file) == 0;
-}
-
 size_t sl_file_read(struct sl_file f[const static 1], struct sl_span buffer[const static 1]) {
   const size_t nread = fread(buffer->data, sizeof(unsigned char), buffer->size, f->file);
   if (ferror(f->file)) {

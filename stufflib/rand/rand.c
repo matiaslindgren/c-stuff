@@ -19,14 +19,6 @@ void sl_rand_set_zero_double(const size_t n, double dst[n], double probability) 
   }
 }
 
-size_t sl_rand_int(const size_t a, const size_t b) {
-  // return random integer i such that a <= i < b
-  if (a >= b) {
-    return a;
-  }
-  return a + (size_t)(rand() % (int)(b - a));
-}
-
 // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
 // 2024-06-14
 void sl_rand_shuffle(void* data, const size_t size, const size_t count) {

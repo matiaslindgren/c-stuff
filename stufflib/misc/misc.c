@@ -42,10 +42,6 @@ sl_misc_encode_big_endian(const size_t size, unsigned char dst[size], const size
   return dst;
 }
 
-size_t sl_misc_midpoint(const size_t lo, const size_t hi) {
-  return lo + (hi - lo) / 2;
-}
-
 size_t sl_misc_vmax_size_t(const size_t n, const size_t v[n]) {
   size_t res = 0;
   for (size_t i = 0; i < n; ++i) {
@@ -64,14 +60,6 @@ void sl_misc_swap(
   memcpy(tmp, a, count);
   memcpy(a, b, count);
   memcpy(b, tmp, count);
-}
-
-const char* sl_misc_tmpdir(void) {
-  const char* tmpdir = getenv("SL_TMP_DIR");
-  if (!tmpdir) {
-    return "/tmp";
-  }
-  return tmpdir;
 }
 
 bool sl_misc_is_zero(const size_t count, unsigned char data[count]) {

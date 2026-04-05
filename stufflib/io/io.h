@@ -24,8 +24,11 @@ bool sl_file_open(
     const char mode[const static 1]
 );
 void sl_file_close(struct sl_file f[const static 1]);
-bool sl_file_can_read(struct sl_file f[const static 1]);
 size_t sl_file_read(struct sl_file f[const static 1], struct sl_span buffer[const static 1]);
+
+static inline bool sl_file_can_read(struct sl_file f[const static 1]) {
+  return f->file && !feof(f->file) && ferror(f->file) == 0;
+}
 size_t sl_file_parse_int64(
     struct sl_file f[const static 1],
     const size_t count,

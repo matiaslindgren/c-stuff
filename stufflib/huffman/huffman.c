@@ -84,19 +84,3 @@ void sl_huffman_destroy(struct sl_huffman_tree tree[const static 1]) {
   }
   sl_huffman_init(tree, 0, 0);
 }
-
-bool sl_huffman_contains(
-    const struct sl_huffman_tree tree[const static 1],
-    const size_t code,
-    const size_t code_len
-) {
-  return code_len > 0 && code <= tree->max_codes[code_len - 1] && tree->symbols[code_len - 1][code];
-}
-
-size_t sl_huffman_get(
-    const struct sl_huffman_tree tree[const static 1],
-    const size_t code,
-    const size_t code_len
-) {
-  return tree->symbols[code_len - 1][code] - 1;
-}
