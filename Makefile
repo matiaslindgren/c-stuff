@@ -5,7 +5,7 @@ MODULE_DIR := ./stufflib
 OUTPUT_DIR := ./build
 TEMP_DIR   = $(eval TEMP_DIR := $(shell mktemp --directory))
 
-CLANG  := clang-22
+CLANG  := clang-21
 CFLAGS ?= \
 	-std=gnu23 \
 	-Weverything \

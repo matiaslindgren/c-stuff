@@ -22,14 +22,14 @@ It is assumed the target platform is a reasonably common, new OS, with large amo
 The current Makefile assumes either Linux or macOS.
 
 * `make`
-* `clang-22`
+* `clang-21`
 * probably many more depending on your OS/distro
 
 See the [LLVM docs](https://apt.llvm.org/) or stufflib's [CI config](./.github/workflows/c.yml) on how to new Clang versions (or use Docker).
 
 ### (Optional) Run in Docker
 
-If you can't install Clang 22 using a package manager, you can use Docker:
+If you can't install Clang 21 using a package manager, you can use Docker:
 
 ```sh
 ./scripts/build_image.sh
