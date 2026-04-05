@@ -4,17 +4,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "stufflib/args/args.h"
-#include "stufflib/io/io.h"
-#include "stufflib/linalg/linalg.h"
-#include "stufflib/macros/macros.h"
-#include "stufflib/math/math.h"
-#include "stufflib/memory/memory.h"
-#include "stufflib/misc/misc.h"
-#include "stufflib/record/reader.h"
-#include "stufflib/record/record.h"
-#include "stufflib/record/writer.h"
-#include "stufflib/span/span.h"
+#include <stufflib/args/args.h>
+#include <stufflib/io/io.h>
+#include <stufflib/linalg/linalg.h>
+#include <stufflib/macros/macros.h>
+#include <stufflib/math/math.h>
+#include <stufflib/memory/memory.h>
+#include <stufflib/misc/misc.h>
+#include <stufflib/record/reader.h>
+#include <stufflib/record/record.h>
+#include <stufflib/record/writer.h>
+#include <stufflib/span/span.h>
 
 bool contains(
     const char dir[static const 1],

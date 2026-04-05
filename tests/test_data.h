@@ -2,7 +2,7 @@
 #define SL_TEST_DATA_H_INCLUDED
 #include <stdint.h>
 
-#include "stufflib/span/span.h"
+#include <stufflib/span/span.h>
 
 // clang-format off
 static struct sl_span sl_test_data_hello_utf8[] = {

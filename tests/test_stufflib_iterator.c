@@ -3,11 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib/args/args.h"
-#include "stufflib/iterator/iterator.h"
-#include "stufflib/macros/macros.h"
-#include "stufflib/span/span.h"
-#include "stufflib/unicode/unicode.h"
+#include <stufflib/args/args.h>
+#include <stufflib/iterator/iterator.h>
+#include <stufflib/macros/macros.h>
+#include <stufflib/span/span.h>
+#include <stufflib/unicode/unicode.h>
 
 static bool test_data(const bool) {
   struct sl_span data = {

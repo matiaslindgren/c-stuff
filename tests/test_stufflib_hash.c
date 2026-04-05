@@ -4,10 +4,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib/args/args.h"
-#include "stufflib/hash/hash.h"
-#include "stufflib/macros/macros.h"
-#include "stufflib/misc/misc.h"
+#include <stufflib/args/args.h>
+#include <stufflib/hash/hash.h>
+#include <stufflib/macros/macros.h>
+#include <stufflib/misc/misc.h>
 
 static bool test_single_byte(const bool) {
   for (uint8_t i = 0; i < 10; ++i) {

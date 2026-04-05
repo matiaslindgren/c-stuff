@@ -5,11 +5,11 @@
 
 #define SL_LA_FLOAT_EQ_TOL 1e-6
 
-#include "stufflib/args/args.h"
-#include "stufflib/linalg/linalg.h"
-#include "stufflib/macros/macros.h"
-#include "stufflib/math/math.h"
-#include "stufflib/ml/ml.h"
+#include <stufflib/args/args.h>
+#include <stufflib/linalg/linalg.h>
+#include <stufflib/macros/macros.h>
+#include <stufflib/math/math.h>
+#include <stufflib/ml/ml.h>
 
 bool check_vector_equal(
     struct sl_la_vector a[const static 1],

@@ -3,10 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "stufflib/args/args.h"
-#include "stufflib/linalg/linalg.h"
-#include "stufflib/macros/macros.h"
-#include "stufflib/math/math.h"
+#include <stufflib/args/args.h>
+#include <stufflib/linalg/linalg.h>
+#include <stufflib/macros/macros.h>
+#include <stufflib/math/math.h>
 
 bool fequal(const double a, const double b) {
   return sl_math_double_almost(a, b, 1e-9);

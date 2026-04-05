@@ -1,15 +1,15 @@
-#include "stufflib/sort/sort.h"
+#include <stufflib/sort/sort.h>
 
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "stufflib/args/args.h"
-#include "stufflib/filesystem/filesystem.h"
-#include "stufflib/io/io.h"
-#include "stufflib/string/string.h"
-#include "stufflib/tokenizer/tokenizer.h"
+#include <stufflib/args/args.h>
+#include <stufflib/filesystem/filesystem.h>
+#include <stufflib/io/io.h>
+#include <stufflib/string/string.h>
+#include <stufflib/tokenizer/tokenizer.h>
 
 void print_usage(const struct sl_args args[const static 1]) {
   fprintf(stderr, "usage: %s { numeric | ascii } path\n", args->argv[0]);

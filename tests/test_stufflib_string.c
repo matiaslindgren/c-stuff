@@ -6,10 +6,10 @@
 #include <string.h>
 
 #include "./test_data.h"
-#include "stufflib/args/args.h"
-#include "stufflib/macros/macros.h"
-#include "stufflib/span/span.h"
-#include "stufflib/string/string.h"
+#include <stufflib/args/args.h>
+#include <stufflib/macros/macros.h>
+#include <stufflib/span/span.h>
+#include <stufflib/string/string.h>
 
 static bool test_string_init(const bool) {
   for (size_t i = 0; i < SL_ARRAY_LEN(sl_test_data_hello_utf8); ++i) {

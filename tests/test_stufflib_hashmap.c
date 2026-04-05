@@ -1,11 +1,11 @@
 #include <assert.h>
 #include <string.h>
 
-#include "stufflib/args/args.h"
-#include "stufflib/hashmap/hashmap.h"
-#include "stufflib/iterator/iterator.h"
-#include "stufflib/macros/macros.h"
-#include "stufflib/span/span.h"
+#include <stufflib/args/args.h>
+#include <stufflib/hashmap/hashmap.h>
+#include <stufflib/iterator/iterator.h>
+#include <stufflib/macros/macros.h>
+#include <stufflib/span/span.h>
 
 static bool test_empty(const bool) {
   struct sl_hashmap map = sl_hashmap_create(2);

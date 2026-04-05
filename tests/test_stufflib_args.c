@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib/args/args.h"
-#include "stufflib/macros/macros.h"
+#include <stufflib/args/args.h>
+#include <stufflib/macros/macros.h>
 
 static bool test_parse_positional(const bool) {
   char* const argv[] = {

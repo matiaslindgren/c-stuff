@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib/args/args.h"
-#include "stufflib/macros/macros.h"
-#include "stufflib/unionfind/unionfind.h"
+#include <stufflib/args/args.h>
+#include <stufflib/macros/macros.h>
+#include <stufflib/unionfind/unionfind.h>
 
 int sl_uf_assert_roots_ok(const struct sl_unionfind uf, size_t expected_roots[static 1]) {
   for (size_t i = 0; i < uf.count; ++i) {

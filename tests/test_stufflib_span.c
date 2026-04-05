@@ -5,9 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib/args/args.h"
-#include "stufflib/macros/macros.h"
-#include "stufflib/span/span.h"
+#include <stufflib/args/args.h>
+#include <stufflib/macros/macros.h>
+#include <stufflib/span/span.h>
 
 static bool test_data_view_one(const bool) {
   unsigned char x     = 1;

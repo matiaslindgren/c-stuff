@@ -1,15 +1,16 @@
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib/args/args.h"
-#include "stufflib/filesystem/filesystem.h"
-#include "stufflib/hashmap/hashmap.h"
-#include "stufflib/iterator/iterator.h"
-#include "stufflib/span/span.h"
-#include "stufflib/string/string.h"
-#include "stufflib/tokenizer/tokenizer.h"
+#include <stufflib/args/args.h>
+#include <stufflib/filesystem/filesystem.h>
+#include <stufflib/hashmap/hashmap.h>
+#include <stufflib/iterator/iterator.h>
+#include <stufflib/span/span.h>
+#include <stufflib/string/string.h>
+#include <stufflib/tokenizer/tokenizer.h>
 
 static unsigned char reader_buffer_data[1024 << 6] = {0};
 static struct sl_span reader_buffer                = {0};

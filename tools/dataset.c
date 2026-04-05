@@ -1,4 +1,4 @@
-#include "stufflib/dataset/dataset.h"
+#include <stufflib/dataset/dataset.h>
 
 #include <errno.h>
 #include <math.h>
@@ -7,19 +7,19 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib/args/args.h"
-#include "stufflib/filesystem/filesystem.h"
-#include "stufflib/io/io.h"
-#include "stufflib/linalg/linalg.h"
-#include "stufflib/macros/macros.h"
-#include "stufflib/memory/memory.h"
-#include "stufflib/misc/misc.h"
-#include "stufflib/png/png.h"
-#include "stufflib/record/record.h"
-#include "stufflib/record/writer.h"
-#include "stufflib/span/span.h"
-#include "stufflib/string/string.h"
-#include "stufflib/tokenizer/tokenizer.h"
+#include <stufflib/args/args.h>
+#include <stufflib/filesystem/filesystem.h>
+#include <stufflib/io/io.h>
+#include <stufflib/linalg/linalg.h>
+#include <stufflib/macros/macros.h>
+#include <stufflib/memory/memory.h>
+#include <stufflib/misc/misc.h>
+#include <stufflib/png/png.h>
+#include <stufflib/record/record.h>
+#include <stufflib/record/writer.h>
+#include <stufflib/span/span.h>
+#include <stufflib/string/string.h>
+#include <stufflib/tokenizer/tokenizer.h>
 
 static unsigned char reader_buffer_data[1024 << 6] = {0};
 static struct sl_span reader_buffer                = {0};

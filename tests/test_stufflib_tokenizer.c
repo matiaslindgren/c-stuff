@@ -2,10 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "stufflib/args/args.h"
-#include "stufflib/macros/macros.h"
-#include "stufflib/span/span.h"
-#include "stufflib/tokenizer/tokenizer.h"
+#include <stufflib/args/args.h>
+#include <stufflib/macros/macros.h>
+#include <stufflib/span/span.h>
+#include <stufflib/tokenizer/tokenizer.h>
 
 static bool test_tokenize_empty(const bool) {
   struct sl_span empty1 = {0};

@@ -5,10 +5,10 @@
 #include <string.h>
 
 #include "./test_data.h"
-#include "stufflib/args/args.h"
-#include "stufflib/io/io.h"
-#include "stufflib/macros/macros.h"
-#include "stufflib/span/span.h"
+#include <stufflib/args/args.h>
+#include <stufflib/io/io.h>
+#include <stufflib/macros/macros.h>
+#include <stufflib/span/span.h>
 
 static bool test_format_path(const bool) {
   char buffer[1024]    = {0};

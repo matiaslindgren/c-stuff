@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib/args/args.h"
-#include "stufflib/macros/macros.h"
-#include "stufflib/rand/rand.h"
+#include <stufflib/args/args.h>
+#include <stufflib/macros/macros.h>
+#include <stufflib/rand/rand.h>
 
 static bool test_rand_fill(const bool) {
   const size_t n = 1000;

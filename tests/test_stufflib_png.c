@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stufflib/args/args.h"
-#include "stufflib/macros/macros.h"
-#include "stufflib/misc/misc.h"
-#include "stufflib/png/png.h"
+#include <stufflib/args/args.h>
+#include <stufflib/macros/macros.h>
+#include <stufflib/misc/misc.h>
+#include <stufflib/png/png.h>
 
 static bool test_read_single_pixel_chunks(const bool verbose) {
   for (size_t i = 0; i < 3; ++i) {

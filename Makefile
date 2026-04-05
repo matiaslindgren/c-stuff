@@ -76,6 +76,8 @@ PROGRAM_PATHS   := $(subst .o,,$(PROGRAM_OBJECTS))
 TEST_PATHS := $(filter $(BUILD_DIR)/tests/test_%,$(PROGRAM_PATHS))
 TOOL_PATHS := $(filter $(BUILD_DIR)/tools/%,$(PROGRAM_PATHS))
 
+STUFFLIB := $(BUILD_DIR)/libstufflib.a
+
 OBJECT_PATHS := $(MODULE_OBJECTS) $(PROGRAM_OBJECTS)
 DEPEND_PATHS := $(subst .o,.d,$(OBJECT_PATHS))
 BUILD_DIRS   := $(sort $(dir $(OBJECT_PATHS)))
@@ -137,8 +139,11 @@ $(DEPEND_PATHS): $(BUILD_DIR)/%.d: %.c | $(BUILD_DIRS)
 $(OBJECT_PATHS): $(BUILD_DIR)/%.o: %.c | $(BUILD_DIRS)
 	$(CC) $< $(CFLAGS) $(INCLUDES) -c -o $@
 
-$(PROGRAM_PATHS): %: %.o
-	$(CC) $< $(CFLAGS) -o $@ $(LDFLAGS)
+$(STUFFLIB): $(MODULE_OBJECTS)
+	$(AR) rcs $@ $^
+
+$(PROGRAM_PATHS): %: %.o $(STUFFLIB)
+	$(CC) $< $(CFLAGS) -o $@ $(STUFFLIB) $(LDFLAGS)
 
 .PHONY: printvars
 printvars:
@@ -149,13 +154,14 @@ printvars:
 JQ_MAKE_COMPILE_COMMANDS := [inputs|{\
 	directory: "$(abspath .)", \
 	command: ., \
-	file: match("^$(CC)[ ]+([^ ]+)").captures[0].string, \
+	file: match("([^ ]+\\.c)").captures[0].string, \
 	output: match("-o[ ]+([^ ]+)").captures[0].string \
 	}]
 
 compile_commands.json: ALWAYS_BUILD
 	@$(MAKE) --always-make --dry-run all objects \
 		| grep -wE '^$(CC)' \
+		| grep ' -c ' \
 		| jq -nR '$(JQ_MAKE_COMPILE_COMMANDS)' > $@
 
 .PHONY: ALWAYS_BUILD
