@@ -1,11 +1,10 @@
-#include <stufflib/hash/hash.h>
-
 #include <inttypes.h>
 #include <limits.h>
 #include <string.h>
+#include <stufflib/hash/hash.h>
 
 static uint32_t sl_hash_crc32_lut[0xff + 1] = {0};
-static int sl_hash_crc32_lut_computed        = 0;
+static int sl_hash_crc32_lut_computed       = 0;
 
 void sl_hash_crc32_lut_init(void) {
   for (uint32_t n = 0; n < SL_ARRAY_LEN(sl_hash_crc32_lut); ++n) {

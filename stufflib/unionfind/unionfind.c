@@ -1,7 +1,6 @@
-#include <stufflib/unionfind/unionfind.h>
-
 #include <assert.h>
 #include <stdint.h>
+#include <stufflib/unionfind/unionfind.h>
 
 #define SL_UNIONFIND_ROOT SIZE_MAX
 

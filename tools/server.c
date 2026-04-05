@@ -6,13 +6,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <unistd.h>
-
 #include <stufflib/args/args.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/misc/misc.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #define SL_SOCKET_BACKLOG_LEN 1024
 

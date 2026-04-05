@@ -1,8 +1,7 @@
-#include <stufflib/linalg/linalg.h>
-
 #include <assert.h>
 #include <math.h>
 #include <string.h>
+#include <stufflib/linalg/linalg.h>
 
 #ifdef __APPLE__
   #if __has_include(<Accelerate/Accelerate.h>)
@@ -295,4 +294,3 @@ void sl_la_matrix_add_axis2(struct sl_la_matrix m[const static 1], const float x
 void sl_la_matrix_mul_axis2(struct sl_la_matrix m[const static 1], const float x) {
   cblas_sscal(m->rows * m->cols, x, m->data, 1);
 }
-

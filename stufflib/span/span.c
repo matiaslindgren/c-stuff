@@ -1,8 +1,7 @@
-#include <stufflib/span/span.h>
-
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stufflib/span/span.h>
 
 struct sl_span sl_span_view(size_t size, unsigned char data[size]) {
   assert(size);

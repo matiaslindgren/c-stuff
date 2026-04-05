@@ -1,10 +1,9 @@
-#include <stufflib/ml/ml.h>
-
 #include <assert.h>
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <stufflib/ml/ml.h>
 
 void sl_ml_random_train_test_split(
     struct sl_la_matrix data[const static 1],

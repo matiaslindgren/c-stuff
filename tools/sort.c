@@ -1,13 +1,11 @@
-#include <stufflib/sort/sort.h>
-
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <stufflib/args/args.h>
 #include <stufflib/filesystem/filesystem.h>
 #include <stufflib/io/io.h>
+#include <stufflib/sort/sort.h>
 #include <stufflib/string/string.h>
 #include <stufflib/tokenizer/tokenizer.h>
 

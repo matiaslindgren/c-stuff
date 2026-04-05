@@ -8,7 +8,6 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
-
 #include <stufflib/memory/memory.h>
 #include <stufflib/png/deflate.h>
 #include <stufflib/span/span.h>
@@ -93,7 +92,12 @@ void sl_png_image_destroy(struct sl_png_image image);
 void sl_png_image_copy(struct sl_png_image dst[static 1], struct sl_png_image src[static 1]);
 struct sl_png_image sl_png_image_rgb_create(const size_t width, const size_t height);
 unsigned char* sl_png_image_get_pixel(struct sl_png_image image[static 1], size_t row, size_t col);
-void sl_png_image_set_pixel(struct sl_png_image image[static 1], size_t row, size_t col, const unsigned char* new_value);
+void sl_png_image_set_pixel(
+    struct sl_png_image image[static 1],
+    size_t row,
+    size_t col,
+    const unsigned char* new_value
+);
 bool sl_png_is_supported(struct sl_png_header header);
 void sl_png_dump_header(FILE stream[const static 1], struct sl_png_header header);
 void sl_png_dump_img_data_info(FILE stream[const static 1], struct sl_png_image image);
@@ -115,7 +119,11 @@ enum sl_png_filter_type sl_png_parse_filter_type(unsigned filter);
 bool sl_png_unapply_filter(struct sl_png_image image[static 1]);
 struct sl_png_image sl_png_read_image(const char filename[const static 1]);
 bool sl_png_chunk_fwrite_header(FILE stream[const static 1], struct sl_png_header header);
-bool sl_png_chunk_fwrite(FILE stream[const static 1], const char chunk_type[const static 1], struct sl_span data[const static 1]);
+bool sl_png_chunk_fwrite(
+    FILE stream[const static 1],
+    const char chunk_type[const static 1],
+    struct sl_span data[const static 1]
+);
 bool sl_png_write_image(struct sl_png_image image, const char filename[const static 1]);
 
 #endif  // SL_PNG_H_INCLUDED

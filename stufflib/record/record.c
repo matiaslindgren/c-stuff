@@ -1,8 +1,7 @@
-#include <stufflib/record/record.h>
-
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <stufflib/record/record.h>
 
 size_t sl_record_item_size(const struct sl_record r[const static 1]) {
   if (SL_STR_EQ(r->type, "float32")) {

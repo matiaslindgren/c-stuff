@@ -1,10 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-
-#include <stufflib/png/png.h>
 #include <stufflib/args/args.h>
 #include <stufflib/img/img.h>
 #include <stufflib/macros/macros.h>
+#include <stufflib/png/png.h>
 
 bool segment(const struct sl_args args[const static 1]) {
   if (sl_args_count_positional(args) != 3) {

@@ -1,7 +1,6 @@
-#include <stufflib/rand/rand.h>
-
 #include <math.h>
 #include <stdlib.h>
+#include <stufflib/rand/rand.h>
 #include <time.h>
 
 void sl_rand_fill_double(const size_t n, double dst[n], double scale) {

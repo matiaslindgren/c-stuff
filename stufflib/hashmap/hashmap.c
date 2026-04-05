@@ -1,9 +1,7 @@
-#include <stufflib/hashmap/hashmap.h>
-
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
-
+#include <stufflib/hashmap/hashmap.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/misc/misc.h>
 

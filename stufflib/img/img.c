@@ -1,5 +1,4 @@
 #include <stufflib/img/img.h>
-
 #include <stufflib/macros/macros.h>
 #include <stufflib/math/math.h>
 #include <stufflib/memory/memory.h>

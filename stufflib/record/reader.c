@@ -1,10 +1,8 @@
-#include <stufflib/record/reader.h>
-
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-
 #include <stufflib/macros/macros.h>
+#include <stufflib/record/reader.h>
 
 bool sl_record_reader_open(struct sl_record_reader reader[const static 1]) {
   if (!reader->file || !reader->record) {

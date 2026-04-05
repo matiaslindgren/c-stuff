@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <stufflib/args/args.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/span/span.h>

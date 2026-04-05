@@ -4,13 +4,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "./test_data.h"
 #include <stufflib/args/args.h>
 #include <stufflib/iterator/iterator.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/span/span.h>
 #include <stufflib/unicode/unicode.h>
+
+#include "./test_data.h"
 
 static bool test_validate_utf8(const bool) {
   struct sl_span invalid_utf8[] = {

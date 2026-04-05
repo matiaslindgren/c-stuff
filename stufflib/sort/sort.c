@@ -1,9 +1,8 @@
-#include <stufflib/sort/sort.h>
-
 #include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stufflib/sort/sort.h>
 
 #define SL_INSERTSORT_THRESHOLD 24
 

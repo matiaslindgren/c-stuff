@@ -1,10 +1,8 @@
-#include <stufflib/tokenizer/tokenizer.h>
-
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <stufflib/macros/macros.h>
+#include <stufflib/tokenizer/tokenizer.h>
 
 struct sl_span sl_tokenizer_next_token(
     struct sl_span data[const static 1],

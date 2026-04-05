@@ -3,7 +3,6 @@
 
 #include <stddef.h>
 #include <stdio.h>
-
 #include <stufflib/macros/macros.h>
 #include <stufflib/math/math.h>
 #include <stufflib/memory/memory.h>
@@ -51,22 +50,62 @@ void sl_la_vec_max(const int count, float lhs[restrict count], const float rhs[r
 bool sl_la_vector_is_finite(struct sl_la_vector v[const static 1]);
 void sl_la_vector_scale(struct sl_la_vector v[const static 1], const float alpha);
 void sl_la_vector_clear(struct sl_la_vector v[const static 1]);
-float sl_la_vector_dot(const struct sl_la_vector a[const static 1], const struct sl_la_vector b[const static 1]);
-void sl_la_vector_add(const struct sl_la_vector a[const static 1], const struct sl_la_vector b[const static 1]);
-void sl_la_vector_sub(const struct sl_la_vector a[const static 1], const struct sl_la_vector b[const static 1]);
-void sl_la_vector_mul(struct sl_la_vector lhs[const static 1], const struct sl_la_vector rhs[const static 1]);
-void sl_la_vector_copy(struct sl_la_vector dst[const static 1], struct sl_la_vector src[const static 1]);
+float sl_la_vector_dot(
+    const struct sl_la_vector a[const static 1],
+    const struct sl_la_vector b[const static 1]
+);
+void sl_la_vector_add(
+    const struct sl_la_vector a[const static 1],
+    const struct sl_la_vector b[const static 1]
+);
+void sl_la_vector_sub(
+    const struct sl_la_vector a[const static 1],
+    const struct sl_la_vector b[const static 1]
+);
+void sl_la_vector_mul(
+    struct sl_la_vector lhs[const static 1],
+    const struct sl_la_vector rhs[const static 1]
+);
+void sl_la_vector_copy(
+    struct sl_la_vector dst[const static 1],
+    struct sl_la_vector src[const static 1]
+);
 void sl_la_vector_print(FILE stream[const static 1], const struct sl_la_vector v[const static 1]);
 void sl_la_matrix_print(FILE stream[const static 1], struct sl_la_matrix a[const static 1]);
-void sl_la_matrix_multiply(const struct sl_la_matrix a[const static 1], const struct sl_la_matrix b[const static 1], struct sl_la_matrix c[const static 1]);
+void sl_la_matrix_multiply(
+    const struct sl_la_matrix a[const static 1],
+    const struct sl_la_matrix b[const static 1],
+    struct sl_la_matrix c[const static 1]
+);
 double sl_la_matrix_trace(struct sl_la_matrix a[const static 1]);
 double sl_la_matrix_frobenius_norm(struct sl_la_matrix a[const static 1]);
-void sl_la_matrix_copy_row(struct sl_la_vector dst[const static 1], struct sl_la_matrix src[const static 1], const int row);
-void sl_la_matrix_saxpy_axis0(struct sl_la_matrix m[const static 1], struct sl_la_vector v[const static 1], const float alpha);
-void sl_la_matrix_add_axis0(struct sl_la_matrix m[const static 1], struct sl_la_vector v[const static 1]);
-void sl_la_matrix_sub_axis0(struct sl_la_matrix m[const static 1], struct sl_la_vector v[const static 1]);
-void sl_la_matrix_mul_axis0(struct sl_la_matrix m[const static 1], struct sl_la_vector v[const static 1]);
-void sl_la_matrix_diffdiv_axis0(struct sl_la_matrix m[const static 1], struct sl_la_vector lhs[const static 1], struct sl_la_vector rhs[const static 1]);
+void sl_la_matrix_copy_row(
+    struct sl_la_vector dst[const static 1],
+    struct sl_la_matrix src[const static 1],
+    const int row
+);
+void sl_la_matrix_saxpy_axis0(
+    struct sl_la_matrix m[const static 1],
+    struct sl_la_vector v[const static 1],
+    const float alpha
+);
+void sl_la_matrix_add_axis0(
+    struct sl_la_matrix m[const static 1],
+    struct sl_la_vector v[const static 1]
+);
+void sl_la_matrix_sub_axis0(
+    struct sl_la_matrix m[const static 1],
+    struct sl_la_vector v[const static 1]
+);
+void sl_la_matrix_mul_axis0(
+    struct sl_la_matrix m[const static 1],
+    struct sl_la_vector v[const static 1]
+);
+void sl_la_matrix_diffdiv_axis0(
+    struct sl_la_matrix m[const static 1],
+    struct sl_la_vector lhs[const static 1],
+    struct sl_la_vector rhs[const static 1]
+);
 void sl_la_matrix_add_axis2(struct sl_la_matrix m[const static 1], const float x);
 void sl_la_matrix_mul_axis2(struct sl_la_matrix m[const static 1], const float x);
 

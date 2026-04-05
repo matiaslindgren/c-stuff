@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <stufflib/args/args.h>
 #include <stufflib/io/io.h>
 #include <stufflib/linalg/linalg.h>

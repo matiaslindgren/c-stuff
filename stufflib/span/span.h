@@ -22,10 +22,12 @@ struct sl_span sl_span_copy(struct sl_span src[const static 1]);
 struct sl_span sl_span_from_str(const char str[const static 1]);
 bool sl_span_is_hexadecimal_str(struct sl_span src[const static 1]);
 struct sl_span sl_span_parse_hex(struct sl_span src[const static 1]);
-struct sl_span sl_span_concat(struct sl_span data1[const static 1], struct sl_span data2[const static 1]);
+struct sl_span
+sl_span_concat(struct sl_span data1[const static 1], struct sl_span data2[const static 1]);
 void sl_span_extend(struct sl_span dst[static 1], struct sl_span src[const static 1]);
 struct sl_span sl_span_slice(struct sl_span data[const static 1], size_t begin, size_t end_or_max);
-struct sl_span sl_span_find(struct sl_span data[const static 1], struct sl_span pattern[const static 1]);
+struct sl_span
+sl_span_find(struct sl_span data[const static 1], struct sl_span pattern[const static 1]);
 int sl_span_compare(struct sl_span lhs[const static 1], struct sl_span rhs[const static 1]);
 void* sl_span_iter_get(struct sl_iterator iter[const static 1]);
 void sl_span_iter_advance(struct sl_iterator iter[const static 1]);

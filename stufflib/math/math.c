@@ -1,7 +1,6 @@
-#include <stufflib/math/math.h>
-
 #include <math.h>
 #include <stdlib.h>
+#include <stufflib/math/math.h>
 
 double sl_math_diff(sl_math_function* f, double x) {
   const double h = 0.0001;

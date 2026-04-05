@@ -1,7 +1,6 @@
-#include <stufflib/unicode/unicode.h>
-
 #include <assert.h>
 #include <stdlib.h>
+#include <stufflib/unicode/unicode.h>
 
 size_t sl_unicode_codepoint_width(uint32_t value) {
   if (value < 0x000080) {
@@ -35,7 +34,8 @@ size_t sl_unicode_codepoint_width_from_utf8(size_t size, unsigned char bytes[con
     byte4_f,
     end,
     ill_formed,
-  } state = start;
+  } state
+      = start;
 
   size_t max_width = SL_MIN(4, size);
   size_t width     = 0;

@@ -1,16 +1,14 @@
-#include <stufflib/png/png.h>
-
 #include <inttypes.h>
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <stufflib/hash/hash.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/memory/memory.h>
 #include <stufflib/misc/misc.h>
+#include <stufflib/png/png.h>
 
 const char* sl_png_chunk_types[] = {
     [sl_png_IHDR] = "IHDR", [sl_png_PLTE] = "PLTE", [sl_png_IDAT] = "IDAT", [sl_png_IEND] = "IEND",
@@ -74,9 +72,10 @@ void sl_png_image_copy(struct sl_png_image dst[static 1], struct sl_png_image sr
 
 struct sl_png_image sl_png_image_rgb_create(const size_t width, const size_t height) {
   return (struct sl_png_image){
-      .header
-      = (struct
-         sl_png_header){.width = width, .height = height, .bit_depth = 8, .color_type = sl_png_rgb},
+      .header = (struct sl_png_header){.width      = width,
+                                       .height     = height,
+                                       .bit_depth  = 8,
+                                       .color_type = sl_png_rgb},
       .data   = sl_span_create((width + 2) * (height + 2) * 3),
       .filter = sl_span_create(height)
   };

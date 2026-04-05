@@ -1,8 +1,7 @@
-#include <stufflib/memory/memory.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stufflib/memory/memory.h>
 
 void sl_memset_explicit(
     const size_t size,

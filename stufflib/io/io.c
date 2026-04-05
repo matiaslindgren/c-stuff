@@ -1,10 +1,8 @@
-#include <stufflib/io/io.h>
-
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <stufflib/io/io.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/misc/misc.h>
 

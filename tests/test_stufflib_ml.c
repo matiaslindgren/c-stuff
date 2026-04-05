@@ -66,8 +66,7 @@ static bool test_minmax_normalization(const bool) {
     struct sl_la_matrix a2 = {
         .rows = 4,
         .cols = 3,
-        .data = (float[]){
-                          -1.0f,
+        .data = (float[]){-1.0f,
                           -0.84615385f,
                           -0.22222222f,
                           -0.57142857f,
@@ -76,8 +75,7 @@ static bool test_minmax_normalization(const bool) {
                           -0.28571429f,
                           0.38461538f, 1.0f,
                           1.0f, 1.0f,
-                          -0.55555556f
-        },
+                          -0.55555556f},
     };
     struct sl_ml_minmax_scaler scaler = SL_ML_MINMAX_SCALER_CREATE_INLINE(3);
     sl_ml_minmax_fit(&scaler, &a1);
@@ -95,8 +93,7 @@ static bool test_minmax_normalization(const bool) {
     struct sl_la_matrix a2 = {
         .rows = 4,
         .cols = 3,
-        .data = (float[]){
-                          -1.0f,
+        .data = (float[]){-1.0f,
                           -0.84615385f,
                           -0.22222222f,
                           -0.57142857f,
@@ -105,8 +102,7 @@ static bool test_minmax_normalization(const bool) {
                           -0.28571429f,
                           0.38461538f, 1.0f,
                           1.0f, 1.0f,
-                          -0.55555556f
-        },
+                          -0.55555556f},
     };
     SL_ML_MINMAX_RESCALE(3, &a1, -1, 1);
     if (!check_matrix_equal(&a1, &a2)) {
@@ -122,14 +118,13 @@ static bool test_minmax_normalization(const bool) {
     struct sl_la_matrix a2 = {
         .rows = 4,
         .cols = 3,
-        .data = (float[]){
-                          0.0f, 0.07692308f,
-                          0.38888889f, 0.21428571f,
-                          0.0f, 0.0f,
-                          0.35714286f, 0.69230769f,
+        .data = (float[]){0.0f,
+                          0.07692308f, 0.38888889f,
+                          0.21428571f, 0.0f,
+                          0.0f, 0.35714286f,
+                          0.69230769f, 1.0f,
                           1.0f, 1.0f,
-                          1.0f, 0.22222222f
-        },
+                          0.22222222f},
     };
     struct sl_ml_minmax_scaler scaler = SL_ML_MINMAX_SCALER_CREATE_INLINE(3);
     sl_ml_minmax_fit(&scaler, &a1);
@@ -147,14 +142,13 @@ static bool test_minmax_normalization(const bool) {
     struct sl_la_matrix a2 = {
         .rows = 4,
         .cols = 3,
-        .data = (float[]){
-                          1.0f, 1.69230769f,
-                          4.5f, 2.92857143f,
-                          1.0f, 1.0f,
-                          4.21428571f, 7.23076923f,
+        .data = (float[]){1.0f,
+                          1.69230769f, 4.5f,
+                          2.92857143f, 1.0f,
+                          1.0f, 4.21428571f,
+                          7.23076923f, 10.0f,
                           10.0f, 10.0f,
-                          10.0f, 3.0f
-        },
+                          3.0f},
     };
     struct sl_ml_minmax_scaler scaler = SL_ML_MINMAX_SCALER_CREATE_INLINE(3);
     sl_ml_minmax_fit(&scaler, &a1);

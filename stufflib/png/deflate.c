@@ -1,15 +1,13 @@
-#include <stufflib/png/deflate.h>
-
 #include <assert.h>
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <stufflib/hash/hash.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/misc/misc.h>
+#include <stufflib/png/deflate.h>
 
 struct sl_deflate_length_codes sl_deflate_make_length_codes(void) {
   struct sl_deflate_length_codes codes = {0};

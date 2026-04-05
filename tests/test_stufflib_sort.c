@@ -3,12 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-
 #include <stufflib/args/args.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/rand/rand.h>
 #include <stufflib/sort/sort.h>
+#include <time.h>
 
 static bool test_compare_doubles(const bool verbose) {
   (void)verbose;

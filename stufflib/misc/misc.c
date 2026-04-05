@@ -1,9 +1,8 @@
-#include <stufflib/misc/misc.h>
-
 #include <assert.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stufflib/misc/misc.h>
 
 size_t sl_misc_parse_lil_endian(const size_t size, const unsigned char data[size]) {
   size_t x = 0;

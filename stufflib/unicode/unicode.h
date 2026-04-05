@@ -4,9 +4,8 @@
 // "The Unicode® Standard Version 15.0" – Core Specification
 // https://www.unicode.org/versions/Unicode15.0.0/ch03.pdf#G7404
 // accessed 2023-02-18
-#include <stdint.h>
 #include <stddef.h>
-
+#include <stdint.h>
 #include <stufflib/iterator/iterator.h>
 #include <stufflib/span/span.h>
 

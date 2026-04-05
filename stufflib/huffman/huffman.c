@@ -1,7 +1,5 @@
-#include <stufflib/huffman/huffman.h>
-
 #include <stdlib.h>
-
+#include <stufflib/huffman/huffman.h>
 #include <stufflib/macros/macros.h>
 
 void sl_huffman_init(
@@ -68,11 +66,9 @@ void sl_huffman_init(
     }
   }
 
-  *tree = (struct sl_huffman_tree){
-      .max_code_len = max_code_len,
-      .max_codes    = max_codes,
-      .symbols      = symbols
-  };
+  *tree = (struct sl_huffman_tree){.max_code_len = max_code_len,
+                                   .max_codes    = max_codes,
+                                   .symbols      = symbols};
   sl_free(codes);
   sl_free(next_code);
   sl_free(code_length_count);

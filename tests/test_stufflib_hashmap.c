@@ -1,6 +1,5 @@
 #include <assert.h>
 #include <string.h>
-
 #include <stufflib/args/args.h>
 #include <stufflib/hashmap/hashmap.h>
 #include <stufflib/iterator/iterator.h>

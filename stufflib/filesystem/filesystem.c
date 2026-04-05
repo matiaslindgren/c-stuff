@@ -1,10 +1,8 @@
-#include <stufflib/filesystem/filesystem.h>
-
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <stufflib/filesystem/filesystem.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/unicode/unicode.h>
 

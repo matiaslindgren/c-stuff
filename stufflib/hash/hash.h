@@ -9,7 +9,6 @@
 // Accessed 2023-02-07
 #include <stddef.h>
 #include <stdint.h>
-
 #include <stufflib/macros/macros.h>
 
 void sl_hash_crc32_lut_init(void);

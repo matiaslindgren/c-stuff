@@ -2,7 +2,6 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <stufflib/args/args.h>
 #include <stufflib/linalg/linalg.h>
 #include <stufflib/macros/macros.h>
@@ -259,16 +258,14 @@ static bool test_matrix_diffdiv_axis0(const bool) {
     struct sl_la_matrix a2 = {
         .rows = 4,
         .cols = 3,
-        .data = (float[]){
-                          -0.666666667f,
+        .data = (float[]){-0.666666667f,
                           -7.0f,
                           -1.50f,
                           -2.333333333f,
                           1.0f, 2.50f,
                           1.0f, 9.0f,
                           2.50f, 0.333333333f,
-                          6.0f, 0.50f
-        },
+                          6.0f, 0.50f},
     };
     struct sl_la_vector lhs = {
         .size = 3,

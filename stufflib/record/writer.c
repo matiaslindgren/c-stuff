@@ -1,11 +1,9 @@
-#include <stufflib/record/writer.h>
-
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-
 #include <stufflib/macros/macros.h>
 #include <stufflib/misc/misc.h>
+#include <stufflib/record/writer.h>
 
 bool sl_record_writer_open(struct sl_record_writer writer[const static 1]) {
   if (!writer->file || !writer->record || !sl_record_validate_metadata(writer->record)) {

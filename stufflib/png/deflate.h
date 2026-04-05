@@ -18,7 +18,6 @@
 
 #include <stddef.h>
 #include <stdint.h>
-
 #include <stufflib/huffman/huffman.h>
 #include <stufflib/memory/memory.h>
 #include <stufflib/span/span.h>
@@ -48,8 +47,15 @@ struct sl_huffman_tree sl_deflate_make_fixed_literal_tree(void);
 struct sl_huffman_tree sl_deflate_make_fixed_distance_tree(void);
 size_t sl_deflate_next_bit(struct sl_deflate_deflate_state state[static 1]);
 size_t sl_deflate_next_n_bits(struct sl_deflate_deflate_state state[static 1], const int count);
-size_t sl_deflate_decode_next_code(const struct sl_huffman_tree codes[const static 1], struct sl_deflate_deflate_state state[static 1]);
-void sl_deflate_inflate_block(const struct sl_huffman_tree literal_tree[const static 1], const struct sl_huffman_tree distance_tree[const static 1], struct sl_deflate_deflate_state state[static 1]);
+size_t sl_deflate_decode_next_code(
+    const struct sl_huffman_tree codes[const static 1],
+    struct sl_deflate_deflate_state state[static 1]
+);
+void sl_deflate_inflate_block(
+    const struct sl_huffman_tree literal_tree[const static 1],
+    const struct sl_huffman_tree distance_tree[const static 1],
+    struct sl_deflate_deflate_state state[static 1]
+);
 bool sl_inflate_uncompressed_block(struct sl_deflate_deflate_state state[static 1]);
 bool sl_inflate_dynamic_block(struct sl_deflate_deflate_state state[static 1]);
 bool sl_inflate_fixed_block(struct sl_deflate_deflate_state state[static 1]);
