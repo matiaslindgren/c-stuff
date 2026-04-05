@@ -99,6 +99,11 @@ clean:
 fmt: $(MODULE_HEADERS) $(MODULE_SOURCES) $(PROGRAM_SOURCES)
 	@$(CLANG_FORMAT) --verbose -i $^
 
+MACRO_EXPAND_TARGETS := $(addprefix macro-expand-,$(MODULE_HEADERS) $(MODULE_SOURCES) $(PROGRAM_SOURCES))
+.PHONY: $(MACRO_EXPAND_TARGETS)
+$(MACRO_EXPAND_TARGETS): macro-expand-%: %
+	$(CC) $(CFLAGS) $(INCLUDES) -E $< | $(CLANG_FORMAT) --assume-filename=$<
+
 $(BUILD_DIR) $(BUILD_DIRS):
 	mkdir -p $@
 
