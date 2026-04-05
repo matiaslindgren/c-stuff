@@ -154,14 +154,13 @@ printvars:
 JQ_MAKE_COMPILE_COMMANDS := [inputs|{\
 	directory: "$(abspath .)", \
 	command: ., \
-	file: match("([^ ]+\\.c)").captures[0].string, \
+	file: match("([^ ]+\\.[co])").captures[0].string, \
 	output: match("-o[ ]+([^ ]+)").captures[0].string \
 	}]
 
 compile_commands.json: ALWAYS_BUILD
 	@$(MAKE) --always-make --dry-run all objects \
 		| grep -wE '^$(CC)' \
-		| grep ' -c ' \
 		| jq -nR '$(JQ_MAKE_COMPILE_COMMANDS)' > $@
 
 .PHONY: ALWAYS_BUILD
