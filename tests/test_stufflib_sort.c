@@ -130,15 +130,15 @@ static bool test_compare_strings(const bool verbose) {
   assert(sl_sort_compare_str((void*)(&b[0]), (void*)(&b[0])) == 0);
   assert(sl_sort_compare_str((void*)(&b[1]), (void*)(&b[1])) == 0);
 
-  assert(sl_sort_compare_str((void*)(&a[0]), (void*)(&a[1])) == -1);
-  assert(sl_sort_compare_str((void*)(&a[1]), (void*)(&a[0])) == 1);
-  assert(sl_sort_compare_str((void*)(&b[0]), (void*)(&b[1])) == 1);
-  assert(sl_sort_compare_str((void*)(&b[1]), (void*)(&b[0])) == -1);
+  assert(sl_sort_compare_str((void*)(&a[0]), (void*)(&a[1])) < 0);
+  assert(sl_sort_compare_str((void*)(&a[1]), (void*)(&a[0])) > 0);
+  assert(sl_sort_compare_str((void*)(&b[0]), (void*)(&b[1])) > 0);
+  assert(sl_sort_compare_str((void*)(&b[1]), (void*)(&b[0])) < 0);
 
-  assert(sl_sort_compare_str((void*)(&a[0]), (void*)(&b[0])) == -1);
-  assert(sl_sort_compare_str((void*)(&a[0]), (void*)(&b[1])) == 1);
-  assert(sl_sort_compare_str((void*)(&a[1]), (void*)(&b[0])) == 1);
-  assert(sl_sort_compare_str((void*)(&a[1]), (void*)(&b[1])) == 1);
+  assert(sl_sort_compare_str((void*)(&a[0]), (void*)(&b[0])) < 0);
+  assert(sl_sort_compare_str((void*)(&a[0]), (void*)(&b[1])) > 0);
+  assert(sl_sort_compare_str((void*)(&a[1]), (void*)(&b[0])) > 0);
+  assert(sl_sort_compare_str((void*)(&a[1]), (void*)(&b[1])) > 0);
 
   return true;
 }
