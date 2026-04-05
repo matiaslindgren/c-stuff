@@ -18,12 +18,16 @@ jobs:
           - macos-15
           - macos-26
         make:
-          - release: 0
+          - build_type: debug
             trace: 1
-          - release: 1
+          - build_type: asan
+            trace: 1
+          - build_type: ubsan
+            trace: 1
+          - build_type: release
             trace: 0
 
-    name: "runs-on=${{ matrix.platform }} release=${{ matrix.make.release }} trace=${{ matrix.make.trace }} llvm=${{ matrix.llvm }}"
+    name: "runs-on=${{ matrix.platform }} build_type=${{ matrix.make.build_type }} trace=${{ matrix.make.trace }} llvm=${{ matrix.llvm }}"
     runs-on: ${{ matrix.platform }}
     env:
       STUFFLIB_TEST_VERBOSE: 1
@@ -46,19 +50,19 @@ jobs:
     - uses: actions/checkout@v4
       name: checkout c-stuff git repo
 
-    - run: make -j4 RELEASE=${{ matrix.make.release }} TRACE=${{ matrix.make.trace }} all
+    - run: make -j4 BUILD_TYPE=${{ matrix.make.build_type }} TRACE=${{ matrix.make.trace }} all
       name: build everything
 
-    - run: make RELEASE=${{ matrix.make.release }} TRACE=${{ matrix.make.trace }} compile_commands.json
+    - run: make BUILD_TYPE=${{ matrix.make.build_type }} TRACE=${{ matrix.make.trace }} compile_commands.json
       name: make compile_commands.json
 
     - run: cat compile_commands.json
 
-    - run: make RELEASE=${{ matrix.make.release }} TRACE=${{ matrix.make.trace }} test
+    - run: make BUILD_TYPE=${{ matrix.make.build_type }} TRACE=${{ matrix.make.trace }} test
       name: test
 
-    - run: make RELEASE=${{ matrix.make.release }} TRACE=${{ matrix.make.trace }} integration_test
+    - run: make BUILD_TYPE=${{ matrix.make.build_type }} TRACE=${{ matrix.make.trace }} integration_test
       name: integration test
 
-    - run: make RELEASE=${{ matrix.make.release }} TRACE=${{ matrix.make.trace }} clean
+    - run: make BUILD_TYPE=${{ matrix.make.build_type }} TRACE=${{ matrix.make.trace }} clean
       name: cleanup

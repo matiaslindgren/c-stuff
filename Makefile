@@ -43,14 +43,20 @@ else
 	CLANG_FORMAT := clang-format
 endif
 
-# todo separate: asan, ubsan, valgrind
-RELEASE ?= 0
-ifeq ($(RELEASE), 1)
+BUILD_TYPE ?= debug
+
+ifeq ($(BUILD_TYPE),release)
 	BUILD_DIR := $(OUTPUT_DIR)/release
 	CFLAGS    += -O3 -march=native
+else ifeq ($(BUILD_TYPE),asan)
+	BUILD_DIR := $(OUTPUT_DIR)/asan
+	CFLAGS    += -O1 -g -fsanitize=address
+else ifeq ($(BUILD_TYPE),ubsan)
+	BUILD_DIR := $(OUTPUT_DIR)/ubsan
+	CFLAGS    += -O1 -g -fsanitize=undefined
 else
 	BUILD_DIR := $(OUTPUT_DIR)/debug
-	CFLAGS    += -O1 -g -fsanitize=address,undefined
+	CFLAGS    += -O1 -g
 endif
 
 TRACE ?= 0
