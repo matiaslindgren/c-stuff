@@ -7,7 +7,6 @@
 
 #include <stddef.h>
 #include <stdlib.h>
-
 #include <stufflib/macros/macros.h>
 
 size_t sl_misc_parse_lil_endian(const size_t size, const unsigned char data[size]);

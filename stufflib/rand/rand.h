@@ -3,7 +3,6 @@
 
 #include <stddef.h>
 #include <stdlib.h>
-
 #include <stufflib/misc/misc.h>
 
 void sl_rand_fill_double(const size_t n, double dst[n], double scale);
