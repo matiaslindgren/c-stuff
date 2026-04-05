@@ -1,7 +1,5 @@
 #include <assert.h>
-#include <math.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <stufflib/args/args.h>
 #include <stufflib/linalg/linalg.h>
 #include <stufflib/macros/macros.h>
