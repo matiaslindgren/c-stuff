@@ -311,7 +311,12 @@ bool spambase(const struct sl_args args[const static 1]) {
       .n_dims   = 2,
       .dim_size = {n_rows, n_cols},
   };
-  strcpy(record_samples.path, output_dir);
+  if (strlen(output_dir) >= sizeof(record_samples.path)) {
+    SL_LOG_ERROR("output_dir too long");
+    goto done;
+  }
+  strncpy(record_samples.path, output_dir, sizeof(record_samples.path) - 1);
+  record_samples.path[sizeof(record_samples.path) - 1] = '\0';
   if (!(sl_record_write_metadata(&record_samples)
         && sl_record_write_all(
             &record_samples,
@@ -330,7 +335,12 @@ bool spambase(const struct sl_args args[const static 1]) {
       .n_dims   = 1,
       .dim_size = {n_rows},
   };
-  strcpy(record_classes.path, output_dir);
+  if (strlen(output_dir) >= sizeof(record_classes.path)) {
+    SL_LOG_ERROR("output_dir too long");
+    goto done;
+  }
+  strncpy(record_classes.path, output_dir, sizeof(record_classes.path) - 1);
+  record_classes.path[sizeof(record_classes.path) - 1] = '\0';
   if (!(sl_record_write_metadata(&record_classes)
         && sl_record_write_all(&record_classes, sizeof(classes), (void*)classes))) {
     SL_LOG_ERROR("failed writing spambase dataset classes to '%s'", output_dir);
@@ -480,11 +490,16 @@ bool rcv1(const struct sl_args args[const static 1]) {
       .n_dims   = 2,
       .dim_size = {0, SL_DATASET_RCV1_FEATURES},
   };
-  strcpy(train_record.path, output_dir);
-  train_record_file = (struct sl_file){0};
-  trainset_writer   = (struct sl_record_writer){
-      .file   = &train_record_file,
-      .record = &train_record,
+  if (strlen(output_dir) >= sizeof(train_record.path)) {
+    SL_LOG_ERROR("output_dir too long");
+    goto done;
+  }
+  strncpy(train_record.path, output_dir, sizeof(train_record.path) - 1);
+  train_record.path[sizeof(train_record.path) - 1] = '\0';
+  train_record_file                                = (struct sl_file){0};
+  trainset_writer                                  = (struct sl_record_writer){
+                                       .file   = &train_record_file,
+                                       .record = &train_record,
   };
 
   test_record = (struct sl_record){
@@ -494,11 +509,16 @@ bool rcv1(const struct sl_args args[const static 1]) {
       .n_dims   = 2,
       .dim_size = {0, SL_DATASET_RCV1_FEATURES},
   };
-  strcpy(test_record.path, output_dir);
-  test_record_file = (struct sl_file){0};
-  testset_writer   = (struct sl_record_writer){
-      .file   = &test_record_file,
-      .record = &test_record,
+  if (strlen(output_dir) >= sizeof(test_record.path)) {
+    SL_LOG_ERROR("output_dir too long");
+    goto done;
+  }
+  strncpy(test_record.path, output_dir, sizeof(test_record.path) - 1);
+  test_record.path[sizeof(test_record.path) - 1] = '\0';
+  test_record_file                               = (struct sl_file){0};
+  testset_writer                                 = (struct sl_record_writer){
+                                      .file   = &test_record_file,
+                                      .record = &test_record,
   };
 
   if (!sl_record_writer_open(&trainset_writer)) {
@@ -672,11 +692,16 @@ bool rcv1(const struct sl_args args[const static 1]) {
       .n_dims   = 1,
       .dim_size = {0},
   };
-  strcpy(train_record.path, output_dir);
-  train_record_file = (struct sl_file){0};
-  trainset_writer   = (struct sl_record_writer){
-      .file   = &train_record_file,
-      .record = &train_record,
+  if (strlen(output_dir) >= sizeof(train_record.path)) {
+    SL_LOG_ERROR("output_dir too long");
+    goto done;
+  }
+  strncpy(train_record.path, output_dir, sizeof(train_record.path) - 1);
+  train_record.path[sizeof(train_record.path) - 1] = '\0';
+  train_record_file                                = (struct sl_file){0};
+  trainset_writer                                  = (struct sl_record_writer){
+                                       .file   = &train_record_file,
+                                       .record = &train_record,
   };
 
   test_record = (struct sl_record){
@@ -687,11 +712,16 @@ bool rcv1(const struct sl_args args[const static 1]) {
       .n_dims   = 1,
       .dim_size = {0},
   };
-  strcpy(test_record.path, output_dir);
-  test_record_file = (struct sl_file){0};
-  testset_writer   = (struct sl_record_writer){
-      .file   = &test_record_file,
-      .record = &test_record,
+  if (strlen(output_dir) >= sizeof(test_record.path)) {
+    SL_LOG_ERROR("output_dir too long");
+    goto done;
+  }
+  strncpy(test_record.path, output_dir, sizeof(test_record.path) - 1);
+  test_record.path[sizeof(test_record.path) - 1] = '\0';
+  test_record_file                               = (struct sl_file){0};
+  testset_writer                                 = (struct sl_record_writer){
+                                      .file   = &test_record_file,
+                                      .record = &test_record,
   };
 
   if (!sl_record_writer_open(&trainset_writer)) {

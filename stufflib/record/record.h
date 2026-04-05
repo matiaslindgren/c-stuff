@@ -94,8 +94,14 @@ bool sl_record_read_metadata(
       goto done;
     }
   }
-  strcpy(record->path, path);
-  strcpy(record->name, name);
+  if (strlen(path) >= sizeof(record->path) || strlen(name) >= sizeof(record->name)) {
+    SL_LOG_ERROR("path or name too long");
+    goto done;
+  }
+  strncpy(record->path, path, sizeof(record->path) - 1);
+  record->path[sizeof(record->path) - 1] = '\0';
+  strncpy(record->name, name, sizeof(record->name) - 1);
+  record->name[sizeof(record->name) - 1] = '\0';
 
   if (EOF
           == fscanf(

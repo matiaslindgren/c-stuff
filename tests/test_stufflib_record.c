@@ -70,7 +70,8 @@ static bool test_write_metadata(const bool) {
         .n_dims   = 1,
         .dim_size = {3},
     };
-    strcpy(record.path, sl_misc_tmpdir());
+    strncpy(record.path, sl_misc_tmpdir(), sizeof(record.path) - 1);
+    record.path[sizeof(record.path) - 1] = '\0';
     assert(sl_record_write_metadata(&record));
     assert(contains_str(
         sl_misc_tmpdir(),
@@ -92,7 +93,8 @@ static bool test_write_metadata(const bool) {
         .n_dims   = 3,
         .dim_size = {1, 1, 1},
     };
-    strcpy(record.path, sl_misc_tmpdir());
+    strncpy(record.path, sl_misc_tmpdir(), sizeof(record.path) - 1);
+    record.path[sizeof(record.path) - 1] = '\0';
     assert(sl_record_write_metadata(&record));
     assert(contains_str(
         sl_misc_tmpdir(),
@@ -116,7 +118,8 @@ static bool test_write_metadata(const bool) {
         .n_dims   = 4,
         .dim_size = {10, 15625, 3125, 64},
     };
-    strcpy(record.path, sl_misc_tmpdir());
+    strncpy(record.path, sl_misc_tmpdir(), sizeof(record.path) - 1);
+    record.path[sizeof(record.path) - 1] = '\0';
     assert(sl_record_write_metadata(&record));
     assert(contains_str(
         sl_misc_tmpdir(),
@@ -398,7 +401,8 @@ static bool test_dense_data_writer(const bool) {
       .n_dims   = 2,
       .dim_size = {2000, 25},
   };
-  strcpy(record.path, sl_misc_tmpdir());
+  strncpy(record.path, sl_misc_tmpdir(), sizeof(record.path) - 1);
+  record.path[sizeof(record.path) - 1] = '\0';
 
   float* dataset = sl_alloc(record.size, sizeof(float));
   for (size_t i = 0; i < record.size; ++i) {
@@ -463,7 +467,8 @@ static bool test_sparse_data_writer(const bool) {
       .n_dims   = 1,
       .dim_size = {nonzero_index[nonzero_count - 1]},
   };
-  strcpy(record.path, sl_misc_tmpdir());
+  strncpy(record.path, sl_misc_tmpdir(), sizeof(record.path) - 1);
+  record.path[sizeof(record.path) - 1] = '\0';
 
   struct sl_file file            = {0};
   struct sl_record_writer writer = {
@@ -534,7 +539,8 @@ static bool test_write_data(const bool) {
         .n_dims   = 2,
         .dim_size = {4, 3},
     };
-    strcpy(record.path, sl_misc_tmpdir());
+    strncpy(record.path, sl_misc_tmpdir(), sizeof(record.path) - 1);
+    record.path[sizeof(record.path) - 1] = '\0';
 
     struct sl_la_matrix data = {
         .rows = 4,
@@ -560,7 +566,8 @@ static bool test_write_data(const bool) {
         .n_dims   = 2,
         .dim_size = {4, 3},
     };
-    strcpy(record.path, sl_misc_tmpdir());
+    strncpy(record.path, sl_misc_tmpdir(), sizeof(record.path) - 1);
+    record.path[sizeof(record.path) - 1] = '\0';
 
     struct sl_la_matrix data = {
         .rows = 4,
@@ -590,7 +597,8 @@ static bool test_sparse_write_and_read(const bool) {
         .n_dims   = 2,
         .dim_size = {1024 << 10, 1024 << 10},
     };
-    strcpy(record.path, sl_misc_tmpdir());
+    strncpy(record.path, sl_misc_tmpdir(), sizeof(record.path) - 1);
+    record.path[sizeof(record.path) - 1] = '\0';
 
     float data1[1] = {0};
     assert(sl_record_write_all(&record, sizeof(data1[0]), (void*)data1));
@@ -609,7 +617,8 @@ static bool test_sparse_write_and_read(const bool) {
         .n_dims   = 2,
         .dim_size = {20, 5},
     };
-    strcpy(record.path, sl_misc_tmpdir());
+    strncpy(record.path, sl_misc_tmpdir(), sizeof(record.path) - 1);
+    record.path[sizeof(record.path) - 1] = '\0';
 
     struct sl_la_matrix data1 = {
         .rows = 20,
@@ -642,7 +651,8 @@ static bool test_sparse_batch_write_and_read(const bool) {
       .n_dims   = 2,
       .dim_size = {20, 5},
   };
-  strcpy(record.path, sl_misc_tmpdir());
+  strncpy(record.path, sl_misc_tmpdir(), sizeof(record.path) - 1);
+  record.path[sizeof(record.path) - 1] = '\0';
 
   struct sl_la_matrix data1 = {
       .rows = 20,
