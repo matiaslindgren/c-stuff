@@ -1,9 +1,7 @@
 SHELL := /bin/bash
 
-# TODO dedicated subdir, not repo root
 MODULE_DIR := ./stufflib
 OUTPUT_DIR := ./build
-TEMP_DIR   = $(eval TEMP_DIR := $(shell mktemp --directory))
 
 LLVM_VERSION  := 21
 CFLAGS ?= \
@@ -32,11 +30,14 @@ LDFLAGS  ?= -lm -lc
 INCLUDES := -I.
 
 ifeq ($(shell uname), Darwin)
-	CC       := $(shell brew --prefix llvm@$(LLVM_VERSION))/bin/clang-$(LLVM_VERSION)
-	SDK_PATH := $(shell xcrun --show-sdk-path)
-	LDFLAGS  += -Wl,-syslibroot,$(SDK_PATH),-framework,Accelerate
-	INCLUDES += -isysroot $(SDK_PATH)
-	CLANG_FORMAT :=  $(shell brew --prefix llvm@$(LLVM_VERSION))/bin/clang-format
+	llvm_path := $(shell brew --prefix llvm@$(LLVM_VERSION))
+	sdk_path  := $(shell xcrun --show-sdk-path)
+	CC        := $(llvm_path)/bin/clang-$(LLVM_VERSION)
+	LDFLAGS   += -Wl,-syslibroot,$(sdk_path),-framework,Accelerate
+	INCLUDES  += -isysroot $(sdk_path)
+	CLANG_FORMAT :=  $(llvm_path)/bin/clang-format
+	undefine llvm_path
+	undefine sdk_path
 else
 	CC      := clang-$(LLVM_VERSION)
 	LDFLAGS += -lopenblas
@@ -115,12 +116,16 @@ ifeq (${STUFFLIB_TEST_VERBOSE}, 1)
 	TEST_ARGS += -v
 endif
 
+make_tmp_dir = $(shell mktemp --directory)
+
 RUN_TESTS := $(addprefix run_,$(notdir $(TEST_PATHS)))
 .PHONY: test
 test: $(RUN_TESTS)
 .PHONY: $(RUN_TESTS)
 $(RUN_TESTS): run_%: $(BUILD_DIR)/tests/%
-	@env SL_TEMP_DIR=$(TEMP_DIR) $< $(TEST_ARGS)
+	@export SL_TEMP_DIR=$(call make_tmp_dir); \
+		trap "rm -rf $$SL_TEMP_DIR" EXIT SIGINT; \
+		$< $(TEST_ARGS)
 
 TIMEOUT_CMD := $(shell which timeout)
 ifeq ($(TIMEOUT_CMD),)
