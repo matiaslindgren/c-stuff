@@ -495,8 +495,8 @@ bool rcv1(const struct sl_args args[const static 1]) {
   train_record.path[sizeof(train_record.path) - 1] = '\0';
   train_record_file                                = (struct sl_file){0};
   trainset_writer                                  = (struct sl_record_writer){
-      .file   = &train_record_file,
-      .record = &train_record,
+                                       .file   = &train_record_file,
+                                       .record = &train_record,
   };
 
   test_record = (struct sl_record){
@@ -514,8 +514,8 @@ bool rcv1(const struct sl_args args[const static 1]) {
   test_record.path[sizeof(test_record.path) - 1] = '\0';
   test_record_file                               = (struct sl_file){0};
   testset_writer                                 = (struct sl_record_writer){
-      .file   = &test_record_file,
-      .record = &test_record,
+                                      .file   = &test_record_file,
+                                      .record = &test_record,
   };
 
   if (!sl_record_writer_open(&trainset_writer)) {
@@ -697,8 +697,8 @@ bool rcv1(const struct sl_args args[const static 1]) {
   train_record.path[sizeof(train_record.path) - 1] = '\0';
   train_record_file                                = (struct sl_file){0};
   trainset_writer                                  = (struct sl_record_writer){
-      .file   = &train_record_file,
-      .record = &train_record,
+                                       .file   = &train_record_file,
+                                       .record = &train_record,
   };
 
   test_record = (struct sl_record){
@@ -717,8 +717,8 @@ bool rcv1(const struct sl_args args[const static 1]) {
   test_record.path[sizeof(test_record.path) - 1] = '\0';
   test_record_file                               = (struct sl_file){0};
   testset_writer                                 = (struct sl_record_writer){
-      .file   = &test_record_file,
-      .record = &test_record,
+                                      .file   = &test_record_file,
+                                      .record = &test_record,
   };
 
   if (!sl_record_writer_open(&trainset_writer)) {
