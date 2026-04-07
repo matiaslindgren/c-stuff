@@ -15,13 +15,25 @@ C scribbles. Just for fun and learning. "Everything library". Extremely unstable
 See [LLVM docs](https://apt.llvm.org/) or [CI config](./.github/workflows/c.yml) for installation.
 
 Alternatively, use Docker:
-```sh
+```bash
+#!/usr/bin/env bash
 ./scripts/build_image.sh && ./scripts/run_image.sh
 ```
 
-## Build
+## Build & Test
 
-See [`.github/workflows/c.yml`](.github/workflows/c.yml)
+Debug and sanitizers
+```bash
+#!/usr/bin/env bash
+for build_type in debug asan ubsan; do
+  make -j4 BUILD_TYPE=$build_type all test integration_test
+done
+```
+Release
+```bash
+#!/usr/bin/env bash
+make -j4 BUILD_TYPE=release all test integration_test
+```
 
 ## References
 
