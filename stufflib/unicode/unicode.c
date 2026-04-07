@@ -15,7 +15,7 @@ size_t sl_unicode_codepoint_width(uint32_t value) {
   if (value < 0x110000) {
     return 4;
   }
-  return sl_unicode_error_width;
+  return SL_UNICODE_ERROR_WIDTH;
 }
 
 size_t sl_unicode_codepoint_width_from_utf8(size_t size, unsigned char bytes[const size]) {
@@ -133,7 +133,7 @@ size_t sl_unicode_codepoint_width_from_utf8(size_t size, unsigned char bytes[con
   }
 
 error:
-  return sl_unicode_error_width;
+  return SL_UNICODE_ERROR_WIDTH;
 }
 
 uint32_t sl_unicode_codepoint_from_utf8(size_t width, unsigned char bytes[const width]) {
@@ -161,7 +161,7 @@ uint32_t sl_unicode_codepoint_from_utf8(size_t width, unsigned char bytes[const 
       return byte1;
     }
     default: {
-      return sl_unicode_error_value;
+      return SL_UNICODE_ERROR_VALUE;
     }
   }
 }
@@ -171,7 +171,7 @@ bool sl_unicode_is_valid_utf8(struct sl_span data[const static 1]) {
   while (byte_pos < data->size) {
     size_t codepoint_width
         = sl_unicode_codepoint_width_from_utf8(data->size - byte_pos, data->data + byte_pos);
-    if (codepoint_width == sl_unicode_error_width) {
+    if (codepoint_width == SL_UNICODE_ERROR_WIDTH) {
       return false;
     }
     byte_pos += codepoint_width;
@@ -187,7 +187,7 @@ size_t sl_unicode_iter_item_width(struct sl_iterator iter[const static 1]) {
 
 void sl_unicode_iter_advance(struct sl_iterator iter[const static 1]) {
   size_t codepoint_width = sl_unicode_iter_item_width(iter);
-  if (codepoint_width == sl_unicode_error_width) {
+  if (codepoint_width == SL_UNICODE_ERROR_WIDTH) {
     iter->index += 1;
   } else {
     iter->index += codepoint_width;

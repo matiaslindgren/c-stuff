@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stufflib/context/context.h>
 #include <stufflib/io/io.h>
 #include <stufflib/macros/macros.h>
 
@@ -18,12 +19,19 @@ struct sl_record {
 };
 
 size_t sl_record_item_size(const struct sl_record r[const static 1]);
-bool sl_record_validate_metadata(const struct sl_record r[const static 1]);
+bool sl_record_validate_metadata(
+    struct sl_context ctx[static 1],
+    const struct sl_record r[const static 1]
+);
 bool sl_record_read_metadata(
+    struct sl_context ctx[static 1],
     struct sl_record record[const static 1],
     const char path[const static 1],
     const char name[const static 1]
 );
-bool sl_record_write_metadata(const struct sl_record record[const static 1]);
+bool sl_record_write_metadata(
+    struct sl_context ctx[static 1],
+    const struct sl_record record[const static 1]
+);
 
 #endif  // SL_RECORD_H_INCLUDED

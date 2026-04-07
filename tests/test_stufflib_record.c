@@ -59,7 +59,7 @@ bool contains_str(
   return contains(dir, name, strlen(expected), (unsigned char*)expected);
 }
 
-static bool test_write_metadata(const bool) {
+static bool test_write_metadata(struct sl_context ctx[static 1], const bool) {
   {
     struct sl_record record = {
         .layout   = "dense",
@@ -71,7 +71,7 @@ static bool test_write_metadata(const bool) {
     };
     strncpy(record.path, sl_misc_tmpdir(), sizeof(record.path) - 1);
     record.path[sizeof(record.path) - 1] = '\0';
-    assert(sl_record_write_metadata(&record));
+    assert(sl_record_write_metadata(ctx, &record));
     assert(contains_str(
         sl_misc_tmpdir(),
         "small1.sl_record_meta",
@@ -94,7 +94,7 @@ static bool test_write_metadata(const bool) {
     };
     strncpy(record.path, sl_misc_tmpdir(), sizeof(record.path) - 1);
     record.path[sizeof(record.path) - 1] = '\0';
-    assert(sl_record_write_metadata(&record));
+    assert(sl_record_write_metadata(ctx, &record));
     assert(contains_str(
         sl_misc_tmpdir(),
         "small2.sl_record_meta",
@@ -119,7 +119,7 @@ static bool test_write_metadata(const bool) {
     };
     strncpy(record.path, sl_misc_tmpdir(), sizeof(record.path) - 1);
     record.path[sizeof(record.path) - 1] = '\0';
-    assert(sl_record_write_metadata(&record));
+    assert(sl_record_write_metadata(ctx, &record));
     assert(contains_str(
         sl_misc_tmpdir(),
         "large1.sl_record_meta",
@@ -137,10 +137,10 @@ static bool test_write_metadata(const bool) {
   return true;
 }
 
-static bool test_read_metadata(const bool) {
+static bool test_read_metadata(struct sl_context ctx[static 1], const bool) {
   {
     struct sl_record record;
-    assert(sl_record_read_metadata(&record, "./test-data/record", "small1"));
+    assert(sl_record_read_metadata(ctx, &record, "./test-data/record", "small1"));
     assert(record.path);
     assert(record.name);
     assert(record.type);
@@ -156,7 +156,7 @@ static bool test_read_metadata(const bool) {
   }
   {
     struct sl_record record;
-    assert(sl_record_read_metadata(&record, "./test-data/record", "small2"));
+    assert(sl_record_read_metadata(ctx, &record, "./test-data/record", "small2"));
     assert(record.path);
     assert(record.name);
     assert(record.type);
@@ -176,7 +176,7 @@ static bool test_read_metadata(const bool) {
   }
   {
     struct sl_record record;
-    assert(sl_record_read_metadata(&record, "./test-data/record", "large1"));
+    assert(sl_record_read_metadata(ctx, &record, "./test-data/record", "large1"));
     assert(record.path);
     assert(record.name);
     assert(record.type);
@@ -198,7 +198,7 @@ static bool test_read_metadata(const bool) {
   }
   {
     struct sl_record record;
-    assert(sl_record_read_metadata(&record, "./test-data/record", "large2"));
+    assert(sl_record_read_metadata(ctx, &record, "./test-data/record", "large2"));
     assert(record.path);
     assert(record.name);
     assert(record.type);
@@ -219,9 +219,9 @@ static bool test_read_metadata(const bool) {
   return true;
 }
 
-static bool test_dense_data_reader(const bool) {
+static bool test_dense_data_reader(struct sl_context ctx[static 1], const bool) {
   struct sl_record record = {0};
-  assert(sl_record_read_metadata(&record, "./test-data/record", "large3"));
+  assert(sl_record_read_metadata(ctx, &record, "./test-data/record", "large3"));
 
   const size_t batches = record.dim_size[0];
   const size_t rows    = record.dim_size[1];
@@ -238,7 +238,7 @@ static bool test_dense_data_reader(const bool) {
       .record = &record,
   };
 
-  assert(sl_record_reader_open(&reader));
+  assert(sl_record_reader_open(ctx, &reader));
 
   struct sl_la_matrix batch = {
       .rows = (int)rows,
@@ -250,10 +250,10 @@ static bool test_dense_data_reader(const bool) {
   struct sl_span buffer = sl_span_view(buf_size, (void*)(batch.data));
 
   for (size_t i = 0; i < batches; ++i) {
-    assert(!sl_record_reader_is_done(&reader));
+    assert(!sl_record_reader_is_done(ctx, &reader));
 
     SL_ASSERT_EQ_LL(sl_record_reader_ftell(&reader), i * buf_size);
-    assert(sl_record_reader_read(&reader, &buffer));
+    assert(sl_record_reader_read(ctx, &reader, &buffer));
     SL_ASSERT_EQ_LL(sl_record_reader_ftell(&reader), (i + 1) * buf_size);
 
     SL_ASSERT_EQ_LL(buffer.size, buf_size);
@@ -269,32 +269,32 @@ static bool test_dense_data_reader(const bool) {
     }
   }
 
-  assert(sl_record_reader_is_done(&reader));
+  assert(sl_record_reader_is_done(ctx, &reader));
   SL_ASSERT_EQ_LL(sl_record_reader_ftell(&reader), sizeof(batch.data[0]) * record.size);
 
   sl_record_reader_close(&reader);
   return true;
 }
 
-static bool test_sparse_data_reader(const bool) {
+static bool test_sparse_data_reader(struct sl_context ctx[static 1], const bool) {
   int64_t nonzero_index[100]  = {0};
   int64_t nonzero_values[100] = {0};
   const size_t nonzero_count  = SL_ARRAY_LEN(nonzero_index);
   {
     struct sl_file file = {0};
-    assert(sl_file_open(&file, "./test-data/record/large4.index.txt", "rb"));
-    SL_ASSERT_EQ_LL(sl_file_parse_int64(&file, nonzero_count, nonzero_index), nonzero_count);
+    assert(sl_file_open(ctx, &file, "./test-data/record/large4.index.txt", "rb"));
+    SL_ASSERT_EQ_LL(sl_file_parse_int64(ctx, &file, nonzero_count, nonzero_index), nonzero_count);
     sl_file_close(&file);
   }
   {
     struct sl_file file = {0};
-    assert(sl_file_open(&file, "./test-data/record/large4.values.txt", "rb"));
-    SL_ASSERT_EQ_LL(sl_file_parse_int64(&file, nonzero_count, nonzero_values), nonzero_count);
+    assert(sl_file_open(ctx, &file, "./test-data/record/large4.values.txt", "rb"));
+    SL_ASSERT_EQ_LL(sl_file_parse_int64(ctx, &file, nonzero_count, nonzero_values), nonzero_count);
     sl_file_close(&file);
   }
 
   struct sl_record record = {0};
-  SL_ASSERT_TRUE(sl_record_read_metadata(&record, "./test-data/record", "large4"));
+  SL_ASSERT_TRUE(sl_record_read_metadata(ctx, &record, "./test-data/record", "large4"));
 
   SL_ASSERT_EQ_STR(record.type, "int64");
   SL_ASSERT_EQ_STR(record.layout, "sparse");
@@ -310,7 +310,7 @@ static bool test_sparse_data_reader(const bool) {
       .record = &record,
   };
 
-  assert(sl_record_reader_open(&reader));
+  assert(sl_record_reader_open(ctx, &reader));
 
   int64_t batch[1024 << 6] = {0};
   const size_t batch_size  = SL_ARRAY_LEN(batch);
@@ -320,7 +320,7 @@ static bool test_sparse_data_reader(const bool) {
   size_t seen_items = 0;
 
   for (size_t i = 0; seen_items < nonzero_count;) {
-    assert(!sl_record_reader_is_done(&reader));
+    assert(!sl_record_reader_is_done(ctx, &reader));
 
     if (reader.sparse_offset > 3 * batch_size) {
       const size_t n_skip = reader.sparse_offset / (3 * batch_size);
@@ -330,7 +330,7 @@ static bool test_sparse_data_reader(const bool) {
       continue;
     }
 
-    assert(sl_record_reader_read(&reader, &buffer));
+    assert(sl_record_reader_read(ctx, &reader, &buffer));
 
     SL_ASSERT_EQ_LL(buffer.size, buffer.size);
     SL_ASSERT_EQ_PTR(buffer.data, batch);
@@ -349,13 +349,13 @@ static bool test_sparse_data_reader(const bool) {
   }
 
   SL_ASSERT_EQ_LL(seen_items, nonzero_count);
-  assert(sl_record_reader_is_done(&reader));
+  assert(sl_record_reader_is_done(ctx, &reader));
 
   sl_record_reader_close(&reader);
   return true;
 }
 
-static bool test_read_data(const bool) {
+static bool test_read_data(struct sl_context ctx[static 1], const bool) {
   {
     struct sl_record record = {
         .layout   = "dense",
@@ -367,7 +367,7 @@ static bool test_read_data(const bool) {
         .dim_size = {2},
     };
     float data[2] = {0};
-    assert(sl_record_read_all(&record, sizeof(data), data));
+    assert(sl_record_read_all(ctx, &record, sizeof(data), data));
     assert(sl_math_double_almost((double)data[0], 5, 1e-5));
     assert(sl_math_double_almost((double)data[1], -10, 1e-5));
   }
@@ -383,7 +383,7 @@ static bool test_read_data(const bool) {
     };
     const float expected[] = {0, 0, 1.2f, 0, 0, 0, 0, -3.4f, 56.78f, 0, 0, 0, 0};
     float data[12]         = {0};
-    assert(sl_record_read_all(&record, sizeof(data), data));
+    assert(sl_record_read_all(ctx, &record, sizeof(data), data));
     for (size_t i = 0; i < record.size; ++i) {
       assert(sl_math_double_almost((double)data[i], (double)expected[i], 1e-5));
     }
@@ -391,7 +391,7 @@ static bool test_read_data(const bool) {
   return true;
 }
 
-static bool test_dense_data_writer(const bool) {
+static bool test_dense_data_writer(struct sl_context ctx[static 1], const bool) {
   struct sl_record record = {
       .layout   = "dense",
       .type     = "float32",
@@ -403,7 +403,7 @@ static bool test_dense_data_writer(const bool) {
   strncpy(record.path, sl_misc_tmpdir(), sizeof(record.path) - 1);
   record.path[sizeof(record.path) - 1] = '\0';
 
-  float* dataset = sl_alloc(record.size, sizeof(float));
+  float* dataset = sl_alloc(ctx, record.size, sizeof(float));
   for (size_t i = 0; i < record.size; ++i) {
     dataset[i] = (float)sqrt((double)(i + 1));
   }
@@ -414,7 +414,7 @@ static bool test_dense_data_writer(const bool) {
       .record = &record,
   };
 
-  assert(sl_record_writer_open(&writer));
+  assert(sl_record_writer_open(ctx, &writer));
 
   const size_t batch_size = 10;
   const size_t rows       = record.dim_size[0];
@@ -435,7 +435,7 @@ static bool test_dense_data_writer(const bool) {
         batch.data[j * cols + k] = dataset[(i * batch_size + j) * cols + k];
       }
     }
-    assert(sl_record_writer_write(&writer, &buffer));
+    assert(sl_record_writer_write(ctx, &writer, &buffer));
     SL_ASSERT_EQ_LL(buffer.size, buf_size);
     SL_ASSERT_EQ_PTR(buffer.data, batch.data);
   }
@@ -453,7 +453,7 @@ static bool test_dense_data_writer(const bool) {
   return true;
 }
 
-static bool test_sparse_data_writer(const bool) {
+static bool test_sparse_data_writer(struct sl_context ctx[static 1], const bool) {
   size_t nonzero_index[]     = {0, 1, 2, 100, 105, 9'012, 12'303, 12'304, 25'000, 90'123};
   int32_t nonzero_values[]   = {-5, -3, -2, 10, 100, 12345, -2003, 12345, -20, 1093};
   const size_t nonzero_count = SL_ARRAY_LEN(nonzero_index);
@@ -475,7 +475,7 @@ static bool test_sparse_data_writer(const bool) {
       .record = &record,
   };
 
-  assert(sl_record_writer_open(&writer));
+  assert(sl_record_writer_open(ctx, &writer));
   {
     int32_t buffer[1024]  = {0};
     const size_t buf_size = SL_ARRAY_LEN(buffer);
@@ -491,7 +491,7 @@ static bool test_sparse_data_writer(const bool) {
           buffer[j] = 0;
         }
       }
-      assert(sl_record_writer_write(&writer, &batch));
+      assert(sl_record_writer_write(ctx, &writer, &batch));
     }
     SL_ASSERT_EQ_LL(seen_items, nonzero_count);
   }
@@ -528,7 +528,7 @@ static bool test_sparse_data_writer(const bool) {
   return true;
 }
 
-static bool test_write_data(const bool) {
+static bool test_write_data(struct sl_context ctx[static 1], const bool) {
   {
     struct sl_record record = {
         .layout   = "dense",
@@ -546,13 +546,13 @@ static bool test_write_data(const bool) {
         .cols = 3,
         .data = (float[]){2, -7, 3, 7, 1, -5, -3, 9, -5, -1, 6, -1},
     };
-    assert(sl_record_write_all(&record, sizeof(float) * sl_la_matrix_size(&data), data.data));
+    assert(sl_record_write_all(ctx, &record, sizeof(float) * sl_la_matrix_size(&data), data.data));
 
     unsigned char raw[] = {0, 0, 0,    0x40, 0, 0, 0xe0, 0xc0, 0, 0, 0x40, 0x40, 0, 0, 0xe0, 0x40,
                            0, 0, 0x80, 0x3f, 0, 0, 0xa0, 0xc0, 0, 0, 0x40, 0xc0, 0, 0, 0x10, 0x41,
                            0, 0, 0xa0, 0xc0, 0, 0, 0x80, 0xbf, 0, 0, 0xc0, 0x40, 0, 0, 0x80, 0xbf};
 
-    assert(sl_record_write_metadata(&record));
+    assert(sl_record_write_metadata(ctx, &record));
     assert(contains(sl_misc_tmpdir(), "small3.sl_record_data", SL_ARRAY_LEN(raw), raw));
   }
 
@@ -574,19 +574,19 @@ static bool test_write_data(const bool) {
         .data = (float[]){0, 0, 0, 5, 0, 0, 0, 0, 0, 0, -10, 0},
     };
 
-    assert(sl_record_write_all(&record, sizeof(float) * sl_la_matrix_size(&data), data.data));
+    assert(sl_record_write_all(ctx, &record, sizeof(float) * sl_la_matrix_size(&data), data.data));
 
     unsigned char raw_data[] = {0x03, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xa0, 0x40,
                                 0x07, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x20, 0xc1};
 
-    assert(sl_record_write_metadata(&record));
+    assert(sl_record_write_metadata(ctx, &record));
     assert(contains(sl_misc_tmpdir(), "small4.sl_record_data", SL_ARRAY_LEN(raw_data), raw_data));
   }
 
   return true;
 }
 
-static bool test_sparse_write_and_read(const bool) {
+static bool test_sparse_write_and_read(struct sl_context ctx[static 1], const bool) {
   {
     struct sl_record record = {
         .layout   = "sparse",
@@ -600,10 +600,10 @@ static bool test_sparse_write_and_read(const bool) {
     record.path[sizeof(record.path) - 1] = '\0';
 
     float data1[1] = {0};
-    assert(sl_record_write_all(&record, sizeof(data1[0]), (void*)data1));
+    assert(sl_record_write_all(ctx, &record, sizeof(data1[0]), (void*)data1));
 
     float data2[1] = {0};
-    assert(sl_record_read_all(&record, sizeof(data2), data2));
+    assert(sl_record_read_all(ctx, &record, sizeof(data2), data2));
     SL_ASSERT_EQ_LL(data1[0], 0);
     SL_ASSERT_EQ_LL(data2[0], 0);
   }
@@ -629,19 +629,20 @@ static bool test_sparse_write_and_read(const bool) {
                     0, 6, 0,  0, 0, 7, 0,  0,  0,  0, 0, 8, 0, 0, 0, 0, 0, -9, 0, 0, 0, 0, 0, 0, 0},
     };
     assert(sl_record_write_all(
+        ctx,
         &record,
         sizeof(data1.data[0]) * sl_la_matrix_size(&data1),
         (void*)data1.data
     ));
 
     float data2[20 * 5] = {0};
-    assert(sl_record_read_all(&record, sizeof(data2), data2));
+    assert(sl_record_read_all(ctx, &record, sizeof(data2), data2));
     SL_ASSERT_EQ_LL(memcmp(data1.data, data2, sizeof(data2)), 0);
   }
   return true;
 }
 
-static bool test_sparse_batch_write_and_read(const bool) {
+static bool test_sparse_batch_write_and_read(struct sl_context ctx[static 1], const bool) {
   struct sl_record record = {
       .layout   = "sparse",
       .type     = "float32",
@@ -673,9 +674,10 @@ static bool test_sparse_batch_write_and_read(const bool) {
         .file   = &file,
         .record = &record,
     };
-    assert(sl_record_writer_open(&writer));
+    assert(sl_record_writer_open(ctx, &writer));
     for (size_t batch_idx = 0; batch_idx < batch_count; ++batch_idx) {
       assert(sl_record_writer_write(
+          ctx,
           &writer,
           &((struct sl_span){
               .size = sizeof(float) * buffer_size,
@@ -693,10 +695,11 @@ static bool test_sparse_batch_write_and_read(const bool) {
         .file   = &file,
         .record = &record,
     };
-    assert(sl_record_reader_open(&reader));
+    assert(sl_record_reader_open(ctx, &reader));
     for (size_t batch_idx = 0; batch_idx < batch_count; ++batch_idx) {
-      assert(!sl_record_reader_is_done(&reader));
+      assert(!sl_record_reader_is_done(ctx, &reader));
       assert(sl_record_reader_read(
+          ctx,
           &reader,
           &((struct sl_span){
               .size = sizeof(float) * buffer_size,
@@ -704,7 +707,7 @@ static bool test_sparse_batch_write_and_read(const bool) {
           })
       ));
     }
-    assert(sl_record_reader_is_done(&reader));
+    assert(sl_record_reader_is_done(ctx, &reader));
     sl_record_reader_close(&reader);
   }
   SL_ASSERT_EQ_LL(memcmp(data1.data, data2, sizeof(data2)), 0);

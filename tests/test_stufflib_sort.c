@@ -9,7 +9,8 @@
 #include <stufflib/sort/sort.h>
 #include <time.h>
 
-static bool test_compare_doubles(const bool verbose) {
+static bool test_compare_doubles(struct sl_context ctx[static 1], const bool verbose) {
+  (void)ctx;
   (void)verbose;
   double* a = calloc(2, sizeof(double));
   double* b = calloc(2, sizeof(double));
@@ -38,8 +39,12 @@ static bool test_compare_doubles(const bool verbose) {
   return true;
 }
 
-static bool
-test_sort_doubles(sl_sort_double* sort_doubles, const bool verbose, const size_t max_len) {
+static bool test_sort_doubles(
+    struct sl_context ctx[static 1],
+    sl_sort_double* sort_doubles,
+    const bool verbose,
+    const size_t max_len
+) {
   const size_t num_tests_per_size = 5;
   const size_t array_sizes[]      = {1, 2, 10, 1000, 10000, 100000, 500000};
 
@@ -60,7 +65,7 @@ test_sort_doubles(sl_sort_double* sort_doubles, const bool verbose, const size_t
       sl_rand_set_zero_double(n, x, 0.01);
 
       clock_t start_time = clock();
-      if (!sort_doubles(n, x)) {
+      if (!sort_doubles(ctx, n, x)) {
         fprintf(stderr, "sort failed\n");
         free(x);
         return false;
@@ -87,40 +92,43 @@ test_sort_doubles(sl_sort_double* sort_doubles, const bool verbose, const size_t
   return true;
 }
 
-double* test_stdlib_qsort_double(const size_t count, double src[count]) {
+double*
+test_stdlib_qsort_double(struct sl_context ctx[static 1], const size_t count, double src[count]) {
+  (void)ctx;
   qsort((void*)src, count, sizeof(double), sl_sort_compare_double);
   return src;
 }
 
-static bool test_insertsort_doubles(const bool verbose) {
+static bool test_insertsort_doubles(struct sl_context ctx[static 1], const bool verbose) {
   if (verbose) {
     printf("test insertsort doubles\n");
   }
-  return test_sort_doubles(sl_sort_insertsort_double, verbose, 10000);
+  return test_sort_doubles(ctx, sl_sort_insertsort_double, verbose, 10000);
 }
 
-static bool test_quicksort_doubles(const bool verbose) {
+static bool test_quicksort_doubles(struct sl_context ctx[static 1], const bool verbose) {
   if (verbose) {
     printf("test quicksort doubles\n");
   }
-  return test_sort_doubles(sl_sort_quicksort_double, verbose, 1000000);
+  return test_sort_doubles(ctx, sl_sort_quicksort_double, verbose, 1000000);
 }
 
-static bool test_mergesort_doubles(const bool verbose) {
+static bool test_mergesort_doubles(struct sl_context ctx[static 1], const bool verbose) {
   if (verbose) {
     printf("test mergesort doubles\n");
   }
-  return test_sort_doubles(sl_sort_mergesort_double, verbose, 1000000);
+  return test_sort_doubles(ctx, sl_sort_mergesort_double, verbose, 1000000);
 }
 
-static bool test_qsort_doubles(const bool verbose) {
+static bool test_qsort_doubles(struct sl_context ctx[static 1], const bool verbose) {
   if (verbose) {
     printf("test stdlib qsort doubles\n");
   }
-  return test_sort_doubles(test_stdlib_qsort_double, verbose, 1000000);
+  return test_sort_doubles(ctx, test_stdlib_qsort_double, verbose, 1000000);
 }
 
-static bool test_compare_strings(const bool verbose) {
+static bool test_compare_strings(struct sl_context ctx[static 1], const bool verbose) {
+  (void)ctx;
   (void)verbose;
   const char* a[] = {"hello", "there"};
   const char* b[] = {"ok", " "};
@@ -143,7 +151,8 @@ static bool test_compare_strings(const bool verbose) {
   return true;
 }
 
-static bool test_sort_strings(sl_sort_str* sort_strings, const bool verbose) {
+static bool
+test_sort_strings(struct sl_context ctx[static 1], sl_sort_str* sort_strings, const bool verbose) {
   const size_t n = 5;
 
   char** s = calloc(n, sizeof(char*));
@@ -154,7 +163,7 @@ static bool test_sort_strings(sl_sort_str* sort_strings, const bool verbose) {
   s[4]     = "there";
 
   clock_t start_time = clock();
-  if (!sort_strings(n, s)) {
+  if (!sort_strings(ctx, n, s)) {
     fprintf(stderr, "sort failed\n");
     free(s);
     return false;
@@ -179,37 +188,39 @@ static bool test_sort_strings(sl_sort_str* sort_strings, const bool verbose) {
   return true;
 }
 
-char** test_stdlib_qsort_str(const size_t count, char* src[count]) {
+char**
+test_stdlib_qsort_str(struct sl_context ctx[static 1], const size_t count, char* src[count]) {
+  (void)ctx;
   qsort((void*)src, count, sizeof(char*), sl_sort_compare_str);
   return src;
 }
 
-static bool test_insertsort_strings(const bool verbose) {
+static bool test_insertsort_strings(struct sl_context ctx[static 1], const bool verbose) {
   if (verbose) {
     printf("test insertsort strings\n");
   }
-  return test_sort_strings(sl_sort_insertsort_str, verbose);
+  return test_sort_strings(ctx, sl_sort_insertsort_str, verbose);
 }
 
-static bool test_quicksort_strings(const bool verbose) {
+static bool test_quicksort_strings(struct sl_context ctx[static 1], const bool verbose) {
   if (verbose) {
     printf("test quicksort strings\n");
   }
-  return test_sort_strings(sl_sort_quicksort_str, verbose);
+  return test_sort_strings(ctx, sl_sort_quicksort_str, verbose);
 }
 
-static bool test_mergesort_strings(const bool verbose) {
+static bool test_mergesort_strings(struct sl_context ctx[static 1], const bool verbose) {
   if (verbose) {
     printf("test mergesort strings\n");
   }
-  return test_sort_strings(sl_sort_mergesort_str, verbose);
+  return test_sort_strings(ctx, sl_sort_mergesort_str, verbose);
 }
 
-static bool test_qsort_strings(const bool verbose) {
+static bool test_qsort_strings(struct sl_context ctx[static 1], const bool verbose) {
   if (verbose) {
     printf("test stdlib qsort strings\n");
   }
-  return test_sort_strings(test_stdlib_qsort_str, verbose);
+  return test_sort_strings(ctx, test_stdlib_qsort_str, verbose);
 }
 
 struct sl_test_named_vec3 {
@@ -233,8 +244,12 @@ int sl_test_compare_named_vec3(const void* a, const void* b) {
   return res;
 }
 
-static bool
-test_sort_named_vec3(sl_test_sort_named_vec3* sl_test_sort_named_vec3, const bool verbose) {
+static bool test_sort_named_vec3(
+    struct sl_context ctx[static 1],
+    sl_test_sort_named_vec3* sl_test_sort_named_vec3,
+    const bool verbose
+) {
+  (void)ctx;
   struct sl_test_named_vec3 items[] = {
       {-1, 0, 0,   "f" },
       {-1, 0, 1,   "e" },
@@ -281,7 +296,9 @@ test_sort_named_vec3(sl_test_sort_named_vec3* sl_test_sort_named_vec3, const boo
 
 struct sl_test_named_vec3*
 sl_test_insertsort_named_vec3s(const size_t count, struct sl_test_named_vec3 src[count]) {
+  struct sl_context tmp_ctx = {0};
   return sl_sort_insertsort(
+      &tmp_ctx,
       (void*)src,
       count,
       sizeof(struct sl_test_named_vec3),
@@ -291,7 +308,9 @@ sl_test_insertsort_named_vec3s(const size_t count, struct sl_test_named_vec3 src
 
 struct sl_test_named_vec3*
 sl_test_quicksort_named_vec3s(const size_t count, struct sl_test_named_vec3 src[count]) {
+  struct sl_context tmp_ctx = {0};
   return sl_sort_quicksort(
+      &tmp_ctx,
       (void*)src,
       count,
       sizeof(struct sl_test_named_vec3),
@@ -301,7 +320,9 @@ sl_test_quicksort_named_vec3s(const size_t count, struct sl_test_named_vec3 src[
 
 struct sl_test_named_vec3*
 sl_test_mergesort_named_vec3s(const size_t count, struct sl_test_named_vec3 src[count]) {
+  struct sl_context tmp_ctx = {0};
   return sl_sort_mergesort(
+      &tmp_ctx,
       (void*)src,
       count,
       sizeof(struct sl_test_named_vec3),
@@ -315,32 +336,32 @@ sl_test_stdlib_qsort_named_vec3s(const size_t count, struct sl_test_named_vec3 s
   return src;
 }
 
-static bool test_insertsort_custom_obj(const bool verbose) {
+static bool test_insertsort_custom_obj(struct sl_context ctx[static 1], const bool verbose) {
   if (verbose) {
     printf("test insertsort custom_obj\n");
   }
-  return test_sort_named_vec3(sl_test_insertsort_named_vec3s, verbose);
+  return test_sort_named_vec3(ctx, sl_test_insertsort_named_vec3s, verbose);
 }
 
-static bool test_quicksort_custom_obj(const bool verbose) {
+static bool test_quicksort_custom_obj(struct sl_context ctx[static 1], const bool verbose) {
   if (verbose) {
     printf("test quicksort custom_obj\n");
   }
-  return test_sort_named_vec3(sl_test_quicksort_named_vec3s, verbose);
+  return test_sort_named_vec3(ctx, sl_test_quicksort_named_vec3s, verbose);
 }
 
-static bool test_mergesort_custom_obj(const bool verbose) {
+static bool test_mergesort_custom_obj(struct sl_context ctx[static 1], const bool verbose) {
   if (verbose) {
     printf("test mergesort custom objects\n");
   }
-  return test_sort_named_vec3(sl_test_mergesort_named_vec3s, verbose);
+  return test_sort_named_vec3(ctx, sl_test_mergesort_named_vec3s, verbose);
 }
 
-static bool test_qsort_custom_obj(const bool verbose) {
+static bool test_qsort_custom_obj(struct sl_context ctx[static 1], const bool verbose) {
   if (verbose) {
     printf("test stdlib qsort custom objects\n");
   }
-  return test_sort_named_vec3(sl_test_stdlib_qsort_named_vec3s, verbose);
+  return test_sort_named_vec3(ctx, sl_test_stdlib_qsort_named_vec3s, verbose);
 }
 
 SL_TEST_MAIN(

@@ -10,7 +10,7 @@
 
 #include "./test_data.h"
 
-static bool test_read_file(const bool verbose) {
+static bool test_read_file(struct sl_context ctx[static 1], const bool verbose) {
   unsigned char buf[128] = {0};
   struct sl_span buffer  = sl_span_view(SL_ARRAY_LEN(buf), buf);
 
@@ -18,7 +18,7 @@ static bool test_read_file(const bool verbose) {
     if (verbose) {
       printf("reading test file '%s'\n", sl_test_data_file_paths[i]);
     }
-    struct sl_span data = sl_fs_read_file(sl_test_data_file_paths[i], &buffer);
+    struct sl_span data = sl_fs_read_file(ctx, sl_test_data_file_paths[i], &buffer);
     assert(data.owned);
     SL_ASSERT_EQ_LL(data.size, sl_test_data_file_sizes[i]);
     if (data.size > 0) {
@@ -29,7 +29,7 @@ static bool test_read_file(const bool verbose) {
   return true;
 }
 
-static bool test_read_file_utf8(const bool verbose) {
+static bool test_read_file_utf8(struct sl_context ctx[static 1], const bool verbose) {
   unsigned char buf[128] = {0};
   struct sl_span buffer  = sl_span_view(SL_ARRAY_LEN(buf), buf);
 
@@ -65,14 +65,14 @@ static bool test_read_file_utf8(const bool verbose) {
     fclose(fp);
     const size_t expected_str_length = strtoull(tmp, 0, 10);
 
-    struct sl_string str = sl_fs_read_file_utf8(input_path, &buffer);
+    struct sl_string str = sl_fs_read_file_utf8(ctx, input_path, &buffer);
     assert(str.length == expected_str_length);
     sl_string_destroy(&str);
   }
   return true;
 }
 
-static bool test_read_lines(const bool verbose) {
+static bool test_read_lines(struct sl_context ctx[static 1], const bool verbose) {
   unsigned char buf[128] = {0};
   struct sl_span buffer  = sl_span_view(SL_ARRAY_LEN(buf), buf);
 
@@ -90,7 +90,7 @@ static bool test_read_lines(const bool verbose) {
       u8"",
   };
 
-  struct sl_string str = sl_fs_read_file_utf8("./test-data/txt/lines.txt", &buffer);
+  struct sl_string str = sl_fs_read_file_utf8(ctx, "./test-data/txt/lines.txt", &buffer);
   {
     // TODO create iterlines util
     struct sl_span newline                = sl_span_view(1, (unsigned char[]){'\n'});
@@ -99,7 +99,7 @@ static bool test_read_lines(const bool verbose) {
     for (struct sl_iterator iter = sl_tokenizer_iter(&newline_tokenizer);
          !sl_tokenizer_iter_is_done(&iter);
          sl_tokenizer_iter_advance(&iter)) {
-      struct sl_string line = sl_string_from_utf8(sl_tokenizer_iter_get(&iter));
+      struct sl_string line = sl_string_from_utf8(ctx, sl_tokenizer_iter_get(&iter));
       if (verbose) {
         printf("line %zu:", lineno);
         bool print_ok = sl_string_fprint(stdout, &line);

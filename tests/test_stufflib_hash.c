@@ -8,7 +8,8 @@
 #include <stufflib/macros/macros.h>
 #include <stufflib/misc/misc.h>
 
-static bool test_single_byte(const bool) {
+static bool test_single_byte(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
   for (uint8_t i = 0; i < 10; ++i) {
     unsigned char data[] = {
         i,
@@ -31,7 +32,8 @@ static bool test_single_byte(const bool) {
   return true;
 }
 
-static bool test_two_bytes_big_endian(const bool) {
+static bool test_two_bytes_big_endian(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
   for (uint16_t i = 0x100; i < 0x100 + 10; ++i) {
     unsigned char data[] = {
         (i & 0xff00) >> 8,
@@ -55,7 +57,8 @@ static bool test_two_bytes_big_endian(const bool) {
   return true;
 }
 
-static bool test_small_strings(const bool) {
+static bool test_small_strings(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
   const char* inputs[] = {
       "",
       "0",

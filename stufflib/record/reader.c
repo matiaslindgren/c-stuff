@@ -4,9 +4,12 @@
 #include <stufflib/macros/macros.h>
 #include <stufflib/record/reader.h>
 
-bool sl_record_reader_open(struct sl_record_reader reader[const static 1]) {
+bool sl_record_reader_open(
+    struct sl_context ctx[static 1],
+    struct sl_record_reader reader[const static 1]
+) {
   if (!reader->file || !reader->record) {
-    SL_LOG_ERROR("incorrectly initialized record reader");
+    SL_ERROR(ctx, "incorrectly initialized record reader");
     return false;
   }
   char full_path[1'024] = {0};
@@ -17,11 +20,11 @@ bool sl_record_reader_open(struct sl_record_reader reader[const static 1]) {
           reader->record->name,
           ".sl_record_data"
       )) {
-    SL_LOG_ERROR("failed formatting record data file path");
+    SL_ERROR(ctx, "failed formatting record data file path");
     return false;
   }
-  if (!sl_file_open(reader->file, full_path, "rb")) {
-    SL_LOG_ERROR("cannot open record data file '%s'", full_path);
+  if (!sl_file_open(ctx, reader->file, full_path, "rb")) {
+    SL_ERROR(ctx, "cannot open record data file '%s'", full_path);
     return false;
   }
   return true;
@@ -35,13 +38,16 @@ long long sl_record_reader_ftell(struct sl_record_reader reader[const static 1])
   return reader->file && reader->file->file ? ftell(reader->file->file) : -1;
 }
 
-bool sl_record_reader_is_done(struct sl_record_reader reader[const static 1]) {
+bool sl_record_reader_is_done(
+    struct sl_context ctx[static 1],
+    struct sl_record_reader reader[const static 1]
+) {
   if (!reader->file || feof(reader->file->file)) {
     return true;
   }
   const long long fpos = sl_record_reader_ftell(reader);
   if (fpos < 0) {
-    SL_LOG_ERROR("failed retrieving file pos for sl_record reader");
+    SL_ERROR(ctx, "failed retrieving file pos for sl_record reader");
     return true;
   }
   const size_t sl_record_disk_size
@@ -52,6 +58,7 @@ bool sl_record_reader_is_done(struct sl_record_reader reader[const static 1]) {
 }
 
 bool sl_record_reader_read_sparse_data(
+    struct sl_context ctx[static 1],
     struct sl_record_reader reader[const static 1],
     struct sl_span buffer[const static 1]
 ) {
@@ -67,11 +74,12 @@ bool sl_record_reader_read_sparse_data(
     return true;
   }
 
-  while (sl_file_can_read(reader->file) && !sl_record_reader_is_done(reader)) {
+  while (sl_file_can_read(reader->file) && !sl_record_reader_is_done(ctx, reader)) {
     if (!reader->has_sparse_offset) {
       int64_t offset = -1;
       if (1 != fread(&offset, sizeof(offset), 1, reader->file->file) || offset < 0) {
-        SL_LOG_ERROR(
+        SL_ERROR(
+            ctx,
             "failed reading sparse index offset from %s at index %zu with "
             "n_read %zu",
             reader->file->path,
@@ -101,7 +109,8 @@ bool sl_record_reader_read_sparse_data(
     }
 
     if (1 != fread(buffer->data + buf_idx * item_size, item_size, 1, reader->file->file)) {
-      SL_LOG_ERROR(
+      SL_ERROR(
+          ctx,
           "failed reading sparse data from %s at index %zu with n_read %zu",
           reader->file->path,
           reader->index,
@@ -120,6 +129,7 @@ bool sl_record_reader_read_sparse_data(
 }
 
 bool sl_record_reader_read_dense_data(
+    struct sl_context ctx[static 1],
     struct sl_record_reader reader[const static 1],
     struct sl_span buffer[const static 1]
 ) {
@@ -131,27 +141,29 @@ bool sl_record_reader_read_dense_data(
   reader->index += n_read;
 
   if (buffer_length != n_read) {
-    SL_LOG_ERROR("failed reading dense data from %s", reader->file->path);
+    SL_ERROR(ctx, "failed reading dense data from %s", reader->file->path);
     return false;
   }
   return true;
 }
 
 bool sl_record_reader_read(
+    struct sl_context ctx[static 1],
     struct sl_record_reader reader[const static 1],
     struct sl_span buffer[const static 1]
 ) {
   const char* const layout = reader->record->layout;
   if (SL_STR_EQ(layout, "sparse")) {
-    return sl_record_reader_read_sparse_data(reader, buffer);
+    return sl_record_reader_read_sparse_data(ctx, reader, buffer);
   } else if (SL_STR_EQ(layout, "dense")) {
-    return sl_record_reader_read_dense_data(reader, buffer);
+    return sl_record_reader_read_dense_data(ctx, reader, buffer);
   }
-  SL_LOG_ERROR("unknown data layout %s", layout);
+  SL_ERROR(ctx, "unknown data layout %s", layout);
   return false;
 }
 
 bool sl_record_read_all(
+    struct sl_context ctx[static 1],
     struct sl_record record[const static 1],
     const size_t bufsize,
     void* buffer
@@ -162,13 +174,13 @@ bool sl_record_read_all(
       .file   = &file,
       .record = record,
   };
-  if (!sl_record_reader_open(&reader)) {
-    SL_LOG_ERROR("failed opening data file, cannot read record");
+  if (!sl_record_reader_open(ctx, &reader)) {
+    SL_ERROR(ctx, "failed opening data file, cannot read record");
     goto done;
   }
   struct sl_span data = sl_span_view(bufsize, buffer);
-  if (!sl_record_reader_read(&reader, &data) || !sl_record_reader_is_done(&reader)) {
-    SL_LOG_ERROR("failed reading record data");
+  if (!sl_record_reader_read(ctx, &reader, &data) || !sl_record_reader_is_done(ctx, &reader)) {
+    SL_ERROR(ctx, "failed reading record data");
     goto done;
   }
   ok = true;

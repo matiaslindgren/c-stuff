@@ -33,9 +33,12 @@ struct sl_deflate_distance_codes sl_deflate_make_distance_codes(void) {
   return codes;
 }
 
-struct sl_huffman_tree sl_deflate_make_fixed_literal_tree(void) {
+struct sl_huffman_tree sl_deflate_make_fixed_literal_tree(struct sl_context ctx[static 1]) {
   const size_t max_literal = 287;
-  size_t* code_lengths     = sl_alloc(max_literal + 1, sizeof(size_t));
+  size_t* code_lengths     = sl_alloc(ctx, max_literal + 1, sizeof(size_t));
+  if (!code_lengths) {
+    return (struct sl_huffman_tree){0};
+  }
   {
     size_t symbol = 0;
     for (; symbol < 144; ++symbol) {
@@ -52,19 +55,22 @@ struct sl_huffman_tree sl_deflate_make_fixed_literal_tree(void) {
     }
   }
   struct sl_huffman_tree tree = {0};
-  sl_huffman_init(&tree, max_literal, code_lengths);
+  sl_huffman_init(ctx, &tree, max_literal, code_lengths);
   sl_free(code_lengths);
   return tree;
 }
 
-struct sl_huffman_tree sl_deflate_make_fixed_distance_tree(void) {
+struct sl_huffman_tree sl_deflate_make_fixed_distance_tree(struct sl_context ctx[static 1]) {
   const size_t max_dist = 31;
-  size_t* code_lengths  = sl_alloc(max_dist + 1, sizeof(size_t));
+  size_t* code_lengths  = sl_alloc(ctx, max_dist + 1, sizeof(size_t));
+  if (!code_lengths) {
+    return (struct sl_huffman_tree){0};
+  }
   for (size_t symbol = 0; symbol <= max_dist; ++symbol) {
     code_lengths[symbol] = 5;
   }
   struct sl_huffman_tree tree = {0};
-  sl_huffman_init(&tree, max_dist, code_lengths);
+  sl_huffman_init(ctx, &tree, max_dist, code_lengths);
   sl_free(code_lengths);
   return tree;
 }
@@ -133,7 +139,10 @@ void sl_deflate_inflate_block(
   }
 }
 
-bool sl_inflate_uncompressed_block(struct sl_deflate_deflate_state state[static 1]) {
+bool sl_inflate_uncompressed_block(
+    struct sl_context ctx[static 1],
+    struct sl_deflate_deflate_state state[static 1]
+) {
   size_t src_byte_pos    = state->src_bit / CHAR_BIT + 1;
   const size_t block_len = sl_misc_parse_lil_endian(2, state->src.data + src_byte_pos);
   src_byte_pos += 2;
@@ -142,11 +151,11 @@ bool sl_inflate_uncompressed_block(struct sl_deflate_deflate_state state[static 
   src_byte_pos += 2;
 
   if ((~block_len & 0xffff) != block_len_check) {
-    SL_LOG_ERROR("corrupted zlib block, ~LEN != NLEN");
+    SL_ERROR(ctx, "corrupted zlib block, ~LEN != NLEN");
     return false;
   }
   if (block_len > state->src.size - src_byte_pos) {
-    SL_LOG_ERROR("corrupted zlib block, LEN too large");
+    SL_ERROR(ctx, "corrupted zlib block, LEN too large");
     return false;
   }
 
@@ -159,7 +168,10 @@ bool sl_inflate_uncompressed_block(struct sl_deflate_deflate_state state[static 
   return true;
 }
 
-bool sl_inflate_dynamic_block(struct sl_deflate_deflate_state state[static 1]) {
+bool sl_inflate_dynamic_block(
+    struct sl_context ctx[static 1],
+    struct sl_deflate_deflate_state state[static 1]
+) {
   const size_t num_lengths        = 257 + sl_deflate_next_n_bits(state, 5);
   const size_t num_distances      = 1 + sl_deflate_next_n_bits(state, 5);
   const size_t num_length_lengths = 4 + sl_deflate_next_n_bits(state, 4);
@@ -168,15 +180,22 @@ bool sl_inflate_dynamic_block(struct sl_deflate_deflate_state state[static 1]) {
       = {16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
   static const size_t max_length_length = 18;
 
-  size_t* length_lengths = sl_alloc(max_length_length + 1, sizeof(size_t));
+  size_t* length_lengths = sl_alloc(ctx, max_length_length + 1, sizeof(size_t));
+  if (!length_lengths) {
+    return false;
+  }
   for (size_t i = 0; i < num_length_lengths; ++i) {
     length_lengths[length_order[i]] = sl_deflate_next_n_bits(state, 3);
   }
   struct sl_huffman_tree length_tree = {0};
-  sl_huffman_init(&length_tree, max_length_length, length_lengths);
+  sl_huffman_init(ctx, &length_tree, max_length_length, length_lengths);
   sl_free(length_lengths);
 
-  size_t* dynamic_code_lengths = sl_alloc(num_lengths + num_distances, sizeof(size_t));
+  size_t* dynamic_code_lengths = sl_alloc(ctx, num_lengths + num_distances, sizeof(size_t));
+  if (!dynamic_code_lengths) {
+    sl_huffman_destroy(&length_tree);
+    return false;
+  }
   for (size_t i = 0; i < num_lengths + num_distances;) {
     const size_t symbol = sl_deflate_decode_next_code(&length_tree, state);
     assert(symbol != SIZE_MAX);
@@ -196,7 +215,7 @@ bool sl_inflate_dynamic_block(struct sl_deflate_deflate_state state[static 1]) {
       code_len    = 0;
       num_repeats = 11 + sl_deflate_next_n_bits(state, 7);
     } else {
-      SL_LOG_ERROR("unexpected symbol %zu in dynamic block", symbol);
+      SL_ERROR(ctx, "unexpected symbol %zu in dynamic block", symbol);
       sl_free(dynamic_code_lengths);
       goto error;
     }
@@ -211,9 +230,9 @@ bool sl_inflate_dynamic_block(struct sl_deflate_deflate_state state[static 1]) {
   const size_t max_distance = num_distances - 1;
 
   struct sl_huffman_tree literal_tree = {0};
-  sl_huffman_init(&literal_tree, max_length, dynamic_code_lengths);
+  sl_huffman_init(ctx, &literal_tree, max_length, dynamic_code_lengths);
   struct sl_huffman_tree distance_tree = {0};
-  sl_huffman_init(&distance_tree, max_distance, dynamic_code_lengths + num_lengths);
+  sl_huffman_init(ctx, &distance_tree, max_distance, dynamic_code_lengths + num_lengths);
   sl_free(dynamic_code_lengths);
 
   sl_deflate_inflate_block(&literal_tree, &distance_tree, state);
@@ -225,37 +244,40 @@ error:
   return false;
 }
 
-bool sl_inflate_fixed_block(struct sl_deflate_deflate_state state[static 1]) {
-  struct sl_huffman_tree literal_tree  = sl_deflate_make_fixed_literal_tree();
-  struct sl_huffman_tree distance_tree = sl_deflate_make_fixed_distance_tree();
+bool sl_inflate_fixed_block(
+    struct sl_context ctx[static 1],
+    struct sl_deflate_deflate_state state[static 1]
+) {
+  struct sl_huffman_tree literal_tree  = sl_deflate_make_fixed_literal_tree(ctx);
+  struct sl_huffman_tree distance_tree = sl_deflate_make_fixed_distance_tree(ctx);
   sl_deflate_inflate_block(&literal_tree, &distance_tree, state);
   sl_huffman_destroy(&literal_tree);
   sl_huffman_destroy(&distance_tree);
   return true;
 }
 
-size_t sl_inflate(struct sl_span dst, const struct sl_span src) {
+size_t sl_inflate(struct sl_context ctx[static 1], struct sl_span dst, const struct sl_span src) {
   if (src.size < 3) {
-    SL_LOG_ERROR("DEFLATE stream is too short");
+    SL_ERROR(ctx, "DEFLATE stream is too short");
     goto error;
   }
   if ((src.data[0] * 256 + src.data[1]) % 31) {
-    SL_LOG_ERROR("DEFLATE stream is corrupted");
+    SL_ERROR(ctx, "DEFLATE stream is corrupted");
     goto error;
   }
   const int cmethod = src.data[0] & 0x0F;
   if (cmethod != 8) {
-    SL_LOG_ERROR("unexpected compression method %d != 8", cmethod);
+    SL_ERROR(ctx, "unexpected compression method %d != 8", cmethod);
     goto error;
   }
   const int cinfo = (src.data[0] & 0xF0) >> 4;
   if (cinfo > 7) {
-    SL_LOG_ERROR("too large compression info %d > 7", cinfo);
+    SL_ERROR(ctx, "too large compression info %d > 7", cinfo);
     goto error;
   }
   const int fdict = (src.data[1] & 0x20) >> 5;
   if (fdict) {
-    SL_LOG_ERROR("dictionaries are not supported");
+    SL_ERROR(ctx, "dictionaries are not supported");
     goto error;
   }
 
@@ -273,25 +295,25 @@ size_t sl_inflate(struct sl_span dst, const struct sl_span src) {
     const size_t block_type = sl_deflate_next_n_bits(&state, 2);
     switch (block_type) {
       case 0: {
-        if (!sl_inflate_uncompressed_block(&state)) {
-          SL_LOG_ERROR("failed inflating uncompressed block");
+        if (!sl_inflate_uncompressed_block(ctx, &state)) {
+          SL_ERROR(ctx, "failed inflating uncompressed block");
           goto error;
         }
       } break;
       case 1: {
-        if (!sl_inflate_fixed_block(&state)) {
-          SL_LOG_ERROR("failed inflating fixed block");
+        if (!sl_inflate_fixed_block(ctx, &state)) {
+          SL_ERROR(ctx, "failed inflating fixed block");
           goto error;
         }
       } break;
       case 2: {
-        if (!sl_inflate_dynamic_block(&state)) {
-          SL_LOG_ERROR("failed inflating dynamic block");
+        if (!sl_inflate_dynamic_block(ctx, &state)) {
+          SL_ERROR(ctx, "failed inflating dynamic block");
           goto error;
         }
       } break;
       default: {
-        SL_LOG_ERROR("invalid block type %zu", block_type);
+        SL_ERROR(ctx, "invalid block type %zu", block_type);
         goto error;
       }
     }
@@ -301,8 +323,7 @@ size_t sl_inflate(struct sl_span dst, const struct sl_span src) {
   /* const size_t dst_adler32 = */
   /*     sl_hash_adler32(state->dst.size, state->dst.data); */
   /* if (dst_adler32 != src_adler32) { */
-  /*   SL_LOG_ERROR("output stream adler32 %zu not equal to expected
-   * %zu", */
+  /*   SL_ERROR(ctx, "output stream adler32 %zu not equal to expected %zu", */
   /*                        dst_adler32, */
   /*                        src_adler32); */
   /*   goto error; */

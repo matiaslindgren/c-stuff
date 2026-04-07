@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stufflib/context/context.h>
 #include <stufflib/memory/memory.h>
 #include <stufflib/png/deflate.h>
 #include <stufflib/span/span.h>
@@ -89,8 +90,13 @@ void sl_png_chunk_destroy(struct sl_png_chunk chunk);
 void sl_png_chunks_destroy(struct sl_png_chunks chunks);
 void sl_png_header_destroy(struct sl_png_header header);
 void sl_png_image_destroy(struct sl_png_image image);
-void sl_png_image_copy(struct sl_png_image dst[static 1], struct sl_png_image src[static 1]);
-struct sl_png_image sl_png_image_rgb_create(const size_t width, const size_t height);
+void sl_png_image_copy(
+    struct sl_context ctx[static 1],
+    struct sl_png_image dst[static 1],
+    struct sl_png_image src[static 1]
+);
+struct sl_png_image
+sl_png_image_rgb_create(struct sl_context ctx[static 1], size_t width, size_t height);
 unsigned char* sl_png_image_get_pixel(struct sl_png_image image[static 1], size_t row, size_t col);
 void sl_png_image_set_pixel(
     struct sl_png_image image[static 1],
@@ -104,26 +110,48 @@ void sl_png_dump_img_data_info(FILE stream[const static 1], struct sl_png_image 
 void sl_png_dump_img_meta(FILE stream[const static 1], struct sl_png_image image);
 void sl_png_dump_chunk_type_freq(FILE stream[const static 1], struct sl_png_chunks chunks);
 enum sl_png_chunk_type sl_png_find_chunk_type(const char type_id[const static 1]);
-struct sl_png_chunk sl_png_read_next_chunk(FILE fp[const static 1]);
-struct sl_png_header sl_png_parse_header(struct sl_png_chunk chunk);
+struct sl_png_chunk
+sl_png_read_next_chunk(struct sl_context ctx[static 1], FILE fp[const static 1]);
+struct sl_png_header
+sl_png_parse_header(struct sl_context ctx[static 1], struct sl_png_chunk chunk);
 uint32_t sl_png_chunk_compute_crc32(struct sl_png_chunk chunk[const static 1]);
 bool sl_png_has_signature(const unsigned char buf[const static 8]);
-struct sl_png_chunks sl_png_read_n_chunks(const char filename[const static 1], size_t count);
-struct sl_png_chunks sl_png_read_chunks(const char filename[const static 1]);
-struct sl_png_header sl_png_read_header(const char filename[const static 1]);
+struct sl_png_chunks sl_png_read_n_chunks(
+    struct sl_context ctx[static 1],
+    const char filename[const static 1],
+    size_t count
+);
+struct sl_png_chunks
+sl_png_read_chunks(struct sl_context ctx[static 1], const char filename[const static 1]);
+struct sl_png_header
+sl_png_read_header(struct sl_context ctx[static 1], const char filename[const static 1]);
 size_t sl_png_data_size(struct sl_png_header header);
 size_t sl_png_idat_max_size(struct sl_png_header header);
-struct sl_span sl_png_pack_image_data(struct sl_png_image image[static 1]);
-void sl_png_unpack_and_pad_image_data(struct sl_png_image image[static 1]);
+struct sl_span
+sl_png_pack_image_data(struct sl_context ctx[static 1], struct sl_png_image image[static 1]);
+void sl_png_unpack_and_pad_image_data(
+    struct sl_context ctx[static 1],
+    struct sl_png_image image[static 1]
+);
 enum sl_png_filter_type sl_png_parse_filter_type(unsigned filter);
-bool sl_png_unapply_filter(struct sl_png_image image[static 1]);
-struct sl_png_image sl_png_read_image(const char filename[const static 1]);
-bool sl_png_chunk_fwrite_header(FILE stream[const static 1], struct sl_png_header header);
+bool sl_png_unapply_filter(struct sl_context ctx[static 1], struct sl_png_image image[static 1]);
+struct sl_png_image
+sl_png_read_image(struct sl_context ctx[static 1], const char filename[const static 1]);
+bool sl_png_chunk_fwrite_header(
+    struct sl_context ctx[static 1],
+    FILE stream[const static 1],
+    struct sl_png_header header
+);
 bool sl_png_chunk_fwrite(
+    struct sl_context ctx[static 1],
     FILE stream[const static 1],
     const char chunk_type[const static 1],
     struct sl_span data[const static 1]
 );
-bool sl_png_write_image(struct sl_png_image image, const char filename[const static 1]);
+bool sl_png_write_image(
+    struct sl_context ctx[static 1],
+    struct sl_png_image image,
+    const char filename[const static 1]
+);
 
 #endif  // SL_PNG_H_INCLUDED

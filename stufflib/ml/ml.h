@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stufflib/context/context.h>
 #include <stufflib/linalg/linalg.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/memory/memory.h>
@@ -40,6 +41,7 @@ struct sl_ml_svm {
 };
 
 void sl_ml_random_train_test_split(
+    struct sl_context ctx[static 1],
     struct sl_la_matrix data[const static 1],
     struct sl_la_matrix train[const static 1],
     struct sl_la_matrix test[const static 1],

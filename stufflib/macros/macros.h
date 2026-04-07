@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stufflib/context/context.h>
+#include <stufflib/error/error.h>
 
 #define SL_NOOP(...) \
   do {               \
@@ -124,26 +126,28 @@
   #define SL_LOG_ERROR(...) SL_NOOP(__VA_ARGS__)
 #endif
 
-#define SL_TEST_MAIN(...)                                          \
-  int main(int argc, char* const argv[argc + 1]) {                 \
-    struct sl_args args         = {.argc = argc, .argv = argv};    \
-    const bool verbose          = sl_args_parse_flag(&args, "-v"); \
-    bool (*tests[])(const bool) = {__VA_ARGS__};                   \
-    char test_names_str[]       = #__VA_ARGS__;                    \
-    bool ok                     = true;                            \
-    const char* test_name       = "";                              \
-    for (size_t t = 0; ok && t < SL_ARRAY_LEN(tests); ++t) {       \
-      test_name = strtok(t ? 0 : test_names_str, ", ");            \
-      assert(test_name);                                           \
-      if (verbose) {                                               \
-        printf("%s\n", test_name);                                 \
-      }                                                            \
-      ok = tests[t](verbose);                                      \
-      if (!ok) {                                                   \
-        SL_LOG_ERROR("test %s (%zu) failed", test_name, t);        \
-      }                                                            \
-    }                                                              \
-    return ok ? EXIT_SUCCESS : EXIT_FAILURE;                       \
+#define SL_TEST_MAIN(...)                                                                       \
+  int main(int argc, char* const argv[argc + 1]) {                                              \
+    struct sl_args args                                      = {.argc = argc, .argv = argv};    \
+    const bool verbose                                       = sl_args_parse_flag(&args, "-v"); \
+    bool (*tests[])(struct sl_context[static 1], const bool) = {__VA_ARGS__};                   \
+    char test_names_str[]                                    = #__VA_ARGS__;                    \
+    bool ok                                                  = true;                            \
+    const char* test_name                                    = "";                              \
+    struct sl_context ctx                                    = {0};                             \
+    for (size_t t = 0; ok && t < SL_ARRAY_LEN(tests); ++t) {                                    \
+      sl_error_clear(&ctx.errors);                                                              \
+      test_name = strtok(t ? 0 : test_names_str, ", ");                                         \
+      assert(test_name);                                                                        \
+      if (verbose) {                                                                            \
+        printf("%s\n", test_name);                                                              \
+      }                                                                                         \
+      ok = tests[t](&ctx, verbose);                                                             \
+      if (!ok) {                                                                                \
+        SL_LOG_ERROR("test %s (%zu) failed", test_name, t);                                     \
+      }                                                                                         \
+    }                                                                                           \
+    return ok ? EXIT_SUCCESS : EXIT_FAILURE;                                                    \
   }
 
 #define SL_REPEAT_1(x) x

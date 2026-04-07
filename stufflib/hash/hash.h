@@ -9,7 +9,6 @@
 // Accessed 2023-02-07
 #include <stddef.h>
 #include <stdint.h>
-#include <stufflib/macros/macros.h>
 
 void sl_hash_crc32_lut_init(void);
 uint32_t sl_hash_crc32(const uint32_t crc32_init, const size_t count, const void* raw_data);

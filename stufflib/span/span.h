@@ -4,6 +4,7 @@
 #include <stddef.h>
 
 // TODO pull iterator impl from core layer
+#include <stufflib/context/context.h>
 #include <stufflib/iterator/iterator.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/memory/memory.h>
@@ -15,16 +16,24 @@ struct sl_span {
 };
 
 struct sl_span sl_span_view(size_t size, unsigned char data[size]);
-struct sl_span sl_span_create(size_t size);
+struct sl_span sl_span_create(struct sl_context ctx[static 1], size_t size);
 void sl_span_destroy(struct sl_span data[static 1]);
 void sl_span_clear(struct sl_span data[const static 1]);
-struct sl_span sl_span_copy(struct sl_span src[const static 1]);
-struct sl_span sl_span_from_str(const char str[const static 1]);
+struct sl_span sl_span_copy(struct sl_context ctx[static 1], struct sl_span src[const static 1]);
+struct sl_span sl_span_from_str(struct sl_context ctx[static 1], const char str[const static 1]);
 bool sl_span_is_hexadecimal_str(struct sl_span src[const static 1]);
-struct sl_span sl_span_parse_hex(struct sl_span src[const static 1]);
 struct sl_span
-sl_span_concat(struct sl_span data1[const static 1], struct sl_span data2[const static 1]);
-void sl_span_extend(struct sl_span dst[static 1], struct sl_span src[const static 1]);
+sl_span_parse_hex(struct sl_context ctx[static 1], struct sl_span src[const static 1]);
+struct sl_span sl_span_concat(
+    struct sl_context ctx[static 1],
+    struct sl_span data1[const static 1],
+    struct sl_span data2[const static 1]
+);
+void sl_span_extend(
+    struct sl_context ctx[static 1],
+    struct sl_span dst[static 1],
+    struct sl_span src[const static 1]
+);
 struct sl_span sl_span_slice(struct sl_span data[const static 1], size_t begin, size_t end_or_max);
 struct sl_span
 sl_span_find(struct sl_span data[const static 1], struct sl_span pattern[const static 1]);

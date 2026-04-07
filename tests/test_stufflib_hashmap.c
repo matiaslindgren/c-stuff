@@ -6,16 +6,16 @@
 #include <stufflib/macros/macros.h>
 #include <stufflib/span/span.h>
 
-static bool test_empty(const bool) {
-  struct sl_hashmap map = sl_hashmap_create(2);
+static bool test_empty(struct sl_context ctx[static 1], const bool) {
+  struct sl_hashmap map = sl_hashmap_create(ctx, 2);
   SL_ASSERT_EQ_LL(map.size, 0);
   SL_ASSERT_EQ_LL(map.capacity, 2);
   assert(map.slots != nullptr);
 
   struct sl_span keys[] = {
-      sl_span_from_str("hello"),
-      sl_span_from_str(" "),
-      sl_span_from_str("there"),
+      sl_span_from_str(ctx, "hello"),
+      sl_span_from_str(ctx, " "),
+      sl_span_from_str(ctx, "there"),
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(keys); ++i) {
     assert(!sl_hashmap_contains(&map, keys + i));
@@ -31,17 +31,17 @@ static bool test_empty(const bool) {
   return true;
 }
 
-static bool test_insert_single_int(const bool) {
+static bool test_insert_single_int(struct sl_context ctx[static 1], const bool) {
   for (int64_t value = -10; value <= 10; ++value) {
-    struct sl_hashmap map    = sl_hashmap_create(2);
-    struct sl_span key_hello = sl_span_from_str("hello");
+    struct sl_hashmap map    = sl_hashmap_create(ctx, 2);
+    struct sl_span key_hello = sl_span_from_str(ctx, "hello");
 
     SL_ASSERT_EQ_LL(map.size, 0);
     SL_ASSERT_EQ_LL(map.capacity, 2);
     assert(map.slots != nullptr);
     assert(!sl_hashmap_contains(&map, &key_hello));
 
-    sl_hashmap_insert(&map, &key_hello, sl_hashmap_type_int64, &value);
+    sl_hashmap_insert(ctx, &map, &key_hello, sl_hashmap_type_int64, &value);
     SL_ASSERT_EQ_LL(map.size, 1);
     SL_ASSERT_EQ_LL(map.capacity, 2);
     assert(map.slots != nullptr);
@@ -56,15 +56,15 @@ static bool test_insert_single_int(const bool) {
     sl_span_destroy(&key_hello);
   }
   for (uint64_t value = 0; value <= 20; ++value) {
-    struct sl_hashmap map = sl_hashmap_create(2);
-    struct sl_span key    = sl_span_from_str("hello");
+    struct sl_hashmap map = sl_hashmap_create(ctx, 2);
+    struct sl_span key    = sl_span_from_str(ctx, "hello");
 
     SL_ASSERT_EQ_LL(map.size, 0);
     SL_ASSERT_EQ_LL(map.capacity, 2);
     assert(map.slots != nullptr);
     assert(!sl_hashmap_contains(&map, &key));
 
-    sl_hashmap_insert(&map, &key, sl_hashmap_type_uint64, &value);
+    sl_hashmap_insert(ctx, &map, &key, sl_hashmap_type_uint64, &value);
     SL_ASSERT_EQ_LL(map.size, 1);
     SL_ASSERT_EQ_LL(map.capacity, 2);
     assert(map.slots != nullptr);
@@ -81,17 +81,17 @@ static bool test_insert_single_int(const bool) {
   return true;
 }
 
-static bool test_insert_single_pointer(const bool) {
-  struct sl_hashmap map = sl_hashmap_create(2);
-  struct sl_span key    = sl_span_from_str("hello");
-  struct sl_span value  = sl_span_from_str("there");
+static bool test_insert_single_pointer(struct sl_context ctx[static 1], const bool) {
+  struct sl_hashmap map = sl_hashmap_create(ctx, 2);
+  struct sl_span key    = sl_span_from_str(ctx, "hello");
+  struct sl_span value  = sl_span_from_str(ctx, "there");
 
   SL_ASSERT_EQ_LL(map.size, 0);
   SL_ASSERT_EQ_LL(map.capacity, 2);
   assert(map.slots != nullptr);
   assert(!sl_hashmap_contains(&map, &key));
 
-  sl_hashmap_insert(&map, &key, sl_hashmap_type_any, &value);
+  sl_hashmap_insert(ctx, &map, &key, sl_hashmap_type_any, &value);
   SL_ASSERT_EQ_LL(map.size, 1);
   SL_ASSERT_EQ_LL(map.capacity, 2);
   assert(map.slots != nullptr);
@@ -109,20 +109,20 @@ static bool test_insert_single_pointer(const bool) {
   return true;
 }
 
-static bool test_insert_two_elements_resizes(const bool) {
-  struct sl_hashmap map    = sl_hashmap_create(2);
-  struct sl_span key_hello = sl_span_from_str("hello");
-  struct sl_span key_there = sl_span_from_str("there");
+static bool test_insert_two_elements_resizes(struct sl_context ctx[static 1], const bool) {
+  struct sl_hashmap map    = sl_hashmap_create(ctx, 2);
+  struct sl_span key_hello = sl_span_from_str(ctx, "hello");
+  struct sl_span key_there = sl_span_from_str(ctx, "there");
 
   SL_ASSERT_EQ_LL(map.size, 0);
   SL_ASSERT_EQ_LL(map.capacity, 2);
   assert(map.slots != nullptr);
   assert(!sl_hashmap_contains(&map, &key_hello));
 
-  sl_hashmap_insert(&map, &key_hello, sl_hashmap_type_int64, &((int64_t){1}));
+  sl_hashmap_insert(ctx, &map, &key_hello, sl_hashmap_type_int64, &((int64_t){1}));
   SL_ASSERT_EQ_LL(map.size, 1);
   SL_ASSERT_EQ_LL(map.capacity, 2);
-  sl_hashmap_insert(&map, &key_there, sl_hashmap_type_int64, &((int64_t){2}));
+  sl_hashmap_insert(ctx, &map, &key_there, sl_hashmap_type_int64, &((int64_t){2}));
   SL_ASSERT_EQ_LL(map.size, 2);
   SL_ASSERT_EQ_LL(map.capacity, 4);
 
@@ -132,13 +132,13 @@ static bool test_insert_two_elements_resizes(const bool) {
   return true;
 }
 
-static bool test_update_single_element(const bool) {
-  struct sl_hashmap map = sl_hashmap_create(2);
-  struct sl_span key    = sl_span_from_str("hello");
+static bool test_update_single_element(struct sl_context ctx[static 1], const bool) {
+  struct sl_hashmap map = sl_hashmap_create(ctx, 2);
+  struct sl_span key    = sl_span_from_str(ctx, "hello");
 
   {
     uint64_t value = 0x123456789;
-    sl_hashmap_insert(&map, &key, sl_hashmap_type_uint64, &value);
+    sl_hashmap_insert(ctx, &map, &key, sl_hashmap_type_uint64, &value);
     assert(sl_hashmap_contains(&map, &key));
     assert(sl_hashmap_get(&map, &key));
     SL_ASSERT_EQ_LL(sl_hashmap_get(&map, &key)->value.uint64, value);
@@ -157,8 +157,8 @@ static bool test_update_single_element(const bool) {
   return true;
 }
 
-static bool test_multiple_resizes_retain_slots(const bool) {
-  struct sl_hashmap map = sl_hashmap_create(2);
+static bool test_multiple_resizes_retain_slots(struct sl_context ctx[static 1], const bool) {
+  struct sl_hashmap map = sl_hashmap_create(ctx, 2);
   const char* keys[]    = {
       "ten",
       "eleven",
@@ -200,18 +200,18 @@ static bool test_multiple_resizes_retain_slots(const bool) {
   for (size_t i = 0; i < n; ++i) {
     SL_ASSERT_EQ_LL(map.size, i);
     SL_ASSERT_EQ_LL(map.capacity, expected_capacities[i]);
-    struct sl_span key1 = sl_span_from_str(keys[i]);
+    struct sl_span key1 = sl_span_from_str(ctx, keys[i]);
     assert(!sl_hashmap_contains(&map, &key1));
     assert(sl_hashmap_get(&map, &key1));
     assert(sl_hashmap_get(&map, &key1)->type == sl_hashmap_type_empty);
     for (size_t j = 0; j < i; ++j) {
-      struct sl_span key2 = sl_span_from_str(keys[j]);
+      struct sl_span key2 = sl_span_from_str(ctx, keys[j]);
       assert(sl_hashmap_contains(&map, &key2));
       assert(sl_hashmap_get(&map, &key2));
       SL_ASSERT_EQ_LL(sl_hashmap_get(&map, &key2)->value.int64, values[j]);
       sl_span_destroy(&key2);
     }
-    sl_hashmap_insert(&map, &key1, sl_hashmap_type_int64, values + i);
+    sl_hashmap_insert(ctx, &map, &key1, sl_hashmap_type_int64, values + i);
     sl_span_destroy(&key1);
   }
   SL_ASSERT_EQ_LL(map.size, n);
@@ -220,8 +220,8 @@ static bool test_multiple_resizes_retain_slots(const bool) {
   return true;
 }
 
-static bool test_slot_iterator(const bool) {
-  struct sl_hashmap map = sl_hashmap_create(2);
+static bool test_slot_iterator(struct sl_context ctx[static 1], const bool) {
+  struct sl_hashmap map = sl_hashmap_create(ctx, 2);
   const char* keys[]    = {
       "ten",
       "eleven",
@@ -238,8 +238,8 @@ static bool test_slot_iterator(const bool) {
   const size_t n                      = SL_ARRAY_LEN(keys);
   for (uint64_t i = 0; i < n; ++i) {
     values[i]          = i;
-    struct sl_span key = sl_span_from_str(keys[i]);
-    sl_hashmap_insert(&map, &key, sl_hashmap_type_uint64, values + i);
+    struct sl_span key = sl_span_from_str(ctx, keys[i]);
+    sl_hashmap_insert(ctx, &map, &key, sl_hashmap_type_uint64, values + i);
     sl_span_destroy(&key);
   }
   struct sl_iterator iter = sl_hashmap_iter(&map);

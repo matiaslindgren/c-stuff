@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stufflib/context/context.h>
 #include <stufflib/span/span.h>
 
 struct sl_file {
@@ -12,26 +13,32 @@ struct sl_file {
 };
 
 bool sl_file_format_path(
-    const size_t bufsize,
+    size_t bufsize,
     char buffer[const bufsize],
     const char path[const static 1],
     const char name[const static 1],
     const char suffix[const static 1]
 );
 bool sl_file_open(
+    struct sl_context ctx[static 1],
     struct sl_file f[const static 1],
     const char path[const static 1],
     const char mode[const static 1]
 );
 void sl_file_close(struct sl_file f[const static 1]);
-size_t sl_file_read(struct sl_file f[const static 1], struct sl_span buffer[const static 1]);
+size_t sl_file_read(
+    struct sl_context ctx[static 1],
+    struct sl_file f[const static 1],
+    struct sl_span buffer[const static 1]
+);
 
 static inline bool sl_file_can_read(struct sl_file f[const static 1]) {
-  return f->file && !feof(f->file) && ferror(f->file) == 0;
+  return (f->file && !feof(f->file) && ferror(f->file) == 0) != 0;
 }
 size_t sl_file_parse_int64(
+    struct sl_context ctx[static 1],
     struct sl_file f[const static 1],
-    const size_t count,
+    size_t count,
     int64_t buffer[const count]
 );
 

@@ -8,7 +8,8 @@
 #include <stufflib/span/span.h>
 #include <stufflib/unicode/unicode.h>
 
-static bool test_data(const bool) {
+static bool test_data(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
   struct sl_span data = {
       .size = 5,
       .data = (unsigned char[5]){0, 1, 2, 3, 4},
@@ -44,7 +45,8 @@ struct sl_iterator sl_cstr_iter(char str[const static 1]) {
   return (struct sl_iterator){.index = 0, .data = str};
 }
 
-static bool test_cstr(const bool) {
+static bool test_cstr(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
   char* strings[] = {
       "",
       " ",

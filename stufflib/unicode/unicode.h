@@ -9,8 +9,8 @@
 #include <stufflib/iterator/iterator.h>
 #include <stufflib/span/span.h>
 
-static const uint32_t sl_unicode_error_value = UINT32_MAX;
-static const size_t sl_unicode_error_width   = 0;
+static const uint32_t SL_UNICODE_ERROR_VALUE = UINT32_MAX;
+static const size_t SL_UNICODE_ERROR_WIDTH   = 0;
 
 size_t sl_unicode_codepoint_width(uint32_t value);
 size_t sl_unicode_codepoint_width_from_utf8(size_t size, unsigned char bytes[const size]);

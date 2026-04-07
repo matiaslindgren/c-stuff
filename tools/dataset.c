@@ -4,9 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stufflib/args/args.h>
+#include <stufflib/context/context.h>
 #include <stufflib/dataset/dataset.h>
 #include <stufflib/filesystem/filesystem.h>
 #include <stufflib/io/io.h>
+#include <stufflib/iterator/iterator.h>
 #include <stufflib/linalg/linalg.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/memory/memory.h>
@@ -30,7 +32,8 @@ static bool cifar_to_png(const struct sl_args args[const static 1]) {
     return false;
   }
 
-  bool all_ok = false;
+  struct sl_context ctx = {0};
+  bool all_ok           = false;
 
   const char* const dataset_dir = sl_args_get_positional(args, 1);
   const char* const output_dir  = sl_args_get_positional(args, 2);
@@ -52,7 +55,7 @@ static bool cifar_to_png(const struct sl_args args[const static 1]) {
     if (verbose) {
       SL_LOG_INFO("reading metadata '%s'", filename);
     }
-    struct sl_string data                 = sl_fs_read_file_utf8(filename, &reader_buffer);
+    struct sl_string data                 = sl_fs_read_file_utf8(&ctx, filename, &reader_buffer);
     // TODO create iterlines util
     struct sl_span newline                = sl_span_view(1, (unsigned char[]){'\n'});
     struct sl_tokenizer newline_tokenizer = sl_tokenizer_create(&(data.utf8_data), &newline);
@@ -60,7 +63,7 @@ static bool cifar_to_png(const struct sl_args args[const static 1]) {
     for (struct sl_iterator iter = sl_tokenizer_iter(&newline_tokenizer);
          lineno < 10 && !sl_tokenizer_iter_is_done(&iter);
          sl_tokenizer_iter_advance(&iter)) {
-      struct sl_string line = sl_string_from_utf8(sl_tokenizer_iter_get(&iter));
+      struct sl_string line = sl_string_from_utf8(&ctx, sl_tokenizer_iter_get(&iter));
       if (line.length == 0 || !sl_string_is_ascii(&line)) {
         SL_LOG_ERROR("all metadata lines must be in ASCII");
         sl_string_destroy(&line);
@@ -89,7 +92,7 @@ static bool cifar_to_png(const struct sl_args args[const static 1]) {
   for (size_t batch_num = 0; batch_num < SL_ARRAY_LEN(batch_names); ++batch_num) {
     char filename[256] = {0};
     snprintf(filename, SL_ARRAY_LEN(filename), "%s/%s", dataset_dir, batch_names[batch_num]);
-    struct sl_span data = sl_fs_read_file(filename, &reader_buffer);
+    struct sl_span data = sl_fs_read_file(&ctx, filename, &reader_buffer);
     if (verbose) {
       SL_LOG_INFO("batch '%s' contains '%zu' bytes", filename, data.size);
     }
@@ -105,7 +108,7 @@ static bool cifar_to_png(const struct sl_args args[const static 1]) {
     }
 
     for (size_t sample_num = 0; sample_num < 10'000; ++sample_num) {
-      struct sl_png_image img   = sl_png_image_rgb_create(32, 32);
+      struct sl_png_image img   = sl_png_image_rgb_create(&ctx, 32, 32);
       const size_t sample_begin = sample_num * (1 + 3 * 1024);
 
       unsigned char label = data.data[sample_begin];
@@ -116,11 +119,11 @@ static bool cifar_to_png(const struct sl_args args[const static 1]) {
 
       for (size_t row = 0; row < img.header.height; ++row) {
         for (size_t col = 0; col < img.header.width; ++col) {
-          const size_t j     = row * img.header.width + col;
+          const size_t j     = (row * img.header.width) + col;
           unsigned char px[] = {
-              data.data[sample_begin + 1 + 0 * 1024 + j],
-              data.data[sample_begin + 1 + 1 * 1024 + j],
-              data.data[sample_begin + 1 + 2 * 1024 + j],
+              data.data[sample_begin + 1 + (0 * 1024) + j],
+              data.data[sample_begin + 1 + (1 * 1024) + j],
+              data.data[sample_begin + 1 + (2 * 1024) + j],
           };
           sl_png_image_set_pixel(&img, row + 1, col + 1, px);
         }
@@ -139,7 +142,7 @@ static bool cifar_to_png(const struct sl_args args[const static 1]) {
       if (verbose) {
         SL_LOG_INFO("writing sample %s", outname);
       }
-      if (!sl_png_write_image(img, outname)) {
+      if (!sl_png_write_image(&ctx, img, outname)) {
         goto invalid_sample;
       }
 
@@ -172,7 +175,8 @@ bool spambase(const struct sl_args args[const static 1]) {
     return false;
   }
 
-  bool all_ok = false;
+  struct sl_context ctx = {0};
+  bool all_ok           = false;
 
   const char* const dataset_dir = sl_args_get_positional(args, 1);
   const char* const output_dir  = sl_args_get_positional(args, 2);
@@ -187,7 +191,7 @@ bool spambase(const struct sl_args args[const static 1]) {
   }
 
   struct sl_la_matrix data
-      = sl_la_matrix_create(SL_DATASET_SPAMBASE_SAMPLES, SL_DATASET_SPAMBASE_FEATURES);
+      = sl_la_matrix_create(&ctx, SL_DATASET_SPAMBASE_SAMPLES, SL_DATASET_SPAMBASE_FEATURES);
   uint16_t classes[SL_DATASET_SPAMBASE_SAMPLES] = {0};
 
   {
@@ -202,7 +206,7 @@ bool spambase(const struct sl_args args[const static 1]) {
       SL_LOG_INFO("reading csv file '%s'", path);
     }
 
-    struct sl_string content              = sl_fs_read_file_utf8(path, &reader_buffer);
+    struct sl_string content              = sl_fs_read_file_utf8(&ctx, path, &reader_buffer);
     // TODO create iterlines util
     struct sl_span newline                = sl_span_view(1, (unsigned char[]){'\n'});
     struct sl_tokenizer newline_tokenizer = sl_tokenizer_create(&(content.utf8_data), &newline);
@@ -314,8 +318,9 @@ bool spambase(const struct sl_args args[const static 1]) {
   }
   strncpy(record_samples.path, output_dir, sizeof(record_samples.path) - 1);
   record_samples.path[sizeof(record_samples.path) - 1] = '\0';
-  if (!(sl_record_write_metadata(&record_samples)
+  if (!(sl_record_write_metadata(&ctx, &record_samples)
         && sl_record_write_all(
+            &ctx,
             &record_samples,
             sizeof(float) * n_rows * n_cols,
             (void*)(data.data)
@@ -338,8 +343,8 @@ bool spambase(const struct sl_args args[const static 1]) {
   }
   strncpy(record_classes.path, output_dir, sizeof(record_classes.path) - 1);
   record_classes.path[sizeof(record_classes.path) - 1] = '\0';
-  if (!(sl_record_write_metadata(&record_classes)
-        && sl_record_write_all(&record_classes, sizeof(classes), (void*)classes))) {
+  if (!(sl_record_write_metadata(&ctx, &record_classes)
+        && sl_record_write_all(&ctx, &record_classes, sizeof(classes), (void*)classes))) {
     SL_LOG_ERROR("failed writing spambase dataset classes to '%s'", output_dir);
     goto done;
   }
@@ -364,7 +369,8 @@ bool rcv1(const struct sl_args args[const static 1]) {
   }
 
   // TODO way too much code
-  bool all_ok = false;
+  struct sl_context ctx = {0};
+  bool all_ok           = false;
 
   const char* const dataset_dir = sl_args_get_positional(args, 1);
   const char* const output_dir  = sl_args_get_positional(args, 2);
@@ -393,7 +399,7 @@ bool rcv1(const struct sl_args args[const static 1]) {
   FILE* fp = nullptr;
 
   struct sl_rcv1_metadata* metadata
-      = sl_alloc(max_document_id + 1, sizeof(struct sl_rcv1_metadata));
+      = sl_alloc(&ctx, max_document_id + 1, sizeof(struct sl_rcv1_metadata));
 
   struct sl_la_vector batch = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_RCV1_FEATURES);
 
@@ -518,11 +524,11 @@ bool rcv1(const struct sl_args args[const static 1]) {
                                       .record = &test_record,
   };
 
-  if (!sl_record_writer_open(&trainset_writer)) {
+  if (!sl_record_writer_open(&ctx, &trainset_writer)) {
     SL_LOG_ERROR("cannot open training set samples record writer");
     goto done;
   }
-  if (!sl_record_writer_open(&testset_writer)) {
+  if (!sl_record_writer_open(&ctx, &testset_writer)) {
     SL_LOG_ERROR("cannot open test set samples record writer");
     goto done;
   }
@@ -645,7 +651,7 @@ bool rcv1(const struct sl_args args[const static 1]) {
       if (metadata[id].in_trainset) {
         // TODO len N buffer instead of len 1
         train_record.dim_size[0] += 1;
-        if (!sl_record_writer_write(&trainset_writer, &write_buffer)) {
+        if (!sl_record_writer_write(&ctx, &trainset_writer, &write_buffer)) {
           SL_LOG_ERROR(
               "RCV1 file '%s' lineno %zu: failed training set writing sample",
               path,
@@ -655,7 +661,7 @@ bool rcv1(const struct sl_args args[const static 1]) {
         }
       } else {
         test_record.dim_size[0] += 1;
-        if (!sl_record_writer_write(&testset_writer, &write_buffer)) {
+        if (!sl_record_writer_write(&ctx, &testset_writer, &write_buffer)) {
           SL_LOG_ERROR("RCV1 file '%s' lineno %zu: failed writing test set sample", path, lineno);
           goto done;
         }
@@ -669,11 +675,11 @@ bool rcv1(const struct sl_args args[const static 1]) {
   train_record.size = trainset_writer.n_written;
   test_record.size  = testset_writer.n_written;
 
-  if (!sl_record_write_metadata(&train_record)) {
+  if (!sl_record_write_metadata(&ctx, &train_record)) {
     SL_LOG_ERROR("failed writing RCV1 metadata for training set samples");
     goto done;
   }
-  if (!sl_record_write_metadata(&test_record)) {
+  if (!sl_record_write_metadata(&ctx, &test_record)) {
     SL_LOG_ERROR("failed writing RCV1 metadata for test set samples");
     goto done;
   }
@@ -721,11 +727,11 @@ bool rcv1(const struct sl_args args[const static 1]) {
                                       .record = &test_record,
   };
 
-  if (!sl_record_writer_open(&trainset_writer)) {
+  if (!sl_record_writer_open(&ctx, &trainset_writer)) {
     SL_LOG_ERROR("cannot open training set classes record writer");
     goto done;
   }
-  if (!sl_record_writer_open(&testset_writer)) {
+  if (!sl_record_writer_open(&ctx, &testset_writer)) {
     SL_LOG_ERROR("cannot open test set classes record writer");
     goto done;
   }
@@ -733,14 +739,14 @@ bool rcv1(const struct sl_args args[const static 1]) {
   struct sl_span class_buffer = {.size = 1, .data = (uint8_t[1]){0}};
   for (size_t id = 0; id <= max_document_id; ++id) {
     if (metadata[id].has_value) {
-      class_buffer.data[0] = metadata[id].is_ccat_class;
+      class_buffer.data[0] = (unsigned char)metadata[id].is_ccat_class;
       if (metadata[id].in_trainset) {
-        if (!sl_record_writer_write(&trainset_writer, &class_buffer)) {
+        if (!sl_record_writer_write(&ctx, &trainset_writer, &class_buffer)) {
           SL_LOG_ERROR("RCV1 document %zu: failed writing training set class", id);
           goto done;
         }
       } else {
-        if (!sl_record_writer_write(&testset_writer, &class_buffer)) {
+        if (!sl_record_writer_write(&ctx, &testset_writer, &class_buffer)) {
           SL_LOG_ERROR("RCV1 document %zu: failed writing test set class", id);
           goto done;
         }
@@ -751,11 +757,11 @@ bool rcv1(const struct sl_args args[const static 1]) {
   train_record.size = train_record.dim_size[0] = trainset_writer.n_written;
   test_record.size = test_record.dim_size[0] = testset_writer.n_written;
 
-  if (!sl_record_write_metadata(&train_record)) {
+  if (!sl_record_write_metadata(&ctx, &train_record)) {
     SL_LOG_ERROR("failed writing RCV1 metadata for training set classes");
     goto done;
   }
-  if (!sl_record_write_metadata(&test_record)) {
+  if (!sl_record_write_metadata(&ctx, &test_record)) {
     SL_LOG_ERROR("failed writing RCV1 metadata for test set classes");
     goto done;
   }
@@ -801,5 +807,5 @@ int main(int argc, char* const argv[argc + 1]) {
   if (!ok) {
     print_usage(&args);
   }
-  return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+  return (int)ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

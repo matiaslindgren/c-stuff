@@ -4,8 +4,15 @@
 
 #define SL_UNIONFIND_ROOT SIZE_MAX
 
-struct sl_unionfind* sl_unionfind_init(struct sl_unionfind uf[static 1], const size_t count) {
-  size_t* parents = sl_alloc(count, sizeof(size_t));
+struct sl_unionfind* sl_unionfind_init(
+    struct sl_context ctx[static 1],
+    struct sl_unionfind uf[static 1],
+    const size_t count
+) {
+  size_t* parents = sl_alloc(ctx, count, sizeof(size_t));
+  if (!parents) {
+    return nullptr;
+  }
   for (size_t i = 0; i < count; ++i) {
     parents[i] = SL_UNIONFIND_ROOT;
   }

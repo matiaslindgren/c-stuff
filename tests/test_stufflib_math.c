@@ -19,10 +19,10 @@
     }                                                                \
   } while (false)
 
-static bool test_factorize_primes(const bool verbose) {
+static bool test_factorize_primes(struct sl_context ctx[static 1], const bool verbose) {
   const size_t primes[] = {2, 3, 5, 7, 11, 13, 17};
   for (size_t i = 0; i < SL_ARRAY_LEN(primes); ++i) {
-    size_t* f = sl_math_factorize(primes[i]);
+    size_t* f = sl_math_factorize(ctx, primes[i]);
     SL_ASSERT_FACTORIZATION_OK(verbose, primes[i], f);
     assert(f[0] == primes[i]);
     assert(f[1] == 0);
@@ -31,9 +31,9 @@ static bool test_factorize_primes(const bool verbose) {
   return true;
 }
 
-static bool test_factorize_4(const bool verbose) {
+static bool test_factorize_4(struct sl_context ctx[static 1], const bool verbose) {
   const size_t n = 4;
-  size_t* f      = sl_math_factorize(n);
+  size_t* f      = sl_math_factorize(ctx, n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   assert(f[0] == 2);
   assert(f[1] == 2);
@@ -42,9 +42,9 @@ static bool test_factorize_4(const bool verbose) {
   return true;
 }
 
-static bool test_factorize_25(const bool verbose) {
+static bool test_factorize_25(struct sl_context ctx[static 1], const bool verbose) {
   const size_t n = 25;
-  size_t* f      = sl_math_factorize(n);
+  size_t* f      = sl_math_factorize(ctx, n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   assert(f[0] == 5);
   assert(f[1] == 5);
@@ -53,9 +53,9 @@ static bool test_factorize_25(const bool verbose) {
   return true;
 }
 
-static bool test_factorize_30(const bool verbose) {
+static bool test_factorize_30(struct sl_context ctx[static 1], const bool verbose) {
   const size_t n = 30;
-  size_t* f      = sl_math_factorize(n);
+  size_t* f      = sl_math_factorize(ctx, n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   assert(f[0] == 2);
   assert(f[1] == 3);
@@ -65,9 +65,9 @@ static bool test_factorize_30(const bool verbose) {
   return true;
 }
 
-static bool test_factorize_864(const bool verbose) {
+static bool test_factorize_864(struct sl_context ctx[static 1], const bool verbose) {
   const size_t n = 864;
-  size_t* f      = sl_math_factorize(n);
+  size_t* f      = sl_math_factorize(ctx, n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   assert(f[0] == 2);
   assert(f[1] == 2);
@@ -82,9 +82,9 @@ static bool test_factorize_864(const bool verbose) {
   return true;
 }
 
-static bool test_factorize_2022(const bool verbose) {
+static bool test_factorize_2022(struct sl_context ctx[static 1], const bool verbose) {
   const size_t n = 2022;
-  size_t* f      = sl_math_factorize(n);
+  size_t* f      = sl_math_factorize(ctx, n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   assert(f[0] == 2);
   assert(f[1] == 3);
@@ -94,9 +94,9 @@ static bool test_factorize_2022(const bool verbose) {
   return true;
 }
 
-static bool test_factorize_202212(const bool verbose) {
+static bool test_factorize_202212(struct sl_context ctx[static 1], const bool verbose) {
   const size_t n = 202212;
-  size_t* f      = sl_math_factorize(n);
+  size_t* f      = sl_math_factorize(ctx, n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   assert(f[0] == 2);
   assert(f[1] == 2);
@@ -109,9 +109,9 @@ static bool test_factorize_202212(const bool verbose) {
   return true;
 }
 
-static bool test_factorize_20221210(const bool verbose) {
+static bool test_factorize_20221210(struct sl_context ctx[static 1], const bool verbose) {
   const size_t n = 20221210;
-  size_t* f      = sl_math_factorize(n);
+  size_t* f      = sl_math_factorize(ctx, n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   assert(f[0] == 2);
   assert(f[1] == 5);
@@ -122,7 +122,8 @@ static bool test_factorize_20221210(const bool verbose) {
   return true;
 }
 
-static bool test_linalg(const bool) {
+static bool test_linalg(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
   const double cmp_eps = 1e-16;
 
   const double v1[] = {1, 2, 3, 4};
@@ -149,7 +150,8 @@ double pow2(double x) {
   return pow(x, 2);
 }
 
-static bool test_numerical_diff(const bool verbose) {
+static bool test_numerical_diff(struct sl_context ctx[static 1], const bool verbose) {
+  (void)ctx;
   const size_t n = 10000;
   double x[n];
   sl_rand_fill_double(n, x, 10);
@@ -195,7 +197,8 @@ static bool test_numerical_diff(const bool verbose) {
   return true;
 }
 
-static bool test_double_almost(const bool) {
+static bool test_double_almost(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
   if (!sl_math_double_almost(1, 1.5, 1)) {
     return false;
   }
@@ -205,7 +208,8 @@ static bool test_double_almost(const bool) {
   return true;
 }
 
-static bool test_round_up_pow2(const bool) {
+static bool test_round_up_pow2(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
   assert(sl_math_next_power_of_two(0) == 1);
   assert(sl_math_next_power_of_two(1) == 2);
   assert(sl_math_next_power_of_two(2) == 4);
@@ -222,7 +226,8 @@ static bool test_round_up_pow2(const bool) {
   return true;
 }
 
-static bool test_is_finite(const bool) {
+static bool test_is_finite(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
   assert(sl_math_is_finite(1, (float[]){0}));
   assert(sl_math_is_finite(1, (float[]){1}));
   assert(sl_math_is_finite(1, (float[]){-1}));

@@ -41,7 +41,8 @@ bool check_matrix_equal(
   return true;
 }
 
-static bool test_minmax_normalization(const bool) {
+static bool test_minmax_normalization(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
   {
     struct sl_la_matrix a = {
         .rows = 4,
@@ -160,7 +161,7 @@ static bool test_minmax_normalization(const bool) {
   return true;
 }
 
-static bool test_random_train_test_split(const bool) {
+static bool test_random_train_test_split(struct sl_context ctx[static 1], const bool) {
   for (int iter = 0; iter < 1000; ++iter) {
     struct sl_la_matrix data = {
         .rows = 12,
@@ -173,7 +174,7 @@ static bool test_random_train_test_split(const bool) {
     struct sl_la_matrix train      = {.rows = data.rows - test.rows, .cols = 3};
     uint16_t train_classes[12 - 4] = {0};
     uint16_t test_classes[4]       = {0};
-    sl_ml_random_train_test_split(&data, &train, &test, labels, train_classes, test_classes);
+    sl_ml_random_train_test_split(ctx, &data, &train, &test, labels, train_classes, test_classes);
 
     int value_freq[12 * 3] = {0};
     int label_freq[12 * 3] = {0};
@@ -197,7 +198,8 @@ static bool test_random_train_test_split(const bool) {
   return true;
 }
 
-static bool test_svm_linear_fit(const bool) {
+static bool test_svm_linear_fit(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
   for (int iter = 0; iter < 1000; ++iter) {
     for (int batch_size = 1; batch_size < 3; ++batch_size) {
       for (int n_epochs = 1; n_epochs < 10; ++n_epochs) {

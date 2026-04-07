@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <stdio.h>
+#include <stufflib/context/context.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/math/math.h>
 #include <stufflib/memory/memory.h>
@@ -34,21 +35,21 @@ struct sl_la_matrix {
     .size = (length), .data = (float[(length)]){0} \
   }
 
-struct sl_la_vector sl_la_vector_create(const int size);
+struct sl_la_vector sl_la_vector_create(struct sl_context ctx[static 1], int size);
 void sl_la_vector_destroy(struct sl_la_vector v[const static 1]);
-struct sl_la_matrix sl_la_matrix_create(const int rows, const int cols);
+struct sl_la_matrix sl_la_matrix_create(struct sl_context ctx[static 1], int rows, int cols);
 void sl_la_matrix_destroy(struct sl_la_matrix a[const static 1]);
-float* sl_la_matrix_get(struct sl_la_matrix a[const static 1], const int row, const int col);
-float* sl_la_matrix_get_row(struct sl_la_matrix a[const static 1], const int row);
+float* sl_la_matrix_get(struct sl_la_matrix a[const static 1], int row, int col);
+float* sl_la_matrix_get_row(struct sl_la_matrix a[const static 1], int row);
 size_t sl_la_matrix_size(struct sl_la_matrix a[const static 1]);
-struct sl_la_vector sl_la_matrix_row_view(struct sl_la_matrix a[const static 1], const int row);
-void sl_la_vec_add(const int count, float lhs[restrict count], const float rhs[restrict count]);
-void sl_la_vec_sub(const int count, float lhs[restrict count], const float rhs[restrict count]);
-void sl_la_vec_mul(const int count, float lhs[restrict count], const float rhs[restrict count]);
-void sl_la_vec_min(const int count, float lhs[restrict count], const float rhs[restrict count]);
-void sl_la_vec_max(const int count, float lhs[restrict count], const float rhs[restrict count]);
+struct sl_la_vector sl_la_matrix_row_view(struct sl_la_matrix a[const static 1], int row);
+void sl_la_vec_add(int count, float lhs[restrict count], const float rhs[restrict count]);
+void sl_la_vec_sub(int count, float lhs[restrict count], const float rhs[restrict count]);
+void sl_la_vec_mul(int count, float lhs[restrict count], const float rhs[restrict count]);
+void sl_la_vec_min(int count, float lhs[restrict count], const float rhs[restrict count]);
+void sl_la_vec_max(int count, float lhs[restrict count], const float rhs[restrict count]);
 bool sl_la_vector_is_finite(struct sl_la_vector v[const static 1]);
-void sl_la_vector_scale(struct sl_la_vector v[const static 1], const float alpha);
+void sl_la_vector_scale(struct sl_la_vector v[const static 1], float alpha);
 void sl_la_vector_clear(struct sl_la_vector v[const static 1]);
 float sl_la_vector_dot(
     const struct sl_la_vector a[const static 1],
@@ -82,12 +83,12 @@ double sl_la_matrix_frobenius_norm(struct sl_la_matrix a[const static 1]);
 void sl_la_matrix_copy_row(
     struct sl_la_vector dst[const static 1],
     struct sl_la_matrix src[const static 1],
-    const int row
+    int row
 );
 void sl_la_matrix_saxpy_axis0(
     struct sl_la_matrix m[const static 1],
     struct sl_la_vector v[const static 1],
-    const float alpha
+    float alpha
 );
 void sl_la_matrix_add_axis0(
     struct sl_la_matrix m[const static 1],
@@ -106,8 +107,8 @@ void sl_la_matrix_diffdiv_axis0(
     struct sl_la_vector lhs[const static 1],
     struct sl_la_vector rhs[const static 1]
 );
-void sl_la_matrix_add_axis2(struct sl_la_matrix m[const static 1], const float x);
-void sl_la_matrix_mul_axis2(struct sl_la_matrix m[const static 1], const float x);
+void sl_la_matrix_add_axis2(struct sl_la_matrix m[const static 1], float x);
+void sl_la_matrix_mul_axis2(struct sl_la_matrix m[const static 1], float x);
 
 static inline bool sl_la_vector_equal(
     struct sl_la_vector lhs[const static 1],

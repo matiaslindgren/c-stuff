@@ -21,6 +21,7 @@ bool sl_file_format_path(
 }
 
 bool sl_file_open(
+    struct sl_context ctx[static 1],
     struct sl_file f[const static 1],
     const char path[const static 1],
     const char mode[const static 1]
@@ -28,8 +29,7 @@ bool sl_file_open(
   SL_LOG_TRACE("fopen %s in mode %s", path, mode);
   f->file = fopen(path, mode);
   if (!f->file) {
-    // TODO no logging from base libraries
-    SL_LOG_ERROR("cannot open '%s'", path);
+    SL_ERROR(ctx, "cannot open '%s'", path);
     return false;
   }
   memset(f->path, 0, SL_ARRAY_LEN(f->path));
@@ -44,16 +44,21 @@ void sl_file_close(struct sl_file f[const static 1]) {
   }
 }
 
-size_t sl_file_read(struct sl_file f[const static 1], struct sl_span buffer[const static 1]) {
+size_t sl_file_read(
+    struct sl_context ctx[static 1],
+    struct sl_file f[const static 1],
+    struct sl_span buffer[const static 1]
+) {
   const size_t nread = fread(buffer->data, sizeof(unsigned char), buffer->size, f->file);
   if (ferror(f->file)) {
-    SL_LOG_ERROR("failed reading %zu bytes from '%s'", buffer->size, f->path);
+    SL_ERROR(ctx, "failed reading %zu bytes from '%s'", buffer->size, f->path);
     return 0;
   }
   return nread;
 }
 
 size_t sl_file_parse_int64(
+    struct sl_context ctx[static 1],
     struct sl_file f[const static 1],
     const size_t count,
     int64_t buffer[const count]
@@ -61,7 +66,7 @@ size_t sl_file_parse_int64(
   size_t pos = 0;
   for (; pos < count && sl_file_can_read(f); ++pos) {
     if (EOF == fscanf(f->file, " %" PRId64, buffer + pos)) {
-      SL_LOG_ERROR("failed parsing int64 at index %zu from '%s'", pos, f->path);
+      SL_ERROR(ctx, "failed parsing int64 at index %zu from '%s'", pos, f->path);
       goto done;
     }
   }

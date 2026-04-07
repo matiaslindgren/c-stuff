@@ -5,6 +5,7 @@
 #include <stufflib/unionfind/unionfind.h>
 
 void sl_img_segment_rgb(
+    struct sl_context ctx[static 1],
     struct sl_png_image dst[const static 1],
     struct sl_png_image src[const static 1],
     size_t threshold_percent
@@ -19,9 +20,18 @@ void sl_img_segment_rgb(
   const size_t bytes_per_px       = 3;
   const double distance_threshold = sl_math_clamp(0.0, (double)threshold_percent / 100.0, 1.0);
 
-  sl_unionfind_init(&segments, width * height);
-  segment_sizes = sl_alloc(width * height, sizeof(size_t));
-  segment_sums  = sl_alloc(bytes_per_px * width * height, sizeof(double));
+  sl_unionfind_init(ctx, &segments, width * height);
+  if (!segments.parents) {
+    goto done;
+  }
+
+  if (!(segment_sizes = sl_alloc(ctx, width * height, sizeof(size_t)))) {
+    goto done;
+  }
+
+  if (!(segment_sums = sl_alloc(ctx, bytes_per_px * width * height, sizeof(double)))) {
+    goto done;
+  }
 
   for (size_t row = 0; row < height; ++row) {
     for (size_t col = 0; col < width; ++col) {
@@ -104,7 +114,7 @@ void sl_img_segment_rgb(
     }
   }
 
-  sl_png_image_copy(dst, src);
+  sl_png_image_copy(ctx, dst, src);
   for (size_t row = 0; row < height; ++row) {
     for (size_t col = 0; col < width; ++col) {
       const size_t idx     = row * width + col;
@@ -115,6 +125,7 @@ void sl_img_segment_rgb(
     }
   }
 
+done:
   sl_unionfind_destroy(&segments);
   sl_free(segment_sizes);
   sl_free(segment_sums);

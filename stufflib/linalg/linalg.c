@@ -20,11 +20,11 @@
   #error "no BLAS support available for this platform"
 #endif
 
-struct sl_la_vector sl_la_vector_create(const int size) {
+struct sl_la_vector sl_la_vector_create(struct sl_context ctx[static 1], const int size) {
   assert(size > 0);
   return (struct sl_la_vector){
       .size = size,
-      .data = sl_alloc((size_t)(size), sizeof(float)),
+      .data = sl_alloc(ctx, (size_t)(size), sizeof(float)),
   };
 }
 
@@ -33,12 +33,13 @@ void sl_la_vector_destroy(struct sl_la_vector v[const static 1]) {
   *v = (struct sl_la_vector){0};
 }
 
-struct sl_la_matrix sl_la_matrix_create(const int rows, const int cols) {
+struct sl_la_matrix
+sl_la_matrix_create(struct sl_context ctx[static 1], const int rows, const int cols) {
   assert(rows > 0 && cols > 0);
   return (struct sl_la_matrix){
       .rows = rows,
       .cols = cols,
-      .data = sl_alloc((size_t)(rows * cols), sizeof(float)),
+      .data = sl_alloc(ctx, (size_t)(rows * cols), sizeof(float)),
   };
 }
 

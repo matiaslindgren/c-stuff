@@ -5,9 +5,12 @@
 #include <stufflib/misc/misc.h>
 #include <stufflib/record/writer.h>
 
-bool sl_record_writer_open(struct sl_record_writer writer[const static 1]) {
-  if (!writer->file || !writer->record || !sl_record_validate_metadata(writer->record)) {
-    SL_LOG_ERROR("invalid record writer");
+bool sl_record_writer_open(
+    struct sl_context ctx[static 1],
+    struct sl_record_writer writer[const static 1]
+) {
+  if (!writer->file || !writer->record || !sl_record_validate_metadata(ctx, writer->record)) {
+    SL_ERROR(ctx, "invalid record writer");
     return false;
   }
   char full_path[1'024] = {0};
@@ -18,11 +21,11 @@ bool sl_record_writer_open(struct sl_record_writer writer[const static 1]) {
           writer->record->name,
           ".sl_record_data"
       )) {
-    SL_LOG_ERROR("failed formatting record data file path");
+    SL_ERROR(ctx, "failed formatting record data file path");
     return false;
   }
-  if (!sl_file_open(writer->file, full_path, "wb")) {
-    SL_LOG_ERROR("cannot open record data file '%s'", full_path);
+  if (!sl_file_open(ctx, writer->file, full_path, "wb")) {
+    SL_ERROR(ctx, "cannot open record data file '%s'", full_path);
     return false;
   }
   return true;
@@ -35,6 +38,7 @@ void sl_record_writer_close(struct sl_record_writer writer[const static 1]) {
 }
 
 bool sl_record_writer_write(
+    struct sl_context ctx[static 1],
     struct sl_record_writer writer[const static 1],
     struct sl_span buffer[const static 1]
 ) {
@@ -49,12 +53,12 @@ bool sl_record_writer_write(
       if (!sl_misc_is_zero(item_size, value)) {
         if (1 != fwrite(&offset, sizeof(offset), 1, writer->file->file)
             || ferror(writer->file->file) != 0) {
-          SL_LOG_ERROR("failed appending offset to %s", writer->file->path);
+          SL_ERROR(ctx, "failed appending offset to %s", writer->file->path);
           return false;
         }
         if (1 != fwrite(value, item_size, 1, writer->file->file)
             || ferror(writer->file->file) != 0) {
-          SL_LOG_ERROR("failed appending data to %s", writer->file->path);
+          SL_ERROR(ctx, "failed appending data to %s", writer->file->path);
           return false;
         }
         writer->n_written += 1;
@@ -70,17 +74,18 @@ bool sl_record_writer_write(
     const size_t n_written = fwrite(buffer->data, item_size, buffer_length, writer->file->file);
     writer->n_written += n_written;
     if (ferror(writer->file->file) != 0 || buffer_length != n_written) {
-      SL_LOG_ERROR("failed writing dense data to %s", writer->file->path);
+      SL_ERROR(ctx, "failed writing dense data to %s", writer->file->path);
       return false;
     }
     return true;
   }
 
-  SL_LOG_ERROR("unknown data layout %s", layout);
+  SL_ERROR(ctx, "unknown data layout %s", layout);
   return false;
 }
 
 bool sl_record_write_all(
+    struct sl_context ctx[static 1],
     struct sl_record record[const static 1],
     const size_t bufsize,
     void* buffer
@@ -91,13 +96,13 @@ bool sl_record_write_all(
       .file   = &file,
       .record = record,
   };
-  if (!sl_record_writer_open(&writer)) {
-    SL_LOG_ERROR("failed opening data file, cannot write record");
+  if (!sl_record_writer_open(ctx, &writer)) {
+    SL_ERROR(ctx, "failed opening data file, cannot write record");
     goto done;
   }
   struct sl_span data = sl_span_view(bufsize, buffer);
-  if (!sl_record_writer_write(&writer, &data)) {
-    SL_LOG_ERROR("failed writing record data");
+  if (!sl_record_writer_write(ctx, &writer, &data)) {
+    SL_ERROR(ctx, "failed writing record data");
     goto done;
   }
   ok = true;

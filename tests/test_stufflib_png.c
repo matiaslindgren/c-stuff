@@ -7,7 +7,7 @@
 #include <stufflib/misc/misc.h>
 #include <stufflib/png/png.h>
 
-static bool test_read_single_pixel_chunks(const bool verbose) {
+static bool test_read_single_pixel_chunks(struct sl_context ctx[static 1], const bool verbose) {
   for (size_t i = 0; i < 3; ++i) {
     const char* png_path = (const char*[]){
         "./test-data/png/ff0000-1x1-rgb-nocomp.png",
@@ -17,7 +17,7 @@ static bool test_read_single_pixel_chunks(const bool verbose) {
     if (verbose) {
       printf("%s\n", png_path);
     }
-    struct sl_png_chunks chunks = sl_png_read_chunks(png_path);
+    struct sl_png_chunks chunks = sl_png_read_chunks(ctx, png_path);
     assert(chunks.count == 3);
     assert(chunks.chunks[0].type == sl_png_IHDR);
     assert(chunks.chunks[0].data.size == 13);
@@ -30,12 +30,13 @@ static bool test_read_single_pixel_chunks(const bool verbose) {
   return true;
 }
 
-static bool test_read_large_image_with_many_chunks(const bool verbose) {
+static bool
+test_read_large_image_with_many_chunks(struct sl_context ctx[static 1], const bool verbose) {
   const char* png_path = "./test-data/png/asan.png";
   if (verbose) {
     printf("%s\n", png_path);
   }
-  struct sl_png_chunks chunks = sl_png_read_chunks(png_path);
+  struct sl_png_chunks chunks = sl_png_read_chunks(ctx, png_path);
   assert(chunks.count == 6);
   assert(chunks.chunks[0].type == sl_png_IHDR);
   assert(chunks.chunks[0].data.size == 13);
@@ -52,7 +53,7 @@ static bool test_read_large_image_with_many_chunks(const bool verbose) {
   return true;
 }
 
-static bool test_read_single_pixel_header(const bool verbose) {
+static bool test_read_single_pixel_header(struct sl_context ctx[static 1], const bool verbose) {
   for (size_t i = 0; i < 3; ++i) {
     const char* png_path = (const char*[]){
         "./test-data/png/ff0000-1x1-rgb-nocomp.png",
@@ -62,7 +63,7 @@ static bool test_read_single_pixel_header(const bool verbose) {
     if (verbose) {
       printf("%s\n", png_path);
     }
-    struct sl_png_header pixel = sl_png_read_header(png_path);
+    struct sl_png_header pixel = sl_png_read_header(ctx, png_path);
     if (!pixel.width) {
       return false;
     }
@@ -77,13 +78,13 @@ static bool test_read_single_pixel_header(const bool verbose) {
   return true;
 }
 
-static bool test_read_img_header(const bool verbose) {
+static bool test_read_img_header(struct sl_context ctx[static 1], const bool verbose) {
   {
     const char* png_path = "./test-data/png/white-square-rgba-dynamic.png";
     if (verbose) {
       printf("%s\n", png_path);
     }
-    struct sl_png_header white_square = sl_png_read_header(png_path);
+    struct sl_png_header white_square = sl_png_read_header(ctx, png_path);
     if (!white_square.width) {
       return false;
     }
@@ -101,7 +102,7 @@ static bool test_read_img_header(const bool verbose) {
     if (verbose) {
       printf("%s\n", png_path);
     }
-    struct sl_png_header github_squares = sl_png_read_header(png_path);
+    struct sl_png_header github_squares = sl_png_read_header(ctx, png_path);
     if (!github_squares.width) {
       return false;
     }
@@ -119,7 +120,7 @@ static bool test_read_img_header(const bool verbose) {
     if (verbose) {
       printf("%s\n", png_path);
     }
-    struct sl_png_header github_profile = sl_png_read_header(png_path);
+    struct sl_png_header github_profile = sl_png_read_header(ctx, png_path);
     if (!github_profile.width) {
       return false;
     }
@@ -137,7 +138,7 @@ static bool test_read_img_header(const bool verbose) {
     if (verbose) {
       printf("%s\n", png_path);
     }
-    struct sl_png_header asan = sl_png_read_header(png_path);
+    struct sl_png_header asan = sl_png_read_header(ctx, png_path);
     if (!asan.width) {
       return false;
     }
@@ -153,12 +154,16 @@ static bool test_read_img_header(const bool verbose) {
   return true;
 }
 
-static inline int
-test_read_single_pixel(const char* png_path, const size_t on_index, const bool verbose) {
+static inline int test_read_single_pixel(
+    struct sl_context ctx[static 1],
+    const char* png_path,
+    const size_t on_index,
+    const bool verbose
+) {
   if (verbose) {
     printf("%s\n", png_path);
   }
-  struct sl_png_image pixel = sl_png_read_image(png_path);
+  struct sl_png_image pixel = sl_png_read_image(ctx, png_path);
   if (!pixel.data.size) {
     SL_LOG_ERROR("failed reading PNG image %s", png_path);
     return false;
@@ -182,40 +187,43 @@ test_read_single_pixel(const char* png_path, const size_t on_index, const bool v
   return true;
 }
 
-static bool test_read_single_pixel_no_compression(const bool verbose) {
+static bool
+test_read_single_pixel_no_compression(struct sl_context ctx[static 1], const bool verbose) {
   for (size_t on_pixel = 0; on_pixel < 3; ++on_pixel) {
     const char* png_path = (const char*[]){
         "./test-data/png/ff0000-1x1-rgb-nocomp.png",
         "./test-data/png/00ff00-1x1-rgb-nocomp.png",
         "./test-data/png/0000ff-1x1-rgb-nocomp.png",
     }[on_pixel];
-    if (!test_read_single_pixel(png_path, on_pixel, verbose)) {
+    if (!test_read_single_pixel(ctx, png_path, on_pixel, verbose)) {
       return false;
     }
   }
   return true;
 }
 
-static bool test_read_single_pixel_with_fixed_compression(const bool verbose) {
+static bool
+test_read_single_pixel_with_fixed_compression(struct sl_context ctx[static 1], const bool verbose) {
   for (size_t on_pixel = 0; on_pixel < 3; ++on_pixel) {
     const char* png_path = (const char*[]){
         "./test-data/png/ff0000-1x1-rgb-fixed.png",
         "./test-data/png/00ff00-1x1-rgb-fixed.png",
         "./test-data/png/0000ff-1x1-rgb-fixed.png",
     }[on_pixel];
-    if (!test_read_single_pixel(png_path, on_pixel, verbose)) {
+    if (!test_read_single_pixel(ctx, png_path, on_pixel, verbose)) {
       return false;
     }
   }
   return true;
 }
 
-static bool test_read_rgba_image_with_dynamic_compression(const bool verbose) {
+static bool
+test_read_rgba_image_with_dynamic_compression(struct sl_context ctx[static 1], const bool verbose) {
   const char* png_path = "./test-data/png/white-square-rgba-dynamic.png";
   if (verbose) {
     printf("%s\n", png_path);
   }
-  struct sl_png_image white_square = sl_png_read_image(png_path);
+  struct sl_png_image white_square = sl_png_read_image(ctx, png_path);
   if (!white_square.data.size) {
     return false;
   }
@@ -242,7 +250,10 @@ static bool test_read_rgba_image_with_dynamic_compression(const bool verbose) {
   return true;
 }
 
-static bool test_read_small_images_with_dynamic_compression(const bool verbose) {
+static bool test_read_small_images_with_dynamic_compression(
+    struct sl_context ctx[static 1],
+    const bool verbose
+) {
   for (size_t i = 0; i < 3; ++i) {
     const char* png_path = (const char*[]){
         "./test-data/png/0099ee-80x160-rgb-dynamic.png",
@@ -257,7 +268,7 @@ static bool test_read_small_images_with_dynamic_compression(const bool verbose) 
     if (verbose) {
       printf("%s\n", png_path);
     }
-    struct sl_png_image img = sl_png_read_image(png_path);
+    struct sl_png_image img = sl_png_read_image(ctx, png_path);
     if (!img.data.size) {
       SL_LOG_ERROR("failed reading PNG image %s", png_path);
       return false;
@@ -285,13 +296,16 @@ static bool test_read_small_images_with_dynamic_compression(const bool verbose) 
   return true;
 }
 
-static bool test_read_large_images_with_dynamic_compression(const bool verbose) {
+static bool test_read_large_images_with_dynamic_compression(
+    struct sl_context ctx[static 1],
+    const bool verbose
+) {
   {
     const char* png_path = "./test-data/png/aabbcc-1600x1600-rgb-dynamic.png";
     if (verbose) {
       printf("%s\n", png_path);
     }
-    struct sl_png_image square = sl_png_read_image(png_path);
+    struct sl_png_image square = sl_png_read_image(ctx, png_path);
     if (!square.data.size) {
       SL_LOG_ERROR("failed reading PNG image %s", png_path);
       return false;
@@ -321,7 +335,7 @@ static bool test_read_large_images_with_dynamic_compression(const bool verbose) 
     if (verbose) {
       printf("%s\n", png_path);
     }
-    struct sl_png_image asan = sl_png_read_image(png_path);
+    struct sl_png_image asan = sl_png_read_image(ctx, png_path);
     if (!asan.data.size) {
       SL_LOG_ERROR("failed reading PNG image %s", png_path);
       return false;
@@ -342,11 +356,15 @@ static bool test_read_large_images_with_dynamic_compression(const bool verbose) 
   return true;
 }
 
-int test_read_write_read(const bool verbose, const char* img0_path) {
+int test_read_write_read(
+    struct sl_context ctx[static 1],
+    const bool verbose,
+    const char* img0_path
+) {
   if (verbose) {
     printf("%s\n", img0_path);
   }
-  struct sl_png_image img0 = sl_png_read_image(img0_path);
+  struct sl_png_image img0 = sl_png_read_image(ctx, img0_path);
   if (!img0.data.size) {
     SL_LOG_ERROR("failed reading PNG image %s", img0_path);
     return false;
@@ -357,9 +375,9 @@ int test_read_write_read(const bool verbose, const char* img0_path) {
 
   char img1_path[200] = {0};
   assert(0 < snprintf(img1_path, SL_ARRAY_LEN(img1_path), "%s/sl_test.png", sl_misc_tmpdir()));
-  assert(sl_png_write_image(img0, img1_path));
+  assert(sl_png_write_image(ctx, img0, img1_path));
 
-  struct sl_png_image img1 = sl_png_read_image(img1_path);
+  struct sl_png_image img1 = sl_png_read_image(ctx, img1_path);
   if (img1.data.size != img0.data.size) {
     fprintf(
         stderr,
@@ -379,7 +397,7 @@ int test_read_write_read(const bool verbose, const char* img0_path) {
   return true;
 }
 
-static bool test_read_write_read_single_pixel(const bool verbose) {
+static bool test_read_write_read_single_pixel(struct sl_context ctx[static 1], const bool verbose) {
   const char* paths[] = {
       "./test-data/png/ff0000-1x1-rgb-nocomp.png",
       "./test-data/png/00ff00-1x1-rgb-nocomp.png",
@@ -387,14 +405,14 @@ static bool test_read_write_read_single_pixel(const bool verbose) {
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(paths); ++i) {
     const char* png_path = paths[i];
-    if (!test_read_write_read(verbose, png_path)) {
+    if (!test_read_write_read(ctx, verbose, png_path)) {
       return false;
     }
   }
   return true;
 }
 
-static bool test_read_write_read_small(const bool verbose) {
+static bool test_read_write_read_small(struct sl_context ctx[static 1], const bool verbose) {
   const char* paths[] = {
       "./test-data/png/0099ee-80x160-rgb-dynamic.png",
       "./test-data/png/cc1177-80x160-rgb-dynamic.png",
@@ -402,14 +420,14 @@ static bool test_read_write_read_small(const bool verbose) {
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(paths); ++i) {
     const char* png_path = paths[i];
-    if (!test_read_write_read(verbose, png_path)) {
+    if (!test_read_write_read(ctx, verbose, png_path)) {
       return false;
     }
   }
   return true;
 }
 
-static bool test_read_write_read_large(const bool verbose) {
+static bool test_read_write_read_large(struct sl_context ctx[static 1], const bool verbose) {
   const char* paths[] = {
       "./test-data/png/aabbcc-1600x1600-rgb-dynamic.png",
       "./test-data/png/github-profile-rgb-dynamic.png",
@@ -417,7 +435,7 @@ static bool test_read_write_read_large(const bool verbose) {
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(paths); ++i) {
     const char* png_path = paths[i];
-    if (!test_read_write_read(verbose, png_path)) {
+    if (!test_read_write_read(ctx, verbose, png_path)) {
       return false;
     }
   }

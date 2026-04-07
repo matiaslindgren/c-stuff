@@ -1,14 +1,15 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stufflib/hash/hash.h>
 #include <stufflib/hashmap/hashmap.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/misc/misc.h>
 
-struct sl_hashmap sl_hashmap_create(size_t init_capacity) {
+struct sl_hashmap sl_hashmap_create(struct sl_context ctx[static 1], size_t init_capacity) {
   return (struct sl_hashmap){
       .capacity = init_capacity,
-      .slots    = sl_alloc(init_capacity, sizeof(struct sl_hashmap_slot)),
+      .slots    = sl_alloc(ctx, init_capacity, sizeof(struct sl_hashmap_slot)),
   };
 }
 
@@ -47,6 +48,7 @@ sl_hashmap_get(struct sl_hashmap map[const static 1], struct sl_span key[const s
 }
 
 void sl_hashmap_write(
+    struct sl_context ctx[static 1],
     struct sl_hashmap map[const static 1],
     struct sl_span key[const static 1],
     const size_t hash,
@@ -54,7 +56,7 @@ void sl_hashmap_write(
     void* value
 ) {
   struct sl_hashmap_slot* slot = sl_hashmap_find_slot(map, key, hash);
-  slot->key                    = sl_span_copy(key);
+  slot->key                    = sl_span_copy(ctx, key);
   slot->hash                   = hash;
   slot->type                   = type;
   switch (type) {
@@ -73,24 +75,29 @@ void sl_hashmap_write(
 }
 
 void sl_hashmap_set(
+    struct sl_context ctx[static 1],
     struct sl_hashmap map[const static 1],
     struct sl_span key[const static 1],
     enum sl_hashmap_type type,
     void* value
 ) {
-  sl_hashmap_write(map, key, sl_hash_crc32_bytes(key->size, key->data), type, value);
+  sl_hashmap_write(ctx, map, key, sl_hash_crc32_bytes(key->size, key->data), type, value);
 }
 
-void sl_hashmap_resize(struct sl_hashmap map[const static 1], const size_t new_capacity) {
+void sl_hashmap_resize(
+    struct sl_context ctx[static 1],
+    struct sl_hashmap map[const static 1],
+    const size_t new_capacity
+) {
   assert(new_capacity);
   assert(new_capacity >= map->size);
   struct sl_hashmap_slot* const old_slots = map->slots;
   const size_t old_capacity               = map->capacity;
-  map->slots                              = sl_alloc(new_capacity, sizeof(struct sl_hashmap_slot));
-  map->capacity                           = new_capacity;
+  map->slots    = sl_alloc(ctx, new_capacity, sizeof(struct sl_hashmap_slot));
+  map->capacity = new_capacity;
   for (size_t i = 0; i < old_capacity; ++i) {
     struct sl_hashmap_slot slot = old_slots[i];
-    sl_hashmap_write(map, &(slot.key), slot.hash, slot.type, &(slot.value));
+    sl_hashmap_write(ctx, map, &(slot.key), slot.hash, slot.type, &(slot.value));
   }
   sl_hashmap_destroy_slots(old_capacity, old_slots);
 }
@@ -108,17 +115,18 @@ bool sl_hashmap_contains(
 }
 
 void sl_hashmap_insert(
+    struct sl_context ctx[static 1],
     struct sl_hashmap map[const static 1],
     struct sl_span key[const static 1],
     enum sl_hashmap_type type,
     void* value
 ) {
   assert(map->size < map->capacity);
-  sl_hashmap_set(map, key, type, value);
+  sl_hashmap_set(ctx, map, key, type, value);
   ++(map->size);
   if (sl_hashmap_load_factor(map) > SL_HASHMAP_MAX_LOAD_FACTOR) {
     const size_t new_capacity = sl_math_next_power_of_two(map->capacity);
-    sl_hashmap_resize(map, new_capacity);
+    sl_hashmap_resize(ctx, map, new_capacity);
   }
 }
 

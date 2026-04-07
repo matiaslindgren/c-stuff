@@ -8,7 +8,8 @@
 #include <stufflib/macros/macros.h>
 #include <stufflib/span/span.h>
 
-static bool test_data_view_one(const bool) {
+static bool test_data_view_one(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
   unsigned char x     = 1;
   struct sl_span data = sl_span_view(1, &x);
   assert(data.size == 1);
@@ -19,7 +20,8 @@ static bool test_data_view_one(const bool) {
   return true;
 }
 
-static bool test_data_view_array(const bool) {
+static bool test_data_view_array(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
   unsigned char x[]   = {1, 2, 3, 4};
   const size_t n      = SL_ARRAY_LEN(x);
   struct sl_span data = sl_span_view(n, x);
@@ -34,9 +36,9 @@ static bool test_data_view_array(const bool) {
   return true;
 }
 
-static bool test_data_create(const bool) {
+static bool test_data_create(struct sl_context ctx[static 1], const bool) {
   const size_t n      = 10;
-  struct sl_span data = sl_span_create(n);
+  struct sl_span data = sl_span_create(ctx, n);
   assert(data.size == n);
   assert(data.owned);
   assert(data.data);
@@ -48,8 +50,8 @@ static bool test_data_create(const bool) {
   return true;
 }
 
-static bool test_data_create_empty(const bool) {
-  struct sl_span data = sl_span_create(0);
+static bool test_data_create_empty(struct sl_context ctx[static 1], const bool) {
+  struct sl_span data = sl_span_create(ctx, 0);
   assert(data.size == 0);
   assert(data.owned);
   assert(!data.data);
@@ -58,7 +60,7 @@ static bool test_data_create_empty(const bool) {
   return true;
 }
 
-static bool test_data_create_from_cstr(const bool) {
+static bool test_data_create_from_cstr(struct sl_context ctx[static 1], const bool) {
   const char* strings[] = {
       "000",
       "0",
@@ -77,7 +79,7 @@ static bool test_data_create_from_cstr(const bool) {
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(strings); ++i) {
     const char* cstr   = strings[i];
-    struct sl_span str = sl_span_from_str(cstr);
+    struct sl_span str = sl_span_from_str(ctx, cstr);
     assert(str.size == lengths[i]);
     assert(str.owned);
     if (str.size == 0) {
@@ -92,7 +94,7 @@ static bool test_data_create_from_cstr(const bool) {
   return true;
 }
 
-static bool test_data_create_from_hexadecimal_cstr(const bool) {
+static bool test_data_create_from_hexadecimal_cstr(struct sl_context ctx[static 1], const bool) {
   const char* strings[] = {
       "0x00",
       "0x1",
@@ -135,13 +137,13 @@ static bool test_data_create_from_hexadecimal_cstr(const bool) {
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(strings); ++i) {
     const char* cstr   = strings[i];
-    struct sl_span str = sl_span_from_str(cstr);
+    struct sl_span str = sl_span_from_str(ctx, cstr);
     assert(str.size == str_lengths[i]);
     assert(str.owned);
     assert(str.data);
     assert(memcmp(str.data, cstr, str.size) == 0);
     assert(sl_span_is_hexadecimal_str(&str));
-    struct sl_span num = sl_span_parse_hex(&str);
+    struct sl_span num = sl_span_parse_hex(ctx, &str);
     assert(num.size == data_lengths[i]);
     assert(num.owned);
     assert(num.data);
@@ -152,11 +154,11 @@ static bool test_data_create_from_hexadecimal_cstr(const bool) {
   return true;
 }
 
-static bool test_data_copy_view(const bool) {
+static bool test_data_copy_view(struct sl_context ctx[static 1], const bool) {
   unsigned char x[]    = {1, 2, 3, 4};
   const size_t n       = SL_ARRAY_LEN(x);
   struct sl_span data1 = sl_span_view(n, x);
-  struct sl_span data2 = sl_span_copy(&data1);
+  struct sl_span data2 = sl_span_copy(ctx, &data1);
   assert(!data1.owned);
   assert(data1.data == x);
   assert(data2.owned);
@@ -171,14 +173,14 @@ static bool test_data_copy_view(const bool) {
   return true;
 }
 
-static bool test_data_concat_views(const bool) {
+static bool test_data_concat_views(struct sl_context ctx[static 1], const bool) {
   unsigned char x1[]   = {1, 2, 3, 4};
   unsigned char x2[]   = {6, 7, 8, 9, 10, 11};
   const size_t n1      = SL_ARRAY_LEN(x1);
   const size_t n2      = SL_ARRAY_LEN(x2);
   struct sl_span data1 = sl_span_view(n1, x1);
   struct sl_span data2 = sl_span_view(n2, x2);
-  struct sl_span data3 = sl_span_concat(&data1, &data2);
+  struct sl_span data3 = sl_span_concat(ctx, &data1, &data2);
   assert(!data1.owned);
   assert(!data2.owned);
   assert(data3.owned);
@@ -200,12 +202,12 @@ static bool test_data_concat_views(const bool) {
   return true;
 }
 
-static bool test_data_concat_empty(const bool) {
+static bool test_data_concat_empty(struct sl_context ctx[static 1], const bool) {
   unsigned char x1[]   = {1, 2, 3, 4};
   const size_t n1      = SL_ARRAY_LEN(x1);
   struct sl_span data1 = sl_span_view(n1, x1);
-  struct sl_span data2 = sl_span_create(0);
-  struct sl_span data3 = sl_span_concat(&data1, &data2);
+  struct sl_span data2 = sl_span_create(ctx, 0);
+  struct sl_span data3 = sl_span_concat(ctx, &data1, &data2);
   assert(!data1.owned);
   assert(data2.owned);
   assert(data3.owned);
@@ -222,7 +224,8 @@ static bool test_data_concat_empty(const bool) {
   return true;
 }
 
-static bool test_data_slice(const bool) {
+static bool test_data_slice(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
   unsigned char x[]   = {1, 2, 3, 4, 5, 6};
   const size_t n      = SL_ARRAY_LEN(x);
   struct sl_span data = sl_span_view(n, x);
@@ -242,7 +245,8 @@ static bool test_data_slice(const bool) {
   return true;
 }
 
-static bool test_data_slice_past_end(const bool) {
+static bool test_data_slice_past_end(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
   unsigned char x[]    = {1, 2, 3, 4, 5, 6};
   const size_t n       = SL_ARRAY_LEN(x);
   struct sl_span data  = sl_span_view(n, x);
@@ -255,7 +259,8 @@ static bool test_data_slice_past_end(const bool) {
   return true;
 }
 
-static bool test_data_find(const bool) {
+static bool test_data_find(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
   unsigned char x1[]   = {1, 2, 3, 1, 2, 3};
   unsigned char x2[]   = {2, 3};
   const size_t n1      = SL_ARRAY_LEN(x1);
@@ -272,7 +277,8 @@ static bool test_data_find(const bool) {
   return true;
 }
 
-static bool test_data_iter(const bool) {
+static bool test_data_iter(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
   unsigned char x[]       = {1, 2, 3, 4, 5, 6};
   const size_t n          = SL_ARRAY_LEN(x);
   struct sl_span data     = sl_span_view(n, x);

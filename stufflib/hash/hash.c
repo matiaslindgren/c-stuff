@@ -2,6 +2,7 @@
 #include <limits.h>
 #include <string.h>
 #include <stufflib/hash/hash.h>
+#include <stufflib/macros/macros.h>
 
 static uint32_t sl_hash_crc32_lut[0xff + 1] = {0};
 static int sl_hash_crc32_lut_computed       = 0;

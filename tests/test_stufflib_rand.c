@@ -7,7 +7,8 @@
 #include <stufflib/macros/macros.h>
 #include <stufflib/rand/rand.h>
 
-static bool test_rand_fill(const bool) {
+static bool test_rand_fill(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
   const size_t n = 1000;
   double x[n];
   sl_rand_fill_double(n, x, 0);
@@ -25,7 +26,8 @@ static bool test_rand_fill(const bool) {
   return true;
 }
 
-static bool test_rand_set_zero(const bool) {
+static bool test_rand_set_zero(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
   const size_t n = 1000;
   double x[n];
   for (size_t i = 0; i < n; ++i) {
@@ -46,7 +48,8 @@ static bool test_rand_set_zero(const bool) {
   return true;
 }
 
-static bool test_randint(const bool) {
+static bool test_randint(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
   assert(sl_rand_int(0, 0) == 0);
   assert(sl_rand_int(1, 0) == 1);
   assert(sl_rand_int(0, 1) == 0);
@@ -66,7 +69,8 @@ static bool test_randint(const bool) {
   return true;
 }
 
-static bool test_rand_shuffle(const bool verbose) {
+static bool test_rand_shuffle(struct sl_context ctx[static 1], const bool verbose) {
+  (void)ctx;
   {
     unsigned char v[] = {0};
     sl_rand_shuffle(v, 1, 1);
@@ -110,7 +114,8 @@ static bool test_rand_shuffle(const bool verbose) {
   return true;
 }
 
-static bool test_rand_shuffle_together(const bool verbose) {
+static bool test_rand_shuffle_together(struct sl_context ctx[static 1], const bool verbose) {
+  (void)ctx;
   for (int iter = 0; iter < 100; ++iter) {
     size_t v1[16]  = {0};
     char v2[16]    = {0};

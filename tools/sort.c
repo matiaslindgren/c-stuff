@@ -24,11 +24,13 @@ int compare_as_doubles(const void* lhs_data, const void* rhs_data) {
 }
 
 char** sort_doubles(const size_t count, char* lines[count]) {
-  return sl_sort_quicksort(lines, count, sizeof(char*), compare_as_doubles);
+  struct sl_context ctx = {0};
+  return sl_sort_quicksort(&ctx, lines, count, sizeof(char*), compare_as_doubles);
 }
 
 int main(int argc, char* const argv[argc + 1]) {
-  bool is_done = false;
+  struct sl_context ctx = {0};
+  bool is_done          = false;
 
   unsigned char reader_buffer_data[1024 << 6] = {0};
   struct sl_span reader_buffer = sl_span_view(SL_ARRAY_LEN(reader_buffer_data), reader_buffer_data);
@@ -51,7 +53,7 @@ int main(int argc, char* const argv[argc + 1]) {
   }
 
   const char* path       = sl_args_get_positional(&args, 1);
-  content                = sl_fs_read_file_utf8(path, &reader_buffer);
+  content                = sl_fs_read_file_utf8(&ctx, path, &reader_buffer);
   struct sl_span newline = sl_span_view(1, (unsigned char[]){'\n'});
 
   struct sl_tokenizer newline_tokenizer = sl_tokenizer_create(&(content.utf8_data), &newline);
@@ -64,8 +66,8 @@ int main(int argc, char* const argv[argc + 1]) {
     if (token->data[0] == 0) {
       continue;
     }
-    struct sl_string line = sl_string_from_utf8(token);
-    lines                 = sl_realloc(lines, num_lines, num_lines + 1, sizeof(char*));
+    struct sl_string line = sl_string_from_utf8(&ctx, token);
+    lines                 = sl_realloc(&ctx, lines, num_lines, num_lines + 1, sizeof(char*));
     lines[num_lines++]    = (char*)line.utf8_data.data;
   }
 
@@ -75,7 +77,7 @@ int main(int argc, char* const argv[argc + 1]) {
       goto done;
     }
   } else {
-    if (!sl_sort_quicksort_str(num_lines, lines)) {
+    if (!sl_sort_quicksort_str(&ctx, num_lines, lines)) {
       SL_LOG_ERROR("failed sorting input as ascii");
       goto done;
     }

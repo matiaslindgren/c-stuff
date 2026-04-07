@@ -16,9 +16,9 @@ int sl_uf_assert_roots_ok(const struct sl_unionfind uf, size_t expected_roots[st
   return true;
 }
 
-static bool test_union_until_single_set(const bool) {
+static bool test_union_until_single_set(struct sl_context ctx[static 1], const bool) {
   struct sl_unionfind uf = {0};
-  if (!sl_unionfind_init(&uf, 10)) {
+  if (!sl_unionfind_init(ctx, &uf, 10)) {
     SL_LOG_ERROR("unable to allocate union find structure");
     return false;
   }
@@ -81,9 +81,9 @@ static bool test_union_until_single_set(const bool) {
   return true;
 }
 
-static bool test_union_self(const bool) {
+static bool test_union_self(struct sl_context ctx[static 1], const bool) {
   struct sl_unionfind uf = {0};
-  if (!sl_unionfind_init(&uf, 3)) {
+  if (!sl_unionfind_init(ctx, &uf, 3)) {
     SL_LOG_ERROR("unable to allocate union find structure");
     return false;
   }

@@ -5,6 +5,7 @@
 #include <stufflib/ml/ml.h>
 
 void sl_ml_random_train_test_split(
+    struct sl_context ctx[static 1],
     struct sl_la_matrix data[const static 1],
     struct sl_la_matrix train[const static 1],
     struct sl_la_matrix test[const static 1],
@@ -13,11 +14,11 @@ void sl_ml_random_train_test_split(
     uint16_t test_classes[const static 1]
 ) {
   if (train->rows + test->rows != data->rows) {
-    SL_LOG_ERROR("train set size + test set size != data set size");
+    SL_ERROR(ctx, "train set size + test set size != data set size");
     return;
   }
   if (train->cols != test->cols || data->cols != train->cols) {
-    SL_LOG_ERROR("number of features must be equal when doing a split");
+    SL_ERROR(ctx, "number of features must be equal when doing a split");
     return;
   }
   sl_rand_shuffle_together(

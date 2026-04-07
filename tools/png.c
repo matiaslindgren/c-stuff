@@ -11,7 +11,8 @@ bool segment(const struct sl_args args[const static 1]) {
     return false;
   }
 
-  bool is_done = false;
+  struct sl_context ctx = {0};
+  bool is_done          = false;
 
   struct sl_png_image src = {0};
   struct sl_png_image dst = {0};
@@ -24,7 +25,7 @@ bool segment(const struct sl_args args[const static 1]) {
   if (verbose) {
     printf("read %s\n", png_src_path);
   }
-  src = sl_png_read_image(png_src_path);
+  src = sl_png_read_image(&ctx, png_src_path);
   if (!src.data.size) {
     SL_LOG_ERROR("failed reading PNG image %s", png_src_path);
     goto done;
@@ -32,12 +33,12 @@ bool segment(const struct sl_args args[const static 1]) {
   if (verbose) {
     printf("segmenting, threshold %zu%%\n", threshold_percent);
   }
-  sl_img_segment_rgb(&dst, &src, threshold_percent);
+  sl_img_segment_rgb(&ctx, &dst, &src, threshold_percent);
 
   if (verbose) {
     printf("write %s\n", png_dst_path);
   }
-  if (!sl_png_write_image(dst, png_dst_path)) {
+  if (!sl_png_write_image(&ctx, dst, png_dst_path)) {
     SL_LOG_ERROR("failed writing PNG image %s", png_dst_path);
     goto done;
   }
@@ -56,7 +57,8 @@ bool info(const struct sl_args args[const static 1]) {
     return false;
   }
 
-  bool is_done = false;
+  struct sl_context ctx = {0};
+  bool is_done          = false;
 
   struct sl_png_chunks chunks = {0};
   struct sl_png_image img     = {0};
@@ -64,11 +66,11 @@ bool info(const struct sl_args args[const static 1]) {
   const char* const png_path = sl_args_get_positional(args, 1);
 
   printf("{");
-  chunks = sl_png_read_chunks(png_path);
+  chunks = sl_png_read_chunks(&ctx, png_path);
   printf("\"chunks\":");
   sl_png_dump_chunk_type_freq(stdout, chunks);
 
-  struct sl_png_header header = sl_png_read_header(png_path);
+  struct sl_png_header header = sl_png_read_header(&ctx, png_path);
   printf(",\"header\":");
   sl_png_dump_header(stdout, header);
 
@@ -78,7 +80,7 @@ bool info(const struct sl_args args[const static 1]) {
     goto done;
   }
 
-  img = sl_png_read_image(png_path);
+  img = sl_png_read_image(&ctx, png_path);
   printf(",\"data\":");
   sl_png_dump_img_data_info(stdout, img);
   is_done = true;
@@ -96,10 +98,11 @@ bool dump_raw(const struct sl_args args[const static 1]) {
     return false;
   }
 
-  bool is_done = false;
+  struct sl_context ctx = {0};
+  bool is_done          = false;
 
   const char* const png_path      = sl_args_get_positional(args, 1);
-  struct sl_png_chunks img_chunks = sl_png_read_chunks(png_path);
+  struct sl_png_chunks img_chunks = sl_png_read_chunks(&ctx, png_path);
   if (!img_chunks.count) {
     SL_LOG_ERROR("failed reading PNG IDAT chunks from %s", png_path);
     goto done;

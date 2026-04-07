@@ -45,20 +45,28 @@ size_t sl_math_next_prime(size_t x) {
   }
 }
 
-size_t* sl_math_factorize(size_t n) {
+size_t* sl_math_factorize(struct sl_context ctx[static 1], size_t n) {
   if (n == 0 || n == 1) {
     return nullptr;
   }
 
   size_t capacity = 4;
-  size_t* factors = sl_alloc(capacity, sizeof(size_t));
+  size_t* factors = sl_alloc(ctx, capacity, sizeof(size_t));
+  if (!factors) {
+    return nullptr;
+  }
 
   size_t num_factors = 0;
   size_t k           = sl_math_next_prime(1);
   while (k <= n) {
     if (n % k == 0) {
       if (num_factors >= capacity) {
-        factors = sl_realloc(factors, capacity, 2 * capacity, sizeof(size_t));
+        size_t* new_factors = sl_realloc(ctx, factors, capacity, 2 * capacity, sizeof(size_t));
+        if (!new_factors) {
+          sl_free(factors);
+          return nullptr;
+        }
+        factors = new_factors;
         capacity *= 2;
       }
       factors[num_factors] = k;
@@ -69,7 +77,12 @@ size_t* sl_math_factorize(size_t n) {
     }
   }
 
-  factors              = sl_realloc(factors, capacity, num_factors + 1, sizeof(size_t));
+  size_t* new_factors = sl_realloc(ctx, factors, capacity, num_factors + 1, sizeof(size_t));
+  if (!new_factors) {
+    sl_free(factors);
+    return nullptr;
+  }
+  factors              = new_factors;
   factors[num_factors] = 0;
   return factors;
 }
