@@ -1,66 +1,27 @@
 # c-stuff
 
-C scribbles. "Everything library". Minimal dependencies (stdlib, openBLAS).
-
-Unstable API, don't depend on this.
+C scribbles. Just for fun and learning. "Everything library". Extremely unstable API.
 
 ## Tools
 
-Functionality (very limited):
-
-* image processing
-* text processing
-* sorting
-* dataset parsing
-* support vector machines
-
-See [`./tools`](./tools)
+[`./tools`](./tools): image processing, text processing, sorting, dataset parsing, SVM.
 
 ## Requirements
 
-It is assumed the target platform is a reasonably common, new OS, with large amounts of RAM (hundreds of MiBs or more).
-The current Makefile assumes either Linux or macOS.
+- `clang-21`
+- `make`
+- Linux or macOS
 
-* `make`
-* `clang-21`
-* probably many more depending on your OS/distro
+See [LLVM docs](https://apt.llvm.org/) or [CI config](./.github/workflows/c.yml) for installation.
 
-See the [LLVM docs](https://apt.llvm.org/) or stufflib's [CI config](./.github/workflows/c.yml) on how to new Clang versions (or use Docker).
-
-### (Optional) Run in Docker
-
-If you can't install Clang 21 using a package manager, you can use Docker:
-
+Alternatively, use Docker:
 ```sh
-./scripts/build_image.sh
-./scripts/run_image.sh
+./scripts/build_image.sh && ./scripts/run_image.sh
 ```
 
-## Makefile targets
+## Build
 
-### Build and test
-
-Unoptimized, with sanitizers (address and UB):
-```sh
-make -j4 all test integration_test
-```
-
-Optimized:
-```sh
-make RELEASE=1 -j4 all test integration_test
-```
-
-### Keep the code tidy
-
-```sh
-make fmt
-```
-
-### Generate compilation database
-
-```sh
-make compile_commands.json
-```
+See [`.github/workflows/c.yml`](.github/workflows/c.yml)
 
 ## References
 
