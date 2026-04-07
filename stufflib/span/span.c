@@ -1,6 +1,10 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stufflib/context/context.h>
+#include <stufflib/iterator/iterator.h>
+#include <stufflib/macros/macros.h>
+#include <stufflib/memory/memory.h>
 #include <stufflib/span/span.h>
 
 struct sl_span sl_span_view(size_t size, unsigned char data[size]) {
@@ -64,8 +68,8 @@ sl_span_parse_hex(struct sl_context ctx[static 1], struct sl_span src[const stat
     return dst;
   }
   for (size_t i_byte = 0; i_byte < dst.size; ++i_byte) {
-    size_t i1   = 2 * i_byte + 2;
-    size_t i2   = 2 * i_byte + 3;
+    size_t i1   = (2 * i_byte) + 2;
+    size_t i2   = (2 * i_byte) + 3;
     char byte[] = {
         (char)(src->data[i1]),
         (char)(i2 < src->size ? src->data[i2] : 0),

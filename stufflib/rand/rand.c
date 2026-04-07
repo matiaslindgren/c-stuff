@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdlib.h>
+#include <stufflib/misc/misc.h>
 #include <stufflib/rand/rand.h>
 #include <time.h>
 
@@ -28,7 +29,7 @@ void sl_rand_shuffle(void* data, const size_t size, const size_t count) {
   unsigned char* v = data;
   for (size_t i = 0; i < count - 1; ++i) {
     const size_t j = sl_rand_int(i, count);
-    sl_misc_swap(v + i * size, v + j * size, size);
+    sl_misc_swap(v + (i * size), v + (j * size), size);
   }
 }
 
@@ -47,7 +48,7 @@ void sl_rand_shuffle_together(
   unsigned char* v2 = data2;
   for (size_t i = 0; i < count - 1; ++i) {
     const size_t j = sl_rand_int(i, count);
-    sl_misc_swap(v1 + i * size1, v1 + j * size1, size1);
-    sl_misc_swap(v2 + i * size2, v2 + j * size2, size2);
+    sl_misc_swap(v1 + (i * size1), v1 + (j * size1), size1);
+    sl_misc_swap(v2 + (i * size2), v2 + (j * size2), size2);
   }
 }

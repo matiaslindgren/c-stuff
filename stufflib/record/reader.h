@@ -44,7 +44,7 @@ bool sl_record_reader_read(
 bool sl_record_read_all(
     struct sl_context ctx[static 1],
     struct sl_record record[const static 1],
-    const size_t bufsize,
+    size_t bufsize,
     void* buffer
 );
 

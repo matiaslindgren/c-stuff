@@ -1,7 +1,9 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stufflib/iterator/iterator.h>
 #include <stufflib/macros/macros.h>
+#include <stufflib/span/span.h>
 #include <stufflib/tokenizer/tokenizer.h>
 
 struct sl_span sl_tokenizer_next_token(

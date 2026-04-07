@@ -4,8 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stufflib/context/context.h>
 #include <stufflib/hash/hash.h>
+#include <stufflib/huffman/huffman.h>
 #include <stufflib/macros/macros.h>
+#include <stufflib/memory/memory.h>
 #include <stufflib/misc/misc.h>
 #include <stufflib/png/deflate.h>
 
@@ -143,7 +146,7 @@ bool sl_inflate_uncompressed_block(
     struct sl_context ctx[static 1],
     struct sl_deflate_deflate_state state[static 1]
 ) {
-  size_t src_byte_pos    = state->src_bit / CHAR_BIT + 1;
+  size_t src_byte_pos    = (state->src_bit / CHAR_BIT) + 1;
   const size_t block_len = sl_misc_parse_lil_endian(2, state->src.data + src_byte_pos);
   src_byte_pos += 2;
 
@@ -344,7 +347,7 @@ size_t sl_deflate_uncompressed(struct sl_span dst, const struct sl_span src) {
   const int cinfo     = 7;
   const int cmf       = (cinfo << 4) | cmethod;
   dst.data[dst_pos++] = cmf;
-  dst.data[dst_pos++] = 31 - (cmf * 256) % 31;
+  dst.data[dst_pos++] = 31 - ((cmf * 256) % 31);
 
   for (bool is_final_block = false; !is_final_block;) {
     assert(src_pos < src.size);

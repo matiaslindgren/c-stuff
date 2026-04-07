@@ -4,8 +4,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stufflib/args/args.h>
+#include <stufflib/context/context.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/math/math.h>
+#include <stufflib/memory/memory.h>
 #include <stufflib/rand/rand.h>
 
 #define SL_ASSERT_FACTORIZATION_OK(verbose, x, factors)              \

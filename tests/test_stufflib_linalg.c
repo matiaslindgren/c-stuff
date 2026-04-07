@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stufflib/args/args.h>
+#include <stufflib/context/context.h>
 #include <stufflib/linalg/linalg.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/math/math.h>

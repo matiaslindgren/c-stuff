@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stufflib/context/context.h>
 #include <stufflib/error/error.h>
-#include <stufflib/macros/macros.h>
 
 bool sl_context_unwind_errors(struct sl_context ctx[static 1], FILE stream[static 1]) {
   bool all_written = true;

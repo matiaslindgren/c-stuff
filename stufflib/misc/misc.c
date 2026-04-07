@@ -2,6 +2,7 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stufflib/macros/macros.h>
 #include <stufflib/misc/misc.h>
 
 size_t sl_misc_parse_lil_endian(const size_t size, const unsigned char data[size]) {
@@ -62,7 +63,7 @@ void sl_misc_swap(
   memcpy(b, tmp, count);
 }
 
-bool sl_misc_is_zero(const size_t count, unsigned char data[count]) {
+bool sl_misc_is_zero(const size_t count, const unsigned char data[count]) {
   for (size_t i = 0; i < count; ++i) {
     if (data[i]) {
       return false;
@@ -74,7 +75,7 @@ bool sl_misc_is_zero(const size_t count, unsigned char data[count]) {
 size_t sl_misc_count_nonzero(const size_t size, const size_t count, unsigned char data[count]) {
   size_t n = 0;
   for (size_t i = 0; i < count; ++i) {
-    n += !sl_misc_is_zero(size, data + i * size);
+    n += !sl_misc_is_zero(size, data + (i * size));
   }
   return n;
 }

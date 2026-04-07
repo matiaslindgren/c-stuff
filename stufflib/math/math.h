@@ -3,7 +3,6 @@
 
 #include <stddef.h>
 #include <stufflib/context/context.h>
-#include <stufflib/memory/memory.h>
 
 typedef double sl_math_function(double);
 

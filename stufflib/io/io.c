@@ -1,10 +1,12 @@
 #include <inttypes.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stufflib/context/context.h>
 #include <stufflib/io/io.h>
 #include <stufflib/macros/macros.h>
-#include <stufflib/misc/misc.h>
+#include <stufflib/span/span.h>
 
 bool sl_file_format_path(
     const size_t bufsize,

@@ -4,10 +4,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stufflib/context/context.h>
 #include <stufflib/hash/hash.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/memory/memory.h>
 #include <stufflib/misc/misc.h>
+#include <stufflib/png/deflate.h>
 #include <stufflib/png/png.h>
 
 const char* sl_png_chunk_types[] = {

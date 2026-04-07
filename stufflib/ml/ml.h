@@ -6,9 +6,6 @@
 #include <stdio.h>
 #include <stufflib/context/context.h>
 #include <stufflib/linalg/linalg.h>
-#include <stufflib/macros/macros.h>
-#include <stufflib/memory/memory.h>
-#include <stufflib/rand/rand.h>
 
 // https://en.wikipedia.org/wiki/Feature_scaling#Rescaling_(min-max_normalization)
 // 2024-06-16
@@ -56,13 +53,13 @@ void sl_ml_minmax_fit(
 void sl_ml_minmax_apply(
     struct sl_ml_minmax_scaler scaler[const static 1],
     struct sl_la_matrix m[const static 1],
-    const float a,
-    const float b
+    float a,
+    float b
 );
 void sl_ml_classification_update(
     struct sl_ml_classification cls[const static 1],
-    const uint16_t pred_class,
-    const uint16_t real_class
+    uint16_t pred_class,
+    uint16_t real_class
 );
 double sl_ml_classification_accuracy(struct sl_ml_classification cls[const static 1]);
 double sl_ml_classification_precision(struct sl_ml_classification cls[const static 1]);

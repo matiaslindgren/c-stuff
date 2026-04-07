@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stufflib/error/error.h>
-#include <stufflib/macros/macros.h>
 
 void sl_error_push(
     struct sl_error_stack s[static 1],

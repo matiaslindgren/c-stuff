@@ -11,9 +11,9 @@
 #include <stdint.h>
 
 void sl_hash_crc32_lut_init(void);
-uint32_t sl_hash_crc32(const uint32_t crc32_init, const size_t count, const void* raw_data);
-uint32_t sl_hash_crc32_bytes(const size_t count, const unsigned char data[const count]);
+uint32_t sl_hash_crc32(uint32_t crc32_init, size_t count, const void* raw_data);
+uint32_t sl_hash_crc32_bytes(size_t count, const unsigned char data[const count]);
 uint32_t sl_hash_crc32_str(const char str[const static 1]);
-uint32_t sl_hash_adler32(const size_t count, const unsigned char data[const count]);
+uint32_t sl_hash_adler32(size_t count, const unsigned char data[const count]);
 
 #endif  // SL_HASH_H_INCLUDED

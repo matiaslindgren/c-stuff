@@ -2,6 +2,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stufflib/context/context.h>
+#include <stufflib/memory/memory.h>
+#include <stufflib/misc/misc.h>
 #include <stufflib/sort/sort.h>
 
 #define SL_INSERTSORT_THRESHOLD 24
@@ -16,12 +19,12 @@ static void* sl_sort_internal_insertsort(
   unsigned char* src      = src_raw;
   unsigned char* swap_tmp = tmp_raw;
   for (size_t rhs = 1; rhs < count; ++rhs) {
-    memcpy(swap_tmp, src + rhs * size, size);
+    memcpy(swap_tmp, src + (rhs * size), size);
     size_t lhs = rhs;
-    for (; lhs > 0 && compare(src + (lhs - 1) * size, swap_tmp) > 0; --lhs) {
-      memcpy(src + lhs * size, src + (lhs - 1) * size, size);
+    for (; lhs > 0 && compare(src + ((lhs - 1) * size), swap_tmp) > 0; --lhs) {
+      memcpy(src + (lhs * size), src + ((lhs - 1) * size), size);
     }
-    memcpy(src + lhs * size, swap_tmp, size);
+    memcpy(src + (lhs * size), swap_tmp, size);
   }
   return src;
 }
@@ -60,22 +63,22 @@ static void sl_sort_internal_mergesort_merge(
   size_t rhs         = mid;
   size_t out         = begin;
   while (lhs < mid && rhs < end) {
-    if (compare(src + lhs * size, src + rhs * size) < 0) {
-      memcpy(dst + out * size, src + lhs * size, size);
+    if (compare(src + (lhs * size), src + (rhs * size)) < 0) {
+      memcpy(dst + (out * size), src + (lhs * size), size);
       ++lhs;
     } else {
-      memcpy(dst + out * size, src + rhs * size, size);
+      memcpy(dst + (out * size), src + (rhs * size), size);
       ++rhs;
     }
     ++out;
   }
   while (lhs < mid) {
-    memcpy(dst + out * size, src + lhs * size, size);
+    memcpy(dst + (out * size), src + (lhs * size), size);
     ++lhs;
     ++out;
   }
   while (rhs < end) {
-    memcpy(dst + out * size, src + rhs * size, size);
+    memcpy(dst + (out * size), src + (rhs * size), size);
     ++rhs;
     ++out;
   }
@@ -132,23 +135,23 @@ static size_t sl_sort_internal_hoare_partition(
   unsigned char* swap_tmp = pivot + size;
 
   const size_t pivot_idx = sl_misc_midpoint(lo, hi);
-  memcpy(pivot, src + pivot_idx * size, size);
+  memcpy(pivot, src + (pivot_idx * size), size);
 
   size_t lhs = lo - 1;
   size_t rhs = hi + 1;
   while (true) {
     do {
       ++lhs;
-    } while (compare(src + lhs * size, pivot) < 0);
+    } while (compare(src + (lhs * size), pivot) < 0);
     do {
       --rhs;
-    } while (compare(src + rhs * size, pivot) > 0);
+    } while (compare(src + (rhs * size), pivot) > 0);
     if (lhs >= rhs) {
       return rhs;
     }
-    memcpy(swap_tmp, src + lhs * size, size);
-    memcpy(src + lhs * size, src + rhs * size, size);
-    memcpy(src + rhs * size, swap_tmp, size);
+    memcpy(swap_tmp, src + (lhs * size), size);
+    memcpy(src + (lhs * size), src + (rhs * size), size);
+    memcpy(src + (rhs * size), swap_tmp, size);
   }
 }
 
@@ -167,7 +170,7 @@ static void sl_sort_internal_quicksort(
   }
   if (hi - lo < SL_INSERTSORT_THRESHOLD) {
     unsigned char* src_bytes = src;
-    sl_sort_insertsort(ctx, src_bytes + lo * size, hi - lo + 1, size, compare);
+    sl_sort_insertsort(ctx, src_bytes + (lo * size), hi - lo + 1, size, compare);
     return;
   }
   const size_t pivot = sl_sort_internal_hoare_partition(size, src, tmp, lo, hi, compare);

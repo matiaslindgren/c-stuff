@@ -9,8 +9,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stufflib/context/context.h>
-#include <stufflib/memory/memory.h>
-#include <stufflib/png/deflate.h>
 #include <stufflib/span/span.h>
 
 enum sl_png_chunk_type {

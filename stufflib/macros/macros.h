@@ -4,9 +4,6 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <string.h>
-#include <stufflib/context/context.h>
-#include <stufflib/error/error.h>
 
 #define SL_NOOP(...) \
   do {               \

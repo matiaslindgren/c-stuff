@@ -7,7 +7,6 @@
 #include <stufflib/context/context.h>
 #include <stufflib/span/span.h>
 #include <stufflib/string/string.h>
-#include <stufflib/tokenizer/tokenizer.h>
 
 struct sl_span sl_fs_read_file(
     struct sl_context ctx[static 1],

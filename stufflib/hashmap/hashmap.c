@@ -1,10 +1,13 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stufflib/context/context.h>
 #include <stufflib/hash/hash.h>
 #include <stufflib/hashmap/hashmap.h>
-#include <stufflib/macros/macros.h>
-#include <stufflib/misc/misc.h>
+#include <stufflib/iterator/iterator.h>
+#include <stufflib/math/math.h>
+#include <stufflib/memory/memory.h>
+#include <stufflib/span/span.h>
 
 struct sl_hashmap sl_hashmap_create(struct sl_context ctx[static 1], size_t init_capacity) {
   return (struct sl_hashmap){

@@ -4,9 +4,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stufflib/context/context.h>
-#include <stufflib/iterator/iterator.h>
 #include <stufflib/span/span.h>
-#include <stufflib/unicode/unicode.h>
 
 struct sl_string {
   size_t length;

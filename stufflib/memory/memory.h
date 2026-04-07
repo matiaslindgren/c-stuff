@@ -3,7 +3,6 @@
 
 #include <stddef.h>
 #include <stufflib/context/context.h>
-#include <stufflib/macros/macros.h>
 
 void sl_memset_explicit(size_t size, unsigned char data[const size], unsigned char value);
 void* sl_alloc(struct sl_context ctx[static 1], size_t num, size_t size);

@@ -1,5 +1,9 @@
 #include <assert.h>
+#include <stdint.h>
 #include <stdlib.h>
+#include <stufflib/iterator/iterator.h>
+#include <stufflib/macros/macros.h>
+#include <stufflib/span/span.h>
 #include <stufflib/unicode/unicode.h>
 
 size_t sl_unicode_codepoint_width(uint32_t value) {
@@ -18,7 +22,7 @@ size_t sl_unicode_codepoint_width(uint32_t value) {
   return SL_UNICODE_ERROR_WIDTH;
 }
 
-size_t sl_unicode_codepoint_width_from_utf8(size_t size, unsigned char bytes[const size]) {
+size_t sl_unicode_codepoint_width_from_utf8(size_t size, const unsigned char bytes[const size]) {
   // See Table 3-7 in Chapter 3
   enum decode_state {
     start = 0,
@@ -136,7 +140,7 @@ error:
   return SL_UNICODE_ERROR_WIDTH;
 }
 
-uint32_t sl_unicode_codepoint_from_utf8(size_t width, unsigned char bytes[const width]) {
+uint32_t sl_unicode_codepoint_from_utf8(size_t width, const unsigned char bytes[const width]) {
   switch (width) {
     case 4: {
       uint32_t byte1 = bytes[0] & 0x07;

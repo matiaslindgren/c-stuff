@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stufflib/args/args.h>
+#include <stufflib/context/context.h>
 
 bool sl_args_contains_help_flag(const struct sl_args args[const static 1]) {
   for (int i = 1; i < args->argc; ++i) {

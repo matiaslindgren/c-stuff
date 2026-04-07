@@ -2,11 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stufflib/args/args.h>
+#include <stufflib/context/context.h>
 #include <stufflib/filesystem/filesystem.h>
 #include <stufflib/iterator/iterator.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/span/span.h>
 #include <stufflib/string/string.h>
+#include <stufflib/tokenizer/tokenizer.h>
 
 #include "./test_data.h"
 

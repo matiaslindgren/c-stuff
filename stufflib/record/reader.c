@@ -1,8 +1,12 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <stufflib/context/context.h>
+#include <stufflib/io/io.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/record/reader.h>
+#include <stufflib/record/record.h>
+#include <stufflib/span/span.h>
 
 bool sl_record_reader_open(
     struct sl_context ctx[static 1],
@@ -108,7 +112,7 @@ bool sl_record_reader_read_sparse_data(
       return true;
     }
 
-    if (1 != fread(buffer->data + buf_idx * item_size, item_size, 1, reader->file->file)) {
+    if (1 != fread(buffer->data + (buf_idx * item_size), item_size, 1, reader->file->file)) {
       SL_ERROR(
           ctx,
           "failed reading sparse data from %s at index %zu with n_read %zu",

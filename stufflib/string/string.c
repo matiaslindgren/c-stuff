@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stufflib/macros/macros.h>
+#include <stufflib/context/context.h>
+#include <stufflib/iterator/iterator.h>
+#include <stufflib/span/span.h>
 #include <stufflib/string/string.h>
+#include <stufflib/unicode/unicode.h>
 
 void sl_string_destroy(struct sl_string string[static 1]) {
   sl_span_destroy(&(string->utf8_data));

@@ -2,7 +2,10 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <stufflib/context/context.h>
+#include <stufflib/linalg/linalg.h>
 #include <stufflib/ml/ml.h>
+#include <stufflib/rand/rand.h>
 
 void sl_ml_random_train_test_split(
     struct sl_context ctx[static 1],
@@ -29,7 +32,7 @@ void sl_ml_random_train_test_split(
       (size_t)data->rows
   );
   test->data          = data->data;
-  train->data         = data->data + test->rows * test->cols;
+  train->data         = data->data + (test->rows * test->cols);
   const size_t n_test = (size_t)test->rows;
   memcpy(test_classes, classes, sizeof(uint16_t) * n_test);
   memcpy(train_classes, classes + n_test, sizeof(uint16_t) * (size_t)train->rows);
@@ -60,7 +63,7 @@ void sl_ml_minmax_apply(
     for (int i = 0; i < scale->size; ++i) {
       const float s   = (b - a) / (scaler->hi.data[i] - scaler->lo.data[i]);
       scale->data[i]  = s;
-      offset->data[i] = a - s * (scaler->lo.data[i]);
+      offset->data[i] = a - (s * (scaler->lo.data[i]));
     }
     scaler->is_cached = true;
   }
@@ -141,7 +144,7 @@ void sl_ml_svm_linear_fit(
       batch_begin = 0;
     }
 
-    const float eta = 1.0f / (lambda * (float)t);
+    const float eta = 1.0F / (lambda * (float)t);
     sl_la_vector_clear(&(svm->s));
 
     for (int i = 0; i < k; ++i) {
@@ -155,7 +158,7 @@ void sl_ml_svm_linear_fit(
     }
     batch_begin += k;
 
-    sl_la_vector_scale(&(svm->w), 1 - eta * lambda);
+    sl_la_vector_scale(&(svm->w), 1 - (eta * lambda));
     sl_la_vector_scale(&(svm->s), eta / (float)k);
     sl_la_vector_add(&(svm->w), &(svm->s));
   }

@@ -1,7 +1,10 @@
+#include <stddef.h>
+#include <stdint.h>
+#include <stufflib/context/context.h>
 #include <stufflib/img/img.h>
-#include <stufflib/macros/macros.h>
 #include <stufflib/math/math.h>
 #include <stufflib/memory/memory.h>
+#include <stufflib/png/png.h>
 #include <stufflib/unionfind/unionfind.h>
 
 void sl_img_segment_rgb(
@@ -36,10 +39,10 @@ void sl_img_segment_rgb(
   for (size_t row = 0; row < height; ++row) {
     for (size_t col = 0; col < width; ++col) {
       const unsigned char* pixel = sl_png_image_get_pixel(src, row, col);
-      const size_t idx           = row * width + col;
+      const size_t idx           = (row * width) + col;
       segment_sizes[idx]         = 1;
       for (size_t byte = 0; byte < bytes_per_px; ++byte) {
-        segment_sums[bytes_per_px * idx + byte] = pixel[byte] / 255.0;
+        segment_sums[(bytes_per_px * idx) + byte] = pixel[byte] / 255.0;
       }
     }
   }
@@ -48,9 +51,9 @@ void sl_img_segment_rgb(
     num_merges = 0;
     for (size_t row = 2; row < height - 1; ++row) {
       for (size_t col = 2; col < width - 1; ++col) {
-        const size_t cur_idx  = row * width + col;
+        const size_t cur_idx  = (row * width) + col;
         const size_t cur_seg  = sl_unionfind_find_root(&segments, cur_idx);
-        const double* cur_sum = segment_sums + bytes_per_px * cur_seg;
+        const double* cur_sum = segment_sums + (bytes_per_px * cur_seg);
         const double* cur_avg = sl_math_linalg_scalar_vmul(
             sl_math_inv((double)segment_sizes[cur_seg]),
             bytes_per_px,
@@ -61,10 +64,10 @@ void sl_img_segment_rgb(
         double dist2left  = distance_threshold;
         double dist2above = distance_threshold;
 
-        const size_t left_idx = row * width + col - 1;
+        const size_t left_idx = (row * width) + col - 1;
         const size_t left_seg = sl_unionfind_find_root(&segments, left_idx);
         if (left_seg != cur_seg) {
-          const double* left_sum = segment_sums + bytes_per_px * left_seg;
+          const double* left_sum = segment_sums + (bytes_per_px * left_seg);
           const double* left_avg = sl_math_linalg_scalar_vmul(
               sl_math_inv((double)segment_sizes[left_seg]),
               bytes_per_px,
@@ -76,10 +79,10 @@ void sl_img_segment_rgb(
           dist2left = sl_math_linalg_norm2(bytes_per_px, left_diff);
         }
 
-        const size_t above_idx = (row - 1) * width + col;
+        const size_t above_idx = ((row - 1) * width) + col;
         const size_t above_seg = sl_unionfind_find_root(&segments, above_idx);
         if (above_seg != cur_seg) {
-          const double* above_sum = segment_sums + bytes_per_px * above_seg;
+          const double* above_sum = segment_sums + (bytes_per_px * above_seg);
           const double* above_avg = sl_math_linalg_scalar_vmul(
               sl_math_inv((double)segment_sizes[above_seg]),
               bytes_per_px,
@@ -96,8 +99,8 @@ void sl_img_segment_rgb(
           segment_sizes[left_seg] += segment_sizes[cur_seg];
           sl_math_linalg_vadd_inplace(
               bytes_per_px,
-              segment_sums + bytes_per_px * left_seg,
-              segment_sums + bytes_per_px * cur_seg
+              segment_sums + (bytes_per_px * left_seg),
+              segment_sums + (bytes_per_px * cur_seg)
           );
           ++num_merges;
         } else if (dist2above < distance_threshold) {
@@ -105,8 +108,8 @@ void sl_img_segment_rgb(
           segment_sizes[above_seg] += segment_sizes[cur_seg];
           sl_math_linalg_vadd_inplace(
               bytes_per_px,
-              segment_sums + bytes_per_px * above_seg,
-              segment_sums + bytes_per_px * cur_seg
+              segment_sums + (bytes_per_px * above_seg),
+              segment_sums + (bytes_per_px * cur_seg)
           );
           ++num_merges;
         }
@@ -117,7 +120,7 @@ void sl_img_segment_rgb(
   sl_png_image_copy(ctx, dst, src);
   for (size_t row = 0; row < height; ++row) {
     for (size_t col = 0; col < width; ++col) {
-      const size_t idx     = row * width + col;
+      const size_t idx     = (row * width) + col;
       const size_t seg     = sl_unionfind_find_root(&segments, idx);
       const size_t src_row = seg / width;
       const size_t src_col = seg % width;

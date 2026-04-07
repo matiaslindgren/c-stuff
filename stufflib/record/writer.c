@@ -1,9 +1,13 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <stufflib/context/context.h>
+#include <stufflib/io/io.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/misc/misc.h>
+#include <stufflib/record/record.h>
 #include <stufflib/record/writer.h>
+#include <stufflib/span/span.h>
 
 bool sl_record_writer_open(
     struct sl_context ctx[static 1],
@@ -49,7 +53,7 @@ bool sl_record_writer_write(
   if (SL_STR_EQ(layout, "sparse")) {
     int64_t offset = (int64_t)writer->sparse_offset;
     for (size_t buf_idx = 0; buf_idx < buffer_length; ++buf_idx) {
-      unsigned char* value = buffer->data + buf_idx * item_size;
+      unsigned char* value = buffer->data + (buf_idx * item_size);
       if (!sl_misc_is_zero(item_size, value)) {
         if (1 != fwrite(&offset, sizeof(offset), 1, writer->file->file)
             || ferror(writer->file->file) != 0) {

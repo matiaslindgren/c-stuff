@@ -5,8 +5,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stufflib/context/context.h>
-#include <stufflib/io/io.h>
-#include <stufflib/macros/macros.h>
 
 struct sl_record {
   char layout[8];  // TODO enum

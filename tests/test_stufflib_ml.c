@@ -6,6 +6,7 @@
 #define SL_LA_FLOAT_EQ_TOL 1e-6
 
 #include <stufflib/args/args.h>
+#include <stufflib/context/context.h>
 #include <stufflib/linalg/linalg.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/math/math.h>

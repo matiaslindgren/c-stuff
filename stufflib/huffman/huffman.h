@@ -3,8 +3,6 @@
 
 #include <stddef.h>
 #include <stufflib/context/context.h>
-#include <stufflib/memory/memory.h>
-#include <stufflib/misc/misc.h>
 
 struct sl_huffman_tree {
   size_t max_code_len;

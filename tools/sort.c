@@ -3,8 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stufflib/args/args.h>
+#include <stufflib/context/context.h>
 #include <stufflib/filesystem/filesystem.h>
 #include <stufflib/io/io.h>
+#include <stufflib/macros/macros.h>
+#include <stufflib/memory/memory.h>
 #include <stufflib/sort/sort.h>
 #include <stufflib/string/string.h>
 #include <stufflib/tokenizer/tokenizer.h>

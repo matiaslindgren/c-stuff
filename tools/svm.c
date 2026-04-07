@@ -1,14 +1,18 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stufflib/args/args.h>
 #include <stufflib/context/context.h>
 #include <stufflib/dataset/dataset.h>
+#include <stufflib/io/io.h>
 #include <stufflib/linalg/linalg.h>
 #include <stufflib/macros/macros.h>
+#include <stufflib/memory/memory.h>
 #include <stufflib/ml/ml.h>
 #include <stufflib/record/reader.h>
 #include <stufflib/record/record.h>
+#include <stufflib/span/span.h>
 
 bool spambase(struct sl_context ctx[static 1], const struct sl_args args[const static 1]) {
   bool all_ok = false;
@@ -59,7 +63,7 @@ bool spambase(struct sl_context ctx[static 1], const struct sl_args args[const s
       .shuffle_buffer = (size_t[SL_DATASET_SPAMBASE_SAMPLES]){0},
       .batch_size     = 1,
       .n_epochs       = 2,
-      .learning_rate  = 1e-9f,
+      .learning_rate  = 1e-9F,
   };
 
   struct sl_la_matrix test_data = {
@@ -308,7 +312,7 @@ bool rcv1(struct sl_context ctx[static 1], const struct sl_args args[const stati
       .batch_size     = 100,
       .n_epochs       = 1,
       // learning rate from Shalev-Shwartz et al. (2011)
-      .learning_rate  = 1e-4f,
+      .learning_rate  = 1e-4F,
   };
 
   uint16_t classes_buffer[SL_SVM_RCV1_BUFFER_LEN] = {0};
@@ -331,7 +335,7 @@ bool rcv1(struct sl_context ctx[static 1], const struct sl_args args[const stati
       SL_LOG_INFO("RCV1 train batch %zu: copy classes", batch_idx);
     }
     for (size_t i = 0; i < SL_SVM_RCV1_BUFFER_LEN; ++i) {
-      const size_t class_idx = (size_t)samples_batch.rows * batch_idx + i;
+      const size_t class_idx = ((size_t)samples_batch.rows * batch_idx) + i;
       classes_buffer[i]      = class_idx < train_classes_record.size ? train_classes[class_idx] : 0;
     }
 
@@ -378,7 +382,7 @@ bool rcv1(struct sl_context ctx[static 1], const struct sl_args args[const stati
       SL_LOG_INFO("RCV1 test batch %zu: copy classes", batch_idx);
     }
     for (size_t i = 0; i < SL_SVM_RCV1_BUFFER_LEN; ++i) {
-      const size_t class_idx = (size_t)samples_batch.rows * batch_idx + i;
+      const size_t class_idx = ((size_t)samples_batch.rows * batch_idx) + i;
       classes_buffer[i]      = class_idx < test_classes_record.size ? test_classes[class_idx] : 0;
     }
 

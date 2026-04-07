@@ -6,8 +6,6 @@
 // TODO pull iterator impl from core layer
 #include <stufflib/context/context.h>
 #include <stufflib/iterator/iterator.h>
-#include <stufflib/macros/macros.h>
-#include <stufflib/memory/memory.h>
 
 struct sl_span {
   bool owned;

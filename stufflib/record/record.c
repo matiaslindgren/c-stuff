@@ -1,6 +1,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <stufflib/context/context.h>
+#include <stufflib/io/io.h>
+#include <stufflib/macros/macros.h>
 #include <stufflib/record/record.h>
 
 size_t sl_record_item_size(const struct sl_record r[const static 1]) {

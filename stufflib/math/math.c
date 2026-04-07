@@ -1,6 +1,8 @@
 #include <math.h>
 #include <stdlib.h>
+#include <stufflib/context/context.h>
 #include <stufflib/math/math.h>
+#include <stufflib/memory/memory.h>
 
 double sl_math_diff(sl_math_function* f, double x) {
   const double h = 0.0001;

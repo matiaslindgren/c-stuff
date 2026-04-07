@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stufflib/context/context.h>
 #include <stufflib/memory/memory.h>
 
 void sl_memset_explicit(
@@ -42,7 +43,7 @@ void* sl_realloc(
   }
   if (new_count > old_count) {
     const size_t tail_size = (new_count - old_count) * size;
-    unsigned char* tail    = ((unsigned char*)new_data) + old_count * size;
+    unsigned char* tail    = ((unsigned char*)new_data) + (old_count * size);
     sl_memset_explicit(tail_size, tail, 0);
   }
   return new_data;

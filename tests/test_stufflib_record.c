@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stufflib/args/args.h>
+#include <stufflib/context/context.h>
 #include <stufflib/io/io.h>
 #include <stufflib/linalg/linalg.h>
 #include <stufflib/macros/macros.h>

@@ -20,7 +20,6 @@
 #include <stdint.h>
 #include <stufflib/context/context.h>
 #include <stufflib/huffman/huffman.h>
-#include <stufflib/memory/memory.h>
 #include <stufflib/span/span.h>
 
 struct sl_deflate_length_codes {

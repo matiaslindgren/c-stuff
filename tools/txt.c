@@ -8,6 +8,7 @@
 #include <stufflib/filesystem/filesystem.h>
 #include <stufflib/hashmap/hashmap.h>
 #include <stufflib/iterator/iterator.h>
+#include <stufflib/macros/macros.h>
 #include <stufflib/span/span.h>
 #include <stufflib/string/string.h>
 #include <stufflib/tokenizer/tokenizer.h>

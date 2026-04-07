@@ -13,8 +13,8 @@ static const uint32_t SL_UNICODE_ERROR_VALUE = UINT32_MAX;
 static const size_t SL_UNICODE_ERROR_WIDTH   = 0;
 
 size_t sl_unicode_codepoint_width(uint32_t value);
-size_t sl_unicode_codepoint_width_from_utf8(size_t size, unsigned char bytes[const size]);
-uint32_t sl_unicode_codepoint_from_utf8(size_t width, unsigned char bytes[const width]);
+size_t sl_unicode_codepoint_width_from_utf8(size_t size, const unsigned char bytes[const size]);
+uint32_t sl_unicode_codepoint_from_utf8(size_t width, const unsigned char bytes[const width]);
 bool sl_unicode_is_valid_utf8(struct sl_span data[const static 1]);
 size_t sl_unicode_iter_item_width(struct sl_iterator iter[const static 1]);
 void sl_unicode_iter_advance(struct sl_iterator iter[const static 1]);

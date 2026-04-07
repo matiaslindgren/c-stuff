@@ -4,9 +4,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stufflib/context/context.h>
-#include <stufflib/macros/macros.h>
 #include <stufflib/math/math.h>
-#include <stufflib/memory/memory.h>
 
 #ifndef SL_LA_FLOAT_EQ_TOL
   #define SL_LA_FLOAT_EQ_TOL 1e-12

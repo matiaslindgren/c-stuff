@@ -1,7 +1,12 @@
 #include <assert.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
+#include <stufflib/context/context.h>
 #include <stufflib/linalg/linalg.h>
+#include <stufflib/macros/macros.h>
+#include <stufflib/math/math.h>
+#include <stufflib/memory/memory.h>
 
 #ifdef __APPLE__
   #if __has_include(<Accelerate/Accelerate.h>)
@@ -49,7 +54,7 @@ void sl_la_matrix_destroy(struct sl_la_matrix a[const static 1]) {
 }
 
 float* sl_la_matrix_get(struct sl_la_matrix a[const static 1], const int row, const int col) {
-  return a->data + row * a->cols + col;
+  return a->data + (row * a->cols) + col;
 }
 
 float* sl_la_matrix_get_row(struct sl_la_matrix a[const static 1], const int row) {

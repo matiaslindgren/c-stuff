@@ -1,6 +1,9 @@
 #include <stdlib.h>
+#include <stufflib/context/context.h>
 #include <stufflib/huffman/huffman.h>
 #include <stufflib/macros/macros.h>
+#include <stufflib/memory/memory.h>
+#include <stufflib/misc/misc.h>
 
 void sl_huffman_init(
     struct sl_context ctx[static 1],
