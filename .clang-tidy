@@ -14,6 +14,7 @@ Checks: >
   -misc-unused-parameters,
   modernize-*,
   -modernize-use-trailing-return-type,
+  -modernize-use-nullptr,
   performance-*,
   -performance-unnecessary-value-param,
   portability-*,

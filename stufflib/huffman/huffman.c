@@ -8,7 +8,7 @@ void sl_huffman_init(
     const size_t max_symbol,
     const size_t code_lengths[const max_symbol + 1]
 ) {
-  if (!max_symbol) { // TODO useless branch
+  if (!max_symbol) {  // TODO useless branch
     *tree = (struct sl_huffman_tree){0};
     return;
   }
