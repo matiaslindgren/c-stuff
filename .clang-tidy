@@ -1,29 +1,35 @@
-Checks: >
-  -*,
-  bugprone-*,
-  -bugprone-assignment-in-if-condition,
-  -bugprone-easily-swappable-parameters,
-  -bugprone-switch-missing-default-case,
-  cert-*,
-  -cert-dcl37-c,
-  -cert-dcl51-cpp,
-  clang-analyzer-*,
-  concurrency-*,
-  misc-*,
-  -misc-no-recursion,
-  -misc-unused-parameters,
-  modernize-*,
-  -modernize-use-trailing-return-type,
-  -modernize-use-nullptr,
-  performance-*,
-  -performance-unnecessary-value-param,
-  portability-*,
-  readability-*,
-  -readability-else-after-return,
-  -readability-function-cognitive-complexity,
-  -readability-identifier-length,
-  -readability-magic-numbers,
-  -readability-named-parameter,
+Checks:
+  - '-*'
+  - 'bugprone-*'
+  - 'cert-*'
+  - 'clang-analyzer-*'
+  - 'concurrency-*'
+  - 'misc-*'
+  - 'modernize-*'
+  - 'performance-*'
+  - 'portability-*'
+  - 'readability-*'
+  # this looks perfectly fine with the parens `if (!(x = get()))`
+  - '-bugprone-assignment-in-if-condition'
+  - '-bugprone-easily-swappable-parameters'
+   # warns on unhandled fprintf return value
+  - '-cert-err33-c'
+  # warns on not using (unavailable) fprintf_s etc
+  - '-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling'
+  - '-misc-no-recursion'
+  - '-modernize-use-trailing-return-type'
+  # false positives on struct zero init, e.g. struct my_type s = {0};
+  - '-modernize-use-nullptr'
+  # warns when you define integer constant macros
+  - '-modernize-macro-to-enum'
+  - '-performance-unnecessary-value-param'
+  - '-readability-else-after-return'
+  - '-readability-function-cognitive-complexity'
+  - '-readability-identifier-length'
+  - '-readability-magic-numbers'
+  - '-readability-named-parameter'
+  # false positives on struct zero init, e.g. struct my_type s = {0};
+  - '-readability-implicit-bool-conversion'
 WarningsAsErrors: '*'
 FormatStyle: file
 HeaderFilterRegex: '.*'
