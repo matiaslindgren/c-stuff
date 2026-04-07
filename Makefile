@@ -30,15 +30,13 @@ LDFLAGS  ?= -lm -lc
 INCLUDES := -I.
 
 ifeq ($(shell uname), Darwin)
-	llvm_path := $(shell brew --prefix llvm@$(LLVM_VERSION))
-	sdk_path  := $(shell xcrun --show-sdk-path)
-	CC        := $(llvm_path)/bin/clang-$(LLVM_VERSION)
-	LDFLAGS   += -Wl,-syslibroot,$(sdk_path),-framework,Accelerate
-	INCLUDES  += -isysroot $(sdk_path)
-	CLANG_FORMAT :=  $(llvm_path)/bin/clang-format
-	CLANG_TIDY   :=  $(llvm_path)/bin/clang-tidy
-	undefine llvm_path
-	undefine sdk_path
+	LLVM_PATH := $(shell brew --prefix llvm@$(LLVM_VERSION))
+	SDK_PATH  := $(shell xcrun --show-sdk-path)
+	CC        := $(LLVM_PATH)/bin/clang-$(LLVM_VERSION)
+	LDFLAGS   += -Wl,-syslibroot,$(SDK_PATH),-framework,Accelerate
+	INCLUDES  += -isysroot $(SDK_PATH)
+	CLANG_FORMAT :=  $(LLVM_PATH)/bin/clang-format
+	CLANG_TIDY   :=  $(LLVM_PATH)/bin/clang-tidy
 else
 	CC      := clang-$(LLVM_VERSION)
 	LDFLAGS += -lopenblas
