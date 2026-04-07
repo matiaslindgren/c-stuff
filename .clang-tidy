@@ -1,0 +1,47 @@
+Checks: >
+  -*,
+  bugprone-*,
+  -bugprone-assignment-in-if-condition,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-switch-missing-default-case,
+  cert-*,
+  -cert-dcl37-c,
+  -cert-dcl51-cpp,
+  clang-analyzer-*,
+  concurrency-*,
+  misc-*,
+  -misc-no-recursion,
+  -misc-unused-parameters,
+  modernize-*,
+  -modernize-use-trailing-return-type,
+  performance-*,
+  -performance-unnecessary-value-param,
+  portability-*,
+  readability-*,
+  -readability-else-after-return,
+  -readability-function-cognitive-complexity,
+  -readability-identifier-length,
+  -readability-magic-numbers,
+  -readability-named-parameter,
+WarningsAsErrors: '*'
+FormatStyle: file
+HeaderFilterRegex: '.*'
+SystemHeaders: false
+
+CheckOptions:
+  - key:   bugprone-suspicious-include.HeaderFileExtensions
+    value: 'h'
+  - key:   readability-identifier-naming.FunctionCase
+    value: lower_case
+  - key:   readability-identifier-naming.VariableCase
+    value: lower_case
+  - key:   readability-identifier-naming.GlobalConstantCase
+    value: UPPER_CASE
+  - key:   readability-identifier-naming.MacroDefinitionCase
+    value: UPPER_CASE
+  - key:   readability-identifier-naming.EnumConstantCase
+    value: lower_case # TODO UPPER_CASE
+  - key:   readability-identifier-naming.TypedefCase
+    value: lower_case
+  - key:   readability-identifier-naming.StructCase
+    value: lower_case

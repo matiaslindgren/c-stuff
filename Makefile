@@ -36,12 +36,14 @@ ifeq ($(shell uname), Darwin)
 	LDFLAGS   += -Wl,-syslibroot,$(sdk_path),-framework,Accelerate
 	INCLUDES  += -isysroot $(sdk_path)
 	CLANG_FORMAT :=  $(llvm_path)/bin/clang-format
+	CLANG_TIDY   :=  $(llvm_path)/bin/clang-tidy
 	undefine llvm_path
 	undefine sdk_path
 else
 	CC      := clang-$(LLVM_VERSION)
 	LDFLAGS += -lopenblas
 	CLANG_FORMAT := clang-format
+	CLANG_TIDY   := clang-tidy
 endif
 
 BUILD_TYPE ?= debug
@@ -75,10 +77,12 @@ MODULE_HEADERS := $(call find_headers,$(MODULE_DIRS))
 MODULE_SOURCES := $(call find_sources,$(MODULE_DIRS))
 MODULE_OBJECTS := $(subst /./,/,$(addprefix $(BUILD_DIR)/,$(subst .c,.o,$(MODULE_SOURCES))))
 
-PROGRAM_DIRS    := $(wildcard ./*)
+PROGRAM_DIRS    := tools tests
 PROGRAM_SOURCES := $(call find_sources,$(PROGRAM_DIRS))
 PROGRAM_OBJECTS := $(subst /./,/,$(addprefix $(BUILD_DIR)/,$(subst .c,.o,$(PROGRAM_SOURCES))))
 PROGRAM_PATHS   := $(subst .o,,$(PROGRAM_OBJECTS))
+
+ALL_READABLE_FILES := $(MODULE_HEADERS) $(MODULE_SOURCES) $(PROGRAM_SOURCES)
 
 TEST_PATHS := $(filter $(BUILD_DIR)/tests/test_%,$(PROGRAM_PATHS))
 TOOL_PATHS := $(filter $(BUILD_DIR)/tools/%,$(PROGRAM_PATHS))
@@ -97,10 +101,21 @@ clean:
 	$(RM) -r $(OUTPUT_DIR)
 
 .PHONY: fmt
-fmt: $(MODULE_HEADERS) $(MODULE_SOURCES) $(PROGRAM_SOURCES)
+fmt: format
+
+.PHONY: format
+format: $(ALL_READABLE_FILES)
 	@$(CLANG_FORMAT) --verbose -i $^
 
-MACRO_EXPAND_TARGETS := $(addprefix macro-expand-,$(MODULE_HEADERS) $(MODULE_SOURCES) $(PROGRAM_SOURCES))
+.PHONY: tidy
+tidy: $(ALL_READABLE_FILES)
+	@$(CLANG_TIDY) --quiet $^
+
+.PHONY: tidy-fix
+tidy-fix: $(ALL_READABLE_FILES)
+	@$(CLANG_TIDY) --fix --quiet $^
+
+MACRO_EXPAND_TARGETS := $(addprefix macro-expand-,$(ALL_READABLE_FILES))
 .PHONY: $(MACRO_EXPAND_TARGETS)
 $(MACRO_EXPAND_TARGETS): macro-expand-%: %
 	$(CC) $(CFLAGS) $(INCLUDES) -E $< | $(CLANG_FORMAT) --assume-filename=$<
