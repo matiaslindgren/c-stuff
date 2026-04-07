@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stufflib/args/args.h>
+#include <stufflib/context/context.h>
 #include <stufflib/filesystem/filesystem.h>
 #include <stufflib/hashmap/hashmap.h>
 #include <stufflib/iterator/iterator.h>
@@ -14,17 +15,16 @@
 static unsigned char reader_buffer_data[1024 << 6] = {0};
 static struct sl_span reader_buffer                = {0};
 
-bool concat(const struct sl_args args[const static 1]) {
+bool concat(struct sl_context ctx[static 1], const struct sl_args args[const static 1]) {
   {
     const int args_count     = sl_args_count_positional(args) - 1;
     const int expected_count = 1;
     if (args_count < expected_count) {
-      SL_LOG_ERROR("concat takes %d or more arguments, not %d", expected_count, args_count);
+      SL_ERROR(ctx, "concat takes %d or more arguments, not %d", expected_count, args_count);
       return false;
     }
   }
 
-  struct sl_context ctx   = {0};
   bool is_done            = false;
   struct sl_string result = {0};
 
@@ -33,10 +33,10 @@ bool concat(const struct sl_args args[const static 1]) {
     if (!path) {
       break;
     }
-    struct sl_string content = sl_fs_read_file_utf8(&ctx, path, &reader_buffer);
+    struct sl_string content = sl_fs_read_file_utf8(ctx, path, &reader_buffer);
     const bool read_ok       = content.length > 0;
     if (read_ok) {
-      sl_string_extend(&ctx, &result, &content);
+      sl_string_extend(ctx, &result, &content);
     }
     sl_string_destroy(&content);
     if (!read_ok) {
@@ -55,27 +55,26 @@ done:
   return is_done;
 }
 
-bool count(const struct sl_args args[const static 1]) {
+bool count(struct sl_context ctx[static 1], const struct sl_args args[const static 1]) {
   {
     const int args_count     = sl_args_count_positional(args) - 1;
     const int expected_count = 2;
     if (args_count != expected_count) {
-      SL_LOG_ERROR("count takes %d arguments, not %d", expected_count, args_count);
+      SL_ERROR(ctx, "count takes %d arguments, not %d", expected_count, args_count);
       return false;
     }
   }
 
   char* pattern_str = sl_args_get_positional(args, 1);
   if (strlen(pattern_str) == 0) {
-    SL_LOG_ERROR("pattern to count cannot be empty");
+    SL_ERROR(ctx, "pattern to count cannot be empty");
     return false;
   }
 
-  struct sl_context ctx = {0};
-  bool is_done          = false;
+  bool is_done = false;
 
   char* path               = sl_args_get_positional(args, 2);
-  struct sl_string content = sl_fs_read_file_utf8(&ctx, path, &reader_buffer);
+  struct sl_string content = sl_fs_read_file_utf8(ctx, path, &reader_buffer);
 
   struct sl_span pattern = sl_span_view(strlen(pattern_str), (unsigned char*)pattern_str);
   struct sl_tokenizer pattern_tokenizer = sl_tokenizer_create(&(content.utf8_data), &pattern);
@@ -100,12 +99,12 @@ done:
   return is_done;
 }
 
-bool slicelines(const struct sl_args args[const static 1]) {
+bool slicelines(struct sl_context ctx[static 1], const struct sl_args args[const static 1]) {
   {
     const int args_count     = sl_args_count_positional(args) - 1;
     const int expected_count = 3;
     if (args_count != expected_count) {
-      SL_LOG_ERROR("slicelines takes %d arguments, not %d", expected_count, args_count);
+      SL_ERROR(ctx, "slicelines takes %d arguments, not %d", expected_count, args_count);
       return false;
     }
   }
@@ -114,10 +113,9 @@ bool slicelines(const struct sl_args args[const static 1]) {
   const size_t count = strtoull(sl_args_get_positional(args, 2), 0, 10);
   char* path         = sl_args_get_positional(args, 3);
 
-  struct sl_context ctx = {0};
-  bool is_done          = false;
+  bool is_done = false;
 
-  struct sl_string content = sl_fs_read_file_utf8(&ctx, path, &reader_buffer);
+  struct sl_string content = sl_fs_read_file_utf8(ctx, path, &reader_buffer);
   if (!content.length) {
     goto done;
   }
@@ -131,7 +129,7 @@ bool slicelines(const struct sl_args args[const static 1]) {
        !sl_tokenizer_iter_is_done(&iter);
        sl_tokenizer_iter_advance(&iter)) {
     if (begin <= lineno && n_printed < count) {
-      struct sl_string line = sl_string_from_utf8(&ctx, sl_tokenizer_iter_get(&iter));
+      struct sl_string line = sl_string_from_utf8(ctx, sl_tokenizer_iter_get(&iter));
       bool write_ok         = sl_string_fprint(stdout, &line);
       ++n_printed;
       sl_string_destroy(&line);
@@ -152,12 +150,12 @@ done:
   return is_done;
 }
 
-bool replace(const struct sl_args args[const static 1]) {
+bool replace(struct sl_context ctx[static 1], const struct sl_args args[const static 1]) {
   {
     const int args_count     = sl_args_count_positional(args) - 1;
     const int expected_count = 3;
     if (args_count != expected_count) {
-      SL_LOG_ERROR("replace takes %d arguments, not %d", expected_count, args_count);
+      SL_ERROR(ctx, "replace takes %d arguments, not %d", expected_count, args_count);
       return false;
     }
   }
@@ -168,28 +166,27 @@ bool replace(const struct sl_args args[const static 1]) {
 
   if (strlen(pattern_str) == 0) {
     // TODO allow empty pattern str to split at all codepoints
-    SL_LOG_ERROR("pattern to replace cannot be empty");
+    SL_ERROR(ctx, "pattern to replace cannot be empty");
     return false;
   }
 
-  struct sl_context ctx = {0};
-  bool is_done          = false;
+  bool is_done = false;
 
-  struct sl_string content = sl_fs_read_file_utf8(&ctx, path, &reader_buffer);
+  struct sl_string content = sl_fs_read_file_utf8(ctx, path, &reader_buffer);
   if (!content.length) {
     goto done;
   }
 
-  struct sl_span pattern = sl_span_from_str(&ctx, pattern_str);
+  struct sl_span pattern = sl_span_from_str(ctx, pattern_str);
   if (sl_span_is_hexadecimal_str(&pattern)) {
-    struct sl_span hex_pattern = sl_span_parse_hex(&ctx, &pattern);
+    struct sl_span hex_pattern = sl_span_parse_hex(ctx, &pattern);
     sl_span_destroy(&pattern);
     pattern = hex_pattern;
   }
 
-  struct sl_span replacement = sl_span_from_str(&ctx, replacement_str);
+  struct sl_span replacement = sl_span_from_str(ctx, replacement_str);
   if (sl_span_is_hexadecimal_str(&replacement)) {
-    struct sl_span hex_replacement = sl_span_parse_hex(&ctx, &replacement);
+    struct sl_span hex_replacement = sl_span_parse_hex(ctx, &replacement);
     sl_span_destroy(&replacement);
     replacement = hex_replacement;
   }
@@ -199,7 +196,7 @@ bool replace(const struct sl_args args[const static 1]) {
   struct sl_iterator iter = sl_tokenizer_iter(&pattern_tokenizer);
   while (!sl_tokenizer_iter_is_done(&iter)) {
     {
-      struct sl_string line = sl_string_from_utf8(&ctx, sl_tokenizer_iter_get(&iter));
+      struct sl_string line = sl_string_from_utf8(ctx, sl_tokenizer_iter_get(&iter));
       const bool write_ok   = sl_string_fprint(stdout, &line);
       sl_string_destroy(&line);
       if (!write_ok) {
@@ -208,7 +205,7 @@ bool replace(const struct sl_args args[const static 1]) {
     }
     sl_tokenizer_iter_advance(&iter);
     if (!sl_tokenizer_iter_is_done(&iter) && replacement.size) {
-      struct sl_string repl = sl_string_from_utf8(&ctx, &replacement);
+      struct sl_string repl = sl_string_from_utf8(ctx, &replacement);
       const bool write_ok   = sl_string_fprint(stdout, &repl);
       sl_string_destroy(&repl);
       if (!write_ok) {
@@ -226,23 +223,22 @@ done:
   return is_done;
 }
 
-bool linefreq(const struct sl_args args[const static 1]) {
+bool linefreq(struct sl_context ctx[static 1], const struct sl_args args[const static 1]) {
   {
     const int args_count     = sl_args_count_positional(args) - 1;
     const int expected_count = 1;
     if (args_count != expected_count) {
-      SL_LOG_ERROR("linefreq takes %d arguments, not %d", expected_count, args_count);
+      SL_ERROR(ctx, "linefreq takes %d arguments, not %d", expected_count, args_count);
       return false;
     }
   }
 
   char* path = sl_args_get_positional(args, 1);
 
-  struct sl_context ctx = {0};
-  bool is_done          = false;
+  bool is_done = false;
 
-  struct sl_hashmap freq   = sl_hashmap_create(&ctx, 1024);
-  struct sl_string content = sl_fs_read_file_utf8(&ctx, path, &reader_buffer);
+  struct sl_hashmap freq   = sl_hashmap_create(ctx, 1024);
+  struct sl_string content = sl_fs_read_file_utf8(ctx, path, &reader_buffer);
   if (!content.length) {
     goto done;
   }
@@ -258,7 +254,7 @@ bool linefreq(const struct sl_args args[const static 1]) {
       continue;
     }
     if (!sl_hashmap_contains(&freq, line)) {
-      sl_hashmap_insert(&ctx, &freq, line, sl_hashmap_type_uint64, &((uint64_t){0}));
+      sl_hashmap_insert(ctx, &freq, line, sl_hashmap_type_uint64, &((uint64_t){0}));
     }
     sl_hashmap_get(&freq, line)->value.uint64 += 1;
   }
@@ -269,7 +265,7 @@ bool linefreq(const struct sl_args args[const static 1]) {
     if (printf("%" PRIu64 " ", slot->value.uint64) < 0) {
       goto done;
     }
-    struct sl_string key_str = sl_string_from_utf8(&ctx, &(slot->key));
+    struct sl_string key_str = sl_string_from_utf8(ctx, &(slot->key));
     bool write_ok            = sl_string_fprint(stdout, &key_str);
     sl_string_destroy(&key_str);
     if (!write_ok || (printf("\n") < 0)) {
@@ -309,27 +305,29 @@ void print_usage(const struct sl_args args[const static 1]) {
 }
 
 int main(int argc, char* const argv[argc + 1]) {
-  struct sl_args args = {.argc = argc, .argv = argv};
-  reader_buffer       = sl_span_view(SL_ARRAY_LEN(reader_buffer_data), reader_buffer_data);
-  bool ok             = false;
-  char* command       = sl_args_get_positional(&args, 0);
+  struct sl_context ctx = {0};
+  struct sl_args args   = {.argc = argc, .argv = argv};
+  reader_buffer         = sl_span_view(SL_ARRAY_LEN(reader_buffer_data), reader_buffer_data);
+  bool ok               = false;
+  char* command         = sl_args_get_positional(&args, 0);
   if (command) {
     if (strcmp(command, "concat") == 0) {
-      ok = concat(&args);
+      ok = concat(&ctx, &args);
     } else if (strcmp(command, "count") == 0) {
-      ok = count(&args);
+      ok = count(&ctx, &args);
     } else if (strcmp(command, "slicelines") == 0) {
-      ok = slicelines(&args);
+      ok = slicelines(&ctx, &args);
     } else if (strcmp(command, "replace") == 0) {
-      ok = replace(&args);
+      ok = replace(&ctx, &args);
     } else if (strcmp(command, "linefreq") == 0) {
-      ok = linefreq(&args);
+      ok = linefreq(&ctx, &args);
     } else {
-      SL_LOG_ERROR("unknown command %s", command);
+      SL_ERROR(&ctx, "unknown command %s", command);
     }
   }
   if (!ok) {
     print_usage(&args);
   }
+  sl_context_unwind_errors(&ctx, stderr);
   return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

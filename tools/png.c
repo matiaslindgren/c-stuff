@@ -1,18 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stufflib/args/args.h>
+#include <stufflib/context/context.h>
 #include <stufflib/img/img.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/png/png.h>
 
-bool segment(const struct sl_args args[const static 1]) {
+bool segment(struct sl_context ctx[static 1], const struct sl_args args[const static 1]) {
   if (sl_args_count_positional(args) != 3) {
-    SL_LOG_ERROR("too few arguments to PNG segment");
+    SL_ERROR(ctx, "too few arguments to PNG segment");
     return false;
   }
 
-  struct sl_context ctx = {0};
-  bool is_done          = false;
+  bool is_done = false;
 
   struct sl_png_image src = {0};
   struct sl_png_image dst = {0};
@@ -25,7 +25,7 @@ bool segment(const struct sl_args args[const static 1]) {
   if (verbose) {
     printf("read %s\n", png_src_path);
   }
-  src = sl_png_read_image(&ctx, png_src_path);
+  src = sl_png_read_image(ctx, png_src_path);
   if (!src.data.size) {
     SL_LOG_ERROR("failed reading PNG image %s", png_src_path);
     goto done;
@@ -33,12 +33,12 @@ bool segment(const struct sl_args args[const static 1]) {
   if (verbose) {
     printf("segmenting, threshold %zu%%\n", threshold_percent);
   }
-  sl_img_segment_rgb(&ctx, &dst, &src, threshold_percent);
+  sl_img_segment_rgb(ctx, &dst, &src, threshold_percent);
 
   if (verbose) {
     printf("write %s\n", png_dst_path);
   }
-  if (!sl_png_write_image(&ctx, dst, png_dst_path)) {
+  if (!sl_png_write_image(ctx, dst, png_dst_path)) {
     SL_LOG_ERROR("failed writing PNG image %s", png_dst_path);
     goto done;
   }
@@ -51,14 +51,13 @@ done:
   return is_done;
 }
 
-bool info(const struct sl_args args[const static 1]) {
+bool info(struct sl_context ctx[static 1], const struct sl_args args[const static 1]) {
   if (sl_args_count_positional(args) != 2) {
-    SL_LOG_ERROR("too few arguments to PNG info");
+    SL_ERROR(ctx, "too few arguments to PNG info");
     return false;
   }
 
-  struct sl_context ctx = {0};
-  bool is_done          = false;
+  bool is_done = false;
 
   struct sl_png_chunks chunks = {0};
   struct sl_png_image img     = {0};
@@ -66,11 +65,11 @@ bool info(const struct sl_args args[const static 1]) {
   const char* const png_path = sl_args_get_positional(args, 1);
 
   printf("{");
-  chunks = sl_png_read_chunks(&ctx, png_path);
+  chunks = sl_png_read_chunks(ctx, png_path);
   printf("\"chunks\":");
   sl_png_dump_chunk_type_freq(stdout, chunks);
 
-  struct sl_png_header header = sl_png_read_header(&ctx, png_path);
+  struct sl_png_header header = sl_png_read_header(ctx, png_path);
   printf(",\"header\":");
   sl_png_dump_header(stdout, header);
 
@@ -80,7 +79,7 @@ bool info(const struct sl_args args[const static 1]) {
     goto done;
   }
 
-  img = sl_png_read_image(&ctx, png_path);
+  img = sl_png_read_image(ctx, png_path);
   printf(",\"data\":");
   sl_png_dump_img_data_info(stdout, img);
   is_done = true;
@@ -92,17 +91,16 @@ done:
   return is_done;
 }
 
-bool dump_raw(const struct sl_args args[const static 1]) {
+bool dump_raw(struct sl_context ctx[static 1], const struct sl_args args[const static 1]) {
   if (sl_args_count_positional(args) < 3) {
-    SL_LOG_ERROR("too few arguments to PNG dump_raw");
+    SL_ERROR(ctx, "too few arguments to PNG dump_raw");
     return false;
   }
 
-  struct sl_context ctx = {0};
-  bool is_done          = false;
+  bool is_done = false;
 
   const char* const png_path      = sl_args_get_positional(args, 1);
-  struct sl_png_chunks img_chunks = sl_png_read_chunks(&ctx, png_path);
+  struct sl_png_chunks img_chunks = sl_png_read_chunks(ctx, png_path);
   if (!img_chunks.count) {
     SL_LOG_ERROR("failed reading PNG IDAT chunks from %s", png_path);
     goto done;
@@ -147,22 +145,24 @@ void print_usage(const struct sl_args args[const static 1]) {
 }
 
 int main(int argc, char* const argv[argc + 1]) {
-  struct sl_args args = {.argc = argc, .argv = argv};
-  bool ok             = false;
-  const char* command = sl_args_get_positional(&args, 0);
+  struct sl_context ctx = {0};
+  struct sl_args args   = {.argc = argc, .argv = argv};
+  bool ok               = false;
+  const char* command   = sl_args_get_positional(&args, 0);
   if (command) {
     if (strcmp(command, "segment") == 0) {
-      ok = segment(&args);
+      ok = segment(&ctx, &args);
     } else if (strcmp(command, "info") == 0) {
-      ok = info(&args);
+      ok = info(&ctx, &args);
     } else if (strcmp(command, "dump_raw") == 0) {
-      ok = dump_raw(&args);
+      ok = dump_raw(&ctx, &args);
     } else {
-      SL_LOG_ERROR("unknown command %s", command);
+      SL_ERROR(&ctx, "unknown command %s", command);
     }
   }
   if (!ok) {
     print_usage(&args);
   }
+  sl_context_unwind_errors(&ctx, stderr);
   return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -23,9 +23,8 @@ int compare_as_doubles(const void* lhs_data, const void* rhs_data) {
   return (lhs_num > rhs_num) - (lhs_num < rhs_num);
 }
 
-char** sort_doubles(const size_t count, char* lines[count]) {
-  struct sl_context ctx = {0};
-  return sl_sort_quicksort(&ctx, lines, count, sizeof(char*), compare_as_doubles);
+char** sort_doubles(struct sl_context ctx[static 1], const size_t count, char* lines[count]) {
+  return sl_sort_quicksort(ctx, lines, count, sizeof(char*), compare_as_doubles);
 }
 
 int main(int argc, char* const argv[argc + 1]) {
@@ -72,13 +71,13 @@ int main(int argc, char* const argv[argc + 1]) {
   }
 
   if (sort_as_numeric) {
-    if (!sort_doubles(num_lines, lines)) {
-      SL_LOG_ERROR("failed sorting input as numeric");
+    if (!sort_doubles(&ctx, num_lines, lines)) {
+      SL_ERROR(&ctx, "failed sorting input as numeric");
       goto done;
     }
   } else {
     if (!sl_sort_quicksort_str(&ctx, num_lines, lines)) {
-      SL_LOG_ERROR("failed sorting input as ascii");
+      SL_ERROR(&ctx, "failed sorting input as ascii");
       goto done;
     }
   }
@@ -92,6 +91,7 @@ int main(int argc, char* const argv[argc + 1]) {
   is_done = true;
 
 done:
+  sl_context_unwind_errors(&ctx, stderr);
   sl_string_destroy(&content);
   for (size_t i = 0; i < num_lines; ++i) {
     sl_free(lines[i]);

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stufflib/args/args.h>
+#include <stufflib/context/context.h>
 #include <stufflib/dataset/dataset.h>
 #include <stufflib/linalg/linalg.h>
 #include <stufflib/macros/macros.h>
@@ -9,9 +10,8 @@
 #include <stufflib/record/reader.h>
 #include <stufflib/record/record.h>
 
-bool spambase(const struct sl_args args[const static 1]) {
-  struct sl_context ctx = {0};
-  bool all_ok           = false;
+bool spambase(struct sl_context ctx[static 1], const struct sl_args args[const static 1]) {
+  bool all_ok = false;
 
   const char* const dataset_dir = sl_args_get_positional(args, 1);
   const bool verbose            = sl_args_parse_flag(args, "-v");
@@ -25,25 +25,25 @@ bool spambase(const struct sl_args args[const static 1]) {
 
   struct sl_record samples_record;
   struct sl_la_matrix samples
-      = sl_la_matrix_create(&ctx, SL_DATASET_SPAMBASE_SAMPLES, SL_DATASET_SPAMBASE_FEATURES);
+      = sl_la_matrix_create(ctx, SL_DATASET_SPAMBASE_SAMPLES, SL_DATASET_SPAMBASE_FEATURES);
 
-  if (!sl_record_read_metadata(&ctx, &classes_record, dataset_dir, "spambase_classes")) {
+  if (!sl_record_read_metadata(ctx, &classes_record, dataset_dir, "spambase_classes")) {
     SL_LOG_ERROR("failed reading metadata of spambase classes");
     goto done;
   }
 
-  if (!sl_record_read_metadata(&ctx, &samples_record, dataset_dir, "spambase_samples")) {
+  if (!sl_record_read_metadata(ctx, &samples_record, dataset_dir, "spambase_samples")) {
     SL_LOG_ERROR("failed reading metadata of spambase samples");
     goto done;
   }
 
-  if (!sl_record_read_all(&ctx, &classes_record, sizeof(classes), (void*)classes)) {
+  if (!sl_record_read_all(ctx, &classes_record, sizeof(classes), (void*)classes)) {
     SL_LOG_ERROR("failed reading spambase classes");
     goto done;
   }
 
   if (!sl_record_read_all(
-          &ctx,
+          ctx,
           &samples_record,
           sl_record_item_size(&samples_record) * sl_la_matrix_size(&samples),
           (void*)(samples.data)
@@ -75,7 +75,7 @@ bool spambase(const struct sl_args args[const static 1]) {
   uint16_t train_classes[SL_ARRAY_LEN(classes) - SL_ARRAY_LEN(test_classes)] = {0};
 
   sl_ml_random_train_test_split(
-      &ctx,
+      ctx,
       &samples,
       &train_data,
       &test_data,
@@ -119,9 +119,8 @@ done:
 
 #define SL_SVM_RCV1_BUFFER_LEN 10'000
 
-bool rcv1(const struct sl_args args[const static 1]) {
-  struct sl_context ctx = {0};
-  bool all_ok           = false;
+bool rcv1(struct sl_context ctx[static 1], const struct sl_args args[const static 1]) {
+  bool all_ok = false;
 
   const char* const dataset_dir = sl_args_get_positional(args, 1);
   const bool verbose            = sl_args_parse_flag(args, "-v");
@@ -152,7 +151,7 @@ bool rcv1(const struct sl_args args[const static 1]) {
   uint8_t* test_classes                = nullptr;
 
   struct sl_la_matrix samples_batch
-      = sl_la_matrix_create(&ctx, SL_SVM_RCV1_BUFFER_LEN, SL_DATASET_RCV1_FEATURES);
+      = sl_la_matrix_create(ctx, SL_SVM_RCV1_BUFFER_LEN, SL_DATASET_RCV1_FEATURES);
   struct sl_span read_buffer
       = sl_span_view(sizeof(float) * sl_la_matrix_size(&samples_batch), (void*)samples_batch.data);
 
@@ -161,7 +160,7 @@ bool rcv1(const struct sl_args args[const static 1]) {
   }
 
   if (!sl_record_read_metadata(
-          &ctx,
+          ctx,
           &train_samples_record,
           dataset_dir,
           flip_train_test ? "rcv1_test_samples" : "rcv1_train_samples"
@@ -170,7 +169,7 @@ bool rcv1(const struct sl_args args[const static 1]) {
     goto done;
   }
   if (!sl_record_read_metadata(
-          &ctx,
+          ctx,
           &test_samples_record,
           dataset_dir,
           flip_train_test ? "rcv1_train_samples" : "rcv1_test_samples"
@@ -180,7 +179,7 @@ bool rcv1(const struct sl_args args[const static 1]) {
   }
 
   if (!sl_record_read_metadata(
-          &ctx,
+          ctx,
           &train_classes_record,
           dataset_dir,
           flip_train_test ? "rcv1_test_classes" : "rcv1_train_classes"
@@ -189,7 +188,7 @@ bool rcv1(const struct sl_args args[const static 1]) {
     goto done;
   }
   if (!sl_record_read_metadata(
-          &ctx,
+          ctx,
           &test_classes_record,
           dataset_dir,
           flip_train_test ? "rcv1_train_classes" : "rcv1_test_classes"
@@ -200,15 +199,15 @@ bool rcv1(const struct sl_args args[const static 1]) {
 
   const size_t class_size = sl_record_item_size(&train_classes_record);
 
-  train_classes = sl_alloc(&ctx, train_classes_record.size, class_size);
-  test_classes  = sl_alloc(&ctx, test_classes_record.size, class_size);
+  train_classes = sl_alloc(ctx, train_classes_record.size, class_size);
+  test_classes  = sl_alloc(ctx, test_classes_record.size, class_size);
 
   if (verbose) {
     SL_LOG_INFO("RCV1: reading classes records");
   }
 
   if (!sl_record_read_all(
-          &ctx,
+          ctx,
           &train_classes_record,
           train_classes_record.size * class_size,
           (void*)train_classes
@@ -224,7 +223,7 @@ bool rcv1(const struct sl_args args[const static 1]) {
   }
 
   if (!sl_record_read_all(
-          &ctx,
+          ctx,
           &test_classes_record,
           test_classes_record.size * class_size,
           (void*)test_classes
@@ -239,7 +238,7 @@ bool rcv1(const struct sl_args args[const static 1]) {
     }
   }
 
-  if (!sl_record_reader_open(&ctx, &train_samples_reader)) {
+  if (!sl_record_reader_open(ctx, &train_samples_reader)) {
     SL_LOG_ERROR("failed opening RCV1 training set samples record reader");
     goto done;
   }
@@ -251,12 +250,12 @@ bool rcv1(const struct sl_args args[const static 1]) {
   struct sl_ml_minmax_scaler minmax_scaler
       = SL_ML_MINMAX_SCALER_CREATE_INLINE(SL_DATASET_RCV1_FEATURES);
 
-  for (size_t batch_idx = 0; !sl_record_reader_is_done(&ctx, &train_samples_reader); ++batch_idx) {
+  for (size_t batch_idx = 0; !sl_record_reader_is_done(ctx, &train_samples_reader); ++batch_idx) {
     if (verbose) {
       SL_LOG_INFO("RCV1 train batch %zu minmax: read batch", batch_idx);
     }
     sl_span_clear(&read_buffer);
-    if (!sl_record_reader_read(&ctx, &train_samples_reader, &read_buffer)) {
+    if (!sl_record_reader_read(ctx, &train_samples_reader, &read_buffer)) {
       SL_LOG_ERROR("RCV1 train batch %zu minmax: failed reading samples batch", batch_idx);
       goto done;
     }
@@ -288,11 +287,11 @@ bool rcv1(const struct sl_args args[const static 1]) {
       .record = &train_samples_record,
   };
 
-  if (!sl_record_reader_open(&ctx, &train_samples_reader)) {
+  if (!sl_record_reader_open(ctx, &train_samples_reader)) {
     SL_LOG_ERROR("failed opening RCV1 training set samples record reader");
     goto done;
   }
-  if (!sl_record_reader_open(&ctx, &test_samples_reader)) {
+  if (!sl_record_reader_open(ctx, &test_samples_reader)) {
     SL_LOG_ERROR("failed opening RCV1 testing set samples record reader");
     goto done;
   }
@@ -313,12 +312,12 @@ bool rcv1(const struct sl_args args[const static 1]) {
   };
 
   uint16_t classes_buffer[SL_SVM_RCV1_BUFFER_LEN] = {0};
-  for (size_t batch_idx = 0; !sl_record_reader_is_done(&ctx, &train_samples_reader); ++batch_idx) {
+  for (size_t batch_idx = 0; !sl_record_reader_is_done(ctx, &train_samples_reader); ++batch_idx) {
     if (verbose) {
       SL_LOG_INFO("RCV1 train batch %zu: reading buffer", batch_idx);
     }
     sl_span_clear(&read_buffer);
-    if (!sl_record_reader_read(&ctx, &train_samples_reader, &read_buffer)) {
+    if (!sl_record_reader_read(ctx, &train_samples_reader, &read_buffer)) {
       SL_LOG_ERROR("failed reading RCV1 training set samples batch during svm fit");
       goto done;
     }
@@ -357,12 +356,12 @@ bool rcv1(const struct sl_args args[const static 1]) {
     sl_ml_classification_print(stderr, &report);
   }
 
-  for (size_t batch_idx = 0; !sl_record_reader_is_done(&ctx, &test_samples_reader); ++batch_idx) {
+  for (size_t batch_idx = 0; !sl_record_reader_is_done(ctx, &test_samples_reader); ++batch_idx) {
     if (verbose) {
       SL_LOG_INFO("RCV1 test batch %zu: reading buffer", batch_idx);
     }
     sl_span_clear(&read_buffer);
-    if (!sl_record_reader_read(&ctx, &test_samples_reader, &read_buffer)) {
+    if (!sl_record_reader_read(ctx, &test_samples_reader, &read_buffer)) {
       SL_LOG_ERROR(
           "failed reading RCV1 testing set samples batch during svm "
           "evaluation"
@@ -409,24 +408,26 @@ void print_usage(const struct sl_args args[const static 1]) {
 }
 
 int main(int argc, char* const argv[argc + 1]) {
-  bool ok             = false;
-  struct sl_args args = {.argc = argc, .argv = argv};
+  struct sl_context ctx = {0};
+  bool ok               = false;
+  struct sl_args args   = {.argc = argc, .argv = argv};
   if (sl_args_count_positional(&args) < 2) {
-    SL_LOG_ERROR("incorrect number of arguments");
+    SL_ERROR(&ctx, "incorrect number of arguments");
   } else {
     const char* experiment = sl_args_get_positional(&args, 0);
     if (experiment) {
       if (strcmp(experiment, "spambase") == 0) {
-        ok = spambase(&args);
+        ok = spambase(&ctx, &args);
       } else if (strcmp(experiment, "rcv1") == 0) {
-        ok = rcv1(&args);
+        ok = rcv1(&ctx, &args);
       } else {
-        SL_LOG_ERROR("unknown experiment %s", experiment);
+        SL_ERROR(&ctx, "unknown experiment %s", experiment);
       }
     }
   }
   if (!ok) {
     print_usage(&args);
   }
+  sl_context_unwind_errors(&ctx, stderr);
   return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
