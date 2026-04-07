@@ -3,7 +3,8 @@
 #include <stufflib/error/error.h>
 #include <stufflib/macros/macros.h>
 
-void sl_context_unwind_errors(struct sl_context ctx[static 1], FILE stream[static 1]) {
+bool sl_context_unwind_errors(struct sl_context ctx[static 1], FILE stream[static 1]) {
+  bool all_written = true;
   for (struct sl_error_msg e = {0}; sl_error_pop(&ctx->errors, &e);) {
     if (fprintf(
             stream,
@@ -16,7 +17,9 @@ void sl_context_unwind_errors(struct sl_context ctx[static 1], FILE stream[stati
             e.msg
         )
         < 0) {
-      abort();
+      all_written = false;
     }
   }
+  sl_error_clear(&ctx->errors);
+  return all_written;
 }

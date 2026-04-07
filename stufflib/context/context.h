@@ -28,6 +28,6 @@ __attribute__((__format__(__printf__, 4, 5))) static inline void sl_context_erro
 #define SL_ERROR(ctx, fmt, ...) \
   sl_context_error_pushf((ctx), __FILE__, __LINE__, (fmt)__VA_OPT__(, __VA_ARGS__))
 
-void sl_context_unwind_errors(struct sl_context ctx[static 1], FILE stream[static 1]);
+bool sl_context_unwind_errors(struct sl_context ctx[static 1], FILE stream[static 1]);
 
 #endif  // SL_CONTEXT_H_INCLUDED

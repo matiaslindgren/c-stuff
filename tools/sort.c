@@ -91,7 +91,9 @@ int main(int argc, char* const argv[argc + 1]) {
   is_done = true;
 
 done:
-  sl_context_unwind_errors(&ctx, stderr);
+  if (!sl_context_unwind_errors(&ctx, stderr)) {
+    is_done = false;
+  }
   sl_string_destroy(&content);
   for (size_t i = 0; i < num_lines; ++i) {
     sl_free(lines[i]);

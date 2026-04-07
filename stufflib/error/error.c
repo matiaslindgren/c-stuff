@@ -50,7 +50,7 @@ const struct sl_error_msg* sl_error_peek(struct sl_error_stack s[static 1]) {
 }
 
 void sl_error_clear(struct sl_error_stack s[static 1]) {
-  s->top = 0;
+  *s = (struct sl_error_stack){0};
 }
 
 size_t sl_error_depth(struct sl_error_stack s[static 1]) {

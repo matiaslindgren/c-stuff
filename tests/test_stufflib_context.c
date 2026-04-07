@@ -122,7 +122,7 @@ static bool test_unwind_empties_stack(struct sl_context ctx[static 1], const boo
   FILE* mem   = open_memstream(&buf, &size);
   assert(mem);
 
-  sl_context_unwind_errors(&c, mem);
+  assert(sl_context_unwind_errors(&c, mem));
   fclose(mem);
 
   assert(!sl_error_occurred(&c.errors));
@@ -150,7 +150,7 @@ static bool test_unwind_output_format(struct sl_context ctx[static 1], const boo
   FILE* mem   = open_memstream(&buf, &size);
   assert(mem);
 
-  sl_context_unwind_errors(&c, mem);
+  assert(sl_context_unwind_errors(&c, mem));
   fclose(mem);
 
   assert(strstr(buf, "\"level\":\"error\"") != nullptr);
@@ -171,7 +171,7 @@ static bool test_unwind_empty_stack_is_noop(struct sl_context ctx[static 1], con
   FILE* mem   = open_memstream(&buf, &size);
   assert(mem);
 
-  sl_context_unwind_errors(&c, mem);
+  assert(sl_context_unwind_errors(&c, mem));
   fclose(mem);
 
   assert(size == 0);

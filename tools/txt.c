@@ -328,6 +328,8 @@ int main(int argc, char* const argv[argc + 1]) {
   if (!ok) {
     print_usage(&args);
   }
-  sl_context_unwind_errors(&ctx, stderr);
+  if (!sl_context_unwind_errors(&ctx, stderr)) {
+    ok = false;
+  }
   return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
