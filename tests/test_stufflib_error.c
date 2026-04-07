@@ -1,0 +1,195 @@
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stufflib/args/args.h>
+#include <stufflib/error/error.h>
+#include <stufflib/macros/macros.h>
+
+static bool test_empty_stack(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
+  struct sl_error_stack s = {0};
+
+  assert(sl_error_depth(&s) == 0);
+  assert(!sl_error_occurred(&s));
+  assert(sl_error_peek(&s) == nullptr);
+
+  struct sl_error_msg out = {0};
+  assert(!sl_error_pop(&s, &out));
+
+  return true;
+}
+
+static bool test_push_single(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
+  struct sl_error_stack s = {0};
+
+  sl_error_push(&s, "file.c", 42, "something went wrong");
+
+  assert(sl_error_depth(&s) == 1);
+  assert(sl_error_occurred(&s));
+
+  const struct sl_error_msg* top = sl_error_peek(&s);
+  assert(top != nullptr);
+  assert(strcmp(top->file, "file.c") == 0);
+  assert(top->line == 42);
+  assert(strcmp(top->msg, "something went wrong") == 0);
+
+  return true;
+}
+
+static bool test_pop_single(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
+  struct sl_error_stack s = {0};
+
+  sl_error_push(&s, "file.c", 7, "pop me");
+
+  struct sl_error_msg out = {0};
+  assert(sl_error_pop(&s, &out));
+  assert(strcmp(out.file, "file.c") == 0);
+  assert(out.line == 7);
+  assert(strcmp(out.msg, "pop me") == 0);
+
+  assert(sl_error_depth(&s) == 0);
+  assert(!sl_error_occurred(&s));
+  assert(sl_error_peek(&s) == nullptr);
+
+  return true;
+}
+
+static bool test_lifo_order(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
+  struct sl_error_stack s = {0};
+
+  sl_error_push(&s, "a.c", 1, "first");
+  sl_error_push(&s, "b.c", 2, "second");
+  sl_error_push(&s, "c.c", 3, "third");
+
+  assert(sl_error_depth(&s) == 3);
+
+  const struct sl_error_msg* top = sl_error_peek(&s);
+  assert(top != nullptr);
+  assert(strcmp(top->msg, "third") == 0);
+
+  struct sl_error_msg out = {0};
+
+  assert(sl_error_pop(&s, &out));
+  assert(strcmp(out.msg, "third") == 0);
+  assert(sl_error_depth(&s) == 2);
+
+  assert(sl_error_pop(&s, &out));
+  assert(strcmp(out.msg, "second") == 0);
+  assert(sl_error_depth(&s) == 1);
+
+  assert(sl_error_pop(&s, &out));
+  assert(strcmp(out.msg, "first") == 0);
+  assert(sl_error_depth(&s) == 0);
+
+  assert(!sl_error_pop(&s, &out));
+
+  return true;
+}
+
+static bool test_peek_does_not_pop(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
+  struct sl_error_stack s = {0};
+
+  sl_error_push(&s, "x.c", 99, "persistent");
+
+  for (size_t i = 0; i < 5; ++i) {
+    const struct sl_error_msg* top = sl_error_peek(&s);
+    assert(top != nullptr);
+    assert(strcmp(top->msg, "persistent") == 0);
+    assert(sl_error_depth(&s) == 1);
+  }
+
+  return true;
+}
+
+static bool test_clear(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
+  struct sl_error_stack s = {0};
+
+  sl_error_push(&s, "a.c", 1, "one");
+  sl_error_push(&s, "b.c", 2, "two");
+  sl_error_push(&s, "c.c", 3, "three");
+
+  sl_error_clear(&s);
+
+  assert(sl_error_depth(&s) == 0);
+  assert(!sl_error_occurred(&s));
+  assert(sl_error_peek(&s) == nullptr);
+
+  struct sl_error_msg out = {0};
+  assert(!sl_error_pop(&s, &out));
+
+  return true;
+}
+
+static bool test_depth_tracking(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
+  struct sl_error_stack s = {0};
+
+  const size_t n = SL_ERROR_STACK_DEPTH - 1;
+  for (size_t i = 0; i < n; ++i) {
+    sl_error_push(&s, "f.c", (int)i, "msg");
+    assert(sl_error_depth(&s) == i + 1);
+  }
+
+  for (size_t i = n; i > 0; --i) {
+    assert(sl_error_depth(&s) == i);
+    struct sl_error_msg out = {0};
+    assert(sl_error_pop(&s, &out));
+  }
+
+  assert(sl_error_depth(&s) == 0);
+
+  return true;
+}
+
+static bool test_msg_truncation(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
+  struct sl_error_stack s = {0};
+
+  char long_msg[SL_ERROR_MSG_LEN + 64];
+  memset(long_msg, 'x', sizeof(long_msg) - 1);
+  long_msg[sizeof(long_msg) - 1] = '\0';
+
+  sl_error_push(&s, "f.c", 1, long_msg);
+
+  const struct sl_error_msg* top = sl_error_peek(&s);
+  assert(top != nullptr);
+  assert(strlen(top->msg) == SL_ERROR_MSG_LEN - 1);
+
+  return true;
+}
+
+static bool test_clear_then_reuse(struct sl_context ctx[static 1], const bool) {
+  (void)ctx;
+  struct sl_error_stack s = {0};
+
+  sl_error_push(&s, "a.c", 1, "before clear");
+  sl_error_clear(&s);
+
+  sl_error_push(&s, "b.c", 2, "after clear");
+
+  assert(sl_error_depth(&s) == 1);
+  const struct sl_error_msg* top = sl_error_peek(&s);
+  assert(top != nullptr);
+  assert(strcmp(top->msg, "after clear") == 0);
+  assert(top->line == 2);
+
+  return true;
+}
+
+SL_TEST_MAIN(
+    test_empty_stack,
+    test_push_single,
+    test_pop_single,
+    test_lifo_order,
+    test_peek_does_not_pop,
+    test_clear,
+    test_depth_tracking,
+    test_msg_truncation,
+    test_clear_then_reuse
+)
