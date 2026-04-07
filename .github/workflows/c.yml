@@ -47,7 +47,7 @@ jobs:
       run: |
         brew install coreutils llvm@${{ matrix.llvm }} lld@${{ matrix.llvm }}
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       name: checkout c-stuff git repo
 
     - run: make -j4 BUILD_TYPE=${{ matrix.make.build_type }} TRACE=${{ matrix.make.trace }} all
