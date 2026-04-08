@@ -40,13 +40,17 @@ struct sl_hashmap sl_hashmap_create(struct sl_context ctx[static 1], size_t init
 void sl_hashmap_destroy_slots(size_t capacity, struct sl_hashmap_slot slots[capacity]);
 void sl_hashmap_destroy(struct sl_hashmap map[const static 1]);
 struct sl_hashmap_slot* sl_hashmap_find_slot(
+    struct sl_context ctx[static 1],
     struct sl_hashmap map[const static 1],
     struct sl_span key[const static 1],
     size_t hash
 );
-struct sl_hashmap_slot*
-sl_hashmap_get(struct sl_hashmap map[const static 1], struct sl_span key[const static 1]);
-void sl_hashmap_write(
+struct sl_hashmap_slot* sl_hashmap_get(
+    struct sl_context ctx[static 1],
+    struct sl_hashmap map[const static 1],
+    struct sl_span key[const static 1]
+);
+bool sl_hashmap_write(
     struct sl_context ctx[static 1],
     struct sl_hashmap map[const static 1],
     struct sl_span key[const static 1],
@@ -54,21 +58,25 @@ void sl_hashmap_write(
     enum sl_hashmap_type type,
     void* value
 );
-void sl_hashmap_set(
+bool sl_hashmap_set(
     struct sl_context ctx[static 1],
     struct sl_hashmap map[const static 1],
     struct sl_span key[const static 1],
     enum sl_hashmap_type type,
     void* value
 );
-void sl_hashmap_resize(
+bool sl_hashmap_resize(
     struct sl_context ctx[static 1],
     struct sl_hashmap map[const static 1],
     size_t new_capacity
 );
 double sl_hashmap_load_factor(struct sl_hashmap map[const static 1]);
-bool sl_hashmap_contains(struct sl_hashmap map[const static 1], struct sl_span key[const static 1]);
-void sl_hashmap_insert(
+bool sl_hashmap_contains(
+    struct sl_context ctx[static 1],
+    struct sl_hashmap map[const static 1],
+    struct sl_span key[const static 1]
+);
+bool sl_hashmap_insert(
     struct sl_context ctx[static 1],
     struct sl_hashmap map[const static 1],
     struct sl_span key[const static 1],

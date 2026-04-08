@@ -254,10 +254,16 @@ bool linefreq(struct sl_context ctx[static 1], const struct sl_args args[const s
     if (!(line->size)) {
       continue;
     }
-    if (!sl_hashmap_contains(&freq, line)) {
-      sl_hashmap_insert(ctx, &freq, line, sl_hashmap_type_uint64, &((uint64_t){0}));
+    if (!sl_hashmap_contains(ctx, &freq, line)) {
+      if (!sl_hashmap_insert(ctx, &freq, line, sl_hashmap_type_uint64, &((uint64_t){0}))) {
+        goto done;
+      }
     }
-    sl_hashmap_get(&freq, line)->value.uint64 += 1;
+    struct sl_hashmap_slot* freq_slot = sl_hashmap_get(ctx, &freq, line);
+    if (!freq_slot) {
+      goto done;
+    }
+    freq_slot->value.uint64 += 1;
   }
 
   for (struct sl_iterator freq_iter = sl_hashmap_iter(&freq); !sl_hashmap_iter_is_done(&freq_iter);
