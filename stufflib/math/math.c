@@ -30,8 +30,12 @@ size_t sl_math_next_power_of_two(const size_t x1) {
   return x2;
 }
 
+// TODO signed math
 bool sl_math_is_prime(size_t x) {
-  for (size_t i = 2; i * i < x; ++i) {
+  if (x == 0 || x == 1) {
+    return false;
+  }
+  for (size_t i = 2; i * i <= x; ++i) {
     if (x % i == 0) {
       return false;
     }

@@ -78,6 +78,7 @@
   } while (false)
 
 #define SL_ASSERT_TRUE(expr, ...) SL_ASSERT_BINOP(==, bool, "%d", (expr), true, __VA_ARGS__)
+#define SL_ASSERT_FALSE(expr, ...) SL_ASSERT_BINOP(==, bool, "%d", (expr), false, __VA_ARGS__)
 #define SL_ASSERT_EQ_CHAR(...) SL_ASSERT_BINOP(==, char, "%c", __VA_ARGS__)
 #define SL_ASSERT_EQ_LL(...) SL_ASSERT_BINOP(==, long long, "%lld", __VA_ARGS__)
 #define SL_ASSERT_EQ_PTR(...) SL_ASSERT_BINOP(==, void*, "%p", __VA_ARGS__)
