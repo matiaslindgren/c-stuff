@@ -1,6 +1,7 @@
 #ifndef SL_RAND_H_INCLUDED
 #define SL_RAND_H_INCLUDED
 
+#include <limits.h>
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -12,10 +13,11 @@ void sl_rand_shuffle_together(void* data1, void* data2, size_t size1, size_t siz
 
 static inline size_t sl_rand_int(const size_t a, const size_t b) {
   // return random integer i such that a <= i < b
-  if (a >= b) {
+  if ((a >= b) || ((b - a) > (size_t)INT_MAX)) {
     return a;
   }
-  return a + (size_t)(rand() % (int)(b - a));
+  int rand_val = rand();
+  return a + (size_t)(rand_val % (int)(b - a));
 }
 
 #endif  // SL_RAND_H_INCLUDED

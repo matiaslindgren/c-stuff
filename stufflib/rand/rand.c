@@ -10,8 +10,9 @@ void sl_rand_seed(unsigned int seed) {
 
 void sl_rand_fill_double(const size_t n, double dst[n], double scale) {
   for (size_t i = 0; i < n; ++i) {
-    double r = rand() - RAND_MAX / 2;
-    dst[i]   = scale * (r / RAND_MAX);
+    int rand_val = rand();
+    double r     = (double)rand_val / RAND_MAX;
+    dst[i]       = scale * (2.0 * r - 1.0);
   }
 }
 
