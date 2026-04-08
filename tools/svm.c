@@ -10,9 +10,11 @@
 #include <stufflib/macros/macros.h>
 #include <stufflib/memory/memory.h>
 #include <stufflib/ml/ml.h>
+#include <stufflib/rand/rand.h>
 #include <stufflib/record/reader.h>
 #include <stufflib/record/record.h>
 #include <stufflib/span/span.h>
+#include <time.h>
 
 bool spambase(struct sl_context ctx[static 1], const struct sl_args args[const static 1]) {
   bool all_ok = false;
@@ -415,6 +417,9 @@ int main(int argc, char* const argv[argc + 1]) {
   struct sl_context ctx = {0};
   bool ok               = false;
   struct sl_args args   = {.argc = argc, .argv = argv};
+
+  sl_rand_seed((unsigned int)time(nullptr));
+
   if (sl_args_count_positional(&args) < 2) {
     SL_ERROR(&ctx, "incorrect number of arguments");
   } else {
@@ -429,11 +434,14 @@ int main(int argc, char* const argv[argc + 1]) {
       }
     }
   }
+
   if (!ok) {
     print_usage(&args);
   }
+
   if (!sl_context_unwind_errors(&ctx, stderr)) {
     ok = false;
   }
+
   return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

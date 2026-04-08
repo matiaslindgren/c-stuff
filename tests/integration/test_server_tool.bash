@@ -9,6 +9,7 @@ trap 'echo error:$? line:$LINENO cmd:$BASH_COMMAND' ERR
 self_dir=$(dirname "$0")
 source ${self_dir}/common.bash $@
 
+# TODO use ephemeral ports
 listen_port=8080
 bind_host=127.0.0.1
 message_content="hello TCP server"

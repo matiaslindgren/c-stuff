@@ -4,6 +4,10 @@
 #include <stufflib/rand/rand.h>
 #include <time.h>
 
+void sl_rand_seed(unsigned int seed) {
+  srand(seed);
+}
+
 void sl_rand_fill_double(const size_t n, double dst[n], double scale) {
   for (size_t i = 0; i < n; ++i) {
     double r = rand() - RAND_MAX / 2;

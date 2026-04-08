@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+void sl_rand_seed(unsigned int seed);
 void sl_rand_fill_double(size_t n, double dst[n], double scale);
 void sl_rand_set_zero_double(size_t n, double dst[n], double probability);
 void sl_rand_shuffle(void* data, size_t size, size_t count);
