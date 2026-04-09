@@ -9,6 +9,7 @@
 
 void sl_ml_random_train_test_split(
     struct sl_context ctx[static 1],
+    uint64_t prng[static 1],
     struct sl_la_matrix data[const static 1],
     struct sl_la_matrix train[const static 1],
     struct sl_la_matrix test[const static 1],
@@ -25,6 +26,7 @@ void sl_ml_random_train_test_split(
     return;
   }
   sl_random_shuffle_together(
+      prng,
       data->data,
       classes,
       sizeof(float) * (size_t)data->cols,
@@ -124,6 +126,7 @@ uint8_t sl_ml_svm_binary_predict(
 
 // implements mini-batch pegasos by Shalev-Shwartz et al. (2011)
 void sl_ml_svm_linear_fit(
+    uint64_t prng[static 1],
     struct sl_ml_svm svm[const static 1],
     struct sl_la_matrix data[const static 1],
     const uint16_t classes[const static 1]
@@ -140,7 +143,7 @@ void sl_ml_svm_linear_fit(
 
   for (int t = 1; t <= n_iterations; ++t) {
     if (batch_begin + k >= data->rows) {
-      sl_random_shuffle(svm->shuffle_buffer, sizeof(size_t), (size_t)data->rows);
+      sl_random_shuffle(prng, svm->shuffle_buffer, sizeof(size_t), (size_t)data->rows);
       batch_begin = 0;
     }
 

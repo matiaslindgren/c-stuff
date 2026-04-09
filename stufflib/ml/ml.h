@@ -39,6 +39,7 @@ struct sl_ml_svm {
 
 void sl_ml_random_train_test_split(
     struct sl_context ctx[static 1],
+    uint64_t prng[static 1],
     struct sl_la_matrix data[const static 1],
     struct sl_la_matrix train[const static 1],
     struct sl_la_matrix test[const static 1],
@@ -74,6 +75,7 @@ uint8_t sl_ml_svm_binary_predict(
     struct sl_la_vector x[const static 1]
 );
 void sl_ml_svm_linear_fit(
+    uint64_t prng[static 1],
     struct sl_ml_svm svm[const static 1],
     struct sl_la_matrix data[const static 1],
     const uint16_t classes[const static 1]

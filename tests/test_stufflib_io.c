@@ -137,8 +137,8 @@ static bool test_io_read_file(struct sl_context ctx[static 1], const bool) {
   uint64_t buf = 0;
   assert(sl_io_read(ctx, "./test-data/txt/8bytes.txt", (unsigned char*)&buf, 8));
   assert(!sl_error_occurred(&ctx->errors));
-  // 12345678 in ascii letters
-  assert(buf == 0x3132333435363738UL);
+  // lil-endian 12345678 ascii digits
+  assert(buf == 0x3837363534333231UL);
   return true;
 }
 

@@ -11,6 +11,7 @@
 #include <stufflib/macros/macros.h>
 #include <stufflib/math/math.h>
 #include <stufflib/ml/ml.h>
+#include <stufflib/random/random.h>
 
 bool check_vector_equal(
     struct sl_la_vector a[const static 1],
@@ -163,6 +164,8 @@ static bool test_minmax_normalization(struct sl_context ctx[static 1], const boo
 }
 
 static bool test_random_train_test_split(struct sl_context ctx[static 1], const bool) {
+  uint64_t prng = 0;
+  sl_random_pcg32_init(&prng, 0);
   for (int iter = 0; iter < 1000; ++iter) {
     struct sl_la_matrix data = {
         .rows = 12,
@@ -175,7 +178,16 @@ static bool test_random_train_test_split(struct sl_context ctx[static 1], const 
     struct sl_la_matrix train      = {.rows = data.rows - test.rows, .cols = 3};
     uint16_t train_classes[12 - 4] = {0};
     uint16_t test_classes[4]       = {0};
-    sl_ml_random_train_test_split(ctx, &data, &train, &test, labels, train_classes, test_classes);
+    sl_ml_random_train_test_split(
+        ctx,
+        &prng,
+        &data,
+        &train,
+        &test,
+        labels,
+        train_classes,
+        test_classes
+    );
 
     int value_freq[12 * 3] = {0};
     int label_freq[12 * 3] = {0};
@@ -201,6 +213,8 @@ static bool test_random_train_test_split(struct sl_context ctx[static 1], const 
 
 static bool test_svm_linear_fit(struct sl_context ctx[static 1], const bool) {
   (void)ctx;
+  uint64_t prng = 0;
+  sl_random_pcg32_init(&prng, 0);
   for (int iter = 0; iter < 1000; ++iter) {
     for (int batch_size = 1; batch_size < 3; ++batch_size) {
       for (int n_epochs = 1; n_epochs < 10; ++n_epochs) {
@@ -220,7 +234,7 @@ static bool test_svm_linear_fit(struct sl_context ctx[static 1], const bool) {
             .n_epochs       = n_epochs,
             .learning_rate  = 1e-6f,
         };
-        sl_ml_svm_linear_fit(&svm, &data, classes);
+        sl_ml_svm_linear_fit(&prng, &svm, &data, classes);
 
         for (int i = 0; i < data.rows; ++i) {
           struct sl_la_vector x = sl_la_matrix_row_view(&data, i);

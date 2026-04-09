@@ -14,9 +14,12 @@
 #include <stufflib/record/reader.h>
 #include <stufflib/record/record.h>
 #include <stufflib/span/span.h>
-#include <time.h>
 
-bool spambase(struct sl_context ctx[static 1], const struct sl_args args[const static 1]) {
+bool spambase(
+    struct sl_context ctx[static 1],
+    uint64_t prng[static 1],
+    const struct sl_args args[const static 1]
+) {
   bool all_ok = false;
 
   const char* const dataset_dir = sl_args_get_positional(args, 1);
@@ -82,6 +85,7 @@ bool spambase(struct sl_context ctx[static 1], const struct sl_args args[const s
 
   sl_ml_random_train_test_split(
       ctx,
+      prng,
       &samples,
       &train_data,
       &test_data,
@@ -96,7 +100,7 @@ bool spambase(struct sl_context ctx[static 1], const struct sl_args args[const s
   sl_ml_minmax_apply(&minmax_scaler, &train_data, -1, 1);
   sl_ml_minmax_apply(&minmax_scaler, &test_data, -1, 1);
 
-  sl_ml_svm_linear_fit(&svm, &train_data, train_classes);
+  sl_ml_svm_linear_fit(prng, &svm, &train_data, train_classes);
 
   {
     struct sl_ml_classification report = {0};
@@ -125,7 +129,11 @@ done:
 
 #define SL_SVM_RCV1_BUFFER_LEN 10'000
 
-bool rcv1(struct sl_context ctx[static 1], const struct sl_args args[const static 1]) {
+bool rcv1(
+    struct sl_context ctx[static 1],
+    uint64_t prng[static 1],
+    const struct sl_args args[const static 1]
+) {
   bool all_ok = false;
 
   const char* const dataset_dir = sl_args_get_positional(args, 1);
@@ -344,7 +352,7 @@ bool rcv1(struct sl_context ctx[static 1], const struct sl_args args[const stati
     if (verbose) {
       SL_LOG_INFO("RCV1 train batch %zu: fit svm", batch_idx);
     }
-    sl_ml_svm_linear_fit(&svm, &samples_batch, classes_buffer);
+    sl_ml_svm_linear_fit(prng, &svm, &samples_batch, classes_buffer);
 
     if (!sl_la_vector_is_finite(&(svm.w))) {
       SL_LOG_ERROR("RCV1 train batch %zu: SVM weights has NaNs", batch_idx);
@@ -417,8 +425,15 @@ int main(int argc, char* const argv[argc + 1]) {
   struct sl_context ctx = {0};
   bool ok               = false;
   struct sl_args args   = {.argc = argc, .argv = argv};
+  uint64_t prng         = 0;
 
-  sl_random_seed((unsigned int)time(nullptr));
+  {
+    uint64_t seed = sl_random_read_device_seed(&ctx);
+    if (sl_error_occurred(&ctx.errors)) {
+      goto done;
+    }
+    sl_random_pcg32_init(&prng, seed);
+  }
 
   if (sl_args_count_positional(&args) < 2) {
     SL_ERROR(&ctx, "incorrect number of arguments");
@@ -426,9 +441,9 @@ int main(int argc, char* const argv[argc + 1]) {
     const char* experiment = sl_args_get_positional(&args, 0);
     if (experiment) {
       if (strcmp(experiment, "spambase") == 0) {
-        ok = spambase(&ctx, &args);
+        ok = spambase(&ctx, &prng, &args);
       } else if (strcmp(experiment, "rcv1") == 0) {
-        ok = rcv1(&ctx, &args);
+        ok = rcv1(&ctx, &prng, &args);
       } else {
         SL_ERROR(&ctx, "unknown experiment %s", experiment);
       }
@@ -439,6 +454,7 @@ int main(int argc, char* const argv[argc + 1]) {
     print_usage(&args);
   }
 
+done:
   if (!sl_context_unwind_errors(&ctx, stderr)) {
     ok = false;
   }
