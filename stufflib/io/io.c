@@ -7,6 +7,33 @@
 #include <stufflib/io/io.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/span/span.h>
+#include <sys/errno.h>
+
+bool sl_io_read(
+    struct sl_context ctx[static const 1],
+    const char path[static const 1],
+    unsigned char out[static const 1],
+    size_t count
+) {
+  FILE* file = nullptr;
+  bool ok    = true;
+
+  if (!(file = fopen(path, "r"))) {
+    SL_ERROR(ctx, "cannot open %s, ERRNO=%d", path, errno);
+    goto end;
+  }
+
+  if (count != fread(out, 1, count, file)) {
+    SL_ERROR(ctx, "failed reading %zu bytes from %s", count, path);
+    goto end;
+  }
+
+end:
+  if (file) {
+    fclose(file);
+  }
+  return ok;
+}
 
 bool sl_file_format_path(
     const size_t bufsize,

@@ -12,6 +12,12 @@ struct sl_file {
   FILE* file;
 };
 
+bool sl_io_read(
+    struct sl_context ctx[static 1],
+    const char path[static 1],
+    unsigned char out[static 1],
+    size_t count
+);
 bool sl_file_format_path(
     size_t bufsize,
     char buffer[const bufsize],

@@ -125,11 +125,48 @@ static bool test_parse_numbers(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
+static bool test_io_read_one_byte(struct sl_context ctx[static 1], const bool) {
+  unsigned char buf[1] = {0};
+  assert(sl_io_read(ctx, "./test-data/txt/one.txt", buf, 1));
+  assert(!sl_error_occurred(&ctx->errors));
+  SL_ASSERT_EQ_CHAR(buf[0], '1');
+  return true;
+}
+
+static bool test_io_read_file(struct sl_context ctx[static 1], const bool) {
+  uint64_t buf = 0;
+  assert(sl_io_read(ctx, "./test-data/txt/8bytes.txt", (unsigned char*)&buf, 8));
+  assert(!sl_error_occurred(&ctx->errors));
+  // 12345678 in ascii letters
+  assert(buf == 0x3132333435363738UL);
+  return true;
+}
+
+static bool test_io_read_missing_file(struct sl_context ctx[static 1], const bool) {
+  unsigned char buf[1] = {0};
+  sl_io_read(ctx, "./test-data/txt/does_not_exist", buf, 1);
+  assert(sl_error_occurred(&ctx->errors));
+  sl_error_clear(&ctx->errors);
+  return true;
+}
+
+static bool test_io_read_too_many_bytes(struct sl_context ctx[static 1], const bool) {
+  unsigned char buf[8] = {0};
+  sl_io_read(ctx, "./test-data/txt/one.txt", buf, sizeof(buf));
+  assert(sl_error_occurred(&ctx->errors));
+  sl_error_clear(&ctx->errors);
+  return true;
+}
+
 SL_TEST_MAIN(
     test_format_path,
     test_open_file,
     test_read_single_char,
     test_read_empty_file,
     test_read_entire_file,
-    test_parse_numbers
+    test_parse_numbers,
+    test_io_read_one_byte,
+    test_io_read_file,
+    test_io_read_missing_file,
+    test_io_read_too_many_bytes
 )
