@@ -5,7 +5,7 @@
 #include <stufflib/context/context.h>
 #include <stufflib/linalg/linalg.h>
 #include <stufflib/ml/ml.h>
-#include <stufflib/rand/rand.h>
+#include <stufflib/random/random.h>
 
 void sl_ml_random_train_test_split(
     struct sl_context ctx[static 1],
@@ -24,7 +24,7 @@ void sl_ml_random_train_test_split(
     SL_ERROR(ctx, "number of features must be equal when doing a split");
     return;
   }
-  sl_rand_shuffle_together(
+  sl_random_shuffle_together(
       data->data,
       classes,
       sizeof(float) * (size_t)data->cols,
@@ -140,7 +140,7 @@ void sl_ml_svm_linear_fit(
 
   for (int t = 1; t <= n_iterations; ++t) {
     if (batch_begin + k >= data->rows) {
-      sl_rand_shuffle(svm->shuffle_buffer, sizeof(size_t), (size_t)data->rows);
+      sl_random_shuffle(svm->shuffle_buffer, sizeof(size_t), (size_t)data->rows);
       batch_begin = 0;
     }
 

@@ -6,7 +6,7 @@
 #include <stufflib/args/args.h>
 #include <stufflib/context/context.h>
 #include <stufflib/macros/macros.h>
-#include <stufflib/rand/rand.h>
+#include <stufflib/random/random.h>
 #include <stufflib/sort/sort.h>
 #include <time.h>
 
@@ -62,8 +62,8 @@ static bool test_sort_doubles(
     }
 
     for (size_t test = 0; test < num_tests_per_size; ++test) {
-      sl_rand_fill_double(n, x, 1e6);
-      sl_rand_set_zero_double(n, x, 0.01);
+      sl_random_fill_double(n, x, 1e6);
+      sl_random_set_zero_double(n, x, 0.01);
 
       clock_t start_time = clock();
       if (!sort_doubles(ctx, n, x)) {

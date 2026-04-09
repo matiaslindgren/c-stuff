@@ -10,7 +10,7 @@
 #include <stufflib/macros/macros.h>
 #include <stufflib/memory/memory.h>
 #include <stufflib/ml/ml.h>
-#include <stufflib/rand/rand.h>
+#include <stufflib/random/random.h>
 #include <stufflib/record/reader.h>
 #include <stufflib/record/record.h>
 #include <stufflib/span/span.h>
@@ -418,7 +418,7 @@ int main(int argc, char* const argv[argc + 1]) {
   bool ok               = false;
   struct sl_args args   = {.argc = argc, .argv = argv};
 
-  sl_rand_seed((unsigned int)time(nullptr));
+  sl_random_seed((unsigned int)time(nullptr));
 
   if (sl_args_count_positional(&args) < 2) {
     SL_ERROR(&ctx, "incorrect number of arguments");

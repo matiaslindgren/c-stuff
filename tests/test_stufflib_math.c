@@ -8,7 +8,7 @@
 #include <stufflib/macros/macros.h>
 #include <stufflib/math/math.h>
 #include <stufflib/memory/memory.h>
-#include <stufflib/rand/rand.h>
+#include <stufflib/random/random.h>
 
 #define SL_ASSERT_FACTORIZATION_OK(verbose, x, factors)              \
   do {                                                               \
@@ -178,8 +178,8 @@ static bool test_numerical_diff(struct sl_context ctx[static 1], const bool verb
   (void)ctx;
   const size_t n = 10000;
   double x[n];
-  sl_rand_fill_double(n, x, 10);
-  sl_rand_set_zero_double(n, x, 0.01);
+  sl_random_fill_double(n, x, 10);
+  sl_random_set_zero_double(n, x, 0.01);
 
   if (verbose) {
     printf(
