@@ -1,10 +1,10 @@
-#include <assert.h>
 #include <stdio.h>
 #include <stufflib/args/args.h>
 #include <stufflib/context/context.h>
 #include <stufflib/linalg/linalg.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/math/math.h>
+#include <stufflib/testing/testing.h>
 
 bool fequal(const double a, const double b) {
   return sl_math_double_almost(a, b, 1e-9);
@@ -49,7 +49,7 @@ static bool test_matrix_get(struct sl_context ctx[static 1], const bool) {
   };
   for (int row = 0; row < a.rows; ++row) {
     for (int col = 0; col < a.cols; ++col) {
-      assert(a.data + row * a.cols + col == sl_la_matrix_get(&a, row, col));
+      SL_ASSERT_TRUE(a.data + row * a.cols + col == sl_la_matrix_get(&a, row, col));
     }
   }
   return true;
@@ -68,7 +68,7 @@ static bool test_matrix_equal(struct sl_context ctx[static 1], const bool) {
         .cols = 1,
         .data = (float[]){0},
     };
-    assert(sl_la_matrix_equal(&a, &b));
+    SL_ASSERT_TRUE(sl_la_matrix_equal(&a, &b));
   }
   {
     struct sl_la_matrix a = {
@@ -81,7 +81,7 @@ static bool test_matrix_equal(struct sl_context ctx[static 1], const bool) {
         .cols = 1,
         .data = (float[]){0},
     };
-    assert(!sl_la_matrix_equal(&a, &b));
+    SL_ASSERT_TRUE(!sl_la_matrix_equal(&a, &b));
   }
   {
     struct sl_la_matrix a = {
@@ -94,7 +94,7 @@ static bool test_matrix_equal(struct sl_context ctx[static 1], const bool) {
         .cols = 1,
         .data = (float[]){0},
     };
-    assert(!sl_la_matrix_equal(&a, &b));
+    SL_ASSERT_TRUE(!sl_la_matrix_equal(&a, &b));
   }
   {
     struct sl_la_matrix a = {
@@ -107,7 +107,7 @@ static bool test_matrix_equal(struct sl_context ctx[static 1], const bool) {
         .cols = 2,
         .data = (float[]){0, 0},
     };
-    assert(!sl_la_matrix_equal(&a, &b));
+    SL_ASSERT_TRUE(!sl_la_matrix_equal(&a, &b));
   }
   {
     struct sl_la_matrix a = {
@@ -120,7 +120,7 @@ static bool test_matrix_equal(struct sl_context ctx[static 1], const bool) {
         .cols = 3,
         .data = (float[]){0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
     };
-    assert(sl_la_matrix_equal(&a, &b));
+    SL_ASSERT_TRUE(sl_la_matrix_equal(&a, &b));
   }
   {
     struct sl_la_matrix a = {
@@ -133,7 +133,7 @@ static bool test_matrix_equal(struct sl_context ctx[static 1], const bool) {
         .cols = 3,
         .data = (float[12]){0, 1, 2, 3, 4, 5}
     };
-    assert(!sl_la_matrix_equal(&a, &b));
+    SL_ASSERT_TRUE(!sl_la_matrix_equal(&a, &b));
   }
   return true;
 }
@@ -379,7 +379,7 @@ static bool test_vector_scale(struct sl_context ctx[static 1], const bool) {
     };
     sl_la_vector_scale(&v, (float)alpha);
     for (int i = 0; i < v.size; ++i) {
-      assert(fequal((double)v.data[i], (double)(i - 4) * alpha));
+      SL_ASSERT_TRUE(fequal((double)v.data[i], (double)(i - 4) * alpha));
     }
   }
   return true;
@@ -396,7 +396,7 @@ static bool test_vector_equal(struct sl_context ctx[static 1], const bool) {
         .size = 5,
         .data = (float[]){-1, 0, 1, 2, 3},
     };
-    assert(sl_la_vector_equal(&v1, &v2));
+    SL_ASSERT_TRUE(sl_la_vector_equal(&v1, &v2));
   }
   return true;
 }
@@ -412,7 +412,7 @@ static bool test_vector_dot(struct sl_context ctx[static 1], const bool) {
         .size = 5,
         .data = (float[5]){0},
     };
-    assert(fequal((double)sl_la_vector_dot(&v1, &v2), 0));
+    SL_ASSERT_TRUE(fequal((double)sl_la_vector_dot(&v1, &v2), 0));
   }
   {
     struct sl_la_vector v1 = {
@@ -423,7 +423,7 @@ static bool test_vector_dot(struct sl_context ctx[static 1], const bool) {
         .size = 5,
         .data = (float[]){1, 2, 3, 4, 5},
     };
-    assert(fequal((double)sl_la_vector_dot(&v1, &v2), 25));
+    SL_ASSERT_TRUE(fequal((double)sl_la_vector_dot(&v1, &v2), 25));
   }
   return true;
 }

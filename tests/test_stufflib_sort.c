@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,6 +7,7 @@
 #include <stufflib/macros/macros.h>
 #include <stufflib/random/random.h>
 #include <stufflib/sort/sort.h>
+#include <stufflib/testing/testing.h>
 #include <time.h>
 
 static bool test_compare_doubles(struct sl_context ctx[static 1], const bool verbose) {
@@ -20,20 +20,20 @@ static bool test_compare_doubles(struct sl_context ctx[static 1], const bool ver
   b[0]      = 0;
   b[1]      = 1e12;
 
-  assert(sl_sort_compare_double((void*)(&a[0]), (void*)(&a[0])) == 0);
-  assert(sl_sort_compare_double((void*)(&a[1]), (void*)(&a[1])) == 0);
-  assert(sl_sort_compare_double((void*)(&b[0]), (void*)(&b[0])) == 0);
-  assert(sl_sort_compare_double((void*)(&b[1]), (void*)(&b[1])) == 0);
+  SL_ASSERT_TRUE(sl_sort_compare_double((void*)(&a[0]), (void*)(&a[0])) == 0);
+  SL_ASSERT_TRUE(sl_sort_compare_double((void*)(&a[1]), (void*)(&a[1])) == 0);
+  SL_ASSERT_TRUE(sl_sort_compare_double((void*)(&b[0]), (void*)(&b[0])) == 0);
+  SL_ASSERT_TRUE(sl_sort_compare_double((void*)(&b[1]), (void*)(&b[1])) == 0);
 
-  assert(sl_sort_compare_double((void*)(&a[0]), (void*)(&a[1])) == -1);
-  assert(sl_sort_compare_double((void*)(&a[1]), (void*)(&a[0])) == 1);
-  assert(sl_sort_compare_double((void*)(&b[0]), (void*)(&b[1])) == -1);
-  assert(sl_sort_compare_double((void*)(&b[1]), (void*)(&b[0])) == 1);
+  SL_ASSERT_TRUE(sl_sort_compare_double((void*)(&a[0]), (void*)(&a[1])) == -1);
+  SL_ASSERT_TRUE(sl_sort_compare_double((void*)(&a[1]), (void*)(&a[0])) == 1);
+  SL_ASSERT_TRUE(sl_sort_compare_double((void*)(&b[0]), (void*)(&b[1])) == -1);
+  SL_ASSERT_TRUE(sl_sort_compare_double((void*)(&b[1]), (void*)(&b[0])) == 1);
 
-  assert(sl_sort_compare_double((void*)(&a[0]), (void*)(&b[0])) == -1);
-  assert(sl_sort_compare_double((void*)(&a[0]), (void*)(&b[1])) == -1);
-  assert(sl_sort_compare_double((void*)(&a[1]), (void*)(&b[0])) == 1);
-  assert(sl_sort_compare_double((void*)(&a[1]), (void*)(&b[1])) == -1);
+  SL_ASSERT_TRUE(sl_sort_compare_double((void*)(&a[0]), (void*)(&b[0])) == -1);
+  SL_ASSERT_TRUE(sl_sort_compare_double((void*)(&a[0]), (void*)(&b[1])) == -1);
+  SL_ASSERT_TRUE(sl_sort_compare_double((void*)(&a[1]), (void*)(&b[0])) == 1);
+  SL_ASSERT_TRUE(sl_sort_compare_double((void*)(&a[1]), (void*)(&b[1])) == -1);
 
   free(a);
   free(b);
@@ -136,20 +136,20 @@ static bool test_compare_strings(struct sl_context ctx[static 1], const bool ver
   const char* a[] = {"hello", "there"};
   const char* b[] = {"ok", " "};
 
-  assert(sl_sort_compare_str((void*)(&a[0]), (void*)(&a[0])) == 0);
-  assert(sl_sort_compare_str((void*)(&a[1]), (void*)(&a[1])) == 0);
-  assert(sl_sort_compare_str((void*)(&b[0]), (void*)(&b[0])) == 0);
-  assert(sl_sort_compare_str((void*)(&b[1]), (void*)(&b[1])) == 0);
+  SL_ASSERT_TRUE(sl_sort_compare_str((void*)(&a[0]), (void*)(&a[0])) == 0);
+  SL_ASSERT_TRUE(sl_sort_compare_str((void*)(&a[1]), (void*)(&a[1])) == 0);
+  SL_ASSERT_TRUE(sl_sort_compare_str((void*)(&b[0]), (void*)(&b[0])) == 0);
+  SL_ASSERT_TRUE(sl_sort_compare_str((void*)(&b[1]), (void*)(&b[1])) == 0);
 
-  assert(sl_sort_compare_str((void*)(&a[0]), (void*)(&a[1])) < 0);
-  assert(sl_sort_compare_str((void*)(&a[1]), (void*)(&a[0])) > 0);
-  assert(sl_sort_compare_str((void*)(&b[0]), (void*)(&b[1])) > 0);
-  assert(sl_sort_compare_str((void*)(&b[1]), (void*)(&b[0])) < 0);
+  SL_ASSERT_TRUE(sl_sort_compare_str((void*)(&a[0]), (void*)(&a[1])) < 0);
+  SL_ASSERT_TRUE(sl_sort_compare_str((void*)(&a[1]), (void*)(&a[0])) > 0);
+  SL_ASSERT_TRUE(sl_sort_compare_str((void*)(&b[0]), (void*)(&b[1])) > 0);
+  SL_ASSERT_TRUE(sl_sort_compare_str((void*)(&b[1]), (void*)(&b[0])) < 0);
 
-  assert(sl_sort_compare_str((void*)(&a[0]), (void*)(&b[0])) < 0);
-  assert(sl_sort_compare_str((void*)(&a[0]), (void*)(&b[1])) > 0);
-  assert(sl_sort_compare_str((void*)(&a[1]), (void*)(&b[0])) > 0);
-  assert(sl_sort_compare_str((void*)(&a[1]), (void*)(&b[1])) > 0);
+  SL_ASSERT_TRUE(sl_sort_compare_str((void*)(&a[0]), (void*)(&b[0])) < 0);
+  SL_ASSERT_TRUE(sl_sort_compare_str((void*)(&a[0]), (void*)(&b[1])) > 0);
+  SL_ASSERT_TRUE(sl_sort_compare_str((void*)(&a[1]), (void*)(&b[0])) > 0);
+  SL_ASSERT_TRUE(sl_sort_compare_str((void*)(&a[1]), (void*)(&b[1])) > 0);
 
   return true;
 }
@@ -283,10 +283,10 @@ static bool test_sort_named_vec3(
   double sort_msec = 1e3 * ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
 
   for (size_t i = 0; i < n; ++i) {
-    assert(items[i].x == sorted_items[i].x);
-    assert(items[i].y == sorted_items[i].y);
-    assert(items[i].z == sorted_items[i].z);
-    assert(strcmp(items[i].name, sorted_items[i].name) == 0);
+    SL_ASSERT_TRUE(items[i].x == sorted_items[i].x);
+    SL_ASSERT_TRUE(items[i].y == sorted_items[i].y);
+    SL_ASSERT_TRUE(items[i].z == sorted_items[i].z);
+    SL_ASSERT_TRUE(strcmp(items[i].name, sorted_items[i].name) == 0);
   }
 
   size_t test = 0;

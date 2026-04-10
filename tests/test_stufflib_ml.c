@@ -1,7 +1,7 @@
-#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stufflib/testing/testing.h>
 
 #define SL_LA_FLOAT_EQ_TOL 1e-6
 
@@ -53,12 +53,12 @@ static bool test_minmax_normalization(struct sl_context ctx[static 1], const boo
     };
     struct sl_ml_minmax_scaler scaler = SL_ML_MINMAX_SCALER_CREATE_INLINE(3);
     sl_ml_minmax_fit(&scaler, &a);
-    assert(sl_math_double_almost((double)scaler.lo.data[0], -6, SL_LA_FLOAT_EQ_TOL));
-    assert(sl_math_double_almost((double)scaler.lo.data[1], -3, SL_LA_FLOAT_EQ_TOL));
-    assert(sl_math_double_almost((double)scaler.lo.data[2], -8, SL_LA_FLOAT_EQ_TOL));
-    assert(sl_math_double_almost((double)scaler.hi.data[0], 8, SL_LA_FLOAT_EQ_TOL));
-    assert(sl_math_double_almost((double)scaler.hi.data[1], 10, SL_LA_FLOAT_EQ_TOL));
-    assert(sl_math_double_almost((double)scaler.hi.data[2], 10, SL_LA_FLOAT_EQ_TOL));
+    SL_ASSERT_TRUE(sl_math_double_almost((double)scaler.lo.data[0], -6, SL_LA_FLOAT_EQ_TOL));
+    SL_ASSERT_TRUE(sl_math_double_almost((double)scaler.lo.data[1], -3, SL_LA_FLOAT_EQ_TOL));
+    SL_ASSERT_TRUE(sl_math_double_almost((double)scaler.lo.data[2], -8, SL_LA_FLOAT_EQ_TOL));
+    SL_ASSERT_TRUE(sl_math_double_almost((double)scaler.hi.data[0], 8, SL_LA_FLOAT_EQ_TOL));
+    SL_ASSERT_TRUE(sl_math_double_almost((double)scaler.hi.data[1], 10, SL_LA_FLOAT_EQ_TOL));
+    SL_ASSERT_TRUE(sl_math_double_almost((double)scaler.hi.data[2], 10, SL_LA_FLOAT_EQ_TOL));
   }
   {
     struct sl_la_matrix a1 = {
@@ -196,7 +196,7 @@ static bool test_random_train_test_split(struct sl_context ctx[static 1], const 
         const int value = (int)lroundf(*sl_la_matrix_get(&data, row, col));
         value_freq[value] += 1;
         if (col == 0) {
-          assert(value == labels[row]);
+          SL_ASSERT_TRUE(value == labels[row]);
           label_freq[value] += 1;
         }
       }
@@ -238,7 +238,7 @@ static bool test_svm_linear_fit(struct sl_context ctx[static 1], const bool) {
 
         for (int i = 0; i < data.rows; ++i) {
           struct sl_la_vector x = sl_la_matrix_row_view(&data, i);
-          assert(classes[i] == sl_ml_svm_binary_predict(&svm, &x));
+          SL_ASSERT_TRUE(classes[i] == sl_ml_svm_binary_predict(&svm, &x));
         }
       }
     }

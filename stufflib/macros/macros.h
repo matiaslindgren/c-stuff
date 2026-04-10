@@ -15,76 +15,6 @@
 #define SL_ARRAY_LEN(a) (sizeof(a) / sizeof((a)[0]))
 #define SL_STR_EQ(a, b) (strcmp((a), (b)) == 0)
 
-#define SL_ASSERT_BINOP(binop, type, fmt, lhs, rhs, ...)                               \
-  do {                                                                                 \
-    const type sl_assert_lhs = (type)(lhs);                                            \
-    const type sl_assert_rhs = (type)(rhs);                                            \
-    if (!(sl_assert_lhs binop sl_assert_rhs)) {                                        \
-      fprintf(                                                                         \
-          stderr,                                                                      \
-          ("assertion failed: (" #type ")(" #lhs ") " #binop " (" #type ")(" #rhs ") " \
-           "\n  lhs: " #lhs " = " fmt "\n  rhs: " #rhs " = " fmt                       \
-           "\n  function: %s\n  file: %s\n  line: %d\n  msg: \"" __VA_ARGS__ "\"\n"),  \
-          sl_assert_lhs,                                                               \
-          sl_assert_rhs,                                                               \
-          __func__,                                                                    \
-          __FILE__,                                                                    \
-          __LINE__                                                                     \
-      );                                                                               \
-      abort();                                                                         \
-    }                                                                                  \
-  } while (false)
-
-#define SL_ASSERT_STRCMP(expect, type, fmt, lhs, rhs, ...)                                      \
-  do {                                                                                          \
-    type sl_assert_lhs = (type)(lhs);                                                           \
-    type sl_assert_rhs = (type)(rhs);                                                           \
-    if (!(strcmp(sl_assert_lhs, sl_assert_rhs) == expect)) {                                    \
-      fprintf(                                                                                  \
-          stderr,                                                                               \
-          ("assertion failed: strcmp((" #type ")(" #lhs "), (" #type ")(" #rhs ")) == " #expect \
-           "\n  lhs: " #lhs " = \"" fmt "\"\n  rhs: " #rhs " = \"" fmt                          \
-           "\"\n  function: %s\n  file: %s\n  line: %d\n  msg: "                                \
-           "\"" __VA_ARGS__ "\"\n"),                                                            \
-          sl_assert_lhs,                                                                        \
-          sl_assert_rhs,                                                                        \
-          __func__,                                                                             \
-          __FILE__,                                                                             \
-          __LINE__                                                                              \
-      );                                                                                        \
-      abort();                                                                                  \
-    }                                                                                           \
-  } while (false)
-
-#define SL_ASSERT_DOUBLE_ALMOST(fmt, lhs, rhs, tolerance, ...)                                  \
-  do {                                                                                          \
-    double sl_assert_lhs = (double)(lhs);                                                       \
-    double sl_assert_rhs = (double)(rhs);                                                       \
-    if (!(sl_math_double_almost(sl_assert_lhs, sl_assert_rhs, tolerance))) {                    \
-      fprintf(                                                                                  \
-          stderr,                                                                               \
-          ("assertion failed: sl_math_double_almost((\"double\")(" #lhs "), (\"double\")(" #rhs \
-           "), (" #tolerance "))\n  lhs: " #lhs " = \"" fmt "\"\n  rhs: " #rhs " = \"" fmt      \
-           "\"\n  function: %s\n  file: %s\n  line: %d\n  msg: "                                \
-           "\"" __VA_ARGS__ "\"\n"),                                                            \
-          sl_assert_lhs,                                                                        \
-          sl_assert_rhs,                                                                        \
-          __func__,                                                                             \
-          __FILE__,                                                                             \
-          __LINE__                                                                              \
-      );                                                                                        \
-      abort();                                                                                  \
-    }                                                                                           \
-  } while (false)
-
-#define SL_ASSERT_TRUE(expr, ...) SL_ASSERT_BINOP(==, bool, "%d", (expr), true, __VA_ARGS__)
-#define SL_ASSERT_FALSE(expr, ...) SL_ASSERT_BINOP(==, bool, "%d", (expr), false, __VA_ARGS__)
-#define SL_ASSERT_EQ_CHAR(...) SL_ASSERT_BINOP(==, char, "%c", __VA_ARGS__)
-#define SL_ASSERT_EQ_LL(...) SL_ASSERT_BINOP(==, long long, "%lld", __VA_ARGS__)
-#define SL_ASSERT_EQ_PTR(...) SL_ASSERT_BINOP(==, void*, "%p", __VA_ARGS__)
-#define SL_ASSERT_EQ_STR(...) SL_ASSERT_STRCMP(0, const char* const, "%s", __VA_ARGS__)
-#define SL_ASSERT_EQ_DOUBLE(...) SL_ASSERT_DOUBLE_ALMOST("%g", __VA_ARGS__)
-
 #define SL_LOG(level, ...)                             \
   do {                                                 \
     const char* const sl_log_fname    = __FILE__;      \
@@ -123,30 +53,6 @@
 #else
   #define SL_LOG_ERROR(...) SL_NOOP(__VA_ARGS__)
 #endif
-
-#define SL_TEST_MAIN(...)                                                                       \
-  int main(int argc, char* const argv[argc + 1]) {                                              \
-    struct sl_args args                                      = {.argc = argc, .argv = argv};    \
-    const bool verbose                                       = sl_args_parse_flag(&args, "-v"); \
-    bool (*tests[])(struct sl_context[static 1], const bool) = {__VA_ARGS__};                   \
-    char test_names_str[]                                    = #__VA_ARGS__;                    \
-    bool ok                                                  = true;                            \
-    const char* test_name                                    = "";                              \
-    struct sl_context ctx                                    = {0};                             \
-    for (size_t t = 0; ok && t < SL_ARRAY_LEN(tests); ++t) {                                    \
-      sl_error_clear(&ctx.errors);                                                              \
-      test_name = strtok(t ? 0 : test_names_str, ", ");                                         \
-      assert(test_name);                                                                        \
-      if (verbose) {                                                                            \
-        printf("%s\n", test_name);                                                              \
-      }                                                                                         \
-      ok = tests[t](&ctx, verbose);                                                             \
-      if (!ok) {                                                                                \
-        SL_LOG_ERROR("test %s (%zu) failed", test_name, t);                                     \
-      }                                                                                         \
-    }                                                                                           \
-    return ok ? EXIT_SUCCESS : EXIT_FAILURE;                                                    \
-  }
 
 #define SL_REPEAT_1(x) x
 #define SL_REPEAT_2(x) SL_REPEAT_1(x) x

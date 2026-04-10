@@ -1,16 +1,16 @@
-#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <stufflib/args/args.h>
 #include <stufflib/context/context.h>
 #include <stufflib/macros/macros.h>
+#include <stufflib/testing/testing.h>
 
 static bool test_fresh_ctx_has_no_errors(struct sl_context ctx[static 1], const bool) {
   (void)ctx;
   struct sl_context c = {0};
 
-  assert(!sl_error_occurred(&c.errors));
-  assert(sl_error_depth(&c.errors) == 0);
+  SL_ASSERT_TRUE(!sl_error_occurred(&c.errors));
+  SL_ASSERT_TRUE(sl_error_depth(&c.errors) == 0);
 
   return true;
 }
@@ -21,12 +21,12 @@ static bool test_sl_error_macro_no_format_args(struct sl_context ctx[static 1], 
 
   SL_ERROR(&c, "something failed");
 
-  assert(sl_error_occurred(&c.errors));
-  assert(sl_error_depth(&c.errors) == 1);
+  SL_ASSERT_TRUE(sl_error_occurred(&c.errors));
+  SL_ASSERT_TRUE(sl_error_depth(&c.errors) == 1);
 
   const struct sl_error_msg* top = sl_error_peek(&c.errors);
-  assert(top != nullptr);
-  assert(strcmp(top->msg, "something failed") == 0);
+  SL_ASSERT_TRUE(top != nullptr);
+  SL_ASSERT_TRUE(strcmp(top->msg, "something failed") == 0);
 
   return true;
 }
@@ -38,8 +38,8 @@ static bool test_sl_error_macro_formats_message(struct sl_context ctx[static 1],
   SL_ERROR(&c, "value is %d and str is %s", 42, "hello");
 
   const struct sl_error_msg* top = sl_error_peek(&c.errors);
-  assert(top != nullptr);
-  assert(strcmp(top->msg, "value is 42 and str is hello") == 0);
+  SL_ASSERT_TRUE(top != nullptr);
+  SL_ASSERT_TRUE(strcmp(top->msg, "value is 42 and str is hello") == 0);
 
   return true;
 }
@@ -51,8 +51,8 @@ static bool test_sl_error_macro_captures_file(struct sl_context ctx[static 1], c
   SL_ERROR(&c, "check file");
 
   const struct sl_error_msg* top = sl_error_peek(&c.errors);
-  assert(top != nullptr);
-  assert(strstr(top->file, "test_stufflib_context.c") != nullptr);
+  SL_ASSERT_TRUE(top != nullptr);
+  SL_ASSERT_TRUE(strstr(top->file, "test_stufflib_context.c") != nullptr);
 
   return true;
 }
@@ -65,8 +65,8 @@ static bool test_sl_error_macro_captures_line(struct sl_context ctx[static 1], c
   SL_ERROR(&c, "check line");
 
   const struct sl_error_msg* top = sl_error_peek(&c.errors);
-  assert(top != nullptr);
-  assert(top->line == line_before + 1);
+  SL_ASSERT_TRUE(top != nullptr);
+  SL_ASSERT_TRUE(top->line == line_before + 1);
 
   return true;
 }
@@ -79,11 +79,11 @@ static bool test_sl_error_macro_accumulates(struct sl_context ctx[static 1], con
   SL_ERROR(&c, "second");
   SL_ERROR(&c, "third");
 
-  assert(sl_error_depth(&c.errors) == 3);
+  SL_ASSERT_TRUE(sl_error_depth(&c.errors) == 3);
 
   const struct sl_error_msg* top = sl_error_peek(&c.errors);
-  assert(top != nullptr);
-  assert(strcmp(top->msg, "third") == 0);
+  SL_ASSERT_TRUE(top != nullptr);
+  SL_ASSERT_TRUE(strcmp(top->msg, "third") == 0);
 
   return true;
 }
@@ -99,12 +99,12 @@ static bool test_sl_error_macro_msg_truncation(struct sl_context ctx[static 1], 
 
   SL_ERROR(&c, "%s", long_str);
 
-  assert(strlen(long_str) > SL_ERROR_MSG_LEN - 1);
+  SL_ASSERT_TRUE(strlen(long_str) > SL_ERROR_MSG_LEN - 1);
 
   const struct sl_error_msg* top = sl_error_peek(&c.errors);
-  assert(top != nullptr);
-  assert(strlen(top->msg) == SL_ERROR_MSG_LEN - 1);
-  assert(memcmp(top->msg, long_str, SL_ERROR_MSG_LEN - 1) == 0);
+  SL_ASSERT_TRUE(top != nullptr);
+  SL_ASSERT_TRUE(strlen(top->msg) == SL_ERROR_MSG_LEN - 1);
+  SL_ASSERT_TRUE(memcmp(top->msg, long_str, SL_ERROR_MSG_LEN - 1) == 0);
 
   return true;
 }
@@ -120,20 +120,20 @@ static bool test_unwind_empties_stack(struct sl_context ctx[static 1], const boo
   char* buf   = nullptr;
   size_t size = 0;
   FILE* mem   = open_memstream(&buf, &size);
-  assert(mem);
+  SL_ASSERT_TRUE(mem);
 
-  assert(sl_context_unwind_errors(&c, mem));
+  SL_ASSERT_TRUE(sl_context_unwind_errors(&c, mem));
   fclose(mem);
 
-  assert(!sl_error_occurred(&c.errors));
-  assert(sl_error_depth(&c.errors) == 0);
+  SL_ASSERT_TRUE(!sl_error_occurred(&c.errors));
+  SL_ASSERT_TRUE(sl_error_depth(&c.errors) == 0);
 
   // LIFO: third printed first, then second, then first
-  assert(strstr(buf, "third") != nullptr);
-  assert(strstr(buf, "second") != nullptr);
-  assert(strstr(buf, "first") != nullptr);
-  assert(strstr(buf, "third") < strstr(buf, "second"));
-  assert(strstr(buf, "second") < strstr(buf, "first"));
+  SL_ASSERT_TRUE(strstr(buf, "third") != nullptr);
+  SL_ASSERT_TRUE(strstr(buf, "second") != nullptr);
+  SL_ASSERT_TRUE(strstr(buf, "first") != nullptr);
+  SL_ASSERT_TRUE(strstr(buf, "third") < strstr(buf, "second"));
+  SL_ASSERT_TRUE(strstr(buf, "second") < strstr(buf, "first"));
 
   free(buf);
   return true;
@@ -148,15 +148,15 @@ static bool test_unwind_output_format(struct sl_context ctx[static 1], const boo
   char* buf   = nullptr;
   size_t size = 0;
   FILE* mem   = open_memstream(&buf, &size);
-  assert(mem);
+  SL_ASSERT_TRUE(mem);
 
-  assert(sl_context_unwind_errors(&c, mem));
+  SL_ASSERT_TRUE(sl_context_unwind_errors(&c, mem));
   fclose(mem);
 
-  assert(strstr(buf, "\"level\":\"error\"") != nullptr);
-  assert(strstr(buf, "\"file\":\"") != nullptr);
-  assert(strstr(buf, "\"line\":") != nullptr);
-  assert(strstr(buf, "\"msg\":\"boom\"}") != nullptr);
+  SL_ASSERT_TRUE(strstr(buf, "\"level\":\"error\"") != nullptr);
+  SL_ASSERT_TRUE(strstr(buf, "\"file\":\"") != nullptr);
+  SL_ASSERT_TRUE(strstr(buf, "\"line\":") != nullptr);
+  SL_ASSERT_TRUE(strstr(buf, "\"msg\":\"boom\"}") != nullptr);
 
   free(buf);
   return true;
@@ -169,12 +169,12 @@ static bool test_unwind_empty_stack_is_noop(struct sl_context ctx[static 1], con
   char* buf   = nullptr;
   size_t size = 0;
   FILE* mem   = open_memstream(&buf, &size);
-  assert(mem);
+  SL_ASSERT_TRUE(mem);
 
-  assert(sl_context_unwind_errors(&c, mem));
+  SL_ASSERT_TRUE(sl_context_unwind_errors(&c, mem));
   fclose(mem);
 
-  assert(size == 0);
+  SL_ASSERT_TRUE(size == 0);
 
   free(buf);
   return true;

@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,6 +6,7 @@
 #include <stufflib/context/context.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/random/random.h>
+#include <stufflib/testing/testing.h>
 
 static bool test_random_fill(struct sl_context ctx[static 1], const bool) {
   (void)ctx;
@@ -57,19 +57,19 @@ static bool test_randomint(struct sl_context ctx[static 1], const bool) {
   (void)ctx;
   uint64_t prng = 0;
   sl_random_pcg32_init(&prng, 0);
-  assert(sl_random_int(&prng, 0, 0) == 0);
-  assert(sl_random_int(&prng, 1, 0) == 1);
-  assert(sl_random_int(&prng, 0, 1) == 0);
+  SL_ASSERT_TRUE(sl_random_int(&prng, 0, 0) == 0);
+  SL_ASSERT_TRUE(sl_random_int(&prng, 1, 0) == 1);
+  SL_ASSERT_TRUE(sl_random_int(&prng, 0, 1) == 0);
   for (size_t a = 1; a < 100; ++a) {
     for (size_t b = a + 1; b < 100; ++b) {
       int freq[100] = {0};
       for (size_t i = 0; i < 2000; ++i) {
         size_t x = sl_random_int(&prng, a, b);
-        assert(a <= x && x < b);
+        SL_ASSERT_TRUE(a <= x && x < b);
         freq[x] += 1;
       }
       for (size_t x = a; x < b; ++x) {
-        assert(0 < freq[x] && freq[x] <= 2000);
+        SL_ASSERT_TRUE(0 < freq[x] && freq[x] <= 2000);
       }
     }
   }
@@ -83,7 +83,7 @@ static bool test_random_shuffle(struct sl_context ctx[static 1], const bool verb
   {
     unsigned char v[] = {0};
     sl_random_shuffle(&prng, v, 1, 1);
-    assert(v[0] == 0);
+    SL_ASSERT_TRUE(v[0] == 0);
   }
   {
     unsigned char v[16]                  = {0};
@@ -117,7 +117,7 @@ static bool test_random_shuffle(struct sl_context ctx[static 1], const bool verb
       printf("\n");
     }
     for (size_t i = 0; i < n; ++i) {
-      assert(freq_unshuffled[i] < 50);
+      SL_ASSERT_TRUE(freq_unshuffled[i] < 50);
     }
   }
   return true;
@@ -144,7 +144,7 @@ static bool test_random_shuffle_together(struct sl_context ctx[static 1], const 
       printf("\n");
     }
     for (size_t i = 0; i < n; ++i) {
-      assert(v1[i] == (size_t)v2[i]);
+      SL_ASSERT_TRUE(v1[i] == (size_t)v2[i]);
     }
   }
   return true;

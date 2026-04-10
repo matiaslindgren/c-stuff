@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,10 +8,11 @@
 #include <stufflib/math/math.h>
 #include <stufflib/memory/memory.h>
 #include <stufflib/random/random.h>
+#include <stufflib/testing/testing.h>
 
 #define SL_ASSERT_FACTORIZATION_OK(verbose, x, factors)              \
   do {                                                               \
-    assert((factors));                                               \
+    SL_ASSERT_TRUE((factors));                                       \
     if ((verbose)) {                                                 \
       printf("%zu factors:\n", (x));                                 \
       for (size_t f_index = 0; (factors)[f_index] != 0; ++f_index) { \
@@ -48,8 +48,8 @@ static bool test_factorize_primes(struct sl_context ctx[static 1], const bool ve
   for (size_t i = 0; i < SL_ARRAY_LEN(SL_TEST_PRIMES); ++i) {
     size_t* f = sl_math_factorize(ctx, SL_TEST_PRIMES[i]);
     SL_ASSERT_FACTORIZATION_OK(verbose, SL_TEST_PRIMES[i], f);
-    assert(f[0] == SL_TEST_PRIMES[i]);
-    assert(f[1] == 0);
+    SL_ASSERT_TRUE(f[0] == SL_TEST_PRIMES[i]);
+    SL_ASSERT_TRUE(f[1] == 0);
     sl_free(f);
   }
   return true;
@@ -59,9 +59,9 @@ static bool test_factorize_4(struct sl_context ctx[static 1], const bool verbose
   const size_t n = 4;
   size_t* f      = sl_math_factorize(ctx, n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
-  assert(f[0] == 2);
-  assert(f[1] == 2);
-  assert(f[2] == 0);
+  SL_ASSERT_TRUE(f[0] == 2);
+  SL_ASSERT_TRUE(f[1] == 2);
+  SL_ASSERT_TRUE(f[2] == 0);
   sl_free(f);
   return true;
 }
@@ -70,9 +70,9 @@ static bool test_factorize_25(struct sl_context ctx[static 1], const bool verbos
   const size_t n = 25;
   size_t* f      = sl_math_factorize(ctx, n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
-  assert(f[0] == 5);
-  assert(f[1] == 5);
-  assert(f[2] == 0);
+  SL_ASSERT_TRUE(f[0] == 5);
+  SL_ASSERT_TRUE(f[1] == 5);
+  SL_ASSERT_TRUE(f[2] == 0);
   sl_free(f);
   return true;
 }
@@ -81,10 +81,10 @@ static bool test_factorize_30(struct sl_context ctx[static 1], const bool verbos
   const size_t n = 30;
   size_t* f      = sl_math_factorize(ctx, n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
-  assert(f[0] == 2);
-  assert(f[1] == 3);
-  assert(f[2] == 5);
-  assert(f[3] == 0);
+  SL_ASSERT_TRUE(f[0] == 2);
+  SL_ASSERT_TRUE(f[1] == 3);
+  SL_ASSERT_TRUE(f[2] == 5);
+  SL_ASSERT_TRUE(f[3] == 0);
   sl_free(f);
   return true;
 }
@@ -93,15 +93,15 @@ static bool test_factorize_864(struct sl_context ctx[static 1], const bool verbo
   const size_t n = 864;
   size_t* f      = sl_math_factorize(ctx, n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
-  assert(f[0] == 2);
-  assert(f[1] == 2);
-  assert(f[2] == 2);
-  assert(f[3] == 2);
-  assert(f[4] == 2);
-  assert(f[5] == 3);
-  assert(f[6] == 3);
-  assert(f[7] == 3);
-  assert(f[8] == 0);
+  SL_ASSERT_TRUE(f[0] == 2);
+  SL_ASSERT_TRUE(f[1] == 2);
+  SL_ASSERT_TRUE(f[2] == 2);
+  SL_ASSERT_TRUE(f[3] == 2);
+  SL_ASSERT_TRUE(f[4] == 2);
+  SL_ASSERT_TRUE(f[5] == 3);
+  SL_ASSERT_TRUE(f[6] == 3);
+  SL_ASSERT_TRUE(f[7] == 3);
+  SL_ASSERT_TRUE(f[8] == 0);
   sl_free(f);
   return true;
 }
@@ -110,10 +110,10 @@ static bool test_factorize_2022(struct sl_context ctx[static 1], const bool verb
   const size_t n = 2022;
   size_t* f      = sl_math_factorize(ctx, n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
-  assert(f[0] == 2);
-  assert(f[1] == 3);
-  assert(f[2] == 337);
-  assert(f[3] == 0);
+  SL_ASSERT_TRUE(f[0] == 2);
+  SL_ASSERT_TRUE(f[1] == 3);
+  SL_ASSERT_TRUE(f[2] == 337);
+  SL_ASSERT_TRUE(f[3] == 0);
   sl_free(f);
   return true;
 }
@@ -122,13 +122,13 @@ static bool test_factorize_202212(struct sl_context ctx[static 1], const bool ve
   const size_t n = 202212;
   size_t* f      = sl_math_factorize(ctx, n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
-  assert(f[0] == 2);
-  assert(f[1] == 2);
-  assert(f[2] == 3);
-  assert(f[3] == 3);
-  assert(f[4] == 41);
-  assert(f[5] == 137);
-  assert(f[6] == 0);
+  SL_ASSERT_TRUE(f[0] == 2);
+  SL_ASSERT_TRUE(f[1] == 2);
+  SL_ASSERT_TRUE(f[2] == 3);
+  SL_ASSERT_TRUE(f[3] == 3);
+  SL_ASSERT_TRUE(f[4] == 41);
+  SL_ASSERT_TRUE(f[5] == 137);
+  SL_ASSERT_TRUE(f[6] == 0);
   sl_free(f);
   return true;
 }
@@ -137,11 +137,11 @@ static bool test_factorize_20221210(struct sl_context ctx[static 1], const bool 
   const size_t n = 20221210;
   size_t* f      = sl_math_factorize(ctx, n);
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
-  assert(f[0] == 2);
-  assert(f[1] == 5);
-  assert(f[2] == 101);
-  assert(f[3] == 20021);
-  assert(f[4] == 0);
+  SL_ASSERT_TRUE(f[0] == 2);
+  SL_ASSERT_TRUE(f[1] == 5);
+  SL_ASSERT_TRUE(f[2] == 101);
+  SL_ASSERT_TRUE(f[3] == 20021);
+  SL_ASSERT_TRUE(f[4] == 0);
   sl_free(f);
   return true;
 }
@@ -154,7 +154,7 @@ static bool test_linalg(struct sl_context ctx[static 1], const bool) {
   const double v2[] = {0, -2, 4, -6};
   const size_t n    = SL_ARRAY_LEN(v1);
   const double dot  = sl_math_linalg_dot(n, v1, v2);
-  assert(sl_math_double_almost(dot, -16, cmp_eps));
+  SL_ASSERT_TRUE(sl_math_double_almost(dot, -16, cmp_eps));
 
   double m[3][4] = {
       {1, 2, 3, 4},
@@ -163,9 +163,9 @@ static bool test_linalg(struct sl_context ctx[static 1], const bool) {
   };
   double res[3] = {0};
   sl_math_linalg_matmul(3, 4, m, v2, res);
-  assert(sl_math_double_almost(res[0], -16, cmp_eps));
-  assert(sl_math_double_almost(res[1], 0, cmp_eps));
-  assert(sl_math_double_almost(res[2], -48, cmp_eps));
+  SL_ASSERT_TRUE(sl_math_double_almost(res[0], -16, cmp_eps));
+  SL_ASSERT_TRUE(sl_math_double_almost(res[1], 0, cmp_eps));
+  SL_ASSERT_TRUE(sl_math_double_almost(res[2], -48, cmp_eps));
 
   return true;
 }
@@ -215,9 +215,9 @@ static bool test_numerical_diff(struct sl_context ctx[static 1], const bool verb
           d_pow2_x
       );
     }
-    assert(sl_math_double_almost(d_cos_x, -sin_x, 1e-3));
-    assert(sl_math_double_almost(d_sin_x, cos_x, 1e-3));
-    assert(sl_math_double_almost(d_pow2_x, 2 * x[i], 1e-3));
+    SL_ASSERT_TRUE(sl_math_double_almost(d_cos_x, -sin_x, 1e-3));
+    SL_ASSERT_TRUE(sl_math_double_almost(d_sin_x, cos_x, 1e-3));
+    SL_ASSERT_TRUE(sl_math_double_almost(d_pow2_x, 2 * x[i], 1e-3));
   }
 
   return true;
@@ -236,33 +236,33 @@ static bool test_double_almost(struct sl_context ctx[static 1], const bool) {
 
 static bool test_round_up_pow2(struct sl_context ctx[static 1], const bool) {
   (void)ctx;
-  assert(sl_math_next_power_of_two(0) == 1);
-  assert(sl_math_next_power_of_two(1) == 2);
-  assert(sl_math_next_power_of_two(2) == 4);
-  assert(sl_math_next_power_of_two(3) == 4);
-  assert(sl_math_next_power_of_two(4) == 8);
-  assert(sl_math_next_power_of_two(5) == 8);
-  assert(sl_math_next_power_of_two(6) == 8);
-  assert(sl_math_next_power_of_two(7) == 8);
-  assert(sl_math_next_power_of_two(8) == 16);
-  assert(sl_math_next_power_of_two(0xfe) == 0x100);
-  assert(sl_math_next_power_of_two(0xff) == 0x100);
-  assert(sl_math_next_power_of_two(0xffff) == 0x10000);
-  assert(sl_math_next_power_of_two(0xffffffff) == 0x100000000);
+  SL_ASSERT_TRUE(sl_math_next_power_of_two(0) == 1);
+  SL_ASSERT_TRUE(sl_math_next_power_of_two(1) == 2);
+  SL_ASSERT_TRUE(sl_math_next_power_of_two(2) == 4);
+  SL_ASSERT_TRUE(sl_math_next_power_of_two(3) == 4);
+  SL_ASSERT_TRUE(sl_math_next_power_of_two(4) == 8);
+  SL_ASSERT_TRUE(sl_math_next_power_of_two(5) == 8);
+  SL_ASSERT_TRUE(sl_math_next_power_of_two(6) == 8);
+  SL_ASSERT_TRUE(sl_math_next_power_of_two(7) == 8);
+  SL_ASSERT_TRUE(sl_math_next_power_of_two(8) == 16);
+  SL_ASSERT_TRUE(sl_math_next_power_of_two(0xfe) == 0x100);
+  SL_ASSERT_TRUE(sl_math_next_power_of_two(0xff) == 0x100);
+  SL_ASSERT_TRUE(sl_math_next_power_of_two(0xffff) == 0x10000);
+  SL_ASSERT_TRUE(sl_math_next_power_of_two(0xffffffff) == 0x100000000);
   return true;
 }
 
 static bool test_is_finite(struct sl_context ctx[static 1], const bool) {
   (void)ctx;
-  assert(sl_math_is_finite(1, (float[]){0}));
-  assert(sl_math_is_finite(1, (float[]){1}));
-  assert(sl_math_is_finite(1, (float[]){-1}));
-  assert(sl_math_is_finite(10, (float[10]){0}));
-  assert(!sl_math_is_finite(4, (float[]){0, 1, 2, (float)exp(1000)}));
-  assert(!sl_math_is_finite(1, (float[]){NAN}));
-  assert(!sl_math_is_finite(1, (float[]){INFINITY}));
-  assert(!sl_math_is_finite(3, (float[]){0, NAN, 0}));
-  assert(!sl_math_is_finite(3, (float[]){0, INFINITY, 0}));
+  SL_ASSERT_TRUE(sl_math_is_finite(1, (float[]){0}));
+  SL_ASSERT_TRUE(sl_math_is_finite(1, (float[]){1}));
+  SL_ASSERT_TRUE(sl_math_is_finite(1, (float[]){-1}));
+  SL_ASSERT_TRUE(sl_math_is_finite(10, (float[10]){0}));
+  SL_ASSERT_TRUE(!sl_math_is_finite(4, (float[]){0, 1, 2, (float)exp(1000)}));
+  SL_ASSERT_TRUE(!sl_math_is_finite(1, (float[]){NAN}));
+  SL_ASSERT_TRUE(!sl_math_is_finite(1, (float[]){INFINITY}));
+  SL_ASSERT_TRUE(!sl_math_is_finite(3, (float[]){0, NAN, 0}));
+  SL_ASSERT_TRUE(!sl_math_is_finite(3, (float[]){0, INFINITY, 0}));
   return true;
 }
 

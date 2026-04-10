@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,6 +6,7 @@
 #include <stufflib/macros/macros.h>
 #include <stufflib/misc/misc.h>
 #include <stufflib/png/png.h>
+#include <stufflib/testing/testing.h>
 
 static bool test_read_single_pixel_chunks(struct sl_context ctx[static 1], const bool verbose) {
   for (size_t i = 0; i < 3; ++i) {
@@ -19,13 +19,13 @@ static bool test_read_single_pixel_chunks(struct sl_context ctx[static 1], const
       printf("%s\n", png_path);
     }
     struct sl_png_chunks chunks = sl_png_read_chunks(ctx, png_path);
-    assert(chunks.count == 3);
-    assert(chunks.chunks[0].type == sl_png_IHDR);
-    assert(chunks.chunks[0].data.size == 13);
-    assert(chunks.chunks[1].type == sl_png_IDAT);
-    assert(chunks.chunks[1].data.size == 15);
-    assert(chunks.chunks[2].type == sl_png_IEND);
-    assert(chunks.chunks[2].data.size == 0);
+    SL_ASSERT_TRUE(chunks.count == 3);
+    SL_ASSERT_TRUE(chunks.chunks[0].type == sl_png_IHDR);
+    SL_ASSERT_TRUE(chunks.chunks[0].data.size == 13);
+    SL_ASSERT_TRUE(chunks.chunks[1].type == sl_png_IDAT);
+    SL_ASSERT_TRUE(chunks.chunks[1].data.size == 15);
+    SL_ASSERT_TRUE(chunks.chunks[2].type == sl_png_IEND);
+    SL_ASSERT_TRUE(chunks.chunks[2].data.size == 0);
     sl_png_chunks_destroy(chunks);
   }
   return true;
@@ -38,18 +38,18 @@ test_read_large_image_with_many_chunks(struct sl_context ctx[static 1], const bo
     printf("%s\n", png_path);
   }
   struct sl_png_chunks chunks = sl_png_read_chunks(ctx, png_path);
-  assert(chunks.count == 6);
-  assert(chunks.chunks[0].type == sl_png_IHDR);
-  assert(chunks.chunks[0].data.size == 13);
+  SL_ASSERT_TRUE(chunks.count == 6);
+  SL_ASSERT_TRUE(chunks.chunks[0].type == sl_png_IHDR);
+  SL_ASSERT_TRUE(chunks.chunks[0].data.size == 13);
   size_t i = 1;
   for (; i < 4; ++i) {
-    assert(chunks.chunks[i].type == sl_png_IDAT);
-    assert(chunks.chunks[i].data.size == (1 << 13));
+    SL_ASSERT_TRUE(chunks.chunks[i].type == sl_png_IDAT);
+    SL_ASSERT_TRUE(chunks.chunks[i].data.size == (1 << 13));
   }
-  assert(chunks.chunks[i].type == sl_png_IDAT);
-  assert(chunks.chunks[i].data.size == 64);
-  assert(chunks.chunks[i + 1].type == sl_png_IEND);
-  assert(chunks.chunks[i + 1].data.size == 0);
+  SL_ASSERT_TRUE(chunks.chunks[i].type == sl_png_IDAT);
+  SL_ASSERT_TRUE(chunks.chunks[i].data.size == 64);
+  SL_ASSERT_TRUE(chunks.chunks[i + 1].type == sl_png_IEND);
+  SL_ASSERT_TRUE(chunks.chunks[i + 1].data.size == 0);
   sl_png_chunks_destroy(chunks);
   return true;
 }
@@ -71,10 +71,10 @@ static bool test_read_single_pixel_header(struct sl_context ctx[static 1], const
     if (verbose) {
       sl_png_dump_header(stdout, pixel);
     }
-    assert(pixel.width == 1);
-    assert(pixel.height == 1);
-    assert(pixel.bit_depth == 8);
-    assert(pixel.color_type == sl_png_rgb);
+    SL_ASSERT_TRUE(pixel.width == 1);
+    SL_ASSERT_TRUE(pixel.height == 1);
+    SL_ASSERT_TRUE(pixel.bit_depth == 8);
+    SL_ASSERT_TRUE(pixel.color_type == sl_png_rgb);
   }
   return true;
 }
@@ -92,10 +92,10 @@ static bool test_read_img_header(struct sl_context ctx[static 1], const bool ver
     if (verbose) {
       sl_png_dump_header(stdout, white_square);
     }
-    assert(white_square.width == 26);
-    assert(white_square.height == 28);
-    assert(white_square.bit_depth == 8);
-    assert(white_square.color_type == sl_png_rgba);
+    SL_ASSERT_TRUE(white_square.width == 26);
+    SL_ASSERT_TRUE(white_square.height == 28);
+    SL_ASSERT_TRUE(white_square.bit_depth == 8);
+    SL_ASSERT_TRUE(white_square.color_type == sl_png_rgba);
   }
 
   {
@@ -110,10 +110,10 @@ static bool test_read_img_header(struct sl_context ctx[static 1], const bool ver
     if (verbose) {
       sl_png_dump_header(stdout, github_squares);
     }
-    assert(github_squares.width == 81);
-    assert(github_squares.height == 77);
-    assert(github_squares.bit_depth == 8);
-    assert(github_squares.color_type == sl_png_rgb);
+    SL_ASSERT_TRUE(github_squares.width == 81);
+    SL_ASSERT_TRUE(github_squares.height == 77);
+    SL_ASSERT_TRUE(github_squares.bit_depth == 8);
+    SL_ASSERT_TRUE(github_squares.color_type == sl_png_rgb);
   }
 
   {
@@ -128,10 +128,10 @@ static bool test_read_img_header(struct sl_context ctx[static 1], const bool ver
     if (verbose) {
       sl_png_dump_header(stdout, github_profile);
     }
-    assert(github_profile.width == 420);
-    assert(github_profile.height == 420);
-    assert(github_profile.bit_depth == 8);
-    assert(github_profile.color_type == sl_png_rgb);
+    SL_ASSERT_TRUE(github_profile.width == 420);
+    SL_ASSERT_TRUE(github_profile.height == 420);
+    SL_ASSERT_TRUE(github_profile.bit_depth == 8);
+    SL_ASSERT_TRUE(github_profile.color_type == sl_png_rgb);
   }
 
   {
@@ -146,10 +146,10 @@ static bool test_read_img_header(struct sl_context ctx[static 1], const bool ver
     if (verbose) {
       sl_png_dump_header(stdout, asan);
     }
-    assert(asan.width == 958);
-    assert(asan.height == 458);
-    assert(asan.bit_depth == 8);
-    assert(asan.color_type == sl_png_rgb);
+    SL_ASSERT_TRUE(asan.width == 958);
+    SL_ASSERT_TRUE(asan.height == 458);
+    SL_ASSERT_TRUE(asan.bit_depth == 8);
+    SL_ASSERT_TRUE(asan.color_type == sl_png_rgb);
   }
 
   return true;
@@ -172,16 +172,16 @@ static inline int test_read_single_pixel(
   if (verbose) {
     sl_png_dump_img_meta(stdout, pixel);
   }
-  assert(pixel.header.width == 1);
-  assert(pixel.header.height == 1);
-  assert(pixel.header.bit_depth == 8);
-  assert(pixel.header.color_type == sl_png_rgb);
+  SL_ASSERT_TRUE(pixel.header.width == 1);
+  SL_ASSERT_TRUE(pixel.header.height == 1);
+  SL_ASSERT_TRUE(pixel.header.bit_depth == 8);
+  SL_ASSERT_TRUE(pixel.header.color_type == sl_png_rgb);
 
-  assert(pixel.data.size == 9 * 3);
+  SL_ASSERT_TRUE(pixel.data.size == 9 * 3);
   unsigned char expected_data[9 * 3] = {0};
   expected_data[4 * 3 + on_index]    = 255;
   for (size_t i = 0; i < SL_ARRAY_LEN(expected_data); ++i) {
-    assert(pixel.data.data[i] == expected_data[i]);
+    SL_ASSERT_TRUE(pixel.data.data[i] == expected_data[i]);
   }
 
   sl_png_image_destroy(pixel);
@@ -234,16 +234,16 @@ test_read_rgba_image_with_dynamic_compression(struct sl_context ctx[static 1], c
   const size_t width  = 26;
   const size_t height = 28;
   const size_t bpp    = 4;
-  assert(white_square.header.width == width);
-  assert(white_square.header.height == height);
-  assert(white_square.header.bit_depth == 8);
-  assert(white_square.header.color_type == sl_png_rgba);
-  assert(white_square.data.size == bpp * (width + 2) * (height + 2));
+  SL_ASSERT_TRUE(white_square.header.width == width);
+  SL_ASSERT_TRUE(white_square.header.height == height);
+  SL_ASSERT_TRUE(white_square.header.bit_depth == 8);
+  SL_ASSERT_TRUE(white_square.header.color_type == sl_png_rgba);
+  SL_ASSERT_TRUE(white_square.data.size == bpp * (width + 2) * (height + 2));
   for (size_t y = 1; y < height + 1; ++y) {
     for (size_t x = 1; x < width + 1; ++x) {
       const unsigned char* px = white_square.data.data + bpp * (y * (width + 2) + x);
       for (size_t byte = 0; byte < bpp; ++byte) {
-        assert(px[byte] == 0xff);
+        SL_ASSERT_TRUE(px[byte] == 0xff);
       }
     }
   }
@@ -279,17 +279,17 @@ static bool test_read_small_images_with_dynamic_compression(
     }
     const size_t width  = 80;
     const size_t height = 160;
-    assert(img.header.width == width);
-    assert(img.header.height == height);
-    assert(img.header.bit_depth == 8);
-    assert(img.header.color_type == sl_png_rgb);
-    assert(img.data.size == 3 * (width + 2) * (height + 2));
+    SL_ASSERT_TRUE(img.header.width == width);
+    SL_ASSERT_TRUE(img.header.height == height);
+    SL_ASSERT_TRUE(img.header.bit_depth == 8);
+    SL_ASSERT_TRUE(img.header.color_type == sl_png_rgb);
+    SL_ASSERT_TRUE(img.data.size == 3 * (width + 2) * (height + 2));
     for (size_t y = 1; y < height + 1; ++y) {
       for (size_t x = 1; x < width + 1; ++x) {
         const unsigned char* px = img.data.data + 3 * (y * (width + 2) + x);
-        assert(px[0] == ((rgb & 0xff0000) >> 16));
-        assert(px[1] == ((rgb & 0x00ff00) >> 8));
-        assert(px[2] == ((rgb & 0x0000ff) >> 0));
+        SL_ASSERT_TRUE(px[0] == ((rgb & 0xff0000) >> 16));
+        SL_ASSERT_TRUE(px[1] == ((rgb & 0x00ff00) >> 8));
+        SL_ASSERT_TRUE(px[2] == ((rgb & 0x0000ff) >> 0));
       }
     }
     sl_png_image_destroy(img);
@@ -315,17 +315,17 @@ static bool test_read_large_images_with_dynamic_compression(
       sl_png_dump_img_meta(stdout, square);
     }
     const size_t size = 1600;
-    assert(square.header.width == size);
-    assert(square.header.height == size);
-    assert(square.header.bit_depth == 8);
-    assert(square.header.color_type == sl_png_rgb);
-    assert(square.data.size == 3 * (size + 2) * (size + 2));
+    SL_ASSERT_TRUE(square.header.width == size);
+    SL_ASSERT_TRUE(square.header.height == size);
+    SL_ASSERT_TRUE(square.header.bit_depth == 8);
+    SL_ASSERT_TRUE(square.header.color_type == sl_png_rgb);
+    SL_ASSERT_TRUE(square.data.size == 3 * (size + 2) * (size + 2));
     for (size_t y = 1; y < size + 1; ++y) {
       for (size_t x = 1; x < size + 1; ++x) {
         const unsigned char* px = square.data.data + 3 * (y * (size + 2) + x);
-        assert(px[0] == 0xaa);
-        assert(px[1] == 0xbb);
-        assert(px[2] == 0xcc);
+        SL_ASSERT_TRUE(px[0] == 0xaa);
+        SL_ASSERT_TRUE(px[1] == 0xbb);
+        SL_ASSERT_TRUE(px[2] == 0xcc);
       }
     }
     sl_png_image_destroy(square);
@@ -346,12 +346,12 @@ static bool test_read_large_images_with_dynamic_compression(
     }
     const size_t width  = 958;
     const size_t height = 458;
-    assert(asan.header.width == width);
-    assert(asan.header.height == height);
-    assert(asan.header.bit_depth == 8);
-    assert(asan.header.color_type == sl_png_rgb);
-    assert(asan.filter.size == height);
-    assert(asan.data.size == 3 * (width + 2) * (height + 2));
+    SL_ASSERT_TRUE(asan.header.width == width);
+    SL_ASSERT_TRUE(asan.header.height == height);
+    SL_ASSERT_TRUE(asan.header.bit_depth == 8);
+    SL_ASSERT_TRUE(asan.header.color_type == sl_png_rgb);
+    SL_ASSERT_TRUE(asan.filter.size == height);
+    SL_ASSERT_TRUE(asan.data.size == 3 * (width + 2) * (height + 2));
     sl_png_image_destroy(asan);
   }
   return true;
@@ -375,8 +375,11 @@ int test_read_write_read(
   }
 
   char img1_path[200] = {0};
-  assert(0 < snprintf(img1_path, SL_ARRAY_LEN(img1_path), "%s/sl_test.png", sl_misc_tmpdir()));
-  assert(sl_png_write_image(ctx, img0, img1_path));
+  {
+    int ok = snprintf(img1_path, SL_ARRAY_LEN(img1_path), "%s/sl_test.png", sl_misc_tmpdir());
+    SL_ASSERT_TRUE(ok > 0);
+  }
+  SL_ASSERT_TRUE(sl_png_write_image(ctx, img0, img1_path));
 
   struct sl_png_image img1 = sl_png_read_image(ctx, img1_path);
   if (img1.data.size != img0.data.size) {

@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,6 +6,7 @@
 #include <stufflib/iterator/iterator.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/span/span.h>
+#include <stufflib/testing/testing.h>
 #include <stufflib/unicode/unicode.h>
 
 static bool test_data(struct sl_context ctx[static 1], const bool) {
@@ -18,13 +18,13 @@ static bool test_data(struct sl_context ctx[static 1], const bool) {
   size_t i                = 0;
   struct sl_iterator iter = sl_span_iter(&data);
   for (; !sl_span_iter_is_done(&iter); sl_span_iter_advance(&iter)) {
-    assert(iter.index == i);
+    SL_ASSERT_TRUE(iter.index == i);
     const unsigned char* item = sl_span_iter_get(&iter);
-    assert(item);
-    assert(*item == data.data[i]);
+    SL_ASSERT_TRUE(item);
+    SL_ASSERT_TRUE(*item == data.data[i]);
     ++i;
   }
-  assert(iter.index == data.size);
+  SL_ASSERT_TRUE(iter.index == data.size);
   return true;
 }
 
@@ -63,13 +63,13 @@ static bool test_cstr(struct sl_context ctx[static 1], const bool) {
     char* str               = strings[i_str];
     struct sl_iterator iter = sl_cstr_iter(str);
     for (; !sl_cstr_iter_is_done(&iter); sl_cstr_iter_advance(&iter)) {
-      assert(iter.index == i);
+      SL_ASSERT_TRUE(iter.index == i);
       const char* ch = sl_cstr_iter_get(&iter);
-      assert(ch);
-      assert(*ch == str[i]);
+      SL_ASSERT_TRUE(ch);
+      SL_ASSERT_TRUE(*ch == str[i]);
       ++i;
     }
-    assert(iter.index == strlen(str));
+    SL_ASSERT_TRUE(iter.index == strlen(str));
   }
   return true;
 }

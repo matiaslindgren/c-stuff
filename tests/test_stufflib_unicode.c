@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -9,6 +8,7 @@
 #include <stufflib/iterator/iterator.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/span/span.h>
+#include <stufflib/testing/testing.h>
 #include <stufflib/unicode/unicode.h>
 
 #include "./test_data.h"
@@ -25,10 +25,10 @@ static bool test_validate_utf8(struct sl_context ctx[static 1], const bool) {
       {.size = 5, .data = (unsigned char[]){0, 1, 2, 0xf4, 0}      },
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(invalid_utf8); ++i) {
-    assert(!sl_unicode_is_valid_utf8(invalid_utf8 + i));
+    SL_ASSERT_TRUE(!sl_unicode_is_valid_utf8(invalid_utf8 + i));
   }
   for (size_t i = 0; i < SL_ARRAY_LEN(sl_test_data_hello_utf8); ++i) {
-    assert(sl_unicode_is_valid_utf8(sl_test_data_hello_utf8 + i));
+    SL_ASSERT_TRUE(sl_unicode_is_valid_utf8(sl_test_data_hello_utf8 + i));
   }
   return true;
 }
@@ -45,14 +45,14 @@ static bool test_decode_codepoints(struct sl_context ctx[static 1], const bool) 
           utf8_data.size - byte_pos,
           utf8_data.data + byte_pos
       );
-      assert(codepoint_width == sl_unicode_codepoint_width(expected_codepoint));
+      SL_ASSERT_TRUE(codepoint_width == sl_unicode_codepoint_width(expected_codepoint));
       const uint32_t codepoint
           = sl_unicode_codepoint_from_utf8(codepoint_width, utf8_data.data + byte_pos);
-      assert(codepoint == expected_codepoint);
+      SL_ASSERT_TRUE(codepoint == expected_codepoint);
       ++codepoint_pos;
       byte_pos += codepoint_width;
     }
-    assert(byte_pos == utf8_data.size);
+    SL_ASSERT_TRUE(byte_pos == utf8_data.size);
   }
   return true;
 }
@@ -66,9 +66,9 @@ static bool test_unicode_iterator(struct sl_context ctx[static 1], const bool) {
     size_t byte_pos          = 0;
     struct sl_iterator iter  = sl_unicode_iter(sl_test_data_hello_utf8 + i_str);
     for (; !sl_unicode_iter_is_done(&iter); sl_unicode_iter_advance(&iter)) {
-      assert(iter.index == byte_pos);
+      SL_ASSERT_TRUE(iter.index == byte_pos);
       const uint32_t codepoint = sl_unicode_iter_decode_item(&iter);
-      assert(codepoint == sl_test_data_decoded_strings[codepoint_pos]);
+      SL_ASSERT_TRUE(codepoint == sl_test_data_decoded_strings[codepoint_pos]);
       const size_t codepoint_width = sl_unicode_codepoint_width_from_utf8(
           utf8_data.size - byte_pos,
           utf8_data.data + byte_pos
@@ -77,8 +77,8 @@ static bool test_unicode_iterator(struct sl_context ctx[static 1], const bool) {
       ++str_len;
       ++codepoint_pos;
     }
-    assert(str_len == sl_test_data_decoded_lengths[i_str]);
-    assert(str_len == iter.pos);
+    SL_ASSERT_TRUE(str_len == sl_test_data_decoded_lengths[i_str]);
+    SL_ASSERT_TRUE(str_len == iter.pos);
   }
   return true;
 }
@@ -87,7 +87,7 @@ static bool test_unicode_length(struct sl_context ctx[static 1], const bool) {
   (void)ctx;
   for (size_t i_str = 0; i_str < SL_ARRAY_LEN(sl_test_data_hello_utf8); ++i_str) {
     const size_t str_len = sl_unicode_length(sl_test_data_hello_utf8 + i_str);
-    assert(str_len == sl_test_data_decoded_lengths[i_str]);
+    SL_ASSERT_TRUE(str_len == sl_test_data_decoded_lengths[i_str]);
   }
   return true;
 }
@@ -125,7 +125,7 @@ static bool test_decode_utf8_files(struct sl_context ctx[static 1], const bool v
       if (verbose) {
         printf("read %zu bytes\n", utf8_data.size);
       }
-      assert(utf8_data.size > 0);
+      SL_ASSERT_TRUE(utf8_data.size > 0);
     }
 
     uint32_t expected_codepoints[10000] = {0};
@@ -149,19 +149,19 @@ static bool test_decode_utf8_files(struct sl_context ctx[static 1], const bool v
         memset(buf, 0, sizeof(buf));
         ++str_len;
       }
-      assert(feof(fp));
+      SL_ASSERT_TRUE(feof(fp));
       fclose(fp);
     }
 
     size_t codepoint_pos = 0;
     for (struct sl_iterator iter = sl_unicode_iter(&utf8_data); !sl_unicode_iter_is_done(&iter);
          sl_unicode_iter_advance(&iter)) {
-      assert(codepoint_pos < str_len);
+      SL_ASSERT_TRUE(codepoint_pos < str_len);
       const uint32_t codepoint = sl_unicode_iter_decode_item(&iter);
-      assert(codepoint == expected_codepoints[codepoint_pos]);
+      SL_ASSERT_TRUE(codepoint == expected_codepoints[codepoint_pos]);
       ++codepoint_pos;
     }
-    assert(codepoint_pos == str_len);
+    SL_ASSERT_TRUE(codepoint_pos == str_len);
   }
   return true;
 }

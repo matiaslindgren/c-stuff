@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stufflib/args/args.h>
@@ -8,6 +7,7 @@
 #include <stufflib/macros/macros.h>
 #include <stufflib/span/span.h>
 #include <stufflib/string/string.h>
+#include <stufflib/testing/testing.h>
 #include <stufflib/tokenizer/tokenizer.h>
 
 #include "./test_data.h"
@@ -21,10 +21,10 @@ static bool test_read_file(struct sl_context ctx[static 1], const bool verbose) 
       printf("reading test file '%s'\n", sl_test_data_file_paths[i]);
     }
     struct sl_span data = sl_fs_read_file(ctx, sl_test_data_file_paths[i], &buffer);
-    assert(data.owned);
+    SL_ASSERT_TRUE(data.owned);
     SL_ASSERT_EQ_LL(data.size, sl_test_data_file_sizes[i]);
     if (data.size > 0) {
-      assert(data.data != nullptr);
+      SL_ASSERT_TRUE(data.data != nullptr);
     }
     sl_span_destroy(&data);
   }
@@ -61,14 +61,14 @@ static bool test_read_file_utf8(struct sl_context ctx[static 1], const bool verb
     );
 
     FILE* fp = fopen(length_path, "rb");
-    assert(fp);
+    SL_ASSERT_TRUE(fp);
     char tmp[200] = {0};
-    assert(fread(tmp, 1, 200, fp));
+    SL_ASSERT_TRUE(fread(tmp, 1, 200, fp));
     fclose(fp);
     const size_t expected_str_length = strtoull(tmp, 0, 10);
 
     struct sl_string str = sl_fs_read_file_utf8(ctx, input_path, &buffer);
-    assert(str.length == expected_str_length);
+    SL_ASSERT_TRUE(str.length == expected_str_length);
     sl_string_destroy(&str);
   }
   return true;
@@ -106,11 +106,11 @@ static bool test_read_lines(struct sl_context ctx[static 1], const bool verbose)
         printf("line %zu:", lineno);
         bool print_ok = sl_string_fprint(stdout, &line);
         printf("\n");
-        assert(print_ok);
+        SL_ASSERT_TRUE(print_ok);
       }
-      assert(lineno < SL_ARRAY_LEN(expected));
+      SL_ASSERT_TRUE(lineno < SL_ARRAY_LEN(expected));
       const size_t line_len = strlen((const char*)expected[lineno]);
-      assert(
+      SL_ASSERT_TRUE(
           memcmp(
               line.utf8_data.data,
               (const char*)expected[lineno],

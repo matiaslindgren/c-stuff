@@ -21,6 +21,7 @@ CFLAGS ?= \
 	-Wno-missing-prototypes \
 	-Wno-nrvo \
 	-Wno-padded \
+	-Wno-pre-c11-compat \
 	-Wno-pre-c23-compat \
 	-Wno-sign-conversion \
 	-Wno-switch-default \

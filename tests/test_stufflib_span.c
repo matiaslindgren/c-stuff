@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -8,16 +7,17 @@
 #include <stufflib/context/context.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/span/span.h>
+#include <stufflib/testing/testing.h>
 
 static bool test_data_view_one(struct sl_context ctx[static 1], const bool) {
   (void)ctx;
   unsigned char x     = 1;
   struct sl_span data = sl_span_view(1, &x);
-  assert(data.size == 1);
-  assert(!data.owned);
-  assert(data.data == &x);
+  SL_ASSERT_TRUE(data.size == 1);
+  SL_ASSERT_TRUE(!data.owned);
+  SL_ASSERT_TRUE(data.data == &x);
   sl_span_destroy(&data);
-  assert(data.data == nullptr);
+  SL_ASSERT_TRUE(data.data == nullptr);
   return true;
 }
 
@@ -26,38 +26,38 @@ static bool test_data_view_array(struct sl_context ctx[static 1], const bool) {
   unsigned char x[]   = {1, 2, 3, 4};
   const size_t n      = SL_ARRAY_LEN(x);
   struct sl_span data = sl_span_view(n, x);
-  assert(data.size == n);
-  assert(!data.owned);
-  assert(data.data == x);
+  SL_ASSERT_TRUE(data.size == n);
+  SL_ASSERT_TRUE(!data.owned);
+  SL_ASSERT_TRUE(data.data == x);
   for (size_t i = 0; i < n; ++i) {
-    assert(data.data + i == x + i);
+    SL_ASSERT_TRUE(data.data + i == x + i);
   }
   sl_span_destroy(&data);
-  assert(data.data == nullptr);
+  SL_ASSERT_TRUE(data.data == nullptr);
   return true;
 }
 
 static bool test_data_create(struct sl_context ctx[static 1], const bool) {
   const size_t n      = 10;
   struct sl_span data = sl_span_create(ctx, n);
-  assert(data.size == n);
-  assert(data.owned);
-  assert(data.data);
+  SL_ASSERT_TRUE(data.size == n);
+  SL_ASSERT_TRUE(data.owned);
+  SL_ASSERT_TRUE(data.data);
   for (size_t i = 0; i < n; ++i) {
-    assert(data.data[i] == 0);
+    SL_ASSERT_TRUE(data.data[i] == 0);
   }
   sl_span_destroy(&data);
-  assert(data.data == nullptr);
+  SL_ASSERT_TRUE(data.data == nullptr);
   return true;
 }
 
 static bool test_data_create_empty(struct sl_context ctx[static 1], const bool) {
   struct sl_span data = sl_span_create(ctx, 0);
-  assert(data.size == 0);
-  assert(data.owned);
-  assert(!data.data);
+  SL_ASSERT_TRUE(data.size == 0);
+  SL_ASSERT_TRUE(data.owned);
+  SL_ASSERT_TRUE(!data.data);
   sl_span_destroy(&data);
-  assert(data.data == nullptr);
+  SL_ASSERT_TRUE(data.data == nullptr);
   return true;
 }
 
@@ -81,15 +81,15 @@ static bool test_data_create_from_cstr(struct sl_context ctx[static 1], const bo
   for (size_t i = 0; i < SL_ARRAY_LEN(strings); ++i) {
     const char* cstr   = strings[i];
     struct sl_span str = sl_span_from_str(ctx, cstr);
-    assert(str.size == lengths[i]);
-    assert(str.owned);
+    SL_ASSERT_TRUE(str.size == lengths[i]);
+    SL_ASSERT_TRUE(str.owned);
     if (str.size == 0) {
-      assert(!str.data);
+      SL_ASSERT_TRUE(!str.data);
     } else {
-      assert(str.data);
-      assert(memcmp(str.data, cstr, str.size) == 0);
+      SL_ASSERT_TRUE(str.data);
+      SL_ASSERT_TRUE(memcmp(str.data, cstr, str.size) == 0);
     }
-    assert(!sl_span_is_hexadecimal_str(&str));
+    SL_ASSERT_TRUE(!sl_span_is_hexadecimal_str(&str));
     sl_span_destroy(&str);
   }
   return true;
@@ -139,16 +139,16 @@ static bool test_data_create_from_hexadecimal_cstr(struct sl_context ctx[static 
   for (size_t i = 0; i < SL_ARRAY_LEN(strings); ++i) {
     const char* cstr   = strings[i];
     struct sl_span str = sl_span_from_str(ctx, cstr);
-    assert(str.size == str_lengths[i]);
-    assert(str.owned);
-    assert(str.data);
-    assert(memcmp(str.data, cstr, str.size) == 0);
-    assert(sl_span_is_hexadecimal_str(&str));
+    SL_ASSERT_TRUE(str.size == str_lengths[i]);
+    SL_ASSERT_TRUE(str.owned);
+    SL_ASSERT_TRUE(str.data);
+    SL_ASSERT_TRUE(memcmp(str.data, cstr, str.size) == 0);
+    SL_ASSERT_TRUE(sl_span_is_hexadecimal_str(&str));
     struct sl_span num = sl_span_parse_hex(ctx, &str);
-    assert(num.size == data_lengths[i]);
-    assert(num.owned);
-    assert(num.data);
-    assert(memcmp(num.data, bytes[i], num.size) == 0);
+    SL_ASSERT_TRUE(num.size == data_lengths[i]);
+    SL_ASSERT_TRUE(num.owned);
+    SL_ASSERT_TRUE(num.data);
+    SL_ASSERT_TRUE(memcmp(num.data, bytes[i], num.size) == 0);
     sl_span_destroy(&num);
     sl_span_destroy(&str);
   }
@@ -160,17 +160,17 @@ static bool test_data_copy_view(struct sl_context ctx[static 1], const bool) {
   const size_t n       = SL_ARRAY_LEN(x);
   struct sl_span data1 = sl_span_view(n, x);
   struct sl_span data2 = sl_span_copy(ctx, &data1);
-  assert(!data1.owned);
-  assert(data1.data == x);
-  assert(data2.owned);
-  assert(data2.data != x);
+  SL_ASSERT_TRUE(!data1.owned);
+  SL_ASSERT_TRUE(data1.data == x);
+  SL_ASSERT_TRUE(data2.owned);
+  SL_ASSERT_TRUE(data2.data != x);
   for (size_t i = 0; i < n; ++i) {
-    assert(data1.data + i == x + i);
-    assert(data2.data + i != x + i);
-    assert(data2.data[i] == x[i]);
+    SL_ASSERT_TRUE(data1.data + i == x + i);
+    SL_ASSERT_TRUE(data2.data + i != x + i);
+    SL_ASSERT_TRUE(data2.data[i] == x[i]);
   }
   sl_span_destroy(&data2);
-  assert(data2.data == nullptr);
+  SL_ASSERT_TRUE(data2.data == nullptr);
   return true;
 }
 
@@ -182,24 +182,24 @@ static bool test_data_concat_views(struct sl_context ctx[static 1], const bool) 
   struct sl_span data1 = sl_span_view(n1, x1);
   struct sl_span data2 = sl_span_view(n2, x2);
   struct sl_span data3 = sl_span_concat(ctx, &data1, &data2);
-  assert(!data1.owned);
-  assert(!data2.owned);
-  assert(data3.owned);
-  assert(data1.data == x1);
-  assert(data2.data == x2);
-  assert(data3.data != x1);
-  assert(data3.data != x2);
-  assert(data3.size == data1.size + data2.size);
+  SL_ASSERT_TRUE(!data1.owned);
+  SL_ASSERT_TRUE(!data2.owned);
+  SL_ASSERT_TRUE(data3.owned);
+  SL_ASSERT_TRUE(data1.data == x1);
+  SL_ASSERT_TRUE(data2.data == x2);
+  SL_ASSERT_TRUE(data3.data != x1);
+  SL_ASSERT_TRUE(data3.data != x2);
+  SL_ASSERT_TRUE(data3.size == data1.size + data2.size);
   for (size_t i = 0; i < n1; ++i) {
-    assert(data1.data + i != data3.data + i);
-    assert(data1.data[i] == data3.data[i]);
+    SL_ASSERT_TRUE(data1.data + i != data3.data + i);
+    SL_ASSERT_TRUE(data1.data[i] == data3.data[i]);
   }
   for (size_t i = 0; i < n2; ++i) {
-    assert(data2.data + i != data3.data + n1 + i);
-    assert(data2.data[i] == data3.data[n1 + i]);
+    SL_ASSERT_TRUE(data2.data + i != data3.data + n1 + i);
+    SL_ASSERT_TRUE(data2.data[i] == data3.data[n1 + i]);
   }
   sl_span_destroy(&data3);
-  assert(data3.data == nullptr);
+  SL_ASSERT_TRUE(data3.data == nullptr);
   return true;
 }
 
@@ -209,19 +209,19 @@ static bool test_data_concat_empty(struct sl_context ctx[static 1], const bool) 
   struct sl_span data1 = sl_span_view(n1, x1);
   struct sl_span data2 = sl_span_create(ctx, 0);
   struct sl_span data3 = sl_span_concat(ctx, &data1, &data2);
-  assert(!data1.owned);
-  assert(data2.owned);
-  assert(data3.owned);
-  assert(data1.data == x1);
-  assert(data2.data == nullptr);
-  assert(data3.data != x1);
-  assert(data3.size == data1.size);
+  SL_ASSERT_TRUE(!data1.owned);
+  SL_ASSERT_TRUE(data2.owned);
+  SL_ASSERT_TRUE(data3.owned);
+  SL_ASSERT_TRUE(data1.data == x1);
+  SL_ASSERT_TRUE(data2.data == nullptr);
+  SL_ASSERT_TRUE(data3.data != x1);
+  SL_ASSERT_TRUE(data3.size == data1.size);
   for (size_t i = 0; i < n1; ++i) {
-    assert(data1.data + i != data3.data + i);
-    assert(data1.data[i] == data3.data[i]);
+    SL_ASSERT_TRUE(data1.data + i != data3.data + i);
+    SL_ASSERT_TRUE(data1.data[i] == data3.data[i]);
   }
   sl_span_destroy(&data3);
-  assert(data3.data == nullptr);
+  SL_ASSERT_TRUE(data3.data == nullptr);
   return true;
 }
 
@@ -233,13 +233,13 @@ static bool test_data_slice(struct sl_context ctx[static 1], const bool) {
   for (size_t begin = 0; begin < n; ++begin) {
     for (size_t end = begin; end < n; ++end) {
       struct sl_span slice = sl_span_slice(&data, begin, end);
-      assert(!slice.owned);
-      assert(slice.size == end - begin);
+      SL_ASSERT_TRUE(!slice.owned);
+      SL_ASSERT_TRUE(slice.size == end - begin);
       if (!slice.size) {
-        assert(!slice.data);
+        SL_ASSERT_TRUE(!slice.data);
       }
       for (size_t i = 0; i < slice.size; ++i) {
-        assert(slice.data + i == data.data + begin + i);
+        SL_ASSERT_TRUE(slice.data + i == data.data + begin + i);
       }
     }
   }
@@ -252,10 +252,10 @@ static bool test_data_slice_past_end(struct sl_context ctx[static 1], const bool
   const size_t n       = SL_ARRAY_LEN(x);
   struct sl_span data  = sl_span_view(n, x);
   struct sl_span slice = sl_span_slice(&data, 0, SIZE_MAX);
-  assert(!slice.owned);
-  assert(slice.size == data.size);
+  SL_ASSERT_TRUE(!slice.owned);
+  SL_ASSERT_TRUE(slice.size == data.size);
   for (size_t i = 0; i < slice.size; ++i) {
-    assert(slice.data + i == data.data + i);
+    SL_ASSERT_TRUE(slice.data + i == data.data + i);
   }
   return true;
 }
@@ -269,12 +269,12 @@ static bool test_data_find(struct sl_context ctx[static 1], const bool) {
   struct sl_span data1 = sl_span_view(n1, x1);
   struct sl_span data2 = sl_span_view(n2, x2);
   struct sl_span empty = {0};
-  assert(!sl_span_find(&data2, &data1).data);
-  assert(!sl_span_find(&data1, &empty).data);
-  assert(!sl_span_find(&empty, &data1).data);
-  assert(sl_span_find(&data1, &data1).data == x1);
-  assert(sl_span_find(&data2, &data2).data == x2);
-  assert(sl_span_find(&data1, &data2).data == x1 + 1);
+  SL_ASSERT_TRUE(!sl_span_find(&data2, &data1).data);
+  SL_ASSERT_TRUE(!sl_span_find(&data1, &empty).data);
+  SL_ASSERT_TRUE(!sl_span_find(&empty, &data1).data);
+  SL_ASSERT_TRUE(sl_span_find(&data1, &data1).data == x1);
+  SL_ASSERT_TRUE(sl_span_find(&data2, &data2).data == x2);
+  SL_ASSERT_TRUE(sl_span_find(&data1, &data2).data == x1 + 1);
   return true;
 }
 
@@ -285,15 +285,15 @@ static bool test_data_iter(struct sl_context ctx[static 1], const bool) {
   struct sl_span data     = sl_span_view(n, x);
   struct sl_iterator iter = sl_span_iter(&data);
   for (size_t i = 0; i < n; ++i) {
-    assert(!sl_span_iter_is_done(&iter));
-    assert(iter.index == i);
-    assert(iter.pos == i);
+    SL_ASSERT_TRUE(!sl_span_iter_is_done(&iter));
+    SL_ASSERT_TRUE(iter.index == i);
+    SL_ASSERT_TRUE(iter.pos == i);
     unsigned char* item = sl_span_iter_get(&iter);
-    assert(item == data.data + i);
-    assert(item == x + i);
+    SL_ASSERT_TRUE(item == data.data + i);
+    SL_ASSERT_TRUE(item == x + i);
     sl_span_iter_advance(&iter);
   }
-  assert(sl_span_iter_is_done(&iter));
+  SL_ASSERT_TRUE(sl_span_iter_is_done(&iter));
   return true;
 }
 

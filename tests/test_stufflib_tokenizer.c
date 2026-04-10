@@ -1,10 +1,10 @@
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stufflib/args/args.h>
 #include <stufflib/context/context.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/span/span.h>
+#include <stufflib/testing/testing.h>
 #include <stufflib/tokenizer/tokenizer.h>
 
 static bool test_tokenize_empty(struct sl_context ctx[static 1], const bool) {
@@ -16,16 +16,16 @@ static bool test_tokenize_empty(struct sl_context ctx[static 1], const bool) {
   struct sl_span data   = sl_span_view(n, x);
 
   struct sl_span token1 = sl_tokenizer_next_token(&empty1, &empty2, 0);
-  assert(!token1.size);
-  assert(!token1.data);
+  SL_ASSERT_TRUE(!token1.size);
+  SL_ASSERT_TRUE(!token1.data);
 
   struct sl_span token2 = sl_tokenizer_next_token(&data, &empty1, 0);
-  assert(token2.size == 3);
-  assert(token2.data == x);
+  SL_ASSERT_TRUE(token2.size == 3);
+  SL_ASSERT_TRUE(token2.data == x);
 
   struct sl_span token3 = sl_tokenizer_next_token(&empty1, &data, 0);
-  assert(!token3.size);
-  assert(!token3.data);
+  SL_ASSERT_TRUE(!token3.size);
+  SL_ASSERT_TRUE(!token3.data);
 
   return true;
 }
@@ -40,17 +40,17 @@ static bool test_tokenize_one(struct sl_context ctx[static 1], const bool) {
   struct sl_span data2 = sl_span_view(n2, x2);
 
   struct sl_span token1 = sl_tokenizer_next_token(&data1, &data2, 0);
-  assert(token1.size == 1);
-  assert(token1.data == x1);
+  SL_ASSERT_TRUE(token1.size == 1);
+  SL_ASSERT_TRUE(token1.data == x1);
 
   struct sl_span token2 = sl_tokenizer_next_token(&data1, &data2, 1);
-  assert(!token2.size);
-  assert(!token2.data);
+  SL_ASSERT_TRUE(!token2.size);
+  SL_ASSERT_TRUE(!token2.data);
 
   struct sl_span token3 = sl_tokenizer_next_token(&data1, &data2, 2);
-  assert(token3.size == 2);
-  assert(token3.data == x1 + 2);
-  assert(token3.data + 1 == x1 + 3);
+  SL_ASSERT_TRUE(token3.size == 2);
+  SL_ASSERT_TRUE(token3.data == x1 + 2);
+  SL_ASSERT_TRUE(token3.data + 1 == x1 + 3);
 
   return true;
 }
@@ -65,17 +65,17 @@ static bool test_tokenize_many(struct sl_context ctx[static 1], const bool) {
   struct sl_span data2 = sl_span_view(n2, x2);
 
   struct sl_span token1 = sl_tokenizer_next_token(&data1, &data2, 0);
-  assert(token1.size == 1);
-  assert(token1.data == x1);
+  SL_ASSERT_TRUE(token1.size == 1);
+  SL_ASSERT_TRUE(token1.data == x1);
 
   struct sl_span token2 = sl_tokenizer_next_token(&data1, &data2, 1);
-  assert(!token2.size);
-  assert(!token2.data);
+  SL_ASSERT_TRUE(!token2.size);
+  SL_ASSERT_TRUE(!token2.data);
 
   struct sl_span token3 = sl_tokenizer_next_token(&data1, &data2, 2);
-  assert(token3.size == 4);
+  SL_ASSERT_TRUE(token3.size == 4);
   for (size_t i = 0; i < 4; ++i) {
-    assert(token3.data + i == x1 + 2 + i);
+    SL_ASSERT_TRUE(token3.data + i == x1 + 2 + i);
   }
 
   return true;
@@ -92,8 +92,8 @@ static bool test_tokenize_delimiters(struct sl_context ctx[static 1], const bool
 
   for (size_t begin = 0; begin < 3; ++begin) {
     struct sl_span token = sl_tokenizer_next_token(&data1, &data2, begin);
-    assert(!token.size);
-    assert(!token.data);
+    SL_ASSERT_TRUE(!token.size);
+    SL_ASSERT_TRUE(!token.data);
   }
 
   return true;
@@ -111,52 +111,52 @@ static bool test_tokenize_iter(struct sl_context ctx[static 1], const bool) {
   struct sl_tokenizer tok = sl_tokenizer_create(&data, &delimiter);
   struct sl_iterator iter = sl_tokenizer_iter(&tok);
 
-  assert(!sl_tokenizer_iter_is_done(&iter));
+  SL_ASSERT_TRUE(!sl_tokenizer_iter_is_done(&iter));
   {
     struct sl_span* token = sl_tokenizer_iter_get(&iter);
-    assert(token);
-    assert(token->size == 3);
-    assert(token->data == data_str);
+    SL_ASSERT_TRUE(token);
+    SL_ASSERT_TRUE(token->size == 3);
+    SL_ASSERT_TRUE(token->data == data_str);
   }
   sl_tokenizer_iter_advance(&iter);
 
-  assert(!sl_tokenizer_iter_is_done(&iter));
+  SL_ASSERT_TRUE(!sl_tokenizer_iter_is_done(&iter));
   {
     struct sl_span* token = sl_tokenizer_iter_get(&iter);
-    assert(token);
-    assert(token->size == 2);
-    assert(token->data == data_str + 5);
+    SL_ASSERT_TRUE(token);
+    SL_ASSERT_TRUE(token->size == 2);
+    SL_ASSERT_TRUE(token->data == data_str + 5);
   }
   sl_tokenizer_iter_advance(&iter);
 
-  assert(!sl_tokenizer_iter_is_done(&iter));
+  SL_ASSERT_TRUE(!sl_tokenizer_iter_is_done(&iter));
   {
     struct sl_span* token = sl_tokenizer_iter_get(&iter);
-    assert(token);
-    assert(token->size == 4);
-    assert(token->data == data_str + 9);
+    SL_ASSERT_TRUE(token);
+    SL_ASSERT_TRUE(token->size == 4);
+    SL_ASSERT_TRUE(token->data == data_str + 9);
   }
   sl_tokenizer_iter_advance(&iter);
 
-  assert(!sl_tokenizer_iter_is_done(&iter));
+  SL_ASSERT_TRUE(!sl_tokenizer_iter_is_done(&iter));
   {
     struct sl_span* token = sl_tokenizer_iter_get(&iter);
-    assert(token);
-    assert(token->size == 1);
-    assert(token->data == data_str + 15);
+    SL_ASSERT_TRUE(token);
+    SL_ASSERT_TRUE(token->size == 1);
+    SL_ASSERT_TRUE(token->data == data_str + 15);
   }
   sl_tokenizer_iter_advance(&iter);
 
-  assert(!sl_tokenizer_iter_is_done(&iter));
+  SL_ASSERT_TRUE(!sl_tokenizer_iter_is_done(&iter));
   {
     struct sl_span* token = sl_tokenizer_iter_get(&iter);
-    assert(token);
-    assert(!token->size);
-    assert(!token->data);
+    SL_ASSERT_TRUE(token);
+    SL_ASSERT_TRUE(!token->size);
+    SL_ASSERT_TRUE(!token->data);
   }
   sl_tokenizer_iter_advance(&iter);
 
-  assert(sl_tokenizer_iter_is_done(&iter));
+  SL_ASSERT_TRUE(sl_tokenizer_iter_is_done(&iter));
 
   return true;
 }

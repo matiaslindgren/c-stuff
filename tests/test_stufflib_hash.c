@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,6 +7,7 @@
 #include <stufflib/hash/hash.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/misc/misc.h>
+#include <stufflib/testing/testing.h>
 
 static bool test_single_byte(struct sl_context ctx[static 1], const bool) {
   (void)ctx;
@@ -28,7 +28,7 @@ static bool test_single_byte(struct sl_context ctx[static 1], const bool) {
         3705235391,
         2883475241,
     }[i];
-    assert(crc32 == expected);
+    SL_ASSERT_TRUE(crc32 == expected);
   }
   return true;
 }
@@ -53,7 +53,7 @@ static bool test_two_bytes_big_endian(struct sl_context ctx[static 1], const boo
         1444522892,
         555653914,
     }[i - 0x100];
-    assert(crc32 == expected);
+    SL_ASSERT_TRUE(crc32 == expected);
   }
   return true;
 }
@@ -80,7 +80,7 @@ static bool test_small_strings(struct sl_context ctx[static 1], const bool) {
         3916222277,
         852952723,
     }[i];
-    assert(crc32 == expected);
+    SL_ASSERT_TRUE(crc32 == expected);
   }
   return true;
 }

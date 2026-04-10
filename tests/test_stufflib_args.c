@@ -1,10 +1,10 @@
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stufflib/args/args.h>
 #include <stufflib/context/context.h>
 #include <stufflib/macros/macros.h>
+#include <stufflib/testing/testing.h>
 
 static bool test_parse_positional(struct sl_context ctx[static 1], const bool) {
   (void)ctx;
@@ -17,14 +17,14 @@ static bool test_parse_positional(struct sl_context ctx[static 1], const bool) {
   const int argc      = SL_ARRAY_LEN(argv) - 1;
   struct sl_args args = {.argc = argc, .argv = argv};
 
-  assert(sl_args_count_positional(&args) == 2);
-  assert(sl_args_count_optional(&args) == 0);
+  SL_ASSERT_TRUE(sl_args_count_positional(&args) == 2);
+  SL_ASSERT_TRUE(sl_args_count_optional(&args) == 0);
 
-  assert(sl_args_get_positional(&args, 0) != nullptr);
-  assert(strcmp(sl_args_get_positional(&args, 0), argv[1]) == 0);
-  assert(sl_args_get_positional(&args, 1) != nullptr);
-  assert(strcmp(sl_args_get_positional(&args, 1), argv[2]) == 0);
-  assert(sl_args_get_positional(&args, 2) == nullptr);
+  SL_ASSERT_TRUE(sl_args_get_positional(&args, 0) != nullptr);
+  SL_ASSERT_TRUE(strcmp(sl_args_get_positional(&args, 0), argv[1]) == 0);
+  SL_ASSERT_TRUE(sl_args_get_positional(&args, 1) != nullptr);
+  SL_ASSERT_TRUE(strcmp(sl_args_get_positional(&args, 1), argv[2]) == 0);
+  SL_ASSERT_TRUE(sl_args_get_positional(&args, 2) == nullptr);
 
   return true;
 }
@@ -39,11 +39,11 @@ static bool test_parse_one_flag(struct sl_context ctx[static 1], const bool) {
   const int argc      = SL_ARRAY_LEN(argv) - 1;
   struct sl_args args = {.argc = argc, .argv = argv};
 
-  assert(sl_args_count_positional(&args) == 0);
-  assert(sl_args_get_positional(&args, 0) == nullptr);
+  SL_ASSERT_TRUE(sl_args_count_positional(&args) == 0);
+  SL_ASSERT_TRUE(sl_args_get_positional(&args, 0) == nullptr);
 
-  assert(sl_args_count_optional(&args) == 1);
-  assert(sl_args_parse_flag(&args, "-x"));
+  SL_ASSERT_TRUE(sl_args_count_optional(&args) == 1);
+  SL_ASSERT_TRUE(sl_args_parse_flag(&args, "-x"));
 
   char* const should_not_match[] = {
       "-vv",
@@ -60,7 +60,7 @@ static bool test_parse_one_flag(struct sl_context ctx[static 1], const bool) {
       "-v",
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(should_not_match); ++i) {
-    assert(!sl_args_parse_flag(&args, should_not_match[i]));
+    SL_ASSERT_TRUE(!sl_args_parse_flag(&args, should_not_match[i]));
   }
 
   return true;
@@ -77,17 +77,17 @@ static bool test_parse_positional_after_optional(struct sl_context ctx[static 1]
   const int argc      = SL_ARRAY_LEN(argv) - 1;
   struct sl_args args = {.argc = argc, .argv = argv};
 
-  assert(sl_args_count_positional(&args) == 1);
-  assert(sl_args_count_optional(&args) == 1);
+  SL_ASSERT_TRUE(sl_args_count_positional(&args) == 1);
+  SL_ASSERT_TRUE(sl_args_count_optional(&args) == 1);
 
-  assert(sl_args_get_positional(&args, 0) != nullptr);
-  assert(strcmp(sl_args_get_positional(&args, 0), argv[2]) == 0);
-  assert(sl_args_get_positional(&args, 1) == nullptr);
+  SL_ASSERT_TRUE(sl_args_get_positional(&args, 0) != nullptr);
+  SL_ASSERT_TRUE(strcmp(sl_args_get_positional(&args, 0), argv[2]) == 0);
+  SL_ASSERT_TRUE(sl_args_get_positional(&args, 1) == nullptr);
 
-  assert(sl_args_find_optional(&args, argv[1]) != nullptr);
-  assert(strcmp(sl_args_find_optional(&args, argv[1]), argv[1]) == 0);
+  SL_ASSERT_TRUE(sl_args_find_optional(&args, argv[1]) != nullptr);
+  SL_ASSERT_TRUE(strcmp(sl_args_find_optional(&args, argv[1]), argv[1]) == 0);
 
-  assert(sl_args_parse_flag(&args, "-v"));
+  SL_ASSERT_TRUE(sl_args_parse_flag(&args, "-v"));
 
   return true;
 }
@@ -103,18 +103,18 @@ static bool test_parse_two_flags(struct sl_context ctx[static 1], const bool) {
   const int argc      = SL_ARRAY_LEN(argv) - 1;
   struct sl_args args = {.argc = argc, .argv = argv};
 
-  assert(sl_args_count_positional(&args) == 0);
-  assert(sl_args_count_optional(&args) == 2);
+  SL_ASSERT_TRUE(sl_args_count_positional(&args) == 0);
+  SL_ASSERT_TRUE(sl_args_count_optional(&args) == 2);
 
-  assert(sl_args_get_positional(&args, 0) == nullptr);
+  SL_ASSERT_TRUE(sl_args_get_positional(&args, 0) == nullptr);
 
   for (int i = 1; i < argc; ++i) {
-    assert(sl_args_find_optional(&args, argv[i]) != nullptr);
-    assert(strcmp(sl_args_find_optional(&args, argv[i]), argv[i]) == 0);
+    SL_ASSERT_TRUE(sl_args_find_optional(&args, argv[i]) != nullptr);
+    SL_ASSERT_TRUE(strcmp(sl_args_find_optional(&args, argv[i]), argv[i]) == 0);
   }
 
-  assert(sl_args_parse_flag(&args, "-w"));
-  assert(sl_args_parse_flag(&args, "-v"));
+  SL_ASSERT_TRUE(sl_args_parse_flag(&args, "-w"));
+  SL_ASSERT_TRUE(sl_args_parse_flag(&args, "-v"));
 
   char* const should_not_match[] = {
       "-x",
@@ -130,7 +130,7 @@ static bool test_parse_two_flags(struct sl_context ctx[static 1], const bool) {
       "",
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(should_not_match); ++i) {
-    assert(!sl_args_parse_flag(&args, should_not_match[i]));
+    SL_ASSERT_TRUE(!sl_args_parse_flag(&args, should_not_match[i]));
   }
 
   return true;
@@ -150,25 +150,25 @@ static bool test_parse_optional_ints(struct sl_context ctx[static 1], const bool
   const int argc      = SL_ARRAY_LEN(argv) - 1;
   struct sl_args args = {.argc = argc, .argv = argv};
 
-  assert(sl_args_count_positional(&args) == 0);
-  assert(sl_args_count_optional(&args) == 5);
+  SL_ASSERT_TRUE(sl_args_count_positional(&args) == 0);
+  SL_ASSERT_TRUE(sl_args_count_optional(&args) == 5);
 
-  assert(sl_args_get_positional(&args, 0) == nullptr);
+  SL_ASSERT_TRUE(sl_args_get_positional(&args, 0) == nullptr);
 
   for (int i = 1; i < argc; ++i) {
-    assert(sl_args_find_optional(&args, argv[i]) != nullptr);
-    assert(strcmp(sl_args_find_optional(&args, argv[i]), argv[i]) == 0);
+    SL_ASSERT_TRUE(sl_args_find_optional(&args, argv[i]) != nullptr);
+    SL_ASSERT_TRUE(strcmp(sl_args_find_optional(&args, argv[i]), argv[i]) == 0);
   }
 
-  assert(sl_args_parse_ull(&args, "-w", 10) == 1);
-  assert(sl_args_parse_ull(&args, "-w", 8) == 1);
-  assert(sl_args_parse_ull(&args, "-w", 16) == 1);
-  assert(sl_args_parse_ull(&args, "-v", 10) == 10);
-  assert(sl_args_parse_ull(&args, "-v", 8) == 8);
-  assert(sl_args_parse_ull(&args, "-v", 16) == 16);
-  assert(sl_args_parse_ull(&args, "--num-stuff", 10) == 100);
-  assert(sl_args_parse_ull(&args, "--num-stuff", 8) == 64);
-  assert(sl_args_parse_ull(&args, "--num-stuff", 16) == 256);
+  SL_ASSERT_TRUE(sl_args_parse_ull(&args, "-w", 10) == 1);
+  SL_ASSERT_TRUE(sl_args_parse_ull(&args, "-w", 8) == 1);
+  SL_ASSERT_TRUE(sl_args_parse_ull(&args, "-w", 16) == 1);
+  SL_ASSERT_TRUE(sl_args_parse_ull(&args, "-v", 10) == 10);
+  SL_ASSERT_TRUE(sl_args_parse_ull(&args, "-v", 8) == 8);
+  SL_ASSERT_TRUE(sl_args_parse_ull(&args, "-v", 16) == 16);
+  SL_ASSERT_TRUE(sl_args_parse_ull(&args, "--num-stuff", 10) == 100);
+  SL_ASSERT_TRUE(sl_args_parse_ull(&args, "--num-stuff", 8) == 64);
+  SL_ASSERT_TRUE(sl_args_parse_ull(&args, "--num-stuff", 16) == 256);
 
   char* const should_not_match[] = {
       "-f",
@@ -176,9 +176,9 @@ static bool test_parse_optional_ints(struct sl_context ctx[static 1], const bool
       "",
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(should_not_match); ++i) {
-    assert(sl_args_parse_ull(&args, should_not_match[i], 10) == 0);
-    assert(sl_args_parse_ull(&args, should_not_match[i], 8) == 0);
-    assert(sl_args_parse_ull(&args, should_not_match[i], 16) == 0);
+    SL_ASSERT_TRUE(sl_args_parse_ull(&args, should_not_match[i], 10) == 0);
+    SL_ASSERT_TRUE(sl_args_parse_ull(&args, should_not_match[i], 8) == 0);
+    SL_ASSERT_TRUE(sl_args_parse_ull(&args, should_not_match[i], 16) == 0);
   }
 
   return true;
