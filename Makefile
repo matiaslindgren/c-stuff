@@ -26,7 +26,8 @@ CFLAGS ?= \
 	-Wno-sign-conversion \
 	-Wno-switch-default \
 	-Wno-unsafe-buffer-usage \
-	-Wno-vla
+	-Wno-vla \
+	-Wno-global-constructors
 LDFLAGS  ?= -lm -lc
 INCLUDES := -I.
 

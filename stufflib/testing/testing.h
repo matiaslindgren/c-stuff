@@ -1,7 +1,79 @@
 #ifndef SL_TESTING_H_INCLUDED
 #define SL_TESTING_H_INCLUDED
 
+#include <memory.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stufflib/args/args.h>
+#include <stufflib/context/context.h>
 #include <stufflib/math/math.h>
+
+#define SL_ANSI_RED         "\033[31m"
+#define SL_ANSI_GREEN       "\033[32m"
+#define SL_ANSI_RESET       "\033[0m"
+#define SL_ANSI_COLOR(c, s) (sl_terminal_use_colors() ? (c s SL_ANSI_RESET) : (s))
+
+bool sl_terminal_use_colors(void);
+
+typedef bool sl_testing_function(struct sl_context* const, bool);
+
+struct sl_testing_test {
+  struct sl_testing_test* next;
+  const char* name;
+  const char* file;
+  sl_testing_function* func;
+};
+
+static struct sl_testing_test* sl_testing_tests = nullptr;
+
+static inline void sl_testing_destroy_tests(void) {
+  for (struct sl_testing_test* test = sl_testing_tests; test != nullptr;) {
+    struct sl_testing_test* next_test = test->next;
+    free(test);
+    test = next_test;
+  }
+  sl_testing_tests = nullptr;
+}
+
+static inline void sl_testing_register_test_instance(
+    const char name[const static 1],
+    const char file[const static 1],
+    sl_testing_function* test_fn
+) {
+  struct sl_testing_test* test = calloc(1, sizeof(struct sl_testing_test));
+  if (!test) {
+    fprintf(
+        stderr,
+        "[%s] FATAL: failed allocating sl_testing_test node for %s:%s\n",
+        __func__,
+        file,
+        name
+    );
+    sl_testing_destroy_tests();
+    abort();
+  }
+  *test = (struct sl_testing_test){
+      .next = sl_testing_tests,
+      .file = file,
+      .name = name,
+      .func = test_fn,
+  };
+  sl_testing_tests = test;
+}
+
+static inline int sl_testing_run(struct sl_context ctx[static const 1], bool verbose) {
+  int n_failures = 0;
+  for (struct sl_testing_test* test = sl_testing_tests; test != nullptr; test = test->next) {
+    fprintf(stderr, "%s:%s: ", test->file, test->name);
+    if (test->func(ctx, verbose)) {
+      fprintf(stderr, SL_ANSI_COLOR(SL_ANSI_GREEN, " PASS\n"));
+    } else {
+      fprintf(stderr, SL_ANSI_COLOR(SL_ANSI_RED, " FAIL\n"));
+      ++n_failures;
+    }
+  }
+  return n_failures;
+}
 
 #define SL_FORMAT(x)              \
   _Generic(                       \
@@ -100,6 +172,26 @@
 #define SL_ASSERT_EQ_PTR(lhs, rhs, ...) SL_ASSERT_BINOP(==, (void*)(lhs), (void*)(rhs), __VA_ARGS__)
 #define SL_ASSERT_EQ_STR(lhs, rhs, ...) SL_ASSERT_STRCMP(0, lhs, rhs, __VA_ARGS__)
 #define SL_ASSERT_EQ_DOUBLE(...)        SL_ASSERT_DOUBLE_ALMOST(__VA_ARGS__)
+
+#define SL_TEST(name)                                                         \
+  static bool name(struct sl_context ctx[const static 1], bool verbose);      \
+  __attribute__((constructor)) static void sl_testing_register_##name(void) { \
+    sl_testing_register_test_instance(#name, __FILE__, name);                 \
+  }                                                                           \
+  static bool name(struct sl_context ctx[const static 1], bool verbose)
+
+#define SL_TEST_MAIN2()                                      \
+  int main(int argc, char* const argv[argc + 1]) {           \
+    struct sl_args args   = {.argc = argc, .argv = argv};    \
+    const bool verbose    = sl_args_parse_flag(&args, "-v"); \
+    struct sl_context ctx = {0};                             \
+    int n_failures        = sl_testing_run(&ctx, verbose);   \
+    bool ok               = n_failures == 0;                 \
+    if (!sl_context_unwind_errors(&ctx, stderr)) {           \
+      ok = false;                                            \
+    }                                                        \
+    return ok ? EXIT_SUCCESS : EXIT_FAILURE;                 \
+  }
 
 #define SL_TEST_MAIN(...)                                                                       \
   int main(int argc, char* const argv[argc + 1]) {                                              \
