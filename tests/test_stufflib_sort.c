@@ -10,7 +10,7 @@
 #include <stufflib/testing/testing.h>
 #include <time.h>
 
-static bool test_compare_doubles(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_compare_doubles) {
   (void)ctx;
   (void)verbose;
   double* a = calloc(2, sizeof(double));
@@ -102,35 +102,35 @@ test_stdlib_qsort_double(struct sl_context ctx[static 1], const size_t count, do
   return src;
 }
 
-static bool test_insertsort_doubles(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_insertsort_doubles) {
   if (verbose) {
     printf("test insertsort doubles\n");
   }
   return test_sort_doubles(ctx, sl_sort_insertsort_double, verbose, 10000);
 }
 
-static bool test_quicksort_doubles(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_quicksort_doubles) {
   if (verbose) {
     printf("test quicksort doubles\n");
   }
   return test_sort_doubles(ctx, sl_sort_quicksort_double, verbose, 1000000);
 }
 
-static bool test_mergesort_doubles(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_mergesort_doubles) {
   if (verbose) {
     printf("test mergesort doubles\n");
   }
   return test_sort_doubles(ctx, sl_sort_mergesort_double, verbose, 1000000);
 }
 
-static bool test_qsort_doubles(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_qsort_doubles) {
   if (verbose) {
     printf("test stdlib qsort doubles\n");
   }
   return test_sort_doubles(ctx, test_stdlib_qsort_double, verbose, 1000000);
 }
 
-static bool test_compare_strings(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_compare_strings) {
   (void)ctx;
   (void)verbose;
   const char* a[] = {"hello", "there"};
@@ -198,28 +198,28 @@ test_stdlib_qsort_str(struct sl_context ctx[static 1], const size_t count, char*
   return src;
 }
 
-static bool test_insertsort_strings(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_insertsort_strings) {
   if (verbose) {
     printf("test insertsort strings\n");
   }
   return test_sort_strings(ctx, sl_sort_insertsort_str, verbose);
 }
 
-static bool test_quicksort_strings(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_quicksort_strings) {
   if (verbose) {
     printf("test quicksort strings\n");
   }
   return test_sort_strings(ctx, sl_sort_quicksort_str, verbose);
 }
 
-static bool test_mergesort_strings(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_mergesort_strings) {
   if (verbose) {
     printf("test mergesort strings\n");
   }
   return test_sort_strings(ctx, sl_sort_mergesort_str, verbose);
 }
 
-static bool test_qsort_strings(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_qsort_strings) {
   if (verbose) {
     printf("test stdlib qsort strings\n");
   }
@@ -339,47 +339,32 @@ sl_test_stdlib_qsort_named_vec3s(const size_t count, struct sl_test_named_vec3 s
   return src;
 }
 
-static bool test_insertsort_custom_obj(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_insertsort_custom_obj) {
   if (verbose) {
     printf("test insertsort custom_obj\n");
   }
   return test_sort_named_vec3(ctx, sl_test_insertsort_named_vec3s, verbose);
 }
 
-static bool test_quicksort_custom_obj(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_quicksort_custom_obj) {
   if (verbose) {
     printf("test quicksort custom_obj\n");
   }
   return test_sort_named_vec3(ctx, sl_test_quicksort_named_vec3s, verbose);
 }
 
-static bool test_mergesort_custom_obj(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_mergesort_custom_obj) {
   if (verbose) {
     printf("test mergesort custom objects\n");
   }
   return test_sort_named_vec3(ctx, sl_test_mergesort_named_vec3s, verbose);
 }
 
-static bool test_qsort_custom_obj(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_qsort_custom_obj) {
   if (verbose) {
     printf("test stdlib qsort custom objects\n");
   }
   return test_sort_named_vec3(ctx, sl_test_stdlib_qsort_named_vec3s, verbose);
 }
 
-SL_TEST_MAIN(
-    test_compare_doubles,
-    test_compare_strings,
-    test_insertsort_doubles,
-    test_quicksort_doubles,
-    test_mergesort_doubles,
-    test_qsort_doubles,
-    test_insertsort_strings,
-    test_quicksort_strings,
-    test_mergesort_strings,
-    test_qsort_strings,
-    test_insertsort_custom_obj,
-    test_quicksort_custom_obj,
-    test_mergesort_custom_obj,
-    test_qsort_custom_obj
-)
+SL_TEST_MAIN()

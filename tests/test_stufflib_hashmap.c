@@ -7,7 +7,8 @@
 #include <stufflib/span/span.h>
 #include <stufflib/testing/testing.h>
 
-static bool test_empty(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_empty) {
+  (void)verbose;
   struct sl_hashmap map = sl_hashmap_create(ctx, 2);
   SL_ASSERT_EQ_LL(map.size, 0);
   SL_ASSERT_EQ_LL(map.capacity, 2);
@@ -32,7 +33,8 @@ static bool test_empty(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_insert_single_int(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_insert_single_int) {
+  (void)verbose;
   for (int64_t value = -10; value <= 10; ++value) {
     struct sl_hashmap map    = sl_hashmap_create(ctx, 2);
     struct sl_span key_hello = sl_span_from_str(ctx, "hello");
@@ -82,7 +84,8 @@ static bool test_insert_single_int(struct sl_context ctx[static 1], const bool) 
   return true;
 }
 
-static bool test_insert_single_pointer(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_insert_single_pointer) {
+  (void)verbose;
   struct sl_hashmap map = sl_hashmap_create(ctx, 2);
   struct sl_span key    = sl_span_from_str(ctx, "hello");
   struct sl_span value  = sl_span_from_str(ctx, "there");
@@ -110,7 +113,8 @@ static bool test_insert_single_pointer(struct sl_context ctx[static 1], const bo
   return true;
 }
 
-static bool test_insert_two_elements_resizes(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_insert_two_elements_resizes) {
+  (void)verbose;
   struct sl_hashmap map    = sl_hashmap_create(ctx, 2);
   struct sl_span key_hello = sl_span_from_str(ctx, "hello");
   struct sl_span key_there = sl_span_from_str(ctx, "there");
@@ -133,7 +137,8 @@ static bool test_insert_two_elements_resizes(struct sl_context ctx[static 1], co
   return true;
 }
 
-static bool test_update_single_element(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_update_single_element) {
+  (void)verbose;
   struct sl_hashmap map = sl_hashmap_create(ctx, 2);
   struct sl_span key    = sl_span_from_str(ctx, "hello");
 
@@ -160,7 +165,8 @@ static bool test_update_single_element(struct sl_context ctx[static 1], const bo
   return true;
 }
 
-static bool test_multiple_resizes_retain_slots(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_multiple_resizes_retain_slots) {
+  (void)verbose;
   struct sl_hashmap map = sl_hashmap_create(ctx, 2);
   const char* keys[]    = {
       "ten",
@@ -223,7 +229,8 @@ static bool test_multiple_resizes_retain_slots(struct sl_context ctx[static 1], 
   return true;
 }
 
-static bool test_slot_iterator(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_slot_iterator) {
+  (void)verbose;
   struct sl_hashmap map = sl_hashmap_create(ctx, 2);
   const char* keys[]    = {
       "ten",
@@ -263,12 +270,4 @@ static bool test_slot_iterator(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-SL_TEST_MAIN(
-    test_empty,
-    test_insert_single_int,
-    test_insert_single_pointer,
-    test_insert_two_elements_resizes,
-    test_update_single_element,
-    test_multiple_resizes_retain_slots,
-    test_slot_iterator
-)
+SL_TEST_MAIN()

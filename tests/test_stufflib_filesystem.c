@@ -12,7 +12,7 @@
 
 #include "./test_data.h"
 
-static bool test_read_file(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_read_file) {
   unsigned char buf[128] = {0};
   struct sl_span buffer  = sl_span_view(SL_ARRAY_LEN(buf), buf);
 
@@ -31,7 +31,7 @@ static bool test_read_file(struct sl_context ctx[static 1], const bool verbose) 
   return true;
 }
 
-static bool test_read_file_utf8(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_read_file_utf8) {
   unsigned char buf[128] = {0};
   struct sl_span buffer  = sl_span_view(SL_ARRAY_LEN(buf), buf);
 
@@ -74,7 +74,7 @@ static bool test_read_file_utf8(struct sl_context ctx[static 1], const bool verb
   return true;
 }
 
-static bool test_read_lines(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_read_lines) {
   unsigned char buf[128] = {0};
   struct sl_span buffer  = sl_span_view(SL_ARRAY_LEN(buf), buf);
 
@@ -127,4 +127,4 @@ static bool test_read_lines(struct sl_context ctx[static 1], const bool verbose)
   return true;
 }
 
-SL_TEST_MAIN(test_read_file, test_read_file_utf8, test_read_lines)
+SL_TEST_MAIN()

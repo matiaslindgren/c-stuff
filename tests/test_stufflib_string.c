@@ -13,7 +13,8 @@
 
 #include "./test_data.h"
 
-static bool test_string_init(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_string_init) {
+  (void)verbose;
   for (size_t i = 0; i < SL_ARRAY_LEN(sl_test_data_hello_utf8); ++i) {
     struct sl_string str = sl_string_from_utf8(ctx, sl_test_data_hello_utf8 + i);
     SL_ASSERT_TRUE(str.length == sl_test_data_decoded_lengths[i]);
@@ -28,7 +29,8 @@ static bool test_string_init(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_string_utf8_view(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_string_utf8_view) {
+  (void)verbose;
   struct sl_string empty_str = sl_string_from_utf8(ctx, &(struct sl_span){0});
   SL_ASSERT_TRUE(empty_str.length == 0);
   SL_ASSERT_TRUE(empty_str.utf8_data.size == 1);
@@ -49,7 +51,8 @@ static bool test_string_utf8_view(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_string_slice(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_string_slice) {
+  (void)verbose;
   size_t decoded_pos = 0;
   for (size_t i = 0; i < SL_ARRAY_LEN(sl_test_data_hello_utf8); ++i) {
     struct sl_string str = sl_string_from_utf8(ctx, sl_test_data_hello_utf8 + i);
@@ -73,7 +76,8 @@ static bool test_string_slice(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_string_is_ascii(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_string_is_ascii) {
+  (void)verbose;
   {
     struct sl_span hello = (struct sl_span){.size = 12, .data = (unsigned char*)u8"hello there!"};
     struct sl_string str = sl_string_from_utf8(ctx, &hello);
@@ -89,7 +93,8 @@ static bool test_string_is_ascii(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_string_copy_ascii(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_string_copy_ascii) {
+  (void)verbose;
   struct sl_span hello = (struct sl_span){.size = 12, .data = (unsigned char*)u8"hello there!"};
   struct sl_string str = sl_string_from_utf8(ctx, &hello);
   char buf[100]        = {0};
@@ -100,10 +105,4 @@ static bool test_string_copy_ascii(struct sl_context ctx[static 1], const bool) 
   return true;
 }
 
-SL_TEST_MAIN(
-    test_string_init,
-    test_string_utf8_view,
-    test_string_slice,
-    test_string_is_ascii,
-    test_string_copy_ascii
-)
+SL_TEST_MAIN()

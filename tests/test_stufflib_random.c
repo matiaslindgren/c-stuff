@@ -8,8 +8,9 @@
 #include <stufflib/random/random.h>
 #include <stufflib/testing/testing.h>
 
-static bool test_random_fill(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_random_fill) {
   (void)ctx;
+  (void)verbose;
   uint64_t prng = 0;
   sl_random_pcg32_init(&prng, 0);
   const size_t n = 1000;
@@ -29,8 +30,9 @@ static bool test_random_fill(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_random_set_zero(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_random_set_zero) {
   (void)ctx;
+  (void)verbose;
   uint64_t prng = 0;
   sl_random_pcg32_init(&prng, 0);
   const size_t n = 1000;
@@ -53,8 +55,9 @@ static bool test_random_set_zero(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_randomint(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_randomint) {
   (void)ctx;
+  (void)verbose;
   uint64_t prng = 0;
   sl_random_pcg32_init(&prng, 0);
   SL_ASSERT_TRUE(sl_random_int(&prng, 0, 0) == 0);
@@ -76,7 +79,7 @@ static bool test_randomint(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_random_shuffle(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_random_shuffle) {
   (void)ctx;
   uint64_t prng = 0;
   sl_random_pcg32_init(&prng, 0);
@@ -123,7 +126,7 @@ static bool test_random_shuffle(struct sl_context ctx[static 1], const bool verb
   return true;
 }
 
-static bool test_random_shuffle_together(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_random_shuffle_together) {
   (void)ctx;
   uint64_t prng = 0;
   sl_random_pcg32_init(&prng, 0);
@@ -150,10 +153,4 @@ static bool test_random_shuffle_together(struct sl_context ctx[static 1], const 
   return true;
 }
 
-SL_TEST_MAIN(
-    test_random_fill,
-    test_random_set_zero,
-    test_randomint,
-    test_random_shuffle,
-    test_random_shuffle_together
-)
+SL_TEST_MAIN()

@@ -43,8 +43,9 @@ bool check_matrix_equal(
   return true;
 }
 
-static bool test_minmax_normalization(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_minmax_normalization) {
   (void)ctx;
+  (void)verbose;
   {
     struct sl_la_matrix a = {
         .rows = 4,
@@ -163,7 +164,8 @@ static bool test_minmax_normalization(struct sl_context ctx[static 1], const boo
   return true;
 }
 
-static bool test_random_train_test_split(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_random_train_test_split) {
+  (void)verbose;
   uint64_t prng = 0;
   sl_random_pcg32_init(&prng, 0);
   for (int iter = 0; iter < 1000; ++iter) {
@@ -211,8 +213,9 @@ static bool test_random_train_test_split(struct sl_context ctx[static 1], const 
   return true;
 }
 
-static bool test_svm_linear_fit(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_svm_linear_fit) {
   (void)ctx;
+  (void)verbose;
   uint64_t prng = 0;
   sl_random_pcg32_init(&prng, 0);
   for (int iter = 0; iter < 1000; ++iter) {
@@ -246,4 +249,4 @@ static bool test_svm_linear_fit(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-SL_TEST_MAIN(test_minmax_normalization, test_random_train_test_split, test_svm_linear_fit)
+SL_TEST_MAIN()

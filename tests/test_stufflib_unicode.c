@@ -13,8 +13,9 @@
 
 #include "./test_data.h"
 
-static bool test_validate_utf8(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_validate_utf8) {
   (void)ctx;
+  (void)verbose;
   struct sl_span invalid_utf8[] = {
       {.size = 1, .data = (unsigned char[]){0x80}                  },
       {.size = 2, .data = (unsigned char[]){0xc0, 0x80}            },
@@ -33,8 +34,9 @@ static bool test_validate_utf8(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_decode_codepoints(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_decode_codepoints) {
   (void)ctx;
+  (void)verbose;
   size_t codepoint_pos = 0;
   for (size_t i_str = 0; i_str < SL_ARRAY_LEN(sl_test_data_hello_utf8); ++i_str) {
     struct sl_span utf8_data = sl_test_data_hello_utf8[i_str];
@@ -57,8 +59,9 @@ static bool test_decode_codepoints(struct sl_context ctx[static 1], const bool) 
   return true;
 }
 
-static bool test_unicode_iterator(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_unicode_iterator) {
   (void)ctx;
+  (void)verbose;
   size_t codepoint_pos = 0;
   for (size_t i_str = 0; i_str < SL_ARRAY_LEN(sl_test_data_hello_utf8); ++i_str) {
     struct sl_span utf8_data = sl_test_data_hello_utf8[i_str];
@@ -83,8 +86,9 @@ static bool test_unicode_iterator(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_unicode_length(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_unicode_length) {
   (void)ctx;
+  (void)verbose;
   for (size_t i_str = 0; i_str < SL_ARRAY_LEN(sl_test_data_hello_utf8); ++i_str) {
     const size_t str_len = sl_unicode_length(sl_test_data_hello_utf8 + i_str);
     SL_ASSERT_TRUE(str_len == sl_test_data_decoded_lengths[i_str]);
@@ -92,7 +96,7 @@ static bool test_unicode_length(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_decode_utf8_files(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_decode_utf8_files) {
   (void)ctx;
   const char* languages[] = {
       "ar", "bg",  "cs", "de",  "el", "fa", "fi", "fr",  "he",  "hi", "is",
@@ -166,10 +170,4 @@ static bool test_decode_utf8_files(struct sl_context ctx[static 1], const bool v
   return true;
 }
 
-SL_TEST_MAIN(
-    test_validate_utf8,
-    test_decode_codepoints,
-    test_unicode_iterator,
-    test_unicode_length,
-    test_decode_utf8_files
-)
+SL_TEST_MAIN()

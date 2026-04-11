@@ -5,8 +5,9 @@
 #include <stufflib/macros/macros.h>
 #include <stufflib/testing/testing.h>
 
-static bool test_fresh_ctx_has_no_errors(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_fresh_ctx_has_no_errors) {
   (void)ctx;
+  (void)verbose;
   struct sl_context c = {0};
 
   SL_ASSERT_TRUE(!sl_error_occurred(&c.errors));
@@ -15,8 +16,9 @@ static bool test_fresh_ctx_has_no_errors(struct sl_context ctx[static 1], const 
   return true;
 }
 
-static bool test_sl_error_macro_no_format_args(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_sl_error_macro_no_format_args) {
   (void)ctx;
+  (void)verbose;
   struct sl_context c = {0};
 
   SL_ERROR(&c, "something failed");
@@ -31,8 +33,9 @@ static bool test_sl_error_macro_no_format_args(struct sl_context ctx[static 1], 
   return true;
 }
 
-static bool test_sl_error_macro_formats_message(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_sl_error_macro_formats_message) {
   (void)ctx;
+  (void)verbose;
   struct sl_context c = {0};
 
   SL_ERROR(&c, "value is %d and str is %s", 42, "hello");
@@ -44,8 +47,9 @@ static bool test_sl_error_macro_formats_message(struct sl_context ctx[static 1],
   return true;
 }
 
-static bool test_sl_error_macro_captures_file(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_sl_error_macro_captures_file) {
   (void)ctx;
+  (void)verbose;
   struct sl_context c = {0};
 
   SL_ERROR(&c, "check file");
@@ -57,8 +61,9 @@ static bool test_sl_error_macro_captures_file(struct sl_context ctx[static 1], c
   return true;
 }
 
-static bool test_sl_error_macro_captures_line(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_sl_error_macro_captures_line) {
   (void)ctx;
+  (void)verbose;
   struct sl_context c = {0};
 
   const int line_before = __LINE__;
@@ -71,8 +76,9 @@ static bool test_sl_error_macro_captures_line(struct sl_context ctx[static 1], c
   return true;
 }
 
-static bool test_sl_error_macro_accumulates(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_sl_error_macro_accumulates) {
   (void)ctx;
+  (void)verbose;
   struct sl_context c = {0};
 
   SL_ERROR(&c, "first");
@@ -88,8 +94,9 @@ static bool test_sl_error_macro_accumulates(struct sl_context ctx[static 1], con
   return true;
 }
 
-static bool test_sl_error_macro_msg_truncation(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_sl_error_macro_msg_truncation) {
   (void)ctx;
+  (void)verbose;
   struct sl_context c = {0};
 
   // Format a message that would exceed SL_ERROR_MSG_LEN before truncation
@@ -109,8 +116,9 @@ static bool test_sl_error_macro_msg_truncation(struct sl_context ctx[static 1], 
   return true;
 }
 
-static bool test_unwind_empties_stack(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_unwind_empties_stack) {
   (void)ctx;
+  (void)verbose;
   struct sl_context c = {0};
 
   SL_ERROR(&c, "first");
@@ -139,8 +147,9 @@ static bool test_unwind_empties_stack(struct sl_context ctx[static 1], const boo
   return true;
 }
 
-static bool test_unwind_output_format(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_unwind_output_format) {
   (void)ctx;
+  (void)verbose;
   struct sl_context c = {0};
 
   SL_ERROR(&c, "boom");
@@ -162,8 +171,9 @@ static bool test_unwind_output_format(struct sl_context ctx[static 1], const boo
   return true;
 }
 
-static bool test_unwind_empty_stack_is_noop(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_unwind_empty_stack_is_noop) {
   (void)ctx;
+  (void)verbose;
   struct sl_context c = {0};
 
   char* buf   = nullptr;
@@ -180,15 +190,4 @@ static bool test_unwind_empty_stack_is_noop(struct sl_context ctx[static 1], con
   return true;
 }
 
-SL_TEST_MAIN(
-    test_fresh_ctx_has_no_errors,
-    test_sl_error_macro_no_format_args,
-    test_sl_error_macro_formats_message,
-    test_sl_error_macro_captures_file,
-    test_sl_error_macro_captures_line,
-    test_sl_error_macro_accumulates,
-    test_sl_error_macro_msg_truncation,
-    test_unwind_empties_stack,
-    test_unwind_output_format,
-    test_unwind_empty_stack_is_noop
-)
+SL_TEST_MAIN()

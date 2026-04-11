@@ -14,4 +14,4 @@ SL_TEST(test_assert_false) {
   return true;
 }
 
-SL_TEST_MAIN2()
+SL_TEST_MAIN()

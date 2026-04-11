@@ -40,8 +40,9 @@ bool check_matrix_equal(
   return true;
 }
 
-static bool test_matrix_get(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_matrix_get) {
   (void)ctx;
+  (void)verbose;
   struct sl_la_matrix a = {
       .rows = 3,
       .cols = 3,
@@ -55,8 +56,9 @@ static bool test_matrix_get(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_matrix_equal(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_matrix_equal) {
   (void)ctx;
+  (void)verbose;
   {
     struct sl_la_matrix a = {
         .rows = 1,
@@ -138,7 +140,8 @@ static bool test_matrix_equal(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_matrix_create(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_matrix_create) {
+  (void)verbose;
   {
     struct sl_la_matrix a = sl_la_matrix_create(ctx, 1, 1);
     sl_la_matrix_destroy(&a);
@@ -162,8 +165,9 @@ static bool test_matrix_create(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_matrix_trace(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_matrix_trace) {
   (void)ctx;
+  (void)verbose;
   struct sl_la_matrix a = {
       .rows = 3,
       .cols = 3,
@@ -178,8 +182,9 @@ static bool test_matrix_trace(struct sl_context ctx[static 1], const bool) {
   return false;
 }
 
-static bool test_matrix_add_axis0(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_matrix_add_axis0) {
   (void)ctx;
+  (void)verbose;
   {
     struct sl_la_matrix a1 = {
         .rows = 4,
@@ -203,8 +208,9 @@ static bool test_matrix_add_axis0(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_matrix_sub_axis0(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_matrix_sub_axis0) {
   (void)ctx;
+  (void)verbose;
   {
     struct sl_la_matrix a1 = {
         .rows = 4,
@@ -228,8 +234,9 @@ static bool test_matrix_sub_axis0(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_matrix_mul_axis0(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_matrix_mul_axis0) {
   (void)ctx;
+  (void)verbose;
   {
     struct sl_la_matrix a1 = {
         .rows = 4,
@@ -253,8 +260,9 @@ static bool test_matrix_mul_axis0(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_matrix_diffdiv_axis0(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_matrix_diffdiv_axis0) {
   (void)ctx;
+  (void)verbose;
   {
     struct sl_la_matrix a1 = {
         .rows = 4,
@@ -289,8 +297,9 @@ static bool test_matrix_diffdiv_axis0(struct sl_context ctx[static 1], const boo
   return true;
 }
 
-static bool test_matrix_multiply_square(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_matrix_multiply_square) {
   (void)ctx;
+  (void)verbose;
   struct sl_la_matrix a = {
       .rows = 3,
       .cols = 3,
@@ -310,8 +319,9 @@ static bool test_matrix_multiply_square(struct sl_context ctx[static 1], const b
   return check_matrix_equal(&result, &expected);
 }
 
-static bool test_matrix_multiply_zeros(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_matrix_multiply_zeros) {
   (void)ctx;
+  (void)verbose;
   struct sl_la_matrix a = {
       .rows = 3,
       .cols = 3,
@@ -328,8 +338,9 @@ static bool test_matrix_multiply_zeros(struct sl_context ctx[static 1], const bo
   return check_matrix_equal(&result, &expected);
 }
 
-static bool test_matrix_multiply(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_matrix_multiply) {
   (void)ctx;
+  (void)verbose;
   struct sl_la_matrix a = {
       .rows = 4,
       .cols = 3,
@@ -354,8 +365,9 @@ static bool test_matrix_multiply(struct sl_context ctx[static 1], const bool) {
   return check_matrix_equal(&result, &expected);
 }
 
-static bool test_matrix_frobenius_norm(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_matrix_frobenius_norm) {
   (void)ctx;
+  (void)verbose;
   struct sl_la_matrix a = {
       .rows = 4,
       .cols = 3,
@@ -370,8 +382,9 @@ static bool test_matrix_frobenius_norm(struct sl_context ctx[static 1], const bo
   return false;
 }
 
-static bool test_vector_scale(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_vector_scale) {
   (void)ctx;
+  (void)verbose;
   for (int alpha = -10; alpha <= 10; ++alpha) {
     struct sl_la_vector v = {
         .size = 9,
@@ -385,8 +398,9 @@ static bool test_vector_scale(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_vector_equal(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_vector_equal) {
   (void)ctx;
+  (void)verbose;
   {
     struct sl_la_vector v1 = {
         .size = 5,
@@ -401,8 +415,9 @@ static bool test_vector_equal(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_vector_dot(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_vector_dot) {
   (void)ctx;
+  (void)verbose;
   {
     struct sl_la_vector v1 = {
         .size = 5,
@@ -428,8 +443,9 @@ static bool test_vector_dot(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_vector_add(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_vector_add) {
   (void)ctx;
+  (void)verbose;
   {
     struct sl_la_vector v1 = {
         .size = 5,
@@ -458,8 +474,9 @@ static bool test_vector_add(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_vector_sub(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_vector_sub) {
   (void)ctx;
+  (void)verbose;
   {
     struct sl_la_vector v1 = {
         .size = 5,
@@ -488,22 +505,4 @@ static bool test_vector_sub(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-SL_TEST_MAIN(
-    test_matrix_get,
-    test_matrix_equal,
-    test_matrix_create,
-    test_matrix_trace,
-    test_matrix_add_axis0,
-    test_matrix_sub_axis0,
-    test_matrix_mul_axis0,
-    test_matrix_diffdiv_axis0,
-    test_matrix_multiply_square,
-    test_matrix_multiply_zeros,
-    test_matrix_multiply,
-    test_matrix_frobenius_norm,
-    test_vector_scale,
-    test_vector_equal,
-    test_vector_dot,
-    test_vector_add,
-    test_vector_sub
-)
+SL_TEST_MAIN()

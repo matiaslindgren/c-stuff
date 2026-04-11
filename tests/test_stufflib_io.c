@@ -11,8 +11,9 @@
 
 #include "./test_data.h"
 
-static bool test_format_path(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_format_path) {
   (void)ctx;
+  (void)verbose;
   char buffer[1024]    = {0};
   const size_t bufsize = SL_ARRAY_LEN(buffer);
 
@@ -30,7 +31,8 @@ static bool test_format_path(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_open_file(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_open_file) {
+  (void)verbose;
   const char* files[] = {
       "./test-data/txt/empty",
       "./test-data/txt/hello.txt",
@@ -53,7 +55,8 @@ static bool test_open_file(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_read_single_char(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_read_single_char) {
+  (void)verbose;
   struct sl_file file = {0};
   SL_ASSERT_TRUE(sl_file_open(ctx, &file, "./test-data/txt/one.txt", "rb"));
   SL_ASSERT_TRUE(sl_file_can_read(&file));
@@ -73,7 +76,8 @@ static bool test_read_single_char(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_read_empty_file(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_read_empty_file) {
+  (void)verbose;
   struct sl_file file = {0};
   SL_ASSERT_TRUE(sl_file_open(ctx, &file, "./test-data/txt/empty", "rb"));
   SL_ASSERT_TRUE(!ferror(file.file));
@@ -88,7 +92,8 @@ static bool test_read_empty_file(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_read_entire_file(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_read_entire_file) {
+  (void)verbose;
   unsigned char buf[1024] = {0};
   struct sl_span buffer   = sl_span_view(SL_ARRAY_LEN(buf), buf);
 
@@ -109,7 +114,8 @@ static bool test_read_entire_file(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_parse_numbers(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_parse_numbers) {
+  (void)verbose;
   struct sl_file file = {0};
   SL_ASSERT_TRUE(sl_file_open(ctx, &file, "./test-data/txt/numbers.txt", "rb"));
   SL_ASSERT_TRUE(sl_file_can_read(&file));
@@ -125,7 +131,8 @@ static bool test_parse_numbers(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_io_read_one_byte(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_io_read_one_byte) {
+  (void)verbose;
   unsigned char buf[1] = {0};
   SL_ASSERT_TRUE(sl_io_read(ctx, "./test-data/txt/one.txt", buf, 1));
   SL_ASSERT_TRUE(!sl_error_occurred(&ctx->errors));
@@ -133,7 +140,8 @@ static bool test_io_read_one_byte(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_io_read_file(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_io_read_file) {
+  (void)verbose;
   uint64_t buf = 0;
   SL_ASSERT_TRUE(sl_io_read(ctx, "./test-data/txt/8bytes.txt", (unsigned char*)&buf, 8));
   SL_ASSERT_TRUE(!sl_error_occurred(&ctx->errors));
@@ -142,7 +150,8 @@ static bool test_io_read_file(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_io_read_missing_file(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_io_read_missing_file) {
+  (void)verbose;
   unsigned char buf[1] = {0};
   sl_io_read(ctx, "./test-data/txt/does_not_exist", buf, 1);
   SL_ASSERT_TRUE(sl_error_occurred(&ctx->errors));
@@ -150,7 +159,8 @@ static bool test_io_read_missing_file(struct sl_context ctx[static 1], const boo
   return true;
 }
 
-static bool test_io_read_too_many_bytes(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_io_read_too_many_bytes) {
+  (void)verbose;
   unsigned char buf[8] = {0};
   sl_io_read(ctx, "./test-data/txt/one.txt", buf, sizeof(buf));
   SL_ASSERT_TRUE(sl_error_occurred(&ctx->errors));
@@ -158,15 +168,4 @@ static bool test_io_read_too_many_bytes(struct sl_context ctx[static 1], const b
   return true;
 }
 
-SL_TEST_MAIN(
-    test_format_path,
-    test_open_file,
-    test_read_single_char,
-    test_read_empty_file,
-    test_read_entire_file,
-    test_parse_numbers,
-    test_io_read_one_byte,
-    test_io_read_file,
-    test_io_read_missing_file,
-    test_io_read_too_many_bytes
-)
+SL_TEST_MAIN()

@@ -63,7 +63,8 @@ bool contains_str(
   return contains(dir, name, strlen(expected), (unsigned char*)expected);
 }
 
-static bool test_write_metadata(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_write_metadata) {
+  (void)verbose;
   {
     struct sl_record record = {
         .layout   = "dense",
@@ -141,7 +142,8 @@ static bool test_write_metadata(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_read_metadata(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_read_metadata) {
+  (void)verbose;
   {
     struct sl_record record;
     SL_ASSERT_TRUE(sl_record_read_metadata(ctx, &record, "./test-data/record", "small1"));
@@ -223,7 +225,8 @@ static bool test_read_metadata(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_dense_data_reader(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_dense_data_reader) {
+  (void)verbose;
   struct sl_record record = {0};
   SL_ASSERT_TRUE(sl_record_read_metadata(ctx, &record, "./test-data/record", "large3"));
 
@@ -280,7 +283,8 @@ static bool test_dense_data_reader(struct sl_context ctx[static 1], const bool) 
   return true;
 }
 
-static bool test_sparse_data_reader(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_sparse_data_reader) {
+  (void)verbose;
   int64_t nonzero_index[100]  = {0};
   int64_t nonzero_values[100] = {0};
   const size_t nonzero_count  = SL_ARRAY_LEN(nonzero_index);
@@ -359,7 +363,8 @@ static bool test_sparse_data_reader(struct sl_context ctx[static 1], const bool)
   return true;
 }
 
-static bool test_read_data(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_read_data) {
+  (void)verbose;
   {
     struct sl_record record = {
         .layout   = "dense",
@@ -395,7 +400,8 @@ static bool test_read_data(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_dense_data_writer(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_dense_data_writer) {
+  (void)verbose;
   struct sl_record record = {
       .layout   = "dense",
       .type     = "float32",
@@ -457,7 +463,8 @@ static bool test_dense_data_writer(struct sl_context ctx[static 1], const bool) 
   return true;
 }
 
-static bool test_sparse_data_writer(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_sparse_data_writer) {
+  (void)verbose;
   size_t nonzero_index[]     = {0, 1, 2, 100, 105, 9'012, 12'303, 12'304, 25'000, 90'123};
   int32_t nonzero_values[]   = {-5, -3, -2, 10, 100, 12'345, -2'003, 12'345, -20, 1'093};
   const size_t nonzero_count = SL_ARRAY_LEN(nonzero_index);
@@ -533,7 +540,8 @@ static bool test_sparse_data_writer(struct sl_context ctx[static 1], const bool)
   return true;
 }
 
-static bool test_write_data(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_write_data) {
+  (void)verbose;
   {
     struct sl_record record = {
         .layout   = "dense",
@@ -597,7 +605,8 @@ static bool test_write_data(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_sparse_write_and_read(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_sparse_write_and_read) {
+  (void)verbose;
   {
     struct sl_record record = {
         .layout   = "sparse",
@@ -653,7 +662,8 @@ static bool test_sparse_write_and_read(struct sl_context ctx[static 1], const bo
   return true;
 }
 
-static bool test_sparse_batch_write_and_read(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_sparse_batch_write_and_read) {
+  (void)verbose;
   struct sl_record record = {
       .layout   = "sparse",
       .type     = "float32",
@@ -726,15 +736,4 @@ static bool test_sparse_batch_write_and_read(struct sl_context ctx[static 1], co
   return true;
 }
 
-SL_TEST_MAIN(
-    test_write_metadata,
-    test_read_metadata,
-    test_dense_data_reader,
-    test_sparse_data_reader,
-    test_read_data,
-    test_dense_data_writer,
-    test_sparse_data_writer,
-    test_write_data,
-    test_sparse_write_and_read,
-    test_sparse_batch_write_and_read
-)
+SL_TEST_MAIN()

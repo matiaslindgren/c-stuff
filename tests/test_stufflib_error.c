@@ -7,8 +7,9 @@
 #include <stufflib/macros/macros.h>
 #include <stufflib/testing/testing.h>
 
-static bool test_empty_stack(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_empty_stack) {
   (void)ctx;
+  (void)verbose;
   struct sl_error_stack s = {0};
 
   SL_ASSERT_TRUE(sl_error_depth(&s) == 0);
@@ -21,8 +22,9 @@ static bool test_empty_stack(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_push_single(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_push_single) {
   (void)ctx;
+  (void)verbose;
   struct sl_error_stack s = {0};
 
   sl_error_push(&s, "file.c", 42, "something went wrong");
@@ -39,8 +41,9 @@ static bool test_push_single(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_pop_single(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_pop_single) {
   (void)ctx;
+  (void)verbose;
   struct sl_error_stack s = {0};
 
   sl_error_push(&s, "file.c", 7, "pop me");
@@ -58,8 +61,9 @@ static bool test_pop_single(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_lifo_order(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_lifo_order) {
   (void)ctx;
+  (void)verbose;
   struct sl_error_stack s = {0};
 
   sl_error_push(&s, "a.c", 1, "first");
@@ -91,8 +95,9 @@ static bool test_lifo_order(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_peek_does_not_pop(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_peek_does_not_pop) {
   (void)ctx;
+  (void)verbose;
   struct sl_error_stack s = {0};
 
   sl_error_push(&s, "x.c", 99, "persistent");
@@ -107,8 +112,9 @@ static bool test_peek_does_not_pop(struct sl_context ctx[static 1], const bool) 
   return true;
 }
 
-static bool test_clear(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_clear) {
   (void)ctx;
+  (void)verbose;
   struct sl_error_stack s = {0};
 
   sl_error_push(&s, "a.c", 1, "one");
@@ -127,8 +133,9 @@ static bool test_clear(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_depth_tracking(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_depth_tracking) {
   (void)ctx;
+  (void)verbose;
   struct sl_error_stack s = {0};
 
   const size_t n = SL_ERROR_STACK_DEPTH - 1;
@@ -148,8 +155,9 @@ static bool test_depth_tracking(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_msg_truncation(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_msg_truncation) {
   (void)ctx;
+  (void)verbose;
   struct sl_error_stack s = {0};
 
   char long_msg[SL_ERROR_MSG_LEN + 64];
@@ -165,8 +173,9 @@ static bool test_msg_truncation(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_clear_then_reuse(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_clear_then_reuse) {
   (void)ctx;
+  (void)verbose;
   struct sl_error_stack s = {0};
 
   sl_error_push(&s, "a.c", 1, "before clear");
@@ -183,14 +192,4 @@ static bool test_clear_then_reuse(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-SL_TEST_MAIN(
-    test_empty_stack,
-    test_push_single,
-    test_pop_single,
-    test_lifo_order,
-    test_peek_does_not_pop,
-    test_clear,
-    test_depth_tracking,
-    test_msg_truncation,
-    test_clear_then_reuse
-)
+SL_TEST_MAIN()

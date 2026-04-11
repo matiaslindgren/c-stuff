@@ -9,8 +9,9 @@
 #include <stufflib/misc/misc.h>
 #include <stufflib/testing/testing.h>
 
-static bool test_single_byte(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_single_byte) {
   (void)ctx;
+  (void)verbose;
   for (uint8_t i = 0; i < 10; ++i) {
     unsigned char data[] = {
         i,
@@ -33,8 +34,9 @@ static bool test_single_byte(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_two_bytes_big_endian(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_two_bytes_big_endian) {
   (void)ctx;
+  (void)verbose;
   for (uint16_t i = 0x100; i < 0x100 + 10; ++i) {
     unsigned char data[] = {
         (i & 0xff00) >> 8,
@@ -58,8 +60,9 @@ static bool test_two_bytes_big_endian(struct sl_context ctx[static 1], const boo
   return true;
 }
 
-static bool test_small_strings(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_small_strings) {
   (void)ctx;
+  (void)verbose;
   const char* inputs[] = {
       "",
       "0",
@@ -85,4 +88,4 @@ static bool test_small_strings(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-SL_TEST_MAIN(test_single_byte, test_two_bytes_big_endian, test_small_strings)
+SL_TEST_MAIN()

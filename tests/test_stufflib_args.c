@@ -6,8 +6,9 @@
 #include <stufflib/macros/macros.h>
 #include <stufflib/testing/testing.h>
 
-static bool test_parse_positional(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_parse_positional) {
   (void)ctx;
+  (void)verbose;
   char* const argv[] = {
       "bin/path",
       "arg1",
@@ -29,8 +30,9 @@ static bool test_parse_positional(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_parse_one_flag(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_parse_one_flag) {
   (void)ctx;
+  (void)verbose;
   char* const argv[] = {
       "bin/path",
       "-x",
@@ -66,8 +68,9 @@ static bool test_parse_one_flag(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_parse_positional_after_optional(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_parse_positional_after_optional) {
   (void)ctx;
+  (void)verbose;
   char* const argv[] = {
       "bin/path",
       "-v",
@@ -92,8 +95,9 @@ static bool test_parse_positional_after_optional(struct sl_context ctx[static 1]
   return true;
 }
 
-static bool test_parse_two_flags(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_parse_two_flags) {
   (void)ctx;
+  (void)verbose;
   char* const argv[] = {
       "bin/path",
       "-w",
@@ -136,8 +140,9 @@ static bool test_parse_two_flags(struct sl_context ctx[static 1], const bool) {
   return true;
 }
 
-static bool test_parse_optional_ints(struct sl_context ctx[static 1], const bool) {
+SL_TEST(test_parse_optional_ints) {
   (void)ctx;
+  (void)verbose;
   char* const argv[] = {
       "bin/path",
       "-w=1",
@@ -184,10 +189,4 @@ static bool test_parse_optional_ints(struct sl_context ctx[static 1], const bool
   return true;
 }
 
-SL_TEST_MAIN(
-    test_parse_positional,
-    test_parse_one_flag,
-    test_parse_positional_after_optional,
-    test_parse_two_flags,
-    test_parse_optional_ints
-)
+SL_TEST_MAIN()

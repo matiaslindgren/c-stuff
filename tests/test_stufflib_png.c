@@ -8,7 +8,7 @@
 #include <stufflib/png/png.h>
 #include <stufflib/testing/testing.h>
 
-static bool test_read_single_pixel_chunks(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_read_single_pixel_chunks) {
   for (size_t i = 0; i < 3; ++i) {
     const char* png_path = (const char*[]){
         "./test-data/png/ff0000-1x1-rgb-nocomp.png",
@@ -31,8 +31,7 @@ static bool test_read_single_pixel_chunks(struct sl_context ctx[static 1], const
   return true;
 }
 
-static bool
-test_read_large_image_with_many_chunks(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_read_large_image_with_many_chunks) {
   const char* png_path = "./test-data/png/asan.png";
   if (verbose) {
     printf("%s\n", png_path);
@@ -54,7 +53,7 @@ test_read_large_image_with_many_chunks(struct sl_context ctx[static 1], const bo
   return true;
 }
 
-static bool test_read_single_pixel_header(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_read_single_pixel_header) {
   for (size_t i = 0; i < 3; ++i) {
     const char* png_path = (const char*[]){
         "./test-data/png/ff0000-1x1-rgb-nocomp.png",
@@ -79,7 +78,7 @@ static bool test_read_single_pixel_header(struct sl_context ctx[static 1], const
   return true;
 }
 
-static bool test_read_img_header(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_read_img_header) {
   {
     const char* png_path = "./test-data/png/white-square-rgba-dynamic.png";
     if (verbose) {
@@ -188,8 +187,7 @@ static inline int test_read_single_pixel(
   return true;
 }
 
-static bool
-test_read_single_pixel_no_compression(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_read_single_pixel_no_compression) {
   for (size_t on_pixel = 0; on_pixel < 3; ++on_pixel) {
     const char* png_path = (const char*[]){
         "./test-data/png/ff0000-1x1-rgb-nocomp.png",
@@ -203,8 +201,7 @@ test_read_single_pixel_no_compression(struct sl_context ctx[static 1], const boo
   return true;
 }
 
-static bool
-test_read_single_pixel_with_fixed_compression(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_read_single_pixel_with_fixed_compression) {
   for (size_t on_pixel = 0; on_pixel < 3; ++on_pixel) {
     const char* png_path = (const char*[]){
         "./test-data/png/ff0000-1x1-rgb-fixed.png",
@@ -218,8 +215,7 @@ test_read_single_pixel_with_fixed_compression(struct sl_context ctx[static 1], c
   return true;
 }
 
-static bool
-test_read_rgba_image_with_dynamic_compression(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_read_rgba_image_with_dynamic_compression) {
   const char* png_path = "./test-data/png/white-square-rgba-dynamic.png";
   if (verbose) {
     printf("%s\n", png_path);
@@ -251,10 +247,7 @@ test_read_rgba_image_with_dynamic_compression(struct sl_context ctx[static 1], c
   return true;
 }
 
-static bool test_read_small_images_with_dynamic_compression(
-    struct sl_context ctx[static 1],
-    const bool verbose
-) {
+SL_TEST(test_read_small_images_with_dynamic_compression) {
   for (size_t i = 0; i < 3; ++i) {
     const char* png_path = (const char*[]){
         "./test-data/png/0099ee-80x160-rgb-dynamic.png",
@@ -297,10 +290,7 @@ static bool test_read_small_images_with_dynamic_compression(
   return true;
 }
 
-static bool test_read_large_images_with_dynamic_compression(
-    struct sl_context ctx[static 1],
-    const bool verbose
-) {
+SL_TEST(test_read_large_images_with_dynamic_compression) {
   {
     const char* png_path = "./test-data/png/aabbcc-1600x1600-rgb-dynamic.png";
     if (verbose) {
@@ -401,7 +391,7 @@ int test_read_write_read(
   return true;
 }
 
-static bool test_read_write_read_single_pixel(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_read_write_read_single_pixel) {
   const char* paths[] = {
       "./test-data/png/ff0000-1x1-rgb-nocomp.png",
       "./test-data/png/00ff00-1x1-rgb-nocomp.png",
@@ -416,7 +406,7 @@ static bool test_read_write_read_single_pixel(struct sl_context ctx[static 1], c
   return true;
 }
 
-static bool test_read_write_read_small(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_read_write_read_small) {
   const char* paths[] = {
       "./test-data/png/0099ee-80x160-rgb-dynamic.png",
       "./test-data/png/cc1177-80x160-rgb-dynamic.png",
@@ -431,7 +421,7 @@ static bool test_read_write_read_small(struct sl_context ctx[static 1], const bo
   return true;
 }
 
-static bool test_read_write_read_large(struct sl_context ctx[static 1], const bool verbose) {
+SL_TEST(test_read_write_read_large) {
   const char* paths[] = {
       "./test-data/png/aabbcc-1600x1600-rgb-dynamic.png",
       "./test-data/png/github-profile-rgb-dynamic.png",
@@ -446,17 +436,4 @@ static bool test_read_write_read_large(struct sl_context ctx[static 1], const bo
   return true;
 }
 
-SL_TEST_MAIN(
-    test_read_single_pixel_chunks,
-    test_read_large_image_with_many_chunks,
-    test_read_single_pixel_header,
-    test_read_img_header,
-    test_read_single_pixel_no_compression,
-    test_read_single_pixel_with_fixed_compression,
-    test_read_rgba_image_with_dynamic_compression,
-    test_read_small_images_with_dynamic_compression,
-    test_read_large_images_with_dynamic_compression,
-    test_read_write_read_single_pixel,
-    test_read_write_read_small,
-    test_read_write_read_large
-)
+SL_TEST_MAIN()
