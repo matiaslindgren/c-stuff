@@ -249,6 +249,13 @@ static bool test_round_up_pow2(struct sl_context ctx[static 1], const bool) {
   SL_ASSERT_TRUE(sl_math_next_power_of_two(0xff) == 0x100);
   SL_ASSERT_TRUE(sl_math_next_power_of_two(0xffff) == 0x10000);
   SL_ASSERT_TRUE(sl_math_next_power_of_two(0xffffffff) == 0x100000000);
+  // boundary: largest value whose next power of two still fits in size_t
+  const size_t half = SIZE_MAX / 2;  // 2^63 - 1 on 64-bit
+  SL_ASSERT_TRUE(sl_math_next_power_of_two(half - 1) == half + 1);
+  SL_ASSERT_TRUE(sl_math_next_power_of_two(half) == half + 1);
+  // overflow: next power of two would exceed SIZE_MAX, returns 0
+  SL_ASSERT_TRUE(sl_math_next_power_of_two(half + 1) == 0);
+  SL_ASSERT_TRUE(sl_math_next_power_of_two(SIZE_MAX) == 0);
   return true;
 }
 

@@ -1,6 +1,6 @@
 # c-stuff
 
-C scribbles. Just for fun and learning. "Everything library". Extremely unstable API.
+C scribbles. Just for fun and learning. "Everything library". Extremely unstable API. Do not use.
 
 ## Tools
 
@@ -49,3 +49,4 @@ or at least some of them
 - [Beej's Guide to Network Programming, v3.1.11](https://beej.us/guide/bgnet/html/split/index.html)
 - [GNU Make papers (November 2014), Paul D. Smith](https://make.mad-scientist.net/papers/)
 - [The GNU Make Book (April 2015), John Graham-Cumming](https://nostarch.com/gnumake)
+- [Unit Tests in C with the constructor attribute](https://gcher.com/posts/2016-09-02-c-unit-tests-constructor-attribute/)

@@ -8,6 +8,9 @@
 struct sl_context {
   struct sl_error_stack errors;
   // TODO memory arena/allocators
+  // TODO loglevel/verbosity
+  // TODO err stream (default stderr)
+  // TODO out stream (default stdout)
 };
 
 __attribute__((__format__(__printf__, 4, 5))) static inline void sl_context_error_pushf(

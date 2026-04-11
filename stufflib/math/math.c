@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <stufflib/context/context.h>
 #include <stufflib/math/math.h>
 #include <stufflib/memory/memory.h>
@@ -23,6 +24,9 @@ double sl_math_inv(const double x) {
 }
 
 size_t sl_math_next_power_of_two(const size_t x1) {
+  if (x1 > SIZE_MAX / 2) {
+    return 0;
+  }
   size_t x2 = 1;
   while (x2 <= x1) {
     x2 *= 2;
