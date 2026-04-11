@@ -92,14 +92,14 @@
     }                                                                               \
   } while (false)
 
-#define SL_ASSERT_TRUE(expr, ...) SL_ASSERT_BINOP(==, (bool)(expr), true, __VA_ARGS__)
-#define SL_ASSERT_FALSE(expr, ...) SL_ASSERT_BINOP(==, (bool)(expr), false, __VA_ARGS__)
+#define SL_ASSERT_TRUE(expr, ...)        SL_ASSERT_BINOP(==, (bool)(expr), true, __VA_ARGS__)
+#define SL_ASSERT_FALSE(expr, ...)       SL_ASSERT_BINOP(==, (bool)(expr), false, __VA_ARGS__)
 #define SL_ASSERT_EQ_CHAR(lhs, rhs, ...) SL_ASSERT_BINOP(==, (char)(lhs), (char)(rhs), __VA_ARGS__)
 #define SL_ASSERT_EQ_LL(lhs, rhs, ...) \
   SL_ASSERT_BINOP(==, (long long)(lhs), (long long)(rhs), __VA_ARGS__)
 #define SL_ASSERT_EQ_PTR(lhs, rhs, ...) SL_ASSERT_BINOP(==, (void*)(lhs), (void*)(rhs), __VA_ARGS__)
 #define SL_ASSERT_EQ_STR(lhs, rhs, ...) SL_ASSERT_STRCMP(0, lhs, rhs, __VA_ARGS__)
-#define SL_ASSERT_EQ_DOUBLE(...) SL_ASSERT_DOUBLE_ALMOST(__VA_ARGS__)
+#define SL_ASSERT_EQ_DOUBLE(...)        SL_ASSERT_DOUBLE_ALMOST(__VA_ARGS__)
 
 #define SL_TEST_MAIN(...)                                                                       \
   int main(int argc, char* const argv[argc + 1]) {                                              \

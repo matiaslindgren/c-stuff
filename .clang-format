@@ -5,6 +5,7 @@ AlignConsecutiveAssignments:
   Enabled: true
   AcrossEmptyLines: false
   AcrossComments: true
+AlignConsecutiveMacros: Consecutive
 AlignAfterOpenBracket: BlockIndent
 AlignArrayOfStructures: Left
 AlignOperands: Align

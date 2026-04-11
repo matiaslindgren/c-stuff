@@ -9,7 +9,7 @@
 #include <string.h>
 
 #define SL_ERROR_STACK_DEPTH 16
-#define SL_ERROR_MSG_LEN 1'024
+#define SL_ERROR_MSG_LEN     1'024
 
 struct sl_error_msg {
   const char* file;

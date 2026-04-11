@@ -54,15 +54,15 @@
   #define SL_LOG_ERROR(...) SL_NOOP(__VA_ARGS__)
 #endif
 
-#define SL_REPEAT_1(x) x
-#define SL_REPEAT_2(x) SL_REPEAT_1(x) x
-#define SL_REPEAT_3(x) SL_REPEAT_2(x) x
-#define SL_REPEAT_4(x) SL_REPEAT_3(x) x
-#define SL_REPEAT_5(x) SL_REPEAT_4(x) x
-#define SL_REPEAT_6(x) SL_REPEAT_5(x) x
-#define SL_REPEAT_7(x) SL_REPEAT_6(x) x
-#define SL_REPEAT_8(x) SL_REPEAT_7(x) x
-#define SL_REPEAT_9(x) SL_REPEAT_8(x) x
+#define SL_REPEAT_1(x)  x
+#define SL_REPEAT_2(x)  SL_REPEAT_1(x) x
+#define SL_REPEAT_3(x)  SL_REPEAT_2(x) x
+#define SL_REPEAT_4(x)  SL_REPEAT_3(x) x
+#define SL_REPEAT_5(x)  SL_REPEAT_4(x) x
+#define SL_REPEAT_6(x)  SL_REPEAT_5(x) x
+#define SL_REPEAT_7(x)  SL_REPEAT_6(x) x
+#define SL_REPEAT_8(x)  SL_REPEAT_7(x) x
+#define SL_REPEAT_9(x)  SL_REPEAT_8(x) x
 #define SL_REPEAT_10(x) SL_REPEAT_9(x) x
 #define SL_REPEAT_11(x) SL_REPEAT_10(x) x
 #define SL_REPEAT_12(x) SL_REPEAT_11(x) x
