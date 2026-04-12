@@ -48,8 +48,8 @@ endif
 
 BUILD_TYPE ?= debug
 
-ifeq ($(BUILD_TYPE),release)
-	BUILD_DIR := $(OUTPUT_DIR)/release
+ifeq ($(BUILD_TYPE),fast)
+	BUILD_DIR := $(OUTPUT_DIR)/fast
 	CFLAGS    += -O3 -march=native
 else ifeq ($(BUILD_TYPE),asan)
 	BUILD_DIR := $(OUTPUT_DIR)/asan

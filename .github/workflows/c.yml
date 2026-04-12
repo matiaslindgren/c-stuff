@@ -20,16 +20,16 @@ jobs:
           - build_type: debug
             trace: 1
           - build_type: asan
-            trace: 1
+            trace: 0
           - build_type: ubsan
-            trace: 1
-          - build_type: release
+            trace: 0
+          - build_type: fast
             trace: 0
 
     name: "runs-on=${{ matrix.platform }} build_type=${{ matrix.make.build_type }} trace=${{ matrix.make.trace }} llvm=${{ matrix.llvm }}"
     runs-on: ${{ matrix.platform }}
     env:
-      STUFFLIB_TEST_VERBOSE: 1
+      STUFFLIB_TEST_VERBOSE: ${{ matrix.make.trace }}
 
     steps:
     - name: install linux dependencies
