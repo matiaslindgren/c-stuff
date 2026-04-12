@@ -13,7 +13,7 @@ double sl_math_inv(double x);
 size_t sl_math_next_power_of_two(size_t x1);
 bool sl_math_is_prime(size_t x);
 size_t sl_math_next_prime(size_t x);
-size_t* sl_math_factorize(struct sl_context ctx[static 1], size_t n);
+bool sl_math_factorize(struct sl_context ctx[static 1], size_t n, size_t* out[static 1]);
 double* sl_math_linalg_scalar_vmul(double a, size_t n, double dst[n], const double src[n]);
 double* sl_math_linalg_vadd(size_t n, double dst[n], const double lhs[n], const double rhs[n]);
 double* sl_math_linalg_vsub(size_t n, double dst[n], const double lhs[n], const double rhs[n]);

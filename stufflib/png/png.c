@@ -72,20 +72,30 @@ void sl_png_image_copy(
     struct sl_png_image src[static 1]
 ) {
   dst->header = src->header;
-  dst->data   = sl_span_copy(ctx, &(src->data));
-  dst->filter = sl_span_copy(ctx, &(src->filter));
+  if (!sl_span_copy(ctx, &(src->data), &(dst->data))) {
+    return;
+  }
+  if (!sl_span_copy(ctx, &(src->filter), &(dst->filter))) {
+    sl_span_destroy(&(dst->data));
+    return;
+  }
 }
 
 struct sl_png_image
 sl_png_image_rgb_create(struct sl_context ctx[static 1], const size_t width, const size_t height) {
-  return (struct sl_png_image){
-      .header = (struct sl_png_header){.width      = width,
-                                       .height     = height,
-                                       .bit_depth  = 8,
-                                       .color_type = sl_png_rgb},
-      .data   = sl_span_create(ctx, (width + 2) * (height + 2) * 3),
-      .filter = sl_span_create(ctx, height)
-  };
+  struct sl_png_image img = {0};
+  img.header              = (struct sl_png_header){.width      = width,
+                                                   .height     = height,
+                                                   .bit_depth  = 8,
+                                                   .color_type = sl_png_rgb};
+  if (!sl_span_create(ctx, (width + 2) * (height + 2) * 3, &img.data)) {
+    return (struct sl_png_image){0};
+  }
+  if (!sl_span_create(ctx, height, &img.filter)) {
+    sl_span_destroy(&img.data);
+    return (struct sl_png_image){0};
+  }
+  return img;
 }
 
 unsigned char* sl_png_image_get_pixel(struct sl_png_image image[static 1], size_t row, size_t col) {
@@ -214,8 +224,8 @@ sl_png_read_next_chunk(struct sl_context ctx[static 1], FILE fp[const static 1])
   }
 
   if (chunk.data.size) {
-    chunk.data = sl_span_create(ctx, chunk.data.size);
-    if (!chunk.data.data) {
+    size_t chunk_data_size = chunk.data.size;
+    if (!sl_span_create(ctx, chunk_data_size, &chunk.data)) {
       goto error;
     }
     if (fread(chunk.data.data, 1, chunk.data.size, fp) != chunk.data.size) {
@@ -373,8 +383,7 @@ sl_png_pack_image_data(struct sl_context ctx[static 1], struct sl_png_image imag
   size_t height       = image->header.height;
   size_t bytes_per_px = sl_png_bytes_per_pixel[image->header.color_type];
 
-  packed = sl_span_create(ctx, sl_png_data_size(image->header));
-  if (!packed.data) {
+  if (!sl_span_create(ctx, sl_png_data_size(image->header), &packed)) {
     return (struct sl_span){0};
   }
 
@@ -402,12 +411,11 @@ void sl_png_unpack_and_pad_image_data(
   size_t height       = image->header.height;
   size_t bytes_per_px = sl_png_bytes_per_pixel[image->header.color_type];
 
-  filter = sl_span_create(ctx, height);
-  padded = sl_span_create(ctx, bytes_per_px * (width + 2) * (height + 2));
-
-  if ((!filter.data && height) || (!padded.data && bytes_per_px * (width + 2) * (height + 2))) {
+  if (!sl_span_create(ctx, height, &filter)) {
+    return;
+  }
+  if (!sl_span_create(ctx, bytes_per_px * (width + 2) * (height + 2), &padded)) {
     sl_span_destroy(&filter);
-    sl_span_destroy(&padded);
     return;
   }
 
@@ -527,13 +535,14 @@ sl_png_read_image(struct sl_context ctx[static 1], const char filename[const sta
   for (size_t i = 1; i < chunks.count; ++i) {
     struct sl_png_chunk chunk = chunks.chunks[i];
     if (chunk.type == sl_png_IDAT) {
-      sl_span_extend(ctx, &idat, &chunk.data);
+      if (!sl_span_extend(ctx, &idat, &chunk.data)) {
+        goto error;
+      }
     }
   }
   // TODO parse PLTE if header.color_type == sl_png_indexed
 
-  image.data = sl_span_create(ctx, sl_png_data_size(image.header));
-  if (!image.data.data) {
+  if (!sl_span_create(ctx, sl_png_data_size(image.header), &image.data)) {
     goto error;
   }
   size_t num_decoded = sl_inflate(ctx, image.data, idat);
@@ -607,8 +616,8 @@ bool sl_png_chunk_fwrite(
     SL_ERROR(ctx, "will not write too large %s chunk of size %zu", chunk_type, data->size);
     return false;
   }
-  struct sl_span crc_data = sl_span_create(ctx, data->size + 4);
-  if (!crc_data.data) {
+  struct sl_span crc_data = {0};
+  if (!sl_span_create(ctx, data->size + 4, &crc_data)) {
     return false;
   }
 
@@ -663,8 +672,7 @@ bool sl_png_write_image(
   if (!packed_data.data) {
     goto done;
   }
-  idat = sl_span_create(ctx, sl_png_idat_max_size(image.header));
-  if (!idat.data) {
+  if (!sl_span_create(ctx, sl_png_idat_max_size(image.header), &idat)) {
     goto done;
   }
 

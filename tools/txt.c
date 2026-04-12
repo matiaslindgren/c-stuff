@@ -37,7 +37,10 @@ bool concat(struct sl_context ctx[static 1], const struct sl_args args[const sta
     struct sl_string content = sl_fs_read_file_utf8(ctx, path, &reader_buffer);
     const bool read_ok       = content.length > 0;
     if (read_ok) {
-      sl_string_extend(ctx, &result, &content);
+      if (!sl_string_extend(ctx, &result, &content)) {
+        sl_string_destroy(&content);
+        goto done;
+      }
     }
     sl_string_destroy(&content);
     if (!read_ok) {
@@ -130,8 +133,11 @@ bool slicelines(struct sl_context ctx[static 1], const struct sl_args args[const
        !sl_tokenizer_iter_is_done(&iter);
        sl_tokenizer_iter_advance(&iter)) {
     if (begin <= lineno && n_printed < count) {
-      struct sl_string line = sl_string_from_utf8(ctx, sl_tokenizer_iter_get(&iter));
-      bool write_ok         = sl_string_fprint(stdout, &line);
+      struct sl_string line = {0};
+      if (!sl_string_from_utf8(ctx, sl_tokenizer_iter_get(&iter), &line)) {
+        goto done;
+      }
+      bool write_ok = sl_string_fprint(stdout, &line);
       ++n_printed;
       sl_string_destroy(&line);
       if (!write_ok) {
@@ -178,16 +184,28 @@ bool replace(struct sl_context ctx[static 1], const struct sl_args args[const st
     goto done;
   }
 
-  struct sl_span pattern = sl_span_from_str(ctx, pattern_str);
+  struct sl_span pattern = {0};
+  if (!sl_span_from_str(ctx, pattern_str, &pattern)) {
+    goto done;
+  }
   if (sl_span_is_hexadecimal_str(&pattern)) {
-    struct sl_span hex_pattern = sl_span_parse_hex(ctx, &pattern);
+    struct sl_span hex_pattern = {0};
+    if (!sl_span_parse_hex(ctx, &pattern, &hex_pattern)) {
+      goto done;
+    }
     sl_span_destroy(&pattern);
     pattern = hex_pattern;
   }
 
-  struct sl_span replacement = sl_span_from_str(ctx, replacement_str);
+  struct sl_span replacement = {0};
+  if (!sl_span_from_str(ctx, replacement_str, &replacement)) {
+    goto done;
+  }
   if (sl_span_is_hexadecimal_str(&replacement)) {
-    struct sl_span hex_replacement = sl_span_parse_hex(ctx, &replacement);
+    struct sl_span hex_replacement = {0};
+    if (!sl_span_parse_hex(ctx, &replacement, &hex_replacement)) {
+      goto done;
+    }
     sl_span_destroy(&replacement);
     replacement = hex_replacement;
   }
@@ -197,8 +215,11 @@ bool replace(struct sl_context ctx[static 1], const struct sl_args args[const st
   struct sl_iterator iter = sl_tokenizer_iter(&pattern_tokenizer);
   while (!sl_tokenizer_iter_is_done(&iter)) {
     {
-      struct sl_string line = sl_string_from_utf8(ctx, sl_tokenizer_iter_get(&iter));
-      const bool write_ok   = sl_string_fprint(stdout, &line);
+      struct sl_string line = {0};
+      if (!sl_string_from_utf8(ctx, sl_tokenizer_iter_get(&iter), &line)) {
+        goto done;
+      }
+      const bool write_ok = sl_string_fprint(stdout, &line);
       sl_string_destroy(&line);
       if (!write_ok) {
         goto done;
@@ -206,8 +227,11 @@ bool replace(struct sl_context ctx[static 1], const struct sl_args args[const st
     }
     sl_tokenizer_iter_advance(&iter);
     if (!sl_tokenizer_iter_is_done(&iter) && replacement.size) {
-      struct sl_string repl = sl_string_from_utf8(ctx, &replacement);
-      const bool write_ok   = sl_string_fprint(stdout, &repl);
+      struct sl_string repl = {0};
+      if (!sl_string_from_utf8(ctx, &replacement, &repl)) {
+        goto done;
+      }
+      const bool write_ok = sl_string_fprint(stdout, &repl);
       sl_string_destroy(&repl);
       if (!write_ok) {
         goto done;
@@ -272,8 +296,11 @@ bool linefreq(struct sl_context ctx[static 1], const struct sl_args args[const s
     if (printf("%" PRIu64 " ", slot->value.uint64) < 0) {
       goto done;
     }
-    struct sl_string key_str = sl_string_from_utf8(ctx, &(slot->key));
-    bool write_ok            = sl_string_fprint(stdout, &key_str);
+    struct sl_string key_str = {0};
+    if (!sl_string_from_utf8(ctx, &(slot->key), &key_str)) {
+      goto done;
+    }
+    bool write_ok = sl_string_fprint(stdout, &key_str);
     sl_string_destroy(&key_str);
     if (!write_ok || (printf("\n") < 0)) {
       goto done;

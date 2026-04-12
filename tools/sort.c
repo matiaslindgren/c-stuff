@@ -68,9 +68,12 @@ int main(int argc, char* const argv[argc + 1]) {
     if (token->data[0] == 0) {
       continue;
     }
-    struct sl_string line = sl_string_from_utf8(&ctx, token);
-    lines                 = sl_realloc(&ctx, lines, num_lines, num_lines + 1, sizeof(char*));
-    lines[num_lines++]    = (char*)line.utf8_data.data;
+    struct sl_string line = {0};
+    if (!sl_string_from_utf8(&ctx, token, &line)) {
+      goto done;
+    }
+    lines              = sl_realloc(&ctx, lines, num_lines, num_lines + 1, sizeof(char*));
+    lines[num_lines++] = (char*)line.utf8_data.data;
   }
 
   if (sort_as_numeric) {

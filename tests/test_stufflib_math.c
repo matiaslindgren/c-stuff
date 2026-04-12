@@ -46,7 +46,8 @@ SL_TEST(test_is_prime) {
 
 SL_TEST(test_factorize_primes) {
   for (size_t i = 0; i < SL_ARRAY_LEN(SL_TEST_PRIMES); ++i) {
-    size_t* f = sl_math_factorize(ctx, SL_TEST_PRIMES[i]);
+    size_t* f = nullptr;
+    SL_ASSERT_TRUE(sl_math_factorize(ctx, SL_TEST_PRIMES[i], &f));
     SL_ASSERT_FACTORIZATION_OK(verbose, SL_TEST_PRIMES[i], f);
     SL_ASSERT_TRUE(f[0] == SL_TEST_PRIMES[i]);
     SL_ASSERT_TRUE(f[1] == 0);
@@ -57,7 +58,8 @@ SL_TEST(test_factorize_primes) {
 
 SL_TEST(test_factorize_4) {
   const size_t n = 4;
-  size_t* f      = sl_math_factorize(ctx, n);
+  size_t* f      = nullptr;
+  SL_ASSERT_TRUE(sl_math_factorize(ctx, n, &f));
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   SL_ASSERT_TRUE(f[0] == 2);
   SL_ASSERT_TRUE(f[1] == 2);
@@ -68,7 +70,8 @@ SL_TEST(test_factorize_4) {
 
 SL_TEST(test_factorize_25) {
   const size_t n = 25;
-  size_t* f      = sl_math_factorize(ctx, n);
+  size_t* f      = nullptr;
+  SL_ASSERT_TRUE(sl_math_factorize(ctx, n, &f));
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   SL_ASSERT_TRUE(f[0] == 5);
   SL_ASSERT_TRUE(f[1] == 5);
@@ -79,7 +82,8 @@ SL_TEST(test_factorize_25) {
 
 SL_TEST(test_factorize_30) {
   const size_t n = 30;
-  size_t* f      = sl_math_factorize(ctx, n);
+  size_t* f      = nullptr;
+  SL_ASSERT_TRUE(sl_math_factorize(ctx, n, &f));
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   SL_ASSERT_TRUE(f[0] == 2);
   SL_ASSERT_TRUE(f[1] == 3);
@@ -91,7 +95,8 @@ SL_TEST(test_factorize_30) {
 
 SL_TEST(test_factorize_864) {
   const size_t n = 864;
-  size_t* f      = sl_math_factorize(ctx, n);
+  size_t* f      = nullptr;
+  SL_ASSERT_TRUE(sl_math_factorize(ctx, n, &f));
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   SL_ASSERT_TRUE(f[0] == 2);
   SL_ASSERT_TRUE(f[1] == 2);
@@ -108,7 +113,8 @@ SL_TEST(test_factorize_864) {
 
 SL_TEST(test_factorize_2022) {
   const size_t n = 2022;
-  size_t* f      = sl_math_factorize(ctx, n);
+  size_t* f      = nullptr;
+  SL_ASSERT_TRUE(sl_math_factorize(ctx, n, &f));
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   SL_ASSERT_TRUE(f[0] == 2);
   SL_ASSERT_TRUE(f[1] == 3);
@@ -120,7 +126,8 @@ SL_TEST(test_factorize_2022) {
 
 SL_TEST(test_factorize_202212) {
   const size_t n = 202212;
-  size_t* f      = sl_math_factorize(ctx, n);
+  size_t* f      = nullptr;
+  SL_ASSERT_TRUE(sl_math_factorize(ctx, n, &f));
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   SL_ASSERT_TRUE(f[0] == 2);
   SL_ASSERT_TRUE(f[1] == 2);
@@ -135,7 +142,8 @@ SL_TEST(test_factorize_202212) {
 
 SL_TEST(test_factorize_20221210) {
   const size_t n = 20221210;
-  size_t* f      = sl_math_factorize(ctx, n);
+  size_t* f      = nullptr;
+  SL_ASSERT_TRUE(sl_math_factorize(ctx, n, &f));
   SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
   SL_ASSERT_TRUE(f[0] == 2);
   SL_ASSERT_TRUE(f[1] == 5);

@@ -14,11 +14,10 @@ SL_TEST(test_empty) {
   SL_ASSERT_EQ_LL(map.capacity, 2);
   SL_ASSERT_TRUE(map.slots != nullptr);
 
-  struct sl_span keys[] = {
-      sl_span_from_str(ctx, "hello"),
-      sl_span_from_str(ctx, " "),
-      sl_span_from_str(ctx, "there"),
-  };
+  struct sl_span keys[3] = {0};
+  SL_ASSERT_TRUE(sl_span_from_str(ctx, "hello", &keys[0]));
+  SL_ASSERT_TRUE(sl_span_from_str(ctx, " ", &keys[1]));
+  SL_ASSERT_TRUE(sl_span_from_str(ctx, "there", &keys[2]));
   for (size_t i = 0; i < SL_ARRAY_LEN(keys); ++i) {
     SL_ASSERT_TRUE(!sl_hashmap_contains(ctx, &map, keys + i));
     SL_ASSERT_EQ_LL(map.size, 0);
@@ -37,7 +36,8 @@ SL_TEST(test_insert_single_int) {
   (void)verbose;
   for (int64_t value = -10; value <= 10; ++value) {
     struct sl_hashmap map    = sl_hashmap_create(ctx, 2);
-    struct sl_span key_hello = sl_span_from_str(ctx, "hello");
+    struct sl_span key_hello = {0};
+    SL_ASSERT_TRUE(sl_span_from_str(ctx, "hello", &key_hello));
 
     SL_ASSERT_EQ_LL(map.size, 0);
     SL_ASSERT_EQ_LL(map.capacity, 2);
@@ -60,7 +60,8 @@ SL_TEST(test_insert_single_int) {
   }
   for (uint64_t value = 0; value <= 20; ++value) {
     struct sl_hashmap map = sl_hashmap_create(ctx, 2);
-    struct sl_span key    = sl_span_from_str(ctx, "hello");
+    struct sl_span key    = {0};
+    SL_ASSERT_TRUE(sl_span_from_str(ctx, "hello", &key));
 
     SL_ASSERT_EQ_LL(map.size, 0);
     SL_ASSERT_EQ_LL(map.capacity, 2);
@@ -87,8 +88,10 @@ SL_TEST(test_insert_single_int) {
 SL_TEST(test_insert_single_pointer) {
   (void)verbose;
   struct sl_hashmap map = sl_hashmap_create(ctx, 2);
-  struct sl_span key    = sl_span_from_str(ctx, "hello");
-  struct sl_span value  = sl_span_from_str(ctx, "there");
+  struct sl_span key    = {0};
+  struct sl_span value  = {0};
+  SL_ASSERT_TRUE(sl_span_from_str(ctx, "hello", &key));
+  SL_ASSERT_TRUE(sl_span_from_str(ctx, "there", &value));
 
   SL_ASSERT_EQ_LL(map.size, 0);
   SL_ASSERT_EQ_LL(map.capacity, 2);
@@ -116,8 +119,10 @@ SL_TEST(test_insert_single_pointer) {
 SL_TEST(test_insert_two_elements_resizes) {
   (void)verbose;
   struct sl_hashmap map    = sl_hashmap_create(ctx, 2);
-  struct sl_span key_hello = sl_span_from_str(ctx, "hello");
-  struct sl_span key_there = sl_span_from_str(ctx, "there");
+  struct sl_span key_hello = {0};
+  struct sl_span key_there = {0};
+  SL_ASSERT_TRUE(sl_span_from_str(ctx, "hello", &key_hello));
+  SL_ASSERT_TRUE(sl_span_from_str(ctx, "there", &key_there));
 
   SL_ASSERT_EQ_LL(map.size, 0);
   SL_ASSERT_EQ_LL(map.capacity, 2);
@@ -140,7 +145,8 @@ SL_TEST(test_insert_two_elements_resizes) {
 SL_TEST(test_update_single_element) {
   (void)verbose;
   struct sl_hashmap map = sl_hashmap_create(ctx, 2);
-  struct sl_span key    = sl_span_from_str(ctx, "hello");
+  struct sl_span key    = {0};
+  SL_ASSERT_TRUE(sl_span_from_str(ctx, "hello", &key));
 
   {
     uint64_t value = 0x123456789;
@@ -209,12 +215,14 @@ SL_TEST(test_multiple_resizes_retain_slots) {
   for (size_t i = 0; i < n; ++i) {
     SL_ASSERT_EQ_LL(map.size, i);
     SL_ASSERT_EQ_LL(map.capacity, expected_capacities[i]);
-    struct sl_span key1 = sl_span_from_str(ctx, keys[i]);
+    struct sl_span key1 = {0};
+    SL_ASSERT_TRUE(sl_span_from_str(ctx, keys[i], &key1));
     SL_ASSERT_TRUE(!sl_hashmap_contains(ctx, &map, &key1));
     SL_ASSERT_TRUE(sl_hashmap_get(ctx, &map, &key1));
     SL_ASSERT_TRUE(sl_hashmap_get(ctx, &map, &key1)->type == sl_hashmap_type_empty);
     for (size_t j = 0; j < i; ++j) {
-      struct sl_span key2 = sl_span_from_str(ctx, keys[j]);
+      struct sl_span key2 = {0};
+      SL_ASSERT_TRUE(sl_span_from_str(ctx, keys[j], &key2));
       SL_ASSERT_TRUE(sl_hashmap_contains(ctx, &map, &key2));
       SL_ASSERT_TRUE(sl_hashmap_get(ctx, &map, &key2));
       SL_ASSERT_EQ_LL(sl_hashmap_get(ctx, &map, &key2)->value.int64, values[j]);
@@ -248,7 +256,8 @@ SL_TEST(test_slot_iterator) {
   const size_t n                      = SL_ARRAY_LEN(keys);
   for (uint64_t i = 0; i < n; ++i) {
     values[i]          = i;
-    struct sl_span key = sl_span_from_str(ctx, keys[i]);
+    struct sl_span key = {0};
+    SL_ASSERT_TRUE(sl_span_from_str(ctx, keys[i], &key));
     SL_ASSERT_TRUE(sl_hashmap_insert(ctx, &map, &key, sl_hashmap_type_uint64, values + i));
     sl_span_destroy(&key);
   }

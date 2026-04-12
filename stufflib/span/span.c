@@ -16,12 +16,18 @@ struct sl_span sl_span_view(size_t size, unsigned char data[size]) {
   };
 }
 
-struct sl_span sl_span_create(struct sl_context ctx[static 1], size_t size) {
-  return (struct sl_span){
-      .owned = true,
-      .size  = size,
-      .data  = size ? sl_alloc(ctx, size, sizeof(unsigned char)) : nullptr,
-  };
+bool sl_span_create(struct sl_context ctx[static 1], size_t size, struct sl_span out[static 1]) {
+  if (!size) {
+    *out = (struct sl_span){.owned = true, .size = 0, .data = nullptr};
+    return true;
+  }
+  void* data = sl_alloc(ctx, size, sizeof(unsigned char));
+  if (!data) {
+    SL_ERROR(ctx, "failed allocating span of size %zu", size);
+    return false;
+  }
+  *out = (struct sl_span){.owned = true, .size = size, .data = data};
+  return true;
 }
 
 void sl_span_destroy(struct sl_span data[static 1]) {
@@ -35,39 +41,50 @@ void sl_span_clear(struct sl_span data[const static 1]) {
   memset(data->data, 0, data->size);
 }
 
-struct sl_span sl_span_copy(struct sl_context ctx[static 1], struct sl_span src[const static 1]) {
-  struct sl_span dst = sl_span_create(ctx, src->size);
-  if (dst.data && dst.size) {
-    memcpy(dst.data, src->data, dst.size);
+bool sl_span_copy(
+    struct sl_context ctx[static 1],
+    struct sl_span src[const static 1],
+    struct sl_span out[static 1]
+) {
+  if (!sl_span_create(ctx, src->size, out)) {
+    return false;
   }
-  return dst;
+  if (out->data && out->size) {
+    memcpy(out->data, src->data, out->size);
+  }
+  return true;
 }
 
-struct sl_span sl_span_from_str(struct sl_context ctx[static 1], const char str[const static 1]) {
+bool sl_span_from_str(
+    struct sl_context ctx[static 1],
+    const char str[const static 1],
+    struct sl_span out[static 1]
+) {
   size_t num_chars = strlen(str);
-  if (!num_chars) {
-    return sl_span_create(ctx, 0);
+  if (!sl_span_create(ctx, num_chars, out)) {
+    return false;
   }
-  struct sl_span dst = sl_span_create(ctx, num_chars);
-  if (dst.data && dst.size) {
-    memcpy(dst.data, str, dst.size);
+  if (out->data && out->size) {
+    memcpy(out->data, str, out->size);
   }
-  return dst;
+  return true;
 }
 
 bool sl_span_is_hexadecimal_str(struct sl_span src[const static 1]) {
   return src->size > 2 && memcmp(src->data, "0x", 2) == 0;
 }
 
-struct sl_span
-sl_span_parse_hex(struct sl_context ctx[static 1], struct sl_span src[const static 1]) {
+bool sl_span_parse_hex(
+    struct sl_context ctx[static 1],
+    struct sl_span src[const static 1],
+    struct sl_span out[static 1]
+) {
   assert(sl_span_is_hexadecimal_str(src));
-  size_t num_bytes   = ((src->size - 2) + 1) / 2;
-  struct sl_span dst = sl_span_create(ctx, num_bytes);
-  if (!dst.data) {
-    return dst;
+  size_t num_bytes = ((src->size - 2) + 1) / 2;
+  if (!sl_span_create(ctx, num_bytes, out)) {
+    return false;
   }
-  for (size_t i_byte = 0; i_byte < dst.size; ++i_byte) {
+  for (size_t i_byte = 0; i_byte < out->size; ++i_byte) {
     size_t i1   = (2 * i_byte) + 2;
     size_t i2   = (2 * i_byte) + 3;
     char byte[] = {
@@ -75,37 +92,41 @@ sl_span_parse_hex(struct sl_context ctx[static 1], struct sl_span src[const stat
         (char)(i2 < src->size ? src->data[i2] : 0),
         0,
     };
-    dst.data[i_byte] = (unsigned char)strtoul(byte, 0, 16);
+    out->data[i_byte] = (unsigned char)strtoul(byte, 0, 16);
   }
-  return dst;
+  return true;
 }
 
-struct sl_span sl_span_concat(
+bool sl_span_concat(
     struct sl_context ctx[static 1],
     struct sl_span data1[const static 1],
-    struct sl_span data2[const static 1]
+    struct sl_span data2[const static 1],
+    struct sl_span out[static 1]
 ) {
-  struct sl_span dst = sl_span_create(ctx, data1->size + data2->size);
-  if (!dst.data && dst.size) {
-    return dst;
+  if (!sl_span_create(ctx, data1->size + data2->size, out)) {
+    return false;
   }
   if (data1->size) {
-    memcpy(dst.data, data1->data, data1->size);
+    memcpy(out->data, data1->data, data1->size);
   }
   if (data2->size) {
-    memcpy(dst.data + data1->size, data2->data, data2->size);
+    memcpy(out->data + data1->size, data2->data, data2->size);
   }
-  return dst;
+  return true;
 }
 
-void sl_span_extend(
+bool sl_span_extend(
     struct sl_context ctx[static 1],
     struct sl_span dst[static 1],
     struct sl_span src[const static 1]
 ) {
-  struct sl_span tmp = sl_span_concat(ctx, dst, src);
+  struct sl_span tmp = {0};
+  if (!sl_span_concat(ctx, dst, src, &tmp)) {
+    return false;
+  }
   sl_span_destroy(dst);
   *dst = tmp;
+  return true;
 }
 
 struct sl_span sl_span_slice(struct sl_span data[const static 1], size_t begin, size_t end_or_max) {

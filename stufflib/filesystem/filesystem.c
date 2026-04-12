@@ -21,10 +21,16 @@ struct sl_span sl_fs_read_file(
   }
   // TODO try seeking to end to get exact size,
   // fall back to incremental dynamic alloc if stdin
-  data = sl_span_create(ctx, 0);
+  if (!sl_span_create(ctx, 0, &data)) {
+    SL_ERROR(ctx, "failed creating buffer");
+    goto done;
+  }
   for (size_t n_read = 0; sl_file_can_read(&f) && (n_read = sl_file_read(ctx, &f, buffer));) {
     struct sl_span chunk = sl_span_view(n_read, buffer->data);
-    sl_span_extend(ctx, &data, &chunk);
+    if (!sl_span_extend(ctx, &data, &chunk)) {
+      SL_ERROR(ctx, "failed reading '%s'", path);
+      goto done;
+    }
   }
 done:
   sl_file_close(&f);
@@ -44,9 +50,12 @@ struct sl_string sl_fs_read_file_utf8(
     return (struct sl_string){0};
   }
 
-  struct sl_string content = sl_string_from_utf8(ctx, &utf8_data);
+  struct sl_string content = {0};
+  if (!sl_string_from_utf8(ctx, &utf8_data, &content)) {
+    sl_span_destroy(&utf8_data);
+    return (struct sl_string){0};
+  }
   sl_span_destroy(&utf8_data);
-
   return content;
 }
 

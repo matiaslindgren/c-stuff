@@ -14,20 +14,32 @@ struct sl_span {
 };
 
 struct sl_span sl_span_view(size_t size, unsigned char data[size]);
-struct sl_span sl_span_create(struct sl_context ctx[static 1], size_t size);
+bool sl_span_create(struct sl_context ctx[static 1], size_t size, struct sl_span out[static 1]);
 void sl_span_destroy(struct sl_span data[static 1]);
 void sl_span_clear(struct sl_span data[const static 1]);
-struct sl_span sl_span_copy(struct sl_context ctx[static 1], struct sl_span src[const static 1]);
-struct sl_span sl_span_from_str(struct sl_context ctx[static 1], const char str[const static 1]);
+bool sl_span_copy(
+    struct sl_context ctx[static 1],
+    struct sl_span src[const static 1],
+    struct sl_span out[static 1]
+);
+bool sl_span_from_str(
+    struct sl_context ctx[static 1],
+    const char str[const static 1],
+    struct sl_span out[static 1]
+);
 bool sl_span_is_hexadecimal_str(struct sl_span src[const static 1]);
-struct sl_span
-sl_span_parse_hex(struct sl_context ctx[static 1], struct sl_span src[const static 1]);
-struct sl_span sl_span_concat(
+bool sl_span_parse_hex(
+    struct sl_context ctx[static 1],
+    struct sl_span src[const static 1],
+    struct sl_span out[static 1]
+);
+bool sl_span_concat(
     struct sl_context ctx[static 1],
     struct sl_span data1[const static 1],
-    struct sl_span data2[const static 1]
+    struct sl_span data2[const static 1],
+    struct sl_span out[static 1]
 );
-void sl_span_extend(
+bool sl_span_extend(
     struct sl_context ctx[static 1],
     struct sl_span dst[static 1],
     struct sl_span src[const static 1]

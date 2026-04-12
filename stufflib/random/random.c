@@ -12,12 +12,8 @@
 #include <stufflib/misc/misc.h>
 #include <stufflib/random/random.h>
 
-uint64_t sl_random_read_device_seed(struct sl_context ctx[static const 1]) {
-  uint64_t seed = 0;
-  if (!sl_io_read(ctx, "/dev/urandom", (unsigned char*)&seed, 8)) {
-    return 0;
-  }
-  return seed;
+bool sl_random_read_device_seed(struct sl_context ctx[static const 1], uint64_t out[static 1]) {
+  return sl_io_read(ctx, "/dev/urandom", (unsigned char*)out, 8);
 }
 
 static uint64_t const SL_RANDOM_PCG_MULTIPLIER = 6'364'136'223'846'793'005UL;

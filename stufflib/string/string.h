@@ -12,26 +12,31 @@ struct sl_string {
 };
 
 void sl_string_destroy(struct sl_string string[static 1]);
-struct sl_string
-sl_string_from_utf8(struct sl_context ctx[static 1], struct sl_span utf8_data[const static 1]);
+bool sl_string_from_utf8(
+    struct sl_context ctx[static 1],
+    struct sl_span utf8_data[const static 1],
+    struct sl_string out[static 1]
+);
 struct sl_span sl_string_view_utf8_data(struct sl_string str[const static 1]);
 bool sl_string_is_ascii(const struct sl_string str[const static 1]);
 void sl_string_copy_ascii(char dst[const static 1], const struct sl_string str[const static 1]);
-struct sl_string sl_string_concat(
+bool sl_string_concat(
     struct sl_context ctx[static 1],
     struct sl_string str1[const static 1],
-    struct sl_string str2[const static 1]
+    struct sl_string str2[const static 1],
+    struct sl_string out[static 1]
 );
-void sl_string_extend(
+bool sl_string_extend(
     struct sl_context ctx[static 1],
-    struct sl_string str1[const static 1],
+    struct sl_string str1[static 1],
     struct sl_string str2[const static 1]
 );
-struct sl_string sl_string_slice(
+bool sl_string_slice(
     struct sl_context ctx[static 1],
     struct sl_string str[const static 1],
     size_t begin,
-    size_t end
+    size_t end,
+    struct sl_string out[static 1]
 );
 bool sl_string_fprint(FILE stream[const static 1], struct sl_string str[const static 1]);
 

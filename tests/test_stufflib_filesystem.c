@@ -101,7 +101,8 @@ SL_TEST(test_read_lines) {
     for (struct sl_iterator iter = sl_tokenizer_iter(&newline_tokenizer);
          !sl_tokenizer_iter_is_done(&iter);
          sl_tokenizer_iter_advance(&iter)) {
-      struct sl_string line = sl_string_from_utf8(ctx, sl_tokenizer_iter_get(&iter));
+      struct sl_string line = {0};
+      SL_ASSERT_TRUE(sl_string_from_utf8(ctx, sl_tokenizer_iter_get(&iter), &line));
       if (verbose) {
         printf("line %zu:", lineno);
         bool print_ok = sl_string_fprint(stdout, &line);

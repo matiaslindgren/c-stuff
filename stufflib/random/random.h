@@ -11,7 +11,7 @@ static inline uint32_t sl_random_pcg_rotate(uint32_t x, unsigned r) {
   return x >> r | x << (-r & 31);
 }
 
-uint64_t sl_random_read_device_seed(struct sl_context ctx[static 1]);
+bool sl_random_read_device_seed(struct sl_context ctx[static 1], uint64_t out[static 1]);
 uint32_t sl_random_pcg32(uint64_t state[static 1]);
 void sl_random_pcg32_init(uint64_t state[static 1], uint64_t seed);
 size_t sl_random_int(uint64_t state[static 1], size_t a, size_t b);

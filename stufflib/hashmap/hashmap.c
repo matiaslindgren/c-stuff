@@ -71,7 +71,9 @@ bool sl_hashmap_write(
   if (!slot) {
     return false;
   }
-  slot->key  = sl_span_copy(ctx, key);
+  if (!sl_span_copy(ctx, key, &slot->key)) {
+    return false;
+  }
   slot->hash = hash;
   slot->type = type;
   switch (type) {

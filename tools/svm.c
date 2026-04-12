@@ -428,8 +428,8 @@ int main(int argc, char* const argv[argc + 1]) {
   uint64_t prng         = 0;
 
   {
-    uint64_t seed = sl_random_read_device_seed(&ctx);
-    if (sl_error_occurred(&ctx.errors)) {
+    uint64_t seed = 0;
+    if (!sl_random_read_device_seed(&ctx, &seed)) {
       goto done;
     }
     sl_random_pcg32_init(&prng, seed);

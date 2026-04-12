@@ -1,6 +1,6 @@
 #include <math.h>
-#include <stdlib.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <stufflib/context/context.h>
 #include <stufflib/math/math.h>
 #include <stufflib/memory/memory.h>
@@ -55,15 +55,16 @@ size_t sl_math_next_prime(size_t x) {
   }
 }
 
-size_t* sl_math_factorize(struct sl_context ctx[static 1], size_t n) {
+bool sl_math_factorize(struct sl_context ctx[static 1], size_t n, size_t* out[static 1]) {
   if (n == 0 || n == 1) {
-    return nullptr;
+    SL_ERROR(ctx, "cannot factorize %zu", n);
+    return false;
   }
 
   size_t capacity = 4;
   size_t* factors = sl_alloc(ctx, capacity, sizeof(size_t));
   if (!factors) {
-    return nullptr;
+    return false;
   }
 
   size_t num_factors = 0;
@@ -74,7 +75,7 @@ size_t* sl_math_factorize(struct sl_context ctx[static 1], size_t n) {
         size_t* new_factors = sl_realloc(ctx, factors, capacity, 2 * capacity, sizeof(size_t));
         if (!new_factors) {
           sl_free(factors);
-          return nullptr;
+          return false;
         }
         factors = new_factors;
         capacity *= 2;
@@ -90,11 +91,11 @@ size_t* sl_math_factorize(struct sl_context ctx[static 1], size_t n) {
   size_t* new_factors = sl_realloc(ctx, factors, capacity, num_factors + 1, sizeof(size_t));
   if (!new_factors) {
     sl_free(factors);
-    return nullptr;
+    return false;
   }
-  factors              = new_factors;
-  factors[num_factors] = 0;
-  return factors;
+  new_factors[num_factors] = 0;
+  *out                     = new_factors;
+  return true;
 }
 
 double*

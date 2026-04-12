@@ -63,7 +63,10 @@ cifar_to_png(struct sl_context ctx[static 1], const struct sl_args args[const st
     for (struct sl_iterator iter = sl_tokenizer_iter(&newline_tokenizer);
          lineno < 10 && !sl_tokenizer_iter_is_done(&iter);
          sl_tokenizer_iter_advance(&iter)) {
-      struct sl_string line = sl_string_from_utf8(ctx, sl_tokenizer_iter_get(&iter));
+      struct sl_string line = {0};
+      if (!sl_string_from_utf8(ctx, sl_tokenizer_iter_get(&iter), &line)) {
+        goto done;
+      }
       if (line.length == 0 || !sl_string_is_ascii(&line)) {
         SL_LOG_ERROR("all metadata lines must be in ASCII");
         sl_string_destroy(&line);

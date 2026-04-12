@@ -16,7 +16,8 @@
 SL_TEST(test_string_init) {
   (void)verbose;
   for (size_t i = 0; i < SL_ARRAY_LEN(sl_test_data_hello_utf8); ++i) {
-    struct sl_string str = sl_string_from_utf8(ctx, sl_test_data_hello_utf8 + i);
+    struct sl_string str = {0};
+    SL_ASSERT_TRUE(sl_string_from_utf8(ctx, sl_test_data_hello_utf8 + i, &str));
     SL_ASSERT_TRUE(str.length == sl_test_data_decoded_lengths[i]);
     const size_t data_size = str.utf8_data.size;
     SL_ASSERT_TRUE(data_size == sl_test_data_hello_utf8[i].size + 1);
@@ -31,7 +32,8 @@ SL_TEST(test_string_init) {
 
 SL_TEST(test_string_utf8_view) {
   (void)verbose;
-  struct sl_string empty_str = sl_string_from_utf8(ctx, &(struct sl_span){0});
+  struct sl_string empty_str = {0};
+  SL_ASSERT_TRUE(sl_string_from_utf8(ctx, &(struct sl_span){0}, &empty_str));
   SL_ASSERT_TRUE(empty_str.length == 0);
   SL_ASSERT_TRUE(empty_str.utf8_data.size == 1);
   SL_ASSERT_TRUE(empty_str.utf8_data.data[0] == 0);
@@ -40,8 +42,9 @@ SL_TEST(test_string_utf8_view) {
   SL_ASSERT_TRUE(empty_view.data == nullptr);
   sl_string_destroy(&empty_str);
   for (size_t i = 0; i < SL_ARRAY_LEN(sl_test_data_hello_utf8); ++i) {
-    struct sl_string str = sl_string_from_utf8(ctx, sl_test_data_hello_utf8 + i);
-    struct sl_span view  = sl_string_view_utf8_data(&str);
+    struct sl_string str = {0};
+    SL_ASSERT_TRUE(sl_string_from_utf8(ctx, sl_test_data_hello_utf8 + i, &str));
+    struct sl_span view = sl_string_view_utf8_data(&str);
     SL_ASSERT_TRUE(view.size == sl_test_data_hello_utf8[i].size);
     for (size_t c = 0; c < view.size; ++c) {
       SL_ASSERT_TRUE(view.data[c] == sl_test_data_hello_utf8[i].data[c]);
@@ -55,10 +58,12 @@ SL_TEST(test_string_slice) {
   (void)verbose;
   size_t decoded_pos = 0;
   for (size_t i = 0; i < SL_ARRAY_LEN(sl_test_data_hello_utf8); ++i) {
-    struct sl_string str = sl_string_from_utf8(ctx, sl_test_data_hello_utf8 + i);
+    struct sl_string str = {0};
+    SL_ASSERT_TRUE(sl_string_from_utf8(ctx, sl_test_data_hello_utf8 + i, &str));
     for (size_t substr_len = 0; substr_len <= str.length; ++substr_len) {
       for (size_t begin = 0; begin + substr_len <= str.length; ++begin) {
-        struct sl_string substr = sl_string_slice(ctx, &str, begin, begin + substr_len);
+        struct sl_string substr = {0};
+        SL_ASSERT_TRUE(sl_string_slice(ctx, &str, begin, begin + substr_len, &substr));
         SL_ASSERT_TRUE(substr.length == substr_len);
         struct sl_span view = sl_string_view_utf8_data(&substr);
         for (struct sl_iterator iter = sl_unicode_iter(&view); !sl_unicode_iter_is_done(&iter);
@@ -80,13 +85,15 @@ SL_TEST(test_string_is_ascii) {
   (void)verbose;
   {
     struct sl_span hello = (struct sl_span){.size = 12, .data = (unsigned char*)u8"hello there!"};
-    struct sl_string str = sl_string_from_utf8(ctx, &hello);
+    struct sl_string str = {0};
+    SL_ASSERT_TRUE(sl_string_from_utf8(ctx, &hello, &str));
     SL_ASSERT_TRUE(sl_string_is_ascii(&str));
     sl_string_destroy(&str);
   }
   {
     struct sl_span hello = (struct sl_span){.size = 18, .data = (unsigned char*)u8"नमस्ते"};
-    struct sl_string str = sl_string_from_utf8(ctx, &hello);
+    struct sl_string str = {0};
+    SL_ASSERT_TRUE(sl_string_from_utf8(ctx, &hello, &str));
     SL_ASSERT_TRUE(!sl_string_is_ascii(&str));
     sl_string_destroy(&str);
   }
@@ -96,8 +103,9 @@ SL_TEST(test_string_is_ascii) {
 SL_TEST(test_string_copy_ascii) {
   (void)verbose;
   struct sl_span hello = (struct sl_span){.size = 12, .data = (unsigned char*)u8"hello there!"};
-  struct sl_string str = sl_string_from_utf8(ctx, &hello);
-  char buf[100]        = {0};
+  struct sl_string str = {0};
+  SL_ASSERT_TRUE(sl_string_from_utf8(ctx, &hello, &str));
+  char buf[100] = {0};
   sl_string_copy_ascii(buf, &str);
   SL_ASSERT_TRUE(strlen(buf) == hello.size);
   SL_ASSERT_TRUE(strcmp(buf, "hello there!") == 0);

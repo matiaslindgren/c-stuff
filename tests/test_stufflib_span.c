@@ -42,7 +42,8 @@ SL_TEST(test_data_view_array) {
 SL_TEST(test_data_create) {
   (void)verbose;
   const size_t n      = 10;
-  struct sl_span data = sl_span_create(ctx, n);
+  struct sl_span data = {0};
+  SL_ASSERT_TRUE(sl_span_create(ctx, n, &data));
   SL_ASSERT_TRUE(data.size == n);
   SL_ASSERT_TRUE(data.owned);
   SL_ASSERT_TRUE(data.data);
@@ -56,7 +57,8 @@ SL_TEST(test_data_create) {
 
 SL_TEST(test_data_create_empty) {
   (void)verbose;
-  struct sl_span data = sl_span_create(ctx, 0);
+  struct sl_span data = {0};
+  SL_ASSERT_TRUE(sl_span_create(ctx, 0, &data));
   SL_ASSERT_TRUE(data.size == 0);
   SL_ASSERT_TRUE(data.owned);
   SL_ASSERT_TRUE(!data.data);
@@ -85,7 +87,8 @@ SL_TEST(test_data_create_from_cstr) {
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(strings); ++i) {
     const char* cstr   = strings[i];
-    struct sl_span str = sl_span_from_str(ctx, cstr);
+    struct sl_span str = {0};
+    SL_ASSERT_TRUE(sl_span_from_str(ctx, cstr, &str));
     SL_ASSERT_TRUE(str.size == lengths[i]);
     SL_ASSERT_TRUE(str.owned);
     if (str.size == 0) {
@@ -144,13 +147,15 @@ SL_TEST(test_data_create_from_hexadecimal_cstr) {
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(strings); ++i) {
     const char* cstr   = strings[i];
-    struct sl_span str = sl_span_from_str(ctx, cstr);
+    struct sl_span str = {0};
+    SL_ASSERT_TRUE(sl_span_from_str(ctx, cstr, &str));
     SL_ASSERT_TRUE(str.size == str_lengths[i]);
     SL_ASSERT_TRUE(str.owned);
     SL_ASSERT_TRUE(str.data);
     SL_ASSERT_TRUE(memcmp(str.data, cstr, str.size) == 0);
     SL_ASSERT_TRUE(sl_span_is_hexadecimal_str(&str));
-    struct sl_span num = sl_span_parse_hex(ctx, &str);
+    struct sl_span num = {0};
+    SL_ASSERT_TRUE(sl_span_parse_hex(ctx, &str, &num));
     SL_ASSERT_TRUE(num.size == data_lengths[i]);
     SL_ASSERT_TRUE(num.owned);
     SL_ASSERT_TRUE(num.data);
@@ -166,7 +171,8 @@ SL_TEST(test_data_copy_view) {
   unsigned char x[]    = {1, 2, 3, 4};
   const size_t n       = SL_ARRAY_LEN(x);
   struct sl_span data1 = sl_span_view(n, x);
-  struct sl_span data2 = sl_span_copy(ctx, &data1);
+  struct sl_span data2 = {0};
+  SL_ASSERT_TRUE(sl_span_copy(ctx, &data1, &data2));
   SL_ASSERT_TRUE(!data1.owned);
   SL_ASSERT_TRUE(data1.data == x);
   SL_ASSERT_TRUE(data2.owned);
@@ -189,7 +195,8 @@ SL_TEST(test_data_concat_views) {
   const size_t n2      = SL_ARRAY_LEN(x2);
   struct sl_span data1 = sl_span_view(n1, x1);
   struct sl_span data2 = sl_span_view(n2, x2);
-  struct sl_span data3 = sl_span_concat(ctx, &data1, &data2);
+  struct sl_span data3 = {0};
+  SL_ASSERT_TRUE(sl_span_concat(ctx, &data1, &data2, &data3));
   SL_ASSERT_TRUE(!data1.owned);
   SL_ASSERT_TRUE(!data2.owned);
   SL_ASSERT_TRUE(data3.owned);
@@ -216,8 +223,10 @@ SL_TEST(test_data_concat_empty) {
   unsigned char x1[]   = {1, 2, 3, 4};
   const size_t n1      = SL_ARRAY_LEN(x1);
   struct sl_span data1 = sl_span_view(n1, x1);
-  struct sl_span data2 = sl_span_create(ctx, 0);
-  struct sl_span data3 = sl_span_concat(ctx, &data1, &data2);
+  struct sl_span data2 = {0};
+  struct sl_span data3 = {0};
+  SL_ASSERT_TRUE(sl_span_create(ctx, 0, &data2));
+  SL_ASSERT_TRUE(sl_span_concat(ctx, &data1, &data2, &data3));
   SL_ASSERT_TRUE(!data1.owned);
   SL_ASSERT_TRUE(data2.owned);
   SL_ASSERT_TRUE(data3.owned);
