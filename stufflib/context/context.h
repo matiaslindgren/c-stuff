@@ -33,4 +33,8 @@ __attribute__((__format__(__printf__, 4, 5))) static inline void sl_context_erro
 
 bool sl_context_unwind_errors(struct sl_context ctx[static 1], FILE stream[static 1]);
 
+static inline bool sl_context_error_occurred(struct sl_context ctx[static 1]) {
+  return sl_error_occurred(&ctx->errors);
+}
+
 #endif  // SL_CONTEXT_H_INCLUDED

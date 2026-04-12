@@ -67,6 +67,10 @@ static inline int sl_testing_run(struct sl_context ctx[static const 1], bool ver
     fprintf(stderr, "%s:%s: ", test->file, test->name);
     if (test->func(ctx, verbose)) {
       fprintf(stderr, SL_ANSI_COLOR(SL_ANSI_GREEN, " PASS\n"));
+    } else if (sl_context_error_occurred(ctx)) {
+      fprintf(stderr, SL_ANSI_COLOR(SL_ANSI_RED, " ERROR\n"));
+      sl_context_unwind_errors(ctx, stderr);
+      ++n_failures;
     } else {
       fprintf(stderr, SL_ANSI_COLOR(SL_ANSI_RED, " FAIL\n"));
       ++n_failures;
@@ -185,12 +189,18 @@ static inline int sl_testing_run(struct sl_context ctx[static const 1], bool ver
     struct sl_args args   = {.argc = argc, .argv = argv};    \
     const bool verbose    = sl_args_parse_flag(&args, "-v"); \
     struct sl_context ctx = {0};                             \
+    bool pass             = true;                            \
     int n_failures        = sl_testing_run(&ctx, verbose);   \
-    bool ok               = n_failures == 0;                 \
-    if (!sl_context_unwind_errors(&ctx, stderr)) {           \
-      ok = false;                                            \
+    if (n_failures > 0) {                                    \
+      pass = false;                                          \
     }                                                        \
-    return ok ? EXIT_SUCCESS : EXIT_FAILURE;                 \
+    if (sl_context_error_occurred(&ctx)) {                   \
+      pass = false;                                          \
+    }                                                        \
+    if (!sl_context_unwind_errors(&ctx, stderr)) {           \
+      pass = false;                                          \
+    }                                                        \
+    return pass ? EXIT_SUCCESS : EXIT_FAILURE;               \
   }
 
 #endif  // SL_TESTING_H_INCLUDED
