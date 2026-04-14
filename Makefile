@@ -1,16 +1,17 @@
+.SUFFIXES:
+.DELETE_ON_ERROR:
+
 SHELL := /bin/bash
+LLVM_VERSION := 21
+AR := ar
+RM := rm -f
 
-MODULE_DIR := ./stufflib
-OUTPUT_DIR := ./build
-
-LLVM_VERSION  := 21
-CFLAGS ?= \
-	-std=gnu23 \
+STANDARD ?= -std=gnu23
+WARNINGS ?= \
 	-Weverything \
 	-Werror \
 	-Wstrict-prototypes \
 	-Wno-c++-compat \
-	-Wno-nrvo \
 	-Wno-c99-compat \
 	-Wno-declaration-after-statement \
 	-Wno-disabled-macro-expansion \
@@ -28,25 +29,47 @@ CFLAGS ?= \
 	-Wno-unsafe-buffer-usage \
 	-Wno-vla \
 	-Wno-global-constructors
-LDFLAGS  ?= -lm -lc
-INCLUDES := -I.
+CFLAGS   ?=
+LDFLAGS  ?=
+INCLUDES ?=
+
+
+CLANG :=
+PLATFORM_LDFLAGS := -lm -fuse-ld=lld
+PLATFORM_INCLUDES := -I.
 
 ifeq ($(shell uname), Darwin)
 	LLVM_PATH := $(shell brew --prefix llvm@$(LLVM_VERSION))
-	SDK_PATH  := $(shell xcrun --show-sdk-path)
-	CC        := $(LLVM_PATH)/bin/clang-$(LLVM_VERSION)
-	LDFLAGS   += -Wl,-syslibroot,$(SDK_PATH),-framework,Accelerate
-	INCLUDES  += -isysroot $(SDK_PATH)
-	CLANG_FORMAT :=  $(LLVM_PATH)/bin/clang-format
-	CLANG_TIDY   :=  $(LLVM_PATH)/bin/clang-tidy
+	SDK_PATH := $(shell xcrun --show-sdk-path)
+	CLANG        := $(LLVM_PATH)/bin/clang-$(LLVM_VERSION)
+	CLANG_FORMAT := $(LLVM_PATH)/bin/clang-format
+	CLANG_TIDY   := $(LLVM_PATH)/bin/clang-tidy
+	PLATFORM_LDFLAGS += -Wl,-syslibroot,$(SDK_PATH),-framework,Accelerate
+	PLATFORM_INCLUDES += -isysroot $(SDK_PATH)
 else
-	CC      := clang-$(LLVM_VERSION)
-	LDFLAGS += -lopenblas
+	CLANG        := clang-$(LLVM_VERSION)
 	CLANG_FORMAT := clang-format
 	CLANG_TIDY   := clang-tidy
+	PLATFORM_LDFLAGS += -lopenblas
+endif
+
+CC := $(CLANG)
+
+ifeq ($(CFLAGS),)
+	CFLAGS := $(STANDARD) $(WARNINGS)
+endif
+
+ifeq ($(LDFLAGS),)
+	LDFLAGS := $(PLATFORM_LDFLAGS)
+endif
+
+ifeq ($(INCLUDES),)
+	INCLUDES := $(PLATFORM_INCLUDES)
 endif
 
 BUILD_TYPE ?= debug
+MODULE_DIR := ./stufflib
+OUTPUT_DIR := ./build
 
 ifeq ($(BUILD_TYPE),fast)
 	BUILD_DIR := $(OUTPUT_DIR)/fast
@@ -54,20 +77,29 @@ ifeq ($(BUILD_TYPE),fast)
 else ifeq ($(BUILD_TYPE),asan)
 	BUILD_DIR := $(OUTPUT_DIR)/asan
 	CFLAGS    += -O1 -g -fsanitize=address
+	LDFLAGS   += -fsanitize=address
 else ifeq ($(BUILD_TYPE),ubsan)
 	BUILD_DIR := $(OUTPUT_DIR)/ubsan
 	CFLAGS    += -O1 -g -fsanitize=undefined
+	LDFLAGS   += -fsanitize=undefined
+else ifeq ($(BUILD_TYPE),msan)
+	BUILD_DIR := $(OUTPUT_DIR)/msan
+	CFLAGS    += -O1 -g -fsanitize=memory
+	LDFLAGS   += -fsanitize=memory
 else
 	BUILD_DIR := $(OUTPUT_DIR)/debug
 	CFLAGS    += -O1 -g
 endif
 
+
 TRACE ?= 0
+
 ifeq ($(TRACE), 1)
 	CFLAGS += -DSL_VERBOSITY=3
 else
 	CFLAGS += -DSL_VERBOSITY=2
 endif
+
 
 find_headers = $(foreach dir,$1,$(wildcard $(dir)/*.h))
 find_sources = $(foreach dir,$1,$(wildcard $(dir)/*.c))
@@ -93,6 +125,7 @@ OBJECT_PATHS := $(MODULE_OBJECTS) $(PROGRAM_OBJECTS)
 DEPEND_PATHS := $(subst .o,.d,$(OBJECT_PATHS))
 BUILD_DIRS   := $(sort $(dir $(OBJECT_PATHS)))
 
+
 .PHONY: all
 all: $(PROGRAM_PATHS)
 
@@ -114,6 +147,9 @@ tidy: $(ALL_READABLE_FILES)
 .PHONY: tidy-fix
 tidy-fix: $(ALL_READABLE_FILES)
 	@$(CLANG_TIDY) --fix --quiet $^
+
+.PHONY: check
+check: test integration_test
 
 MACRO_EXPAND_TARGETS := $(addprefix macro-expand-,$(ALL_READABLE_FILES))
 .PHONY: $(MACRO_EXPAND_TARGETS)
@@ -156,25 +192,16 @@ integration_test: $(RUN_INTEGRATION_TESTS)
 $(RUN_INTEGRATION_TESTS): integration_test_%: ./tests/integration/test_%_tool.bash $(BUILD_DIR)/tools/%
 	$(TIMEOUT_CMD) $^ $(TEST_ARGS)
 
-# https://www.gnu.org/software/make/manual/make.html#Automatic-Prerequisites
-# 2025-04-19
-$(DEPEND_PATHS): $(BUILD_DIR)/%.d: %.c | $(BUILD_DIRS)
-	@set -e; rm -f $@; \
-		trap "rm -f '$@.$$$$'" EXIT SIGINT; \
-		$(CC) $(CFLAGS) $(INCLUDES) -MM -MT $(subst .d,.o,$@) $< > $@.$$$$; \
-		sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@
-
-# TODO how to avoid dynamic make
--include $(DEPEND_PATHS)
+-include $(wildcard DEPEND_PATHS)
 
 $(OBJECT_PATHS): $(BUILD_DIR)/%.o: %.c | $(BUILD_DIRS)
-	$(CC) $< $(CFLAGS) $(INCLUDES) -c -o $@
+	$(CC) $(CFLAGS) $(INCLUDES) -MMD -MP -MF $(subst .o,.d,$@) -c -o $@ $<
 
 $(STUFFLIB): $(MODULE_OBJECTS)
 	$(AR) rcs $@ $^
 
 $(PROGRAM_PATHS): %: %.o $(STUFFLIB)
-	$(CC) $< $(CFLAGS) -o $@ $(STUFFLIB) $(LDFLAGS)
+	$(CC) $(CFLAGS) -o $@ $(STUFFLIB) $(LDFLAGS) $<
 
 .PHONY: printvars
 printvars:
