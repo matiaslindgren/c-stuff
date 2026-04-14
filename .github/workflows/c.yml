@@ -23,10 +23,14 @@ jobs:
             trace: 0
           - build_type: ubsan
             trace: 0
-          - build_type: msan
-            trace: 0
           - build_type: fast
             trace: 0
+        include:
+          - llvm: 21
+            platform: ubuntu-24.04
+            make:
+              build_type: msan
+              trace: 0
 
     name: "runs-on=${{ matrix.platform }} build_type=${{ matrix.make.build_type }} trace=${{ matrix.make.trace }} llvm=${{ matrix.llvm }}"
     runs-on: ${{ matrix.platform }}
