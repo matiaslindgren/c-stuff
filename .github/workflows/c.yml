@@ -23,6 +23,8 @@ jobs:
             trace: 0
           - build_type: ubsan
             trace: 0
+          - build_type: msan
+            trace: 0
           - build_type: fast
             trace: 0
 
