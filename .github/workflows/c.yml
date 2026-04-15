@@ -16,58 +16,51 @@ jobs:
         platform:
           - ubuntu-24.04
           - macos-26
-        make:
-          - build_type: debug
-            trace: 1
-          - build_type: asan
-            trace: 0
-          - build_type: ubsan
-            trace: 0
-          - build_type: fast
-            trace: 0
+        build:
+          - { optimize: O1, sanitize: none,      trace: 1 }
+          - { optimize: O2, sanitize: address,   trace: 0 }
+          - { optimize: O2, sanitize: undefined, trace: 0 }
+          - { optimize: O3, sanitize: none,      trace: 0 }
         include:
           - llvm: 21
             platform: ubuntu-24.04
-            make:
-              build_type: msan
-              trace: 0
+            build: { optimize: O2, sanitize: memory, trace: 0 }
 
-    name: "runs-on=${{ matrix.platform }} build_type=${{ matrix.make.build_type }} trace=${{ matrix.make.trace }} llvm=${{ matrix.llvm }}"
+    name: "${{ matrix.platform }} optimize=${{ matrix.build.optimize }} sanitize=${{ matrix.build.sanitize }} trace=${{ matrix.build.trace }}"
     runs-on: ${{ matrix.platform }}
     env:
-      STUFFLIB_TEST_VERBOSE: ${{ matrix.make.trace }}
+      OPTIMIZE: ${{ matrix.build.optimize }}
+      SANITIZE: ${{ matrix.build.sanitize }}
+      TRACE: ${{ matrix.build.trace }}
+      STUFFLIB_TEST_VERBOSE: ${{ matrix.build.trace }}
 
     steps:
+    - name: checkout
+      uses: actions/checkout@v4
+
     - name: install linux dependencies
-      if: ${{ startsWith(matrix.platform, 'ubuntu') }}
+      if: startsWith(matrix.platform, 'ubuntu')
       run: |
-        sudo apt update --yes && sudo apt install --yes libopenblas-dev
+        sudo apt update --yes && sudo apt install --yes libopenblas-dev jq
         wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-        sudo add-apt-repository --yes "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-${{ matrix.llvm }} main"
-        sudo add-apt-repository --yes "deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-${{ matrix.llvm }} main"
-        sudo apt update --yes && sudo apt install --yes clang-${{ matrix.llvm }} lld-${{ matrix.llvm }}
+        sudo add-apt-repository --yes "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-${{ matrix.llvm }} main"
+        sudo apt update --yes && sudo apt install --yes clang-${{ matrix.llvm }} lld-${{ matrix.llvm }} clang-format-${{ matrix.llvm }} clang-tidy-${{ matrix.llvm }}
 
     - name: install macOS dependencies
-      if: ${{ startsWith(matrix.platform, 'macos') }}
-      run: |
-        brew install coreutils llvm@${{ matrix.llvm }} lld@${{ matrix.llvm }}
+      if: startsWith(matrix.platform, 'macos')
+      run: brew install coreutils llvm@${{ matrix.llvm }} lld@${{ matrix.llvm }}
 
-    - uses: actions/checkout@v6
-      name: checkout c-stuff git repo
+    - name: verify Makefile parses
+      run: make help
 
-    - run: make -j4 BUILD_TYPE=${{ matrix.make.build_type }} TRACE=${{ matrix.make.trace }} all
-      name: build everything
+    - name: build
+      run: make -j4 all
 
-    - run: make BUILD_TYPE=${{ matrix.make.build_type }} TRACE=${{ matrix.make.trace }} compile_commands.json
-      name: make compile_commands.json
+    - name: compile_commands.json
+      run: make compile_commands.json
 
-    - run: cat compile_commands.json
+    - name: test
+      run: make test
 
-    - run: make BUILD_TYPE=${{ matrix.make.build_type }} TRACE=${{ matrix.make.trace }} test
-      name: test
-
-    - run: make BUILD_TYPE=${{ matrix.make.build_type }} TRACE=${{ matrix.make.trace }} integration_test
-      name: integration test
-
-    - run: make BUILD_TYPE=${{ matrix.make.build_type }} TRACE=${{ matrix.make.trace }} clean
-      name: cleanup
+    - name: integration test
+      run: make integration_test

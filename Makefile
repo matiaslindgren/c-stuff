@@ -1,6 +1,40 @@
+.PHONY: help
+help:
+	@echo "STUFFLIB!"
+	@echo "clang on Linux or macOS only."
+	@echo ""
+	@echo "Requires:"
+	@echo "  clang, lld, OpenBLAS, jq"
+	@echo "  (optional) clang-format, clang-tidy"
+	@echo ""
+	@echo "Main targets:"
+	@echo "  all                    build all tools and tests"
+	@echo "  check                  run unit and integration tests"
+	@echo "  clean                  remove build artifacts"
+	@echo "  help                   print this (default)"
+	@echo "  compile_commands.json  generate compilation database"
+	@echo ""
+	@echo "Other targets:"
+	@echo "  objects                build objects, partial compile commands, and dep files"
+	@echo "  test                   run only unit tests"
+	@echo "  integration_test       run only integration tests"
+	@echo "  fmt                    format source files with clang-format"
+	@echo "  tidy                   lint with clang-tidy"
+	@echo "  printvars              print all make variables"
+	@echo "  macro-expand-%         run preprocessor on % and print result"
+	@echo ""
+	@echo "Variables:"
+	@echo "  OPTIMIZE=O0|O1|O2|O3                    (default: O2)"
+	@echo "  SANITIZE=none|address|undefined|memory  (default: none)"
+	@echo "  TRACE=0|1                               (default: 0)"
+	@echo "  STUFFLIB_TEST_VERBOSE=0|1               (default: 0)"
+
+# disable builtin suffix rules: we use custom explicit pattern rules
 .SUFFIXES:
+# delete (possibly partially) built targets on error
 .DELETE_ON_ERROR:
 
+# defaults and parameters
 SHELL := /bin/bash
 LLVM_VERSION := 21
 AR := ar
@@ -29,66 +63,70 @@ WARNINGS ?= \
 	-Wno-unsafe-buffer-usage \
 	-Wno-vla \
 	-Wno-global-constructors
-CFLAGS   ?=
+CFLAGS   ?= -g
 LDFLAGS  ?=
 INCLUDES ?=
 
 
+# platform dependent config
+UNAME := $(shell uname)
 CLANG :=
 PLATFORM_LDFLAGS := -lm -fuse-ld=lld
 PLATFORM_INCLUDES := -I.
 
-ifeq ($(shell uname), Darwin)
+ifeq ($(UNAME), Darwin)
 	LLVM_PATH := $(shell brew --prefix llvm@$(LLVM_VERSION))
-	SDK_PATH := $(shell xcrun --show-sdk-path)
+	SDK_PATH  := $(shell xcrun --show-sdk-path)
 	CLANG        := $(LLVM_PATH)/bin/clang-$(LLVM_VERSION)
 	CLANG_FORMAT := $(LLVM_PATH)/bin/clang-format
 	CLANG_TIDY   := $(LLVM_PATH)/bin/clang-tidy
-	PLATFORM_LDFLAGS += -Wl,-syslibroot,$(SDK_PATH),-framework,Accelerate
+	PLATFORM_LDFLAGS  += -Wl,-syslibroot,$(SDK_PATH),-framework,Accelerate
 	PLATFORM_INCLUDES += -isysroot $(SDK_PATH)
-else
+else ifeq ($(UNAME), Linux)
 	CLANG        := clang-$(LLVM_VERSION)
 	CLANG_FORMAT := clang-format
 	CLANG_TIDY   := clang-tidy
 	PLATFORM_LDFLAGS += -lopenblas
+else
+	$(error Unsupported platform: $(UNAME))
 endif
 
 CC := $(CLANG)
 
-ifeq ($(CFLAGS),)
-	CFLAGS := $(STANDARD) $(WARNINGS)
-endif
+CFLAGS   := $(CFLAGS) $(STANDARD) $(WARNINGS)
+LDFLAGS  := $(LDFLAGS) $(PLATFORM_LDFLAGS)
+INCLUDES := $(INCLUDES) $(PLATFORM_INCLUDES)
 
-ifeq ($(LDFLAGS),)
-	LDFLAGS := $(PLATFORM_LDFLAGS)
-endif
-
-ifeq ($(INCLUDES),)
-	INCLUDES := $(PLATFORM_INCLUDES)
-endif
-
-BUILD_TYPE ?= debug
+OPTIMIZE ?= O2
+SANITIZE ?= none
 MODULE_DIR := ./stufflib
 OUTPUT_DIR := ./build
+BUILD_DIR  := $(OUTPUT_DIR)/$(OPTIMIZE)-$(SANITIZE)
 
-ifeq ($(BUILD_TYPE),fast)
-	BUILD_DIR := $(OUTPUT_DIR)/fast
-	CFLAGS    += -O3 -march=native
-else ifeq ($(BUILD_TYPE),asan)
-	BUILD_DIR := $(OUTPUT_DIR)/asan
-	CFLAGS    += -O1 -g -fsanitize=address
-	LDFLAGS   += -fsanitize=address
-else ifeq ($(BUILD_TYPE),ubsan)
-	BUILD_DIR := $(OUTPUT_DIR)/ubsan
-	CFLAGS    += -O1 -g -fsanitize=undefined
-	LDFLAGS   += -fsanitize=undefined
-else ifeq ($(BUILD_TYPE),msan)
-	BUILD_DIR := $(OUTPUT_DIR)/msan
-	CFLAGS    += -O1 -g -fsanitize=memory
-	LDFLAGS   += -fsanitize=memory
+ifeq ($(OPTIMIZE),O0)
+	CFLAGS += -O0
+else ifeq ($(OPTIMIZE),O1)
+	CFLAGS += -O1
+else ifeq ($(OPTIMIZE),O2)
+	CFLAGS += -O2
+else ifeq ($(OPTIMIZE),O3)
+	CFLAGS += -O3
 else
-	BUILD_DIR := $(OUTPUT_DIR)/debug
-	CFLAGS    += -O1 -g
+	$(error Unknown OPTIMIZE: $(OPTIMIZE). Use O0, O1, O2, or O3)
+endif
+
+ifeq ($(SANITIZE),none)
+else ifeq ($(SANITIZE),address)
+	CFLAGS  += -fsanitize=address
+	LDFLAGS += -fsanitize=address
+else ifeq ($(SANITIZE),undefined)
+	CFLAGS  += -fsanitize=undefined
+	LDFLAGS += -fsanitize=undefined
+else ifeq ($(SANITIZE),memory)
+	CFLAGS  += -fsanitize=memory
+	LDFLAGS += -fsanitize=memory
+else
+	$(error Unknown SANITIZE: $(SANITIZE). Use none, address, undefined, or memory)
 endif
 
 
@@ -101,29 +139,34 @@ else
 endif
 
 
+# functions to find files in given list of dirs
 find_headers = $(foreach dir,$1,$(wildcard $(dir)/*.h))
 find_sources = $(foreach dir,$1,$(wildcard $(dir)/*.c))
 
+# source discovery
 MODULE_DIRS    := $(wildcard $(MODULE_DIR)/*)
 MODULE_HEADERS := $(call find_headers,$(MODULE_DIRS))
-MODULE_SOURCES := $(call find_sources,$(MODULE_DIRS))
-MODULE_OBJECTS := $(subst /./,/,$(addprefix $(BUILD_DIR)/,$(subst .c,.o,$(MODULE_SOURCES))))
+MODULE_SOURCES := $(patsubst ./%,%,$(call find_sources,$(MODULE_DIRS)))
 
 PROGRAM_DIRS    := tools tests
 PROGRAM_SOURCES := $(call find_sources,$(PROGRAM_DIRS))
-PROGRAM_OBJECTS := $(subst /./,/,$(addprefix $(BUILD_DIR)/,$(subst .c,.o,$(PROGRAM_SOURCES))))
-PROGRAM_PATHS   := $(subst .o,,$(PROGRAM_OBJECTS))
 
 ALL_READABLE_FILES := $(MODULE_HEADERS) $(MODULE_SOURCES) $(PROGRAM_SOURCES)
+
+# derived paths
+MODULE_OBJECTS  := $(patsubst %.c,$(BUILD_DIR)/%.o,$(MODULE_SOURCES))
+PROGRAM_OBJECTS := $(patsubst %.c,$(BUILD_DIR)/%.o,$(PROGRAM_SOURCES))
+PROGRAM_PATHS   := $(patsubst %.o,%,$(PROGRAM_OBJECTS))
 
 TEST_PATHS := $(filter $(BUILD_DIR)/tests/test_%,$(PROGRAM_PATHS))
 TOOL_PATHS := $(filter $(BUILD_DIR)/tools/%,$(PROGRAM_PATHS))
 
-STUFFLIB := $(BUILD_DIR)/libstufflib.a
-
+STUFFLIB     := $(BUILD_DIR)/libstufflib.a
 OBJECT_PATHS := $(MODULE_OBJECTS) $(PROGRAM_OBJECTS)
-DEPEND_PATHS := $(subst .o,.d,$(OBJECT_PATHS))
+DEPEND_PATHS := $(patsubst %.o,%.d,$(OBJECT_PATHS))
 BUILD_DIRS   := $(sort $(dir $(OBJECT_PATHS)))
+
+COMPILE_COMMANDS_DIR := $(BUILD_DIR)/compile_commands
 
 
 .PHONY: all
@@ -144,10 +187,6 @@ format: $(ALL_READABLE_FILES)
 tidy: $(ALL_READABLE_FILES)
 	@$(CLANG_TIDY) --quiet $^
 
-.PHONY: tidy-fix
-tidy-fix: $(ALL_READABLE_FILES)
-	@$(CLANG_TIDY) --fix --quiet $^
-
 .PHONY: check
 check: test integration_test
 
@@ -156,7 +195,7 @@ MACRO_EXPAND_TARGETS := $(addprefix macro-expand-,$(ALL_READABLE_FILES))
 $(MACRO_EXPAND_TARGETS): macro-expand-%: %
 	$(CC) $(CFLAGS) $(INCLUDES) -E $< | $(CLANG_FORMAT) --assume-filename=$<
 
-$(BUILD_DIR) $(BUILD_DIRS):
+$(BUILD_DIR) $(BUILD_DIRS) $(COMPILE_COMMANDS_DIR):
 	mkdir -p $@
 
 .PHONY: objects
@@ -172,6 +211,7 @@ make_tmp_dir = $(shell mktemp --directory)
 RUN_TESTS := $(addprefix run_,$(notdir $(TEST_PATHS)))
 .PHONY: test
 test: $(RUN_TESTS)
+
 .PHONY: $(RUN_TESTS)
 $(RUN_TESTS): run_%: $(BUILD_DIR)/tests/%
 	@export SL_TEMP_DIR=$(call make_tmp_dir); \
@@ -188,14 +228,15 @@ endif
 RUN_INTEGRATION_TESTS := $(addprefix integration_test_,$(notdir $(TOOL_PATHS)))
 .PHONY: integration_test
 integration_test: $(RUN_INTEGRATION_TESTS)
+
 .PHONY: $(RUN_INTEGRATION_TESTS)
 $(RUN_INTEGRATION_TESTS): integration_test_%: ./tests/integration/test_%_tool.bash $(BUILD_DIR)/tools/%
 	$(TIMEOUT_CMD) $^ $(TEST_ARGS)
 
 -include $(wildcard DEPEND_PATHS)
 
-$(OBJECT_PATHS): $(BUILD_DIR)/%.o: %.c | $(BUILD_DIRS)
-	$(CC) $(CFLAGS) $(INCLUDES) -MMD -MP -MF $(subst .o,.d,$@) -c -o $@ $<
+$(OBJECT_PATHS): $(BUILD_DIR)/%.o: %.c | $(BUILD_DIRS) $(COMPILE_COMMANDS_DIR)
+	$(CC) $(CFLAGS) $(INCLUDES) -MMD -MP -MF $(subst .o,.d,$@) -MJ $(COMPILE_COMMANDS_DIR)/$(subst /,-,$@).json -c -o $@ $<
 
 $(STUFFLIB): $(MODULE_OBJECTS)
 	$(AR) rcs $@ $^
@@ -209,17 +250,5 @@ printvars:
 	$(if $(filter-out environ% default automatic,  \
 	$(origin $V)),$(info $V=$($V))))
 
-JQ_MAKE_COMPILE_COMMANDS := [inputs|{\
-	directory: "$(abspath .)", \
-	command: ., \
-	file: match("([^ ]+\\.[co])").captures[0].string, \
-	output: match("-o[ ]+([^ ]+)").captures[0].string \
-	}]
-
-compile_commands.json: ALWAYS_BUILD
-	@$(MAKE) --always-make --dry-run all objects \
-		| grep -wE '^$(CC)' \
-		| jq -nR '$(JQ_MAKE_COMPILE_COMMANDS)' > $@
-
-.PHONY: ALWAYS_BUILD
-ALWAYS_BUILD:
+compile_commands.json: $(OBJECT_PATHS)
+	sed 's/,$$//' $(COMPILE_COMMANDS_DIR)/*.json | jq -s '.' > $@+ && mv $@+ $@
