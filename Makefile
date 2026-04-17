@@ -1,7 +1,7 @@
 .PHONY: help
 help:
 	@echo "STUFFLIB!"
-	@echo "clang on Linux or macOS only."
+	@echo "Builds with clang on Linux or macOS only."
 	@echo ""
 	@echo "Requires:"
 	@echo "  clang, lld, OpenBLAS, jq"
@@ -145,7 +145,7 @@ find_sources = $(foreach dir,$1,$(wildcard $(dir)/*.c))
 
 # source discovery
 MODULE_DIRS    := $(wildcard $(MODULE_DIR)/*)
-MODULE_HEADERS := $(call find_headers,$(MODULE_DIRS))
+MODULE_HEADERS := $(patsubst ./%,%,$(call find_headers,$(MODULE_DIRS)))
 MODULE_SOURCES := $(patsubst ./%,%,$(call find_sources,$(MODULE_DIRS)))
 
 PROGRAM_DIRS    := tools tests
