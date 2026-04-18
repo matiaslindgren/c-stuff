@@ -34,7 +34,7 @@ bool spambase(
   uint16_t classes[SL_DATASET_SPAMBASE_SAMPLES] = {0};
 
   struct sl_record samples_record;
-  struct sl_la_matrix samples
+  struct sl_matrix_f32 samples
       = sl_la_matrix_create(ctx, SL_DATASET_SPAMBASE_SAMPLES, SL_DATASET_SPAMBASE_FEATURES);
 
   if (!sl_record_read_metadata(ctx, &classes_record, dataset_dir, "spambase_classes")) {
@@ -55,7 +55,7 @@ bool spambase(
   if (!sl_record_read_all(
           ctx,
           &samples_record,
-          sl_record_item_size(&samples_record) * sl_la_matrix_size(&samples),
+          sl_record_item_size(&samples_record) * sl_matrix_f32_size(&samples),
           (void*)(samples.data)
       )) {
     SL_LOG_ERROR("failed reading spambase samples");
@@ -63,24 +63,37 @@ bool spambase(
   }
 
   struct sl_ml_svm svm = {
-      .w              = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_SPAMBASE_FEATURES),
-      .s              = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_SPAMBASE_FEATURES),
-      .x              = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_SPAMBASE_FEATURES),
+      .w
+      = {.data     = (float[SL_DATASET_SPAMBASE_FEATURES]){0},
+         .length   = {SL_DATASET_SPAMBASE_FEATURES},
+         .capacity = {SL_DATASET_SPAMBASE_FEATURES}},
+      .s
+      = {.data     = (float[SL_DATASET_SPAMBASE_FEATURES]){0},
+         .length   = {SL_DATASET_SPAMBASE_FEATURES},
+         .capacity = {SL_DATASET_SPAMBASE_FEATURES}},
+      .x
+      = {.data     = (float[SL_DATASET_SPAMBASE_FEATURES]){0},
+         .length   = {SL_DATASET_SPAMBASE_FEATURES},
+         .capacity = {SL_DATASET_SPAMBASE_FEATURES}},
       .shuffle_buffer = (size_t[SL_DATASET_SPAMBASE_SAMPLES]){0},
       .batch_size     = 1,
       .n_epochs       = 2,
       .learning_rate  = 1e-9F,
   };
 
-  struct sl_la_matrix test_data = {
-      .rows = 2000,
-      .cols = samples.cols,
+  struct sl_matrix_f32 test_data = {
+      .length   = {2000, sl_matrix_f32_num_cols(&samples)},
+      .capacity = {2000, sl_matrix_f32_num_cols(&samples)},
   };
   uint16_t test_classes[2000] = {0};
 
-  struct sl_la_matrix train_data = {
-      .rows = samples.rows - test_data.rows,
-      .cols = samples.cols,
+  struct sl_matrix_f32 train_data = {
+      .length
+      = {sl_matrix_f32_num_rows(&samples) - sl_matrix_f32_num_rows(&test_data),
+         sl_matrix_f32_num_cols(&samples)},
+      .capacity
+      = {sl_matrix_f32_num_rows(&samples) - sl_matrix_f32_num_rows(&test_data),
+         sl_matrix_f32_num_cols(&samples)},
   };
   uint16_t train_classes[SL_ARRAY_LEN(classes) - SL_ARRAY_LEN(test_classes)] = {0};
 
@@ -105,8 +118,8 @@ bool spambase(
 
   {
     struct sl_ml_classification report = {0};
-    for (int i = 0; i < train_data.rows; ++i) {
-      struct sl_la_vector x = sl_la_matrix_row_view(&train_data, i);
+    for (size_t i = 0; i < sl_matrix_f32_num_rows(&train_data); ++i) {
+      struct sl_vector_f32 x = sl_la_matrix_row_view(&train_data, i);
       sl_ml_classification_update(&report, train_classes[i], sl_ml_svm_binary_predict(&svm, &x));
     }
     SL_LOG_INFO("spambase dataset, random train set, linear SVM");
@@ -114,8 +127,8 @@ bool spambase(
   }
   {
     struct sl_ml_classification report = {0};
-    for (int i = 0; i < test_data.rows; ++i) {
-      struct sl_la_vector x = sl_la_matrix_row_view(&test_data, i);
+    for (size_t i = 0; i < sl_matrix_f32_num_rows(&test_data); ++i) {
+      struct sl_vector_f32 x = sl_la_matrix_row_view(&test_data, i);
       sl_ml_classification_update(&report, test_classes[i], sl_ml_svm_binary_predict(&svm, &x));
     }
     SL_LOG_INFO("spambase dataset, random test set, linear SVM");
@@ -165,10 +178,10 @@ bool rcv1(
   struct sl_record test_classes_record = {0};
   uint8_t* test_classes                = nullptr;
 
-  struct sl_la_matrix samples_batch
+  struct sl_matrix_f32 samples_batch
       = sl_la_matrix_create(ctx, SL_SVM_RCV1_BUFFER_LEN, SL_DATASET_RCV1_FEATURES);
   struct sl_span read_buffer
-      = sl_span_view(sizeof(float) * sl_la_matrix_size(&samples_batch), (void*)samples_batch.data);
+      = sl_span_view(sizeof(float) * sl_matrix_f32_size(&samples_batch), (void*)samples_batch.data);
 
   if (verbose) {
     SL_LOG_INFO("RCV1: reading metadata records");
@@ -274,12 +287,12 @@ bool rcv1(
       SL_LOG_ERROR("RCV1 train batch %zu minmax: failed reading samples batch", batch_idx);
       goto done;
     }
-    for (int row = 0; row < samples_batch.rows; ++row) {
-      for (int col = 0; col < samples_batch.cols; ++col) {
-        const float value = *sl_la_matrix_get(&samples_batch, row, col);
+    for (size_t row = 0; row < sl_matrix_f32_num_rows(&samples_batch); ++row) {
+      for (size_t col = 0; col < sl_matrix_f32_num_cols(&samples_batch); ++col) {
+        const float value = *sl_matrix_f32_get(&samples_batch, row, col);
         if (value < 0 || value > 1) {
           SL_LOG_ERROR(
-              "invalid RCV1 training sample at (%d, %d): %g is not in [0, 1]",
+              "invalid RCV1 training sample at (%zu, %zu): %g is not in [0, 1]",
               row,
               col,
               (double)value
@@ -316,9 +329,18 @@ bool rcv1(
   }
 
   struct sl_ml_svm svm = {
-      .w              = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_RCV1_FEATURES),
-      .s              = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_RCV1_FEATURES),
-      .x              = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_RCV1_FEATURES),
+      .w
+      = {.data     = (float[SL_DATASET_RCV1_FEATURES]){0},
+         .length   = {SL_DATASET_RCV1_FEATURES},
+         .capacity = {SL_DATASET_RCV1_FEATURES}},
+      .s
+      = {.data     = (float[SL_DATASET_RCV1_FEATURES]){0},
+         .length   = {SL_DATASET_RCV1_FEATURES},
+         .capacity = {SL_DATASET_RCV1_FEATURES}},
+      .x
+      = {.data     = (float[SL_DATASET_RCV1_FEATURES]){0},
+         .length   = {SL_DATASET_RCV1_FEATURES},
+         .capacity = {SL_DATASET_RCV1_FEATURES}},
       .shuffle_buffer = (size_t[SL_SVM_RCV1_BUFFER_LEN]){0},
       .batch_size     = 100,
       .n_epochs       = 1,
@@ -346,7 +368,7 @@ bool rcv1(
       SL_LOG_INFO("RCV1 train batch %zu: copy classes", batch_idx);
     }
     for (size_t i = 0; i < SL_SVM_RCV1_BUFFER_LEN; ++i) {
-      const size_t class_idx = ((size_t)samples_batch.rows * batch_idx) + i;
+      const size_t class_idx = (sl_matrix_f32_num_rows(&samples_batch) * batch_idx) + i;
       classes_buffer[i]      = class_idx < train_classes_record.size ? train_classes[class_idx] : 0;
     }
 
@@ -364,8 +386,8 @@ bool rcv1(
       SL_LOG_INFO("RCV1 train batch %zu: results", batch_idx);
     }
     struct sl_ml_classification report = {0};
-    for (int i = 0; i < SL_SVM_RCV1_BUFFER_LEN; ++i) {
-      struct sl_la_vector x = sl_la_matrix_row_view(&samples_batch, i);
+    for (size_t i = 0; i < SL_SVM_RCV1_BUFFER_LEN; ++i) {
+      struct sl_vector_f32 x = sl_la_matrix_row_view(&samples_batch, i);
       sl_ml_classification_update(&report, classes_buffer[i], sl_ml_svm_binary_predict(&svm, &x));
     }
     sl_ml_classification_print(stderr, &report);
@@ -393,7 +415,7 @@ bool rcv1(
       SL_LOG_INFO("RCV1 test batch %zu: copy classes", batch_idx);
     }
     for (size_t i = 0; i < SL_SVM_RCV1_BUFFER_LEN; ++i) {
-      const size_t class_idx = ((size_t)samples_batch.rows * batch_idx) + i;
+      const size_t class_idx = (sl_matrix_f32_num_rows(&samples_batch) * batch_idx) + i;
       classes_buffer[i]      = class_idx < test_classes_record.size ? test_classes[class_idx] : 0;
     }
 
@@ -401,8 +423,8 @@ bool rcv1(
       SL_LOG_INFO("RCV1 test batch %zu: results", batch_idx);
     }
     struct sl_ml_classification report = {0};
-    for (int i = 0; i < SL_SVM_RCV1_BUFFER_LEN; ++i) {
-      struct sl_la_vector x = sl_la_matrix_row_view(&samples_batch, i);
+    for (size_t i = 0; i < SL_SVM_RCV1_BUFFER_LEN; ++i) {
+      struct sl_vector_f32 x = sl_la_matrix_row_view(&samples_batch, i);
       sl_ml_classification_update(&report, classes_buffer[i], sl_ml_svm_binary_predict(&svm, &x));
     }
     sl_ml_classification_print(stderr, &report);

@@ -1,4 +1,5 @@
 #include <math.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -27,137 +28,133 @@
   #error "no BLAS support available for this platform"
 #endif
 
-struct sl_la_vector sl_la_vector_create(struct sl_context ctx[static 1], const int size) {
+struct sl_vector_f32 sl_la_vector_create(struct sl_context ctx[static 1], const size_t size) {
   assert(size > 0);
-  return (struct sl_la_vector){
-      .size = size,
-      .data = sl_alloc(ctx, (size_t)(size), sizeof(float)),
+  return (struct sl_vector_f32){
+      .data     = sl_alloc(ctx, size, sizeof(float)),
+      .length   = {size},
+      .capacity = {size},
   };
 }
 
-void sl_la_vector_destroy(struct sl_la_vector v[const static 1]) {
+void sl_la_vector_destroy(struct sl_vector_f32 v[const static 1]) {
   sl_free(v->data);
-  *v = (struct sl_la_vector){0};
+  *v = (struct sl_vector_f32){0};
 }
 
-struct sl_la_matrix
-sl_la_matrix_create(struct sl_context ctx[static 1], const int rows, const int cols) {
+struct sl_matrix_f32
+sl_la_matrix_create(struct sl_context ctx[static 1], const size_t rows, const size_t cols) {
   assert(rows > 0 && cols > 0);
-  return (struct sl_la_matrix){
-      .rows = rows,
-      .cols = cols,
-      .data = sl_alloc(ctx, (size_t)(rows * cols), sizeof(float)),
+  return (struct sl_matrix_f32){
+      .data     = sl_alloc(ctx, rows * cols, sizeof(float)),
+      .length   = {rows, cols},
+      .capacity = {rows, cols},
   };
 }
 
-void sl_la_matrix_destroy(struct sl_la_matrix a[const static 1]) {
+void sl_la_matrix_destroy(struct sl_matrix_f32 a[const static 1]) {
   sl_free(a->data);
-  *a = (struct sl_la_matrix){0};
+  *a = (struct sl_matrix_f32){0};
 }
 
-float* sl_la_matrix_get(struct sl_la_matrix a[const static 1], const int row, const int col) {
-  return a->data + (row * a->cols) + col;
-}
-
-float* sl_la_matrix_get_row(struct sl_la_matrix a[const static 1], const int row) {
-  return sl_la_matrix_get(a, row, 0);
-}
-
-size_t sl_la_matrix_size(struct sl_la_matrix a[const static 1]) {
-  return ((size_t)a->rows) * ((size_t)a->cols);
-}
-
-struct sl_la_vector sl_la_matrix_row_view(struct sl_la_matrix a[const static 1], const int row) {
-  return (struct sl_la_vector){
-      .size = a->cols,
-      .data = sl_la_matrix_get_row(a, row),
+struct sl_vector_f32
+sl_la_matrix_row_view(struct sl_matrix_f32 a[const static 1], const size_t row) {
+  return (struct sl_vector_f32){
+      .data     = sl_matrix_f32_get(a, row, 0),
+      .length   = {sl_matrix_f32_num_cols(a)},
+      .capacity = {a->capacity[1]},
   };
 }
 
-// TODO size_t everywhere, cast LAPACK_INT only at cblas interface
-void sl_la_vec_add(const int count, float lhs[restrict count], const float rhs[restrict count]) {
-  cblas_saxpy(count, 1, rhs, 1, lhs, 1);
+void sl_la_vec_add(const size_t count, float lhs[restrict count], const float rhs[restrict count]) {
+  assert(count <= (size_t)INT32_MAX);
+  cblas_saxpy((int)count, 1, rhs, 1, lhs, 1);
 }
 
-void sl_la_vec_sub(const int count, float lhs[restrict count], const float rhs[restrict count]) {
-  cblas_saxpy(count, -1, rhs, 1, lhs, 1);
+void sl_la_vec_sub(const size_t count, float lhs[restrict count], const float rhs[restrict count]) {
+  assert(count <= (size_t)INT32_MAX);
+  cblas_saxpy((int)count, -1, rhs, 1, lhs, 1);
 }
 
-void sl_la_vec_mul(const int count, float lhs[restrict count], const float rhs[restrict count]) {
-  for (int i = 0; i < count; ++i) {
+void sl_la_vec_mul(const size_t count, float lhs[restrict count], const float rhs[restrict count]) {
+  for (size_t i = 0; i < count; ++i) {
     lhs[i] *= rhs[i];
   }
 }
 
-void sl_la_vec_min(const int count, float lhs[restrict count], const float rhs[restrict count]) {
-  for (int i = 0; i < count; ++i) {
+void sl_la_vec_min(const size_t count, float lhs[restrict count], const float rhs[restrict count]) {
+  for (size_t i = 0; i < count; ++i) {
     lhs[i] = fminf(lhs[i], rhs[i]);
   }
 }
 
-void sl_la_vec_max(const int count, float lhs[restrict count], const float rhs[restrict count]) {
-  for (int i = 0; i < count; ++i) {
+void sl_la_vec_max(const size_t count, float lhs[restrict count], const float rhs[restrict count]) {
+  for (size_t i = 0; i < count; ++i) {
     lhs[i] = fmaxf(lhs[i], rhs[i]);
   }
 }
 
-bool sl_la_vector_is_finite(struct sl_la_vector v[const static 1]) {
-  return sl_math_is_finite(v->size, v->data);
+bool sl_la_vector_is_finite(struct sl_vector_f32 v[const static 1]) {
+  assert(sl_vector_f32_size(v) <= (size_t)INT32_MAX);
+  return sl_math_is_finite((int)sl_vector_f32_size(v), v->data);
 }
 
-void sl_la_vector_scale(struct sl_la_vector v[const static 1], const float alpha) {
-  cblas_sscal(v->size, alpha, v->data, 1);
+void sl_la_vector_scale(struct sl_vector_f32 v[const static 1], const float alpha) {
+  assert(sl_vector_f32_size(v) <= (size_t)INT32_MAX);
+  cblas_sscal((int)sl_vector_f32_size(v), alpha, v->data, 1);
 }
 
-void sl_la_vector_clear(struct sl_la_vector v[const static 1]) {
-  memset(v->data, 0, sizeof(float) * (size_t)v->size);
+void sl_la_vector_clear(struct sl_vector_f32 v[const static 1]) {
+  memset(v->data, 0, sizeof(float) * sl_vector_f32_size(v));
 }
 
 float sl_la_vector_dot(
-    const struct sl_la_vector a[const static 1],
-    const struct sl_la_vector b[const static 1]
+    const struct sl_vector_f32 a[const static 1],
+    const struct sl_vector_f32 b[const static 1]
 ) {
-  assert(a->size == b->size);
-  return cblas_sdot(a->size, a->data, 1, b->data, 1);
+  assert(sl_vector_f32_size(a) == sl_vector_f32_size(b));
+  assert(sl_vector_f32_size(a) <= (size_t)INT32_MAX);
+  return cblas_sdot((int)sl_vector_f32_size(a), a->data, 1, b->data, 1);
 }
 
 void sl_la_vector_add(
-    const struct sl_la_vector a[const static 1],
-    const struct sl_la_vector b[const static 1]
+    const struct sl_vector_f32 a[const static 1],
+    const struct sl_vector_f32 b[const static 1]
 ) {
-  assert(a->size == b->size);
-  sl_la_vec_add(a->size, a->data, b->data);
+  assert(sl_vector_f32_size(a) == sl_vector_f32_size(b));
+  sl_la_vec_add(sl_vector_f32_size(a), a->data, b->data);
 }
 
 void sl_la_vector_sub(
-    const struct sl_la_vector a[const static 1],
-    const struct sl_la_vector b[const static 1]
+    const struct sl_vector_f32 a[const static 1],
+    const struct sl_vector_f32 b[const static 1]
 ) {
-  assert(a->size == b->size);
-  sl_la_vec_sub(a->size, a->data, b->data);
+  assert(sl_vector_f32_size(a) == sl_vector_f32_size(b));
+  sl_la_vec_sub(sl_vector_f32_size(a), a->data, b->data);
 }
 
 void sl_la_vector_mul(
-    struct sl_la_vector lhs[const static 1],
-    const struct sl_la_vector rhs[const static 1]
+    struct sl_vector_f32 lhs[const static 1],
+    const struct sl_vector_f32 rhs[const static 1]
 ) {
-  assert(lhs->size == rhs->size);
-  sl_la_vec_mul(lhs->size, lhs->data, rhs->data);
+  assert(sl_vector_f32_size(lhs) == sl_vector_f32_size(rhs));
+  sl_la_vec_mul(sl_vector_f32_size(lhs), lhs->data, rhs->data);
 }
 
 void sl_la_vector_copy(
-    struct sl_la_vector dst[const static 1],
-    struct sl_la_vector src[const static 1]
+    struct sl_vector_f32 dst[const static 1],
+    struct sl_vector_f32 src[const static 1]
 ) {
-  assert(dst->size == src->size);
-  cblas_scopy(src->size, src->data, 1, dst->data, 1);
+  assert(sl_vector_f32_size(dst) == sl_vector_f32_size(src));
+  assert(sl_vector_f32_size(src) <= (size_t)INT32_MAX);
+  cblas_scopy((int)sl_vector_f32_size(src), src->data, 1, dst->data, 1);
 }
 
-void sl_la_vector_print(FILE stream[const static 1], const struct sl_la_vector v[const static 1]) {
-  for (int i = 0; i < v->size; ++i) {
+void sl_la_vector_print(FILE stream[const static 1], const struct sl_vector_f32 v[const static 1]) {
+  for (size_t i = 0; i < sl_vector_f32_size(v); ++i) {
     const double value = (double)v->data[i];
     if (fprintf(stream, (SL_LA_FLOAT_FORMAT " "), value) < 0) {
-      SL_LOG_ERROR(("failed printing vector value at (%d): " SL_LA_FLOAT_FORMAT), i, value);
+      SL_LOG_ERROR(("failed printing vector value at (%zu): " SL_LA_FLOAT_FORMAT), i, value);
       return;
     }
   }
@@ -167,13 +164,13 @@ void sl_la_vector_print(FILE stream[const static 1], const struct sl_la_vector v
   }
 }
 
-void sl_la_matrix_print(FILE stream[const static 1], struct sl_la_matrix a[const static 1]) {
-  for (int row = 0; row < a->rows; ++row) {
-    for (int col = 0; col < a->cols; ++col) {
-      const double value = (double)*sl_la_matrix_get(a, row, col);
+void sl_la_matrix_print(FILE stream[const static 1], struct sl_matrix_f32 a[const static 1]) {
+  for (size_t row = 0; row < sl_matrix_f32_num_rows(a); ++row) {
+    for (size_t col = 0; col < sl_matrix_f32_num_cols(a); ++col) {
+      const double value = (double)*sl_matrix_f32_get(a, row, col);
       if (fprintf(stream, (SL_LA_FLOAT_FORMAT " "), value) < 0) {
         SL_LOG_ERROR(
-            ("failed printing matrix value at (%d, %d): " SL_LA_FLOAT_FORMAT),
+            ("failed printing matrix value at (%zu, %zu): " SL_LA_FLOAT_FORMAT),
             row,
             col,
             value
@@ -182,19 +179,26 @@ void sl_la_matrix_print(FILE stream[const static 1], struct sl_la_matrix a[const
       }
     }
     if (fprintf(stream, "\n") < 0) {
-      SL_LOG_ERROR("failed printing newline after row %d", row);
+      SL_LOG_ERROR("failed printing newline after row %zu", row);
       return;
     }
   }
 }
 
 void sl_la_matrix_multiply(
-    const struct sl_la_matrix a[const static 1],
-    const struct sl_la_matrix b[const static 1],
-    struct sl_la_matrix c[const static 1]
+    const struct sl_matrix_f32 a[const static 1],
+    const struct sl_matrix_f32 b[const static 1],
+    struct sl_matrix_f32 c[const static 1]
 ) {
   // c := a b
-  assert(a->cols == b->rows && a->rows == c->rows && b->cols == c->cols);
+  assert(
+      sl_matrix_f32_num_cols(a) == sl_matrix_f32_num_rows(b)
+      && sl_matrix_f32_num_rows(a) == sl_matrix_f32_num_rows(c)
+      && sl_matrix_f32_num_cols(b) == sl_matrix_f32_num_cols(c)
+  );
+  assert(sl_matrix_f32_num_rows(a) <= (size_t)INT32_MAX);
+  assert(sl_matrix_f32_num_cols(a) <= (size_t)INT32_MAX);
+  assert(sl_matrix_f32_num_cols(b) <= (size_t)INT32_MAX);
   // column-major implicit transpose trickery from
   // https://stackoverflow.com/a/56064726/5951112
   // 2024-06-10
@@ -202,103 +206,113 @@ void sl_la_matrix_multiply(
       CblasColMajor,
       CblasNoTrans,
       CblasNoTrans,
-      b->cols, /* m */
-      a->rows, /* n */
-      a->cols, /* k */
-      1,       /* alpha */
-      b->data, /* a */
-      b->cols, /* lda */
-      a->data, /* b */
-      a->cols, /* ldb */
-      0,       /* beta */
-      c->data, /* c */
-      c->cols  /* ldc */
+      (int)sl_matrix_f32_num_cols(b), /* m */
+      (int)sl_matrix_f32_num_rows(a), /* n */
+      (int)sl_matrix_f32_num_cols(a), /* k */
+      1,                              /* alpha */
+      b->data,                        /* a */
+      (int)sl_matrix_f32_num_cols(b), /* lda */
+      a->data,                        /* b */
+      (int)sl_matrix_f32_num_cols(a), /* ldb */
+      0,                              /* beta */
+      c->data,                        /* c */
+      (int)sl_matrix_f32_num_cols(c)  /* ldc */
   );
 }
 
-double sl_la_matrix_trace(struct sl_la_matrix a[const static 1]) {
-  double tr = 0;
-  for (int i = 0; i < SL_MIN(a->rows, a->cols); ++i) {
-    tr += (double)*sl_la_matrix_get(a, i, i);
+double sl_la_matrix_trace(struct sl_matrix_f32 a[const static 1]) {
+  double tr      = 0;
+  const size_t n = SL_MIN(sl_matrix_f32_num_rows(a), sl_matrix_f32_num_cols(a));
+  for (size_t i = 0; i < n; ++i) {
+    tr += (double)*sl_matrix_f32_get(a, i, i);
   }
   return tr;
 }
 
-double sl_la_matrix_frobenius_norm(struct sl_la_matrix a[const static 1]) {
+double sl_la_matrix_frobenius_norm(struct sl_matrix_f32 a[const static 1]) {
   // https://en.wikipedia.org/wiki/Matrix_norm#Frobenius_norm
   // 2024-06-09
+  assert(sl_matrix_f32_num_cols(a) <= (size_t)INT32_MAX);
   double norm = 0;
-  for (int r = 0; r < a->rows; ++r) {
-    const float* row = sl_la_matrix_get_row(a, r);
-    norm += (double)cblas_sdot(a->cols, row, 1, row, 1);
+  for (size_t r = 0; r < sl_matrix_f32_num_rows(a); ++r) {
+    const float* row = sl_matrix_f32_get(a, r, 0);
+    norm += (double)cblas_sdot((int)sl_matrix_f32_num_cols(a), row, 1, row, 1);
   }
   return sqrt(norm);
 }
 
 void sl_la_matrix_copy_row(
-    struct sl_la_vector dst[const static 1],
-    struct sl_la_matrix src[const static 1],
-    const int row
+    struct sl_vector_f32 dst[const static 1],
+    struct sl_matrix_f32 src[const static 1],
+    const size_t row
 ) {
-  assert(dst->size == src->cols);
-  cblas_scopy(dst->size, sl_la_matrix_get_row(src, row), 1, dst->data, 1);
+  assert(sl_vector_f32_size(dst) == sl_matrix_f32_num_cols(src));
+  assert(sl_vector_f32_size(dst) <= (size_t)INT32_MAX);
+  cblas_scopy((int)sl_vector_f32_size(dst), sl_matrix_f32_get(src, row, 0), 1, dst->data, 1);
 }
 
 void sl_la_matrix_saxpy_axis0(
-    struct sl_la_matrix m[const static 1],
-    struct sl_la_vector v[const static 1],
+    struct sl_matrix_f32 m[const static 1],
+    struct sl_vector_f32 v[const static 1],
     const float alpha
 ) {
-  assert(m->cols == v->size);
-  for (int row = 0; row < m->rows; ++row) {
-    cblas_saxpy(m->cols, alpha, v->data, 1, sl_la_matrix_get_row(m, row), 1);
+  assert(sl_matrix_f32_num_cols(m) == sl_vector_f32_size(v));
+  assert(sl_matrix_f32_num_cols(m) <= (size_t)INT32_MAX);
+  for (size_t row = 0; row < sl_matrix_f32_num_rows(m); ++row) {
+    cblas_saxpy((int)sl_matrix_f32_num_cols(m), alpha, v->data, 1, sl_matrix_f32_get(m, row, 0), 1);
   }
 }
 
 void sl_la_matrix_add_axis0(
-    struct sl_la_matrix m[const static 1],
-    struct sl_la_vector v[const static 1]
+    struct sl_matrix_f32 m[const static 1],
+    struct sl_vector_f32 v[const static 1]
 ) {
   sl_la_matrix_saxpy_axis0(m, v, 1);
 }
 
 void sl_la_matrix_sub_axis0(
-    struct sl_la_matrix m[const static 1],
-    struct sl_la_vector v[const static 1]
+    struct sl_matrix_f32 m[const static 1],
+    struct sl_vector_f32 v[const static 1]
 ) {
   sl_la_matrix_saxpy_axis0(m, v, -1);
 }
 
 void sl_la_matrix_mul_axis0(
-    struct sl_la_matrix m[const static 1],
-    struct sl_la_vector v[const static 1]
+    struct sl_matrix_f32 m[const static 1],
+    struct sl_vector_f32 v[const static 1]
 ) {
-  assert(m->cols == v->size);
-  for (int row = 0; row < m->rows; ++row) {
-    sl_la_vec_mul(m->cols, sl_la_matrix_get_row(m, row), v->data);
+  assert(sl_matrix_f32_num_cols(m) == sl_vector_f32_size(v));
+  for (size_t row = 0; row < sl_matrix_f32_num_rows(m); ++row) {
+    sl_la_vec_mul(sl_matrix_f32_num_cols(m), sl_matrix_f32_get(m, row, 0), v->data);
   }
 }
 
 void sl_la_matrix_diffdiv_axis0(
-    struct sl_la_matrix m[const static 1],
-    struct sl_la_vector lhs[const static 1],
-    struct sl_la_vector rhs[const static 1]
+    struct sl_matrix_f32 m[const static 1],
+    struct sl_vector_f32 lhs[const static 1],
+    struct sl_vector_f32 rhs[const static 1]
 ) {
-  assert(m->cols == lhs->size && m->cols == rhs->size);
-  for (int row = 0; row < m->rows; ++row) {
+  assert(
+      sl_matrix_f32_num_cols(m) == sl_vector_f32_size(lhs)
+      && sl_matrix_f32_num_cols(m) == sl_vector_f32_size(rhs)
+  );
+  for (size_t row = 0; row < sl_matrix_f32_num_rows(m); ++row) {
     // TODO extremely slow
-    for (int col = 0; col < m->cols; ++col) {
-      *sl_la_matrix_get(m, row, col) /= lhs->data[col] - rhs->data[col];
+    for (size_t col = 0; col < sl_matrix_f32_num_cols(m); ++col) {
+      *sl_matrix_f32_get(m, row, col) /= lhs->data[col] - rhs->data[col];
     }
   }
 }
 
-void sl_la_matrix_add_axis2(struct sl_la_matrix m[const static 1], const float x) {
-  for (int i = 0; i < m->rows * m->cols; ++i) {
+void sl_la_matrix_add_axis2(struct sl_matrix_f32 m[const static 1], const float x) {
+  const size_t n = sl_matrix_f32_size(m);
+  for (size_t i = 0; i < n; ++i) {
     m->data[i] += x;
   }
 }
 
-void sl_la_matrix_mul_axis2(struct sl_la_matrix m[const static 1], const float x) {
-  cblas_sscal(m->rows * m->cols, x, m->data, 1);
+void sl_la_matrix_mul_axis2(struct sl_matrix_f32 m[const static 1], const float x) {
+  const size_t n = sl_matrix_f32_size(m);
+  assert(n <= (size_t)INT32_MAX);
+  cblas_sscal((int)n, x, m->data, 1);
 }

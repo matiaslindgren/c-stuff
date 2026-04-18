@@ -12,8 +12,8 @@ SL_TEST(test_matrix_f64_wipe) {
   };
   sl_matrix_f64_wipe(&m);
   SL_ASSERT_TRUE(m.data == nullptr);
-  SL_ASSERT_TRUE(m.length[0] == 0);
-  SL_ASSERT_TRUE(m.length[1] == 0);
+  SL_ASSERT_TRUE(sl_matrix_f64_num_rows(&m) == 0);
+  SL_ASSERT_TRUE(sl_matrix_f64_num_cols(&m) == 0);
   SL_ASSERT_TRUE(m.capacity[0] == 0);
   SL_ASSERT_TRUE(m.capacity[1] == 0);
   return true;
@@ -30,8 +30,8 @@ SL_TEST(test_matrix_f64_clear) {
   };
   sl_matrix_f64_clear(&m);
   SL_ASSERT_TRUE(m.data == buf);
-  SL_ASSERT_TRUE(m.length[0] == 0);
-  SL_ASSERT_TRUE(m.length[1] == 0);
+  SL_ASSERT_TRUE(sl_matrix_f64_num_rows(&m) == 0);
+  SL_ASSERT_TRUE(sl_matrix_f64_num_cols(&m) == 0);
   SL_ASSERT_TRUE(m.capacity[0] == 2);
   SL_ASSERT_TRUE(m.capacity[1] == 2);
   return true;
@@ -91,8 +91,8 @@ SL_TEST(test_matrix_f32_wipe) {
   };
   sl_matrix_f32_wipe(&m);
   SL_ASSERT_TRUE(m.data == nullptr);
-  SL_ASSERT_TRUE(m.length[0] == 0);
-  SL_ASSERT_TRUE(m.length[1] == 0);
+  SL_ASSERT_TRUE(sl_matrix_f32_num_rows(&m) == 0);
+  SL_ASSERT_TRUE(sl_matrix_f32_num_cols(&m) == 0);
   SL_ASSERT_TRUE(m.capacity[0] == 0);
   SL_ASSERT_TRUE(m.capacity[1] == 0);
   return true;
@@ -109,8 +109,8 @@ SL_TEST(test_matrix_f32_clear) {
   };
   sl_matrix_f32_clear(&m);
   SL_ASSERT_TRUE(m.data == buf);
-  SL_ASSERT_TRUE(m.length[0] == 0);
-  SL_ASSERT_TRUE(m.length[1] == 0);
+  SL_ASSERT_TRUE(sl_matrix_f32_num_rows(&m) == 0);
+  SL_ASSERT_TRUE(sl_matrix_f32_num_cols(&m) == 0);
   SL_ASSERT_TRUE(m.capacity[0] == 2);
   SL_ASSERT_TRUE(m.capacity[1] == 2);
   return true;

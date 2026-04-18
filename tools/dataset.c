@@ -193,7 +193,7 @@ bool spambase(struct sl_context ctx[static 1], const struct sl_args args[const s
     );
   }
 
-  struct sl_la_matrix data
+  struct sl_matrix_f32 data
       = sl_la_matrix_create(ctx, SL_DATASET_SPAMBASE_SAMPLES, SL_DATASET_SPAMBASE_FEATURES);
   uint16_t classes[SL_DATASET_SPAMBASE_SAMPLES] = {0};
 
@@ -216,7 +216,7 @@ bool spambase(struct sl_context ctx[static 1], const struct sl_args args[const s
 
     int lineno = 0;
     for (struct sl_iterator iter = sl_tokenizer_iter(&newline_tokenizer);
-         lineno < data.rows && !sl_tokenizer_iter_is_done(&iter);
+         lineno < (int)sl_matrix_f32_num_rows(&data) && !sl_tokenizer_iter_is_done(&iter);
          sl_tokenizer_iter_advance(&iter)) {
       struct sl_span* line = sl_tokenizer_iter_get(&iter);
       if (line->size < 2) {
@@ -230,63 +230,63 @@ bool spambase(struct sl_context ctx[static 1], const struct sl_args args[const s
           == sscanf(
               (const char*)line->data,
               ("%f" SL_REPEAT_56(",%f") ",%d"),
-              sl_la_matrix_get(&data, lineno, 0),
-              sl_la_matrix_get(&data, lineno, 1),
-              sl_la_matrix_get(&data, lineno, 2),
-              sl_la_matrix_get(&data, lineno, 3),
-              sl_la_matrix_get(&data, lineno, 4),
-              sl_la_matrix_get(&data, lineno, 5),
-              sl_la_matrix_get(&data, lineno, 6),
-              sl_la_matrix_get(&data, lineno, 7),
-              sl_la_matrix_get(&data, lineno, 8),
-              sl_la_matrix_get(&data, lineno, 9),
-              sl_la_matrix_get(&data, lineno, 10),
-              sl_la_matrix_get(&data, lineno, 11),
-              sl_la_matrix_get(&data, lineno, 12),
-              sl_la_matrix_get(&data, lineno, 13),
-              sl_la_matrix_get(&data, lineno, 14),
-              sl_la_matrix_get(&data, lineno, 15),
-              sl_la_matrix_get(&data, lineno, 16),
-              sl_la_matrix_get(&data, lineno, 17),
-              sl_la_matrix_get(&data, lineno, 18),
-              sl_la_matrix_get(&data, lineno, 19),
-              sl_la_matrix_get(&data, lineno, 20),
-              sl_la_matrix_get(&data, lineno, 21),
-              sl_la_matrix_get(&data, lineno, 22),
-              sl_la_matrix_get(&data, lineno, 23),
-              sl_la_matrix_get(&data, lineno, 24),
-              sl_la_matrix_get(&data, lineno, 25),
-              sl_la_matrix_get(&data, lineno, 26),
-              sl_la_matrix_get(&data, lineno, 27),
-              sl_la_matrix_get(&data, lineno, 28),
-              sl_la_matrix_get(&data, lineno, 29),
-              sl_la_matrix_get(&data, lineno, 30),
-              sl_la_matrix_get(&data, lineno, 31),
-              sl_la_matrix_get(&data, lineno, 32),
-              sl_la_matrix_get(&data, lineno, 33),
-              sl_la_matrix_get(&data, lineno, 34),
-              sl_la_matrix_get(&data, lineno, 35),
-              sl_la_matrix_get(&data, lineno, 36),
-              sl_la_matrix_get(&data, lineno, 37),
-              sl_la_matrix_get(&data, lineno, 38),
-              sl_la_matrix_get(&data, lineno, 39),
-              sl_la_matrix_get(&data, lineno, 40),
-              sl_la_matrix_get(&data, lineno, 41),
-              sl_la_matrix_get(&data, lineno, 42),
-              sl_la_matrix_get(&data, lineno, 43),
-              sl_la_matrix_get(&data, lineno, 44),
-              sl_la_matrix_get(&data, lineno, 45),
-              sl_la_matrix_get(&data, lineno, 46),
-              sl_la_matrix_get(&data, lineno, 47),
-              sl_la_matrix_get(&data, lineno, 48),
-              sl_la_matrix_get(&data, lineno, 49),
-              sl_la_matrix_get(&data, lineno, 50),
-              sl_la_matrix_get(&data, lineno, 51),
-              sl_la_matrix_get(&data, lineno, 52),
-              sl_la_matrix_get(&data, lineno, 53),
-              sl_la_matrix_get(&data, lineno, 54),
-              sl_la_matrix_get(&data, lineno, 55),
-              sl_la_matrix_get(&data, lineno, 56),
+              sl_matrix_f32_get(&data, (size_t)lineno, 0),
+              sl_matrix_f32_get(&data, (size_t)lineno, 1),
+              sl_matrix_f32_get(&data, (size_t)lineno, 2),
+              sl_matrix_f32_get(&data, (size_t)lineno, 3),
+              sl_matrix_f32_get(&data, (size_t)lineno, 4),
+              sl_matrix_f32_get(&data, (size_t)lineno, 5),
+              sl_matrix_f32_get(&data, (size_t)lineno, 6),
+              sl_matrix_f32_get(&data, (size_t)lineno, 7),
+              sl_matrix_f32_get(&data, (size_t)lineno, 8),
+              sl_matrix_f32_get(&data, (size_t)lineno, 9),
+              sl_matrix_f32_get(&data, (size_t)lineno, 10),
+              sl_matrix_f32_get(&data, (size_t)lineno, 11),
+              sl_matrix_f32_get(&data, (size_t)lineno, 12),
+              sl_matrix_f32_get(&data, (size_t)lineno, 13),
+              sl_matrix_f32_get(&data, (size_t)lineno, 14),
+              sl_matrix_f32_get(&data, (size_t)lineno, 15),
+              sl_matrix_f32_get(&data, (size_t)lineno, 16),
+              sl_matrix_f32_get(&data, (size_t)lineno, 17),
+              sl_matrix_f32_get(&data, (size_t)lineno, 18),
+              sl_matrix_f32_get(&data, (size_t)lineno, 19),
+              sl_matrix_f32_get(&data, (size_t)lineno, 20),
+              sl_matrix_f32_get(&data, (size_t)lineno, 21),
+              sl_matrix_f32_get(&data, (size_t)lineno, 22),
+              sl_matrix_f32_get(&data, (size_t)lineno, 23),
+              sl_matrix_f32_get(&data, (size_t)lineno, 24),
+              sl_matrix_f32_get(&data, (size_t)lineno, 25),
+              sl_matrix_f32_get(&data, (size_t)lineno, 26),
+              sl_matrix_f32_get(&data, (size_t)lineno, 27),
+              sl_matrix_f32_get(&data, (size_t)lineno, 28),
+              sl_matrix_f32_get(&data, (size_t)lineno, 29),
+              sl_matrix_f32_get(&data, (size_t)lineno, 30),
+              sl_matrix_f32_get(&data, (size_t)lineno, 31),
+              sl_matrix_f32_get(&data, (size_t)lineno, 32),
+              sl_matrix_f32_get(&data, (size_t)lineno, 33),
+              sl_matrix_f32_get(&data, (size_t)lineno, 34),
+              sl_matrix_f32_get(&data, (size_t)lineno, 35),
+              sl_matrix_f32_get(&data, (size_t)lineno, 36),
+              sl_matrix_f32_get(&data, (size_t)lineno, 37),
+              sl_matrix_f32_get(&data, (size_t)lineno, 38),
+              sl_matrix_f32_get(&data, (size_t)lineno, 39),
+              sl_matrix_f32_get(&data, (size_t)lineno, 40),
+              sl_matrix_f32_get(&data, (size_t)lineno, 41),
+              sl_matrix_f32_get(&data, (size_t)lineno, 42),
+              sl_matrix_f32_get(&data, (size_t)lineno, 43),
+              sl_matrix_f32_get(&data, (size_t)lineno, 44),
+              sl_matrix_f32_get(&data, (size_t)lineno, 45),
+              sl_matrix_f32_get(&data, (size_t)lineno, 46),
+              sl_matrix_f32_get(&data, (size_t)lineno, 47),
+              sl_matrix_f32_get(&data, (size_t)lineno, 48),
+              sl_matrix_f32_get(&data, (size_t)lineno, 49),
+              sl_matrix_f32_get(&data, (size_t)lineno, 50),
+              sl_matrix_f32_get(&data, (size_t)lineno, 51),
+              sl_matrix_f32_get(&data, (size_t)lineno, 52),
+              sl_matrix_f32_get(&data, (size_t)lineno, 53),
+              sl_matrix_f32_get(&data, (size_t)lineno, 54),
+              sl_matrix_f32_get(&data, (size_t)lineno, 55),
+              sl_matrix_f32_get(&data, (size_t)lineno, 56),
               &label
           )) {
         SL_LOG_ERROR("failed parsing CSV line %d", lineno);
@@ -298,14 +298,14 @@ bool spambase(struct sl_context ctx[static 1], const struct sl_args args[const s
 
     sl_string_destroy(&content);
 
-    if (lineno != data.rows) {
-      SL_LOG_ERROR("expected %d samples but parsed %d", data.rows, lineno);
+    if ((size_t)lineno != sl_matrix_f32_num_rows(&data)) {
+      SL_LOG_ERROR("expected %zu samples but parsed %d", sl_matrix_f32_num_rows(&data), lineno);
       goto done;
     }
   }
 
-  const size_t n_rows = (size_t)data.rows;
-  const size_t n_cols = (size_t)data.cols;
+  const size_t n_rows = sl_matrix_f32_num_rows(&data);
+  const size_t n_cols = sl_matrix_f32_num_cols(&data);
 
   struct sl_record record_samples = {
       .layout   = "sparse",
@@ -403,7 +403,11 @@ bool rcv1(struct sl_context ctx[static 1], const struct sl_args args[const stati
   struct sl_rcv1_metadata* metadata
       = sl_alloc(ctx, max_document_id + 1, sizeof(struct sl_rcv1_metadata));
 
-  struct sl_la_vector batch = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_RCV1_FEATURES);
+  struct sl_vector_f32 batch = {
+      .data     = (float[SL_DATASET_RCV1_FEATURES]){0},
+      .length   = {SL_DATASET_RCV1_FEATURES},
+      .capacity = {SL_DATASET_RCV1_FEATURES},
+  };
 
   struct sl_record train_record           = {0};
   struct sl_file train_record_file        = {0};
@@ -648,7 +652,7 @@ bool rcv1(struct sl_context ctx[static 1], const struct sl_args args[const stati
       }
 
       struct sl_span write_buffer
-          = sl_span_view(sizeof(float) * (size_t)(batch.size), (void*)(batch.data));
+          = sl_span_view(sizeof(float) * sl_vector_f32_size(&batch), (void*)(batch.data));
 
       if (metadata[id].in_trainset) {
         // TODO len N buffer instead of len 1

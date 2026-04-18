@@ -248,10 +248,10 @@ SL_TEST(test_dense_data_reader) {
 
   SL_ASSERT_TRUE(sl_record_reader_open(ctx, &reader));
 
-  struct sl_la_matrix batch = {
-      .rows = (int)rows,
-      .cols = (int)cols,
-      .data = (float[32 * 4]){0},
+  struct sl_matrix_f32 batch = {
+      .length   = {rows, cols},
+      .capacity = {rows, cols},
+      .data     = (float[32 * 4]){0},
   };
   const size_t buf_size = sizeof(batch.data[0]) * rows * cols;
   // TODO combine matrix and span with generic tensor
@@ -271,7 +271,7 @@ SL_TEST(test_dense_data_reader) {
       for (size_t k = 0; k < cols; ++k) {
         const size_t idx      = i * rows * cols + j * cols + k;
         const double expected = sqrt((double)idx + 1);
-        const double result   = (double)*sl_la_matrix_get(&batch, (int)j, (int)k);
+        const double result   = (double)*sl_matrix_f32_get(&batch, j, k);
         SL_ASSERT_EQ_DOUBLE(result, expected, 1e-5);
       }
     }
@@ -431,10 +431,10 @@ SL_TEST(test_dense_data_writer) {
   const size_t rows       = record.dim_size[0];
   const size_t cols       = record.dim_size[1];
 
-  struct sl_la_matrix batch = {
-      .rows = (int)batch_size,
-      .cols = (int)cols,
-      .data = (float[10 * 25]){0},
+  struct sl_matrix_f32 batch = {
+      .length   = {batch_size, cols},
+      .capacity = {batch_size, cols},
+      .data     = (float[10 * 25]){0},
   };
   const size_t buf_size = sizeof(batch.data[0]) * batch_size * cols;
   // TODO combine matrix and span with generic tensor
@@ -555,13 +555,13 @@ SL_TEST(test_write_data) {
     strncpy(record.path, sl_misc_tmpdir(), sizeof(record.path) - 1);
     record.path[sizeof(record.path) - 1] = '\0';
 
-    struct sl_la_matrix data = {
-        .rows = 4,
-        .cols = 3,
-        .data = (float[]){2, -7, 3, 7, 1, -5, -3, 9, -5, -1, 6, -1},
+    struct sl_matrix_f32 data = {
+        .length   = {4, 3},
+        .capacity = {4, 3},
+        .data     = (float[]){2, -7, 3, 7, 1, -5, -3, 9, -5, -1, 6, -1},
     };
     SL_ASSERT_TRUE(
-        sl_record_write_all(ctx, &record, sizeof(float) * sl_la_matrix_size(&data), data.data)
+        sl_record_write_all(ctx, &record, sizeof(float) * sl_matrix_f32_size(&data), data.data)
     );
 
     unsigned char raw[] = {0, 0, 0,    0x40, 0, 0, 0xe0, 0xc0, 0, 0, 0x40, 0x40, 0, 0, 0xe0, 0x40,
@@ -584,14 +584,14 @@ SL_TEST(test_write_data) {
     strncpy(record.path, sl_misc_tmpdir(), sizeof(record.path) - 1);
     record.path[sizeof(record.path) - 1] = '\0';
 
-    struct sl_la_matrix data = {
-        .rows = 4,
-        .cols = 3,
-        .data = (float[]){0, 0, 0, 5, 0, 0, 0, 0, 0, 0, -10, 0},
+    struct sl_matrix_f32 data = {
+        .length   = {4, 3},
+        .capacity = {4, 3},
+        .data     = (float[]){0, 0, 0, 5, 0, 0, 0, 0, 0, 0, -10, 0},
     };
 
     SL_ASSERT_TRUE(
-        sl_record_write_all(ctx, &record, sizeof(float) * sl_la_matrix_size(&data), data.data)
+        sl_record_write_all(ctx, &record, sizeof(float) * sl_matrix_f32_size(&data), data.data)
     );
 
     unsigned char raw_data[] = {0x03, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xa0, 0x40,
@@ -640,19 +640,19 @@ SL_TEST(test_sparse_write_and_read) {
     strncpy(record.path, sl_misc_tmpdir(), sizeof(record.path) - 1);
     record.path[sizeof(record.path) - 1] = '\0';
 
-    struct sl_la_matrix data1 = {
-        .rows = 20,
-        .cols = 5,
+    struct sl_matrix_f32 data1 = {
+        .length   = {20, 5},
+        .capacity = {20, 5},
         .data
         = (float[]){1, 0, 0,  0, 0, 0, -2, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0,  4, 0, 0, 0, 0, 0, -5,
-                    0, 0, 0,  1, 0, 0, 0,  -2, 0,  0, 0, 0, 0, 0, 0, 4, 0, 0,  0, 0, 0, 5, 0, 0, 0,
-                    0, 0, -1, 0, 0, 0, 0,  0,  -2, 0, 0, 0, 0, 0, 3, 0, 0, 0,  4, 0, 0, 0, 0, 0, 0,
-                    0, 6, 0,  0, 0, 7, 0,  0,  0,  0, 0, 8, 0, 0, 0, 0, 0, -9, 0, 0, 0, 0, 0, 0, 0},
+                     0, 0, 0,  1, 0, 0, 0,  -2, 0,  0, 0, 0, 0, 0, 0, 4, 0, 0,  0, 0, 0, 5, 0, 0, 0,
+                     0, 0, -1, 0, 0, 0, 0,  0,  -2, 0, 0, 0, 0, 0, 3, 0, 0, 0,  4, 0, 0, 0, 0, 0, 0,
+                     0, 6, 0,  0, 0, 7, 0,  0,  0,  0, 0, 8, 0, 0, 0, 0, 0, -9, 0, 0, 0, 0, 0, 0, 0},
     };
     SL_ASSERT_TRUE(sl_record_write_all(
         ctx,
         &record,
-        sizeof(data1.data[0]) * sl_la_matrix_size(&data1),
+        sizeof(data1.data[0]) * sl_matrix_f32_size(&data1),
         (void*)data1.data
     ));
 
@@ -676,14 +676,14 @@ SL_TEST(test_sparse_batch_write_and_read) {
   strncpy(record.path, sl_misc_tmpdir(), sizeof(record.path) - 1);
   record.path[sizeof(record.path) - 1] = '\0';
 
-  struct sl_la_matrix data1 = {
-      .rows = 20,
-      .cols = 5,
+  struct sl_matrix_f32 data1 = {
+      .length   = {20, 5},
+      .capacity = {20, 5},
       .data
       = (float[]){1, 0, 0,  0, 0, 0, -2, 0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0,  4, 0, 0, 0, 0, 0, -5,
-                  0, 0, 0,  1, 0, 0, 0,  -2, 0,  0, 0, 0, 0, 0, 0, 4, 0, 0,  0, 0, 0, 5, 0, 0, 0,
-                  0, 0, -1, 0, 0, 0, 0,  0,  -2, 0, 0, 0, 0, 0, 3, 0, 0, 0,  4, 0, 0, 0, 0, 0, 0,
-                  0, 6, 0,  0, 0, 7, 0,  0,  0,  0, 0, 8, 0, 0, 0, 0, 0, -9, 0, 0, 0, 0, 0, 0, 0},
+                   0, 0, 0,  1, 0, 0, 0,  -2, 0,  0, 0, 0, 0, 0, 0, 4, 0, 0,  0, 0, 0, 5, 0, 0, 0,
+                   0, 0, -1, 0, 0, 0, 0,  0,  -2, 0, 0, 0, 0, 0, 3, 0, 0, 0,  4, 0, 0, 0, 0, 0, 0,
+                   0, 6, 0,  0, 0, 7, 0,  0,  0,  0, 0, 8, 0, 0, 0, 0, 0, -9, 0, 0, 0, 0, 0, 0, 0},
   };
 
   const size_t batch_size  = 5;

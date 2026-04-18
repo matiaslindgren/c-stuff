@@ -8,7 +8,7 @@ SL_TEST(test_vector_f64_wipe) {
   struct sl_vector_f64 v = {.data = (double[]){1.0}, .length = {1}, .capacity = {1}};
   sl_vector_f64_wipe(&v);
   SL_ASSERT_TRUE(v.data == nullptr);
-  SL_ASSERT_TRUE(v.length[0] == 0);
+  SL_ASSERT_TRUE(sl_vector_f64_size(&v) == 0);
   SL_ASSERT_TRUE(v.capacity[0] == 0);
   return true;
 }
@@ -20,7 +20,7 @@ SL_TEST(test_vector_f64_clear) {
   struct sl_vector_f64 v = {.data = buf, .length = {3}, .capacity = {3}};
   sl_vector_f64_clear(&v);
   SL_ASSERT_TRUE(v.data == buf);
-  SL_ASSERT_TRUE(v.length[0] == 0);
+  SL_ASSERT_TRUE(sl_vector_f64_size(&v) == 0);
   SL_ASSERT_TRUE(v.capacity[0] == 3);
   return true;
 }
@@ -62,7 +62,7 @@ SL_TEST(test_vector_f32_wipe) {
   struct sl_vector_f32 v = {.data = (float[]){1.0f}, .length = {1}, .capacity = {1}};
   sl_vector_f32_wipe(&v);
   SL_ASSERT_TRUE(v.data == nullptr);
-  SL_ASSERT_TRUE(v.length[0] == 0);
+  SL_ASSERT_TRUE(sl_vector_f32_size(&v) == 0);
   SL_ASSERT_TRUE(v.capacity[0] == 0);
   return true;
 }
@@ -74,7 +74,7 @@ SL_TEST(test_vector_f32_clear) {
   struct sl_vector_f32 v = {.data = buf, .length = {3}, .capacity = {3}};
   sl_vector_f32_clear(&v);
   SL_ASSERT_TRUE(v.data == buf);
-  SL_ASSERT_TRUE(v.length[0] == 0);
+  SL_ASSERT_TRUE(sl_vector_f32_size(&v) == 0);
   SL_ASSERT_TRUE(v.capacity[0] == 3);
   return true;
 }

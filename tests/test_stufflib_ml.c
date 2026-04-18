@@ -15,8 +15,8 @@
 #include <stufflib/random/random.h>
 
 bool check_vector_equal(
-    struct sl_la_vector a[const static 1],
-    struct sl_la_vector b[const static 1]
+    struct sl_vector_f32 a[const static 1],
+    struct sl_vector_f32 b[const static 1]
 ) {
   if (!sl_la_vector_equal(a, b)) {
     fprintf(stderr, "!expected vectors a and b to be equal\n");
@@ -30,8 +30,8 @@ bool check_vector_equal(
 }
 
 bool check_matrix_equal(
-    struct sl_la_matrix a[const static 1],
-    struct sl_la_matrix b[const static 1]
+    struct sl_matrix_f32 a[const static 1],
+    struct sl_matrix_f32 b[const static 1]
 ) {
   if (!sl_la_matrix_equal(a, b)) {
     fprintf(stderr, "!expected matrices a and b to be equal\n");
@@ -48,10 +48,10 @@ SL_TEST(test_minmax_normalization) {
   (void)ctx;
   (void)verbose;
   {
-    struct sl_la_matrix a = {
-        .rows = 4,
-        .cols = 3,
-        .data = (float[]){-6, -2, -1, -3, -3, -8, -1, 6, 10, 8, 10, -4},
+    struct sl_matrix_f32 a = {
+        .length   = {4, 3},
+        .capacity = {4, 3},
+        .data     = (float[]){-6, -2, -1, -3, -3, -8, -1, 6, 10, 8, 10, -4},
     };
     struct sl_ml_minmax_scaler scaler = SL_ML_MINMAX_SCALER_CREATE_INLINE(3);
     sl_ml_minmax_fit(&scaler, &a);
@@ -63,24 +63,24 @@ SL_TEST(test_minmax_normalization) {
     SL_ASSERT_TRUE(sl_math_double_almost((double)scaler.hi.data[2], 10, SL_LA_FLOAT_EQ_TOL));
   }
   {
-    struct sl_la_matrix a1 = {
-        .rows = 4,
-        .cols = 3,
-        .data = (float[]){-6, -2, -1, -3, -3, -8, -1, 6, 10, 8, 10, -4},
+    struct sl_matrix_f32 a1 = {
+        .length   = {4, 3},
+        .capacity = {4, 3},
+        .data     = (float[]){-6, -2, -1, -3, -3, -8, -1, 6, 10, 8, 10, -4},
     };
-    struct sl_la_matrix a2 = {
-        .rows = 4,
-        .cols = 3,
-        .data = (float[]){-1.0f,
-                          -0.84615385f,
-                          -0.22222222f,
-                          -0.57142857f,
-                          -1.0f,
-                          -1.0f,
-                          -0.28571429f,
-                          0.38461538f, 1.0f,
-                          1.0f, 1.0f,
-                          -0.55555556f},
+    struct sl_matrix_f32 a2 = {
+        .length   = {4, 3},
+        .capacity = {4, 3},
+        .data     = (float[]){-1.0f,
+                     -0.84615385f,
+                     -0.22222222f,
+                     -0.57142857f,
+                     -1.0f,
+                     -1.0f,
+                     -0.28571429f,
+                     0.38461538f, 1.0f,
+                     1.0f, 1.0f,
+                     -0.55555556f},
     };
     struct sl_ml_minmax_scaler scaler = SL_ML_MINMAX_SCALER_CREATE_INLINE(3);
     sl_ml_minmax_fit(&scaler, &a1);
@@ -90,24 +90,24 @@ SL_TEST(test_minmax_normalization) {
     }
   }
   {
-    struct sl_la_matrix a1 = {
-        .rows = 4,
-        .cols = 3,
-        .data = (float[]){-6, -2, -1, -3, -3, -8, -1, 6, 10, 8, 10, -4},
+    struct sl_matrix_f32 a1 = {
+        .length   = {4, 3},
+        .capacity = {4, 3},
+        .data     = (float[]){-6, -2, -1, -3, -3, -8, -1, 6, 10, 8, 10, -4},
     };
-    struct sl_la_matrix a2 = {
-        .rows = 4,
-        .cols = 3,
-        .data = (float[]){-1.0f,
-                          -0.84615385f,
-                          -0.22222222f,
-                          -0.57142857f,
-                          -1.0f,
-                          -1.0f,
-                          -0.28571429f,
-                          0.38461538f, 1.0f,
-                          1.0f, 1.0f,
-                          -0.55555556f},
+    struct sl_matrix_f32 a2 = {
+        .length   = {4, 3},
+        .capacity = {4, 3},
+        .data     = (float[]){-1.0f,
+                     -0.84615385f,
+                     -0.22222222f,
+                     -0.57142857f,
+                     -1.0f,
+                     -1.0f,
+                     -0.28571429f,
+                     0.38461538f, 1.0f,
+                     1.0f, 1.0f,
+                     -0.55555556f},
     };
     SL_ML_MINMAX_RESCALE(3, &a1, -1, 1);
     if (!check_matrix_equal(&a1, &a2)) {
@@ -115,21 +115,21 @@ SL_TEST(test_minmax_normalization) {
     }
   }
   {
-    struct sl_la_matrix a1 = {
-        .rows = 4,
-        .cols = 3,
-        .data = (float[]){-6, -2, -1, -3, -3, -8, -1, 6, 10, 8, 10, -4},
+    struct sl_matrix_f32 a1 = {
+        .length   = {4, 3},
+        .capacity = {4, 3},
+        .data     = (float[]){-6, -2, -1, -3, -3, -8, -1, 6, 10, 8, 10, -4},
     };
-    struct sl_la_matrix a2 = {
-        .rows = 4,
-        .cols = 3,
-        .data = (float[]){0.0f,
-                          0.07692308f, 0.38888889f,
-                          0.21428571f, 0.0f,
-                          0.0f, 0.35714286f,
-                          0.69230769f, 1.0f,
-                          1.0f, 1.0f,
-                          0.22222222f},
+    struct sl_matrix_f32 a2 = {
+        .length   = {4, 3},
+        .capacity = {4, 3},
+        .data     = (float[]){0.0f,
+                     0.07692308f, 0.38888889f,
+                     0.21428571f, 0.0f,
+                     0.0f, 0.35714286f,
+                     0.69230769f, 1.0f,
+                     1.0f, 1.0f,
+                     0.22222222f},
     };
     struct sl_ml_minmax_scaler scaler = SL_ML_MINMAX_SCALER_CREATE_INLINE(3);
     sl_ml_minmax_fit(&scaler, &a1);
@@ -139,21 +139,21 @@ SL_TEST(test_minmax_normalization) {
     }
   }
   {
-    struct sl_la_matrix a1 = {
-        .rows = 4,
-        .cols = 3,
-        .data = (float[]){-6, -2, -1, -3, -3, -8, -1, 6, 10, 8, 10, -4},
+    struct sl_matrix_f32 a1 = {
+        .length   = {4, 3},
+        .capacity = {4, 3},
+        .data     = (float[]){-6, -2, -1, -3, -3, -8, -1, 6, 10, 8, 10, -4},
     };
-    struct sl_la_matrix a2 = {
-        .rows = 4,
-        .cols = 3,
-        .data = (float[]){1.0f,
-                          1.69230769f, 4.5f,
-                          2.92857143f, 1.0f,
-                          1.0f, 4.21428571f,
-                          7.23076923f, 10.0f,
-                          10.0f, 10.0f,
-                          3.0f},
+    struct sl_matrix_f32 a2 = {
+        .length   = {4, 3},
+        .capacity = {4, 3},
+        .data     = (float[]){1.0f,
+                     1.69230769f, 4.5f,
+                     2.92857143f, 1.0f,
+                     1.0f, 4.21428571f,
+                     7.23076923f, 10.0f,
+                     10.0f, 10.0f,
+                     3.0f},
     };
     struct sl_ml_minmax_scaler scaler = SL_ML_MINMAX_SCALER_CREATE_INLINE(3);
     sl_ml_minmax_fit(&scaler, &a1);
@@ -170,15 +170,21 @@ SL_TEST(test_random_train_test_split) {
   uint64_t prng = 0;
   sl_random_pcg32_init(&prng, 0);
   for (int iter = 0; iter < 1000; ++iter) {
-    struct sl_la_matrix data = {
-        .rows = 12,
-        .cols = 3,
+    struct sl_matrix_f32 data = {
+        .length   = {12, 3},
+        .capacity = {12, 3},
         .data = (float[]){0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17,
-                          18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35},
+                     18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35},
     };
-    uint16_t labels[]              = {0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33};
-    struct sl_la_matrix test       = {.rows = 4, .cols = 3};
-    struct sl_la_matrix train      = {.rows = data.rows - test.rows, .cols = 3};
+    uint16_t labels[]         = {0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33};
+    struct sl_matrix_f32 test = {
+        .length   = {4, 3},
+        .capacity = {4, 3}
+    };
+    struct sl_matrix_f32 train = {
+        .length   = {sl_matrix_f32_num_rows(&data) - sl_matrix_f32_num_rows(&test), 3},
+        .capacity = {sl_matrix_f32_num_rows(&data) - sl_matrix_f32_num_rows(&test), 3},
+    };
     uint16_t train_classes[12 - 4] = {0};
     uint16_t test_classes[4]       = {0};
     sl_ml_random_train_test_split(
@@ -194,9 +200,9 @@ SL_TEST(test_random_train_test_split) {
 
     int value_freq[12 * 3] = {0};
     int label_freq[12 * 3] = {0};
-    for (int row = 0; row < data.rows; ++row) {
-      for (int col = 0; col < data.cols; ++col) {
-        const int value = (int)lroundf(*sl_la_matrix_get(&data, row, col));
+    for (size_t row = 0; row < sl_matrix_f32_num_rows(&data); ++row) {
+      for (size_t col = 0; col < sl_matrix_f32_num_cols(&data); ++col) {
+        const int value = (int)lroundf(*sl_matrix_f32_get(&data, row, col));
         value_freq[value] += 1;
         if (col == 0) {
           SL_ASSERT_TRUE(value == labels[row]);
@@ -222,17 +228,17 @@ SL_TEST(test_svm_linear_fit) {
   for (int iter = 0; iter < 1000; ++iter) {
     for (int batch_size = 1; batch_size < 3; ++batch_size) {
       for (int n_epochs = 1; n_epochs < 10; ++n_epochs) {
-        struct sl_la_matrix data = {
-            .rows = 4,
-            .cols = 3,
-            .data = (float[]){1, 2, 3, 4, 5, 6, -3, -2, -1, -6, -5, -4},
+        struct sl_matrix_f32 data = {
+            .length   = {4, 3},
+            .capacity = {4, 3},
+            .data     = (float[]){1, 2, 3, 4, 5, 6, -3, -2, -1, -6, -5, -4},
         };
         uint16_t classes[4] = {0, 0, 1, 1};
 
         struct sl_ml_svm svm = {
-            .w              = SL_LA_VECTOR_CREATE_INLINE(3),
-            .s              = SL_LA_VECTOR_CREATE_INLINE(3),
-            .x              = SL_LA_VECTOR_CREATE_INLINE(3),
+            .w              = {.data = (float[3]){0}, .length = {3}, .capacity = {3}},
+            .s              = {.data = (float[3]){0}, .length = {3}, .capacity = {3}},
+            .x              = {.data = (float[3]){0}, .length = {3}, .capacity = {3}},
             .shuffle_buffer = (size_t[4]){0},
             .batch_size     = batch_size,
             .n_epochs       = n_epochs,
@@ -240,8 +246,8 @@ SL_TEST(test_svm_linear_fit) {
         };
         sl_ml_svm_linear_fit(&prng, &svm, &data, classes);
 
-        for (int i = 0; i < data.rows; ++i) {
-          struct sl_la_vector x = sl_la_matrix_row_view(&data, i);
+        for (size_t i = 0; i < sl_matrix_f32_num_rows(&data); ++i) {
+          struct sl_vector_f32 x = sl_la_matrix_row_view(&data, i);
           SL_ASSERT_TRUE(classes[i] == sl_ml_svm_binary_predict(&svm, &x));
         }
       }
