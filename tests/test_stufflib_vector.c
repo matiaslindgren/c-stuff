@@ -25,12 +25,12 @@ SL_TEST(test_vector_f64_clear) {
   return true;
 }
 
-SL_TEST(test_vector_f64_count) {
+SL_TEST(test_vector_f64_size) {
   (void)ctx;
   (void)verbose;
   double buf[]           = {0.0, 0.0, 0.0};
   struct sl_vector_f64 v = {.data = buf, .length = {3}, .capacity = {3}};
-  SL_ASSERT_EQ_LL(sl_vector_f64_count(&v), 3);
+  SL_ASSERT_EQ_LL(sl_vector_f64_size(&v), 3);
   return true;
 }
 
@@ -79,12 +79,12 @@ SL_TEST(test_vector_f32_clear) {
   return true;
 }
 
-SL_TEST(test_vector_f32_count) {
+SL_TEST(test_vector_f32_size) {
   (void)ctx;
   (void)verbose;
   float buf[]            = {0.0f, 0.0f, 0.0f};
   struct sl_vector_f32 v = {.data = buf, .length = {3}, .capacity = {3}};
-  SL_ASSERT_EQ_LL(sl_vector_f32_count(&v), 3);
+  SL_ASSERT_EQ_LL(sl_vector_f32_size(&v), 3);
   return true;
 }
 

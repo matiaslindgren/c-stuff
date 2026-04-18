@@ -37,7 +37,7 @@ SL_TEST(test_matrix_f64_clear) {
   return true;
 }
 
-SL_TEST(test_matrix_f64_count) {
+SL_TEST(test_matrix_f64_size) {
   (void)ctx;
   (void)verbose;
   double buf[]           = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
@@ -46,7 +46,7 @@ SL_TEST(test_matrix_f64_count) {
       .length   = {2, 3},
       .capacity = {2, 3}
   };
-  SL_ASSERT_EQ_LL(sl_matrix_f64_count(&m), 6);
+  SL_ASSERT_EQ_LL(sl_matrix_f64_size(&m), 6);
   return true;
 }
 
@@ -116,7 +116,7 @@ SL_TEST(test_matrix_f32_clear) {
   return true;
 }
 
-SL_TEST(test_matrix_f32_count) {
+SL_TEST(test_matrix_f32_size) {
   (void)ctx;
   (void)verbose;
   float buf[]            = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
@@ -125,7 +125,7 @@ SL_TEST(test_matrix_f32_count) {
       .length   = {2, 3},
       .capacity = {2, 3}
   };
-  SL_ASSERT_EQ_LL(sl_matrix_f32_count(&m), 6);
+  SL_ASSERT_EQ_LL(sl_matrix_f32_size(&m), 6);
   return true;
 }
 

@@ -9,7 +9,7 @@ SL_TEST(test_tensor3_wipe) {
       .length   = {1, 1, 1},
       .capacity = {1, 1, 1},
   };
-  sl_tensor3_wipe(&t);
+  sl_tensor3_f64_wipe(&t);
   SL_ASSERT_TRUE(t.data == nullptr);
   SL_ASSERT_TRUE(t.length[0] == 0);
   SL_ASSERT_TRUE(t.length[1] == 0);
@@ -29,7 +29,7 @@ SL_TEST(test_tensor3_clear) {
       .length   = {2, 2, 2},
       .capacity = {2, 2, 2}
   };
-  sl_tensor3_clear(&t);
+  sl_tensor3_f64_clear(&t);
   SL_ASSERT_TRUE(t.data == buf);
   SL_ASSERT_TRUE(t.length[0] == 0);
   SL_ASSERT_TRUE(t.length[1] == 0);
@@ -40,7 +40,7 @@ SL_TEST(test_tensor3_clear) {
   return true;
 }
 
-SL_TEST(test_tensor3_count) {
+SL_TEST(test_tensor3_size) {
   (void)ctx;
   (void)verbose;
   double buf[24]          = {0};
@@ -49,7 +49,7 @@ SL_TEST(test_tensor3_count) {
       .length   = {2, 3, 4},
       .capacity = {2, 3, 4}
   };
-  SL_ASSERT_EQ_LL(sl_tensor3_count(&t), 24);
+  SL_ASSERT_EQ_LL(sl_tensor3_f64_size(&t), 24);
   return true;
 }
 
@@ -62,9 +62,9 @@ SL_TEST(test_tensor3_get_set) {
       .length   = {2, 2, 2},
       .capacity = {2, 2, 2}
   };
-  sl_tensor3_set(&t, (size_t[3]){1, 0, 1}, 5.0);
-  SL_ASSERT_EQ_DOUBLE(*sl_tensor3_get(&t, (size_t[3]){1, 0, 1}), 5.0, 1e-15);
-  SL_ASSERT_EQ_DOUBLE(buf[sl_tensor3_offset(&t, (size_t[3]){1, 0, 1})], 5.0, 1e-15);
+  sl_tensor3_f64_set(&t, 1, 0, 1, 5.0);
+  SL_ASSERT_EQ_DOUBLE(*sl_tensor3_f64_get(&t, 1, 0, 1), 5.0, 1e-15);
+  SL_ASSERT_EQ_DOUBLE(buf[sl_tensor3_f64_offset(&t, 1, 0, 1)], 5.0, 1e-15);
   return true;
 }
 
@@ -77,11 +77,11 @@ SL_TEST(test_tensor3_offset) {
       .length   = {2, 3, 4},
       .capacity = {2, 3, 4}
   };
-  SL_ASSERT_EQ_LL(sl_tensor3_offset(&t, (size_t[3]){0, 0, 0}), 0);
-  SL_ASSERT_EQ_LL(sl_tensor3_offset(&t, (size_t[3]){0, 0, 1}), 1);
-  SL_ASSERT_EQ_LL(sl_tensor3_offset(&t, (size_t[3]){0, 1, 0}), 4);
-  SL_ASSERT_EQ_LL(sl_tensor3_offset(&t, (size_t[3]){1, 0, 0}), 12);
-  SL_ASSERT_EQ_LL(sl_tensor3_offset(&t, (size_t[3]){1, 2, 3}), 23);
+  SL_ASSERT_EQ_LL(sl_tensor3_f64_offset(&t, 0, 0, 0), 0);
+  SL_ASSERT_EQ_LL(sl_tensor3_f64_offset(&t, 0, 0, 1), 1);
+  SL_ASSERT_EQ_LL(sl_tensor3_f64_offset(&t, 0, 1, 0), 4);
+  SL_ASSERT_EQ_LL(sl_tensor3_f64_offset(&t, 1, 0, 0), 12);
+  SL_ASSERT_EQ_LL(sl_tensor3_f64_offset(&t, 1, 2, 3), 23);
   return true;
 }
 
