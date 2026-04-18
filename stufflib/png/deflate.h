@@ -18,6 +18,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+
 #include <stufflib/context/context.h>
 #include <stufflib/huffman/huffman.h>
 #include <stufflib/span/span.h>

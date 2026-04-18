@@ -2,6 +2,7 @@
 #define SL_MATH_H_INCLUDED
 
 #include <stddef.h>
+
 #include <stufflib/context/context.h>
 
 typedef double sl_math_function(double);

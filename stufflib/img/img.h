@@ -2,6 +2,7 @@
 #define SL_IMG_H_INCLUDED
 
 #include <stddef.h>
+
 #include <stufflib/context/context.h>
 #include <stufflib/png/png.h>
 

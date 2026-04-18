@@ -1,4 +1,5 @@
 #include <stdlib.h>
+
 #include <stufflib/context/context.h>
 #include <stufflib/huffman/huffman.h>
 #include <stufflib/macros/macros.h>

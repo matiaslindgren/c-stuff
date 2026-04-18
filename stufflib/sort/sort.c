@@ -1,7 +1,9 @@
-#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <assert.h>
+
 #include <stufflib/context/context.h>
 #include <stufflib/memory/memory.h>
 #include <stufflib/misc/misc.h>

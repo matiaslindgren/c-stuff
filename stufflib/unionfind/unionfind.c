@@ -1,6 +1,8 @@
-#include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
+
+#include <assert.h>
+
 #include <stufflib/context/context.h>
 #include <stufflib/memory/memory.h>
 #include <stufflib/unionfind/unionfind.h>

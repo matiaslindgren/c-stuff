@@ -2,6 +2,7 @@
 #define SL_HUFFMAN_H_INCLUDED
 
 #include <stddef.h>
+
 #include <stufflib/context/context.h>
 
 struct sl_huffman_tree {

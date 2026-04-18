@@ -2,6 +2,7 @@
 #define SL_UNIONFIND_H_INCLUDED
 
 #include <stddef.h>
+
 #include <stufflib/context/context.h>
 
 struct sl_unionfind {

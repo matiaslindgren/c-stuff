@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
+
 #include <stufflib/context/context.h>
 
 static inline uint32_t sl_random_pcg_rotate(uint32_t x, unsigned r) {

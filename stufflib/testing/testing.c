@@ -1,6 +1,7 @@
 #include <stdlib.h>
-#include <stufflib/testing/testing.h>
 #include <unistd.h>
+
+#include <stufflib/testing/testing.h>
 
 bool sl_terminal_use_colors(void) {
   char* no_color = getenv("NO_COLOR");

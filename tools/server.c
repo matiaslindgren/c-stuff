@@ -1,17 +1,19 @@
-#include <arpa/inet.h>
 #include <errno.h>
-#include <netdb.h>
-#include <netinet/in.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+
 #include <stufflib/args/args.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/misc/misc.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 #define SL_SOCKET_BACKLOG_LEN 1024
 

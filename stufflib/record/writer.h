@@ -2,6 +2,7 @@
 #define STUFFLIB_RECORD_WRITER_H_INCLUDED
 
 #include <stddef.h>
+
 #include <stufflib/context/context.h>
 #include <stufflib/io/io.h>
 #include <stufflib/record/record.h>

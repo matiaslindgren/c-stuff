@@ -3,11 +3,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <sys/errno.h>
+
 #include <stufflib/context/context.h>
 #include <stufflib/io/io.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/span/span.h>
-#include <sys/errno.h>
 
 bool sl_io_read(
     struct sl_context ctx[static const 1],

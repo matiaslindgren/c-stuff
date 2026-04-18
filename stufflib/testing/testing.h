@@ -1,9 +1,9 @@
 #ifndef SL_TESTING_H_INCLUDED
 #define SL_TESTING_H_INCLUDED
 
-#include <memory.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 #include <stufflib/args/args.h>
 #include <stufflib/context/context.h>
 #include <stufflib/math/math.h>

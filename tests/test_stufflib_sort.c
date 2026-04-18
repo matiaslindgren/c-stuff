@@ -2,13 +2,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+
 #include <stufflib/args/args.h>
 #include <stufflib/context/context.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/random/random.h>
 #include <stufflib/sort/sort.h>
 #include <stufflib/testing/testing.h>
-#include <time.h>
 
 SL_TEST(test_compare_doubles) {
   (void)ctx;

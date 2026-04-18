@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
+
 #include <stufflib/context/context.h>
 #include <stufflib/math/math.h>
 #include <stufflib/memory/memory.h>

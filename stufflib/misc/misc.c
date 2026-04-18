@@ -1,7 +1,9 @@
-#include <assert.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <assert.h>
+
 #include <stufflib/macros/macros.h>
 #include <stufflib/misc/misc.h>
 

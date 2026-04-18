@@ -1,7 +1,9 @@
-#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+
+#include <assert.h>
+
 #include <stufflib/context/context.h>
 #include <stufflib/linalg/linalg.h>
 #include <stufflib/macros/macros.h>

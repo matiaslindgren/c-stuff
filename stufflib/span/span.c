@@ -1,6 +1,8 @@
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <assert.h>
+
 #include <stufflib/context/context.h>
 #include <stufflib/iterator/iterator.h>
 #include <stufflib/macros/macros.h>

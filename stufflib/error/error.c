@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <stufflib/error/error.h>
 
 void sl_error_push(

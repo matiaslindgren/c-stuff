@@ -1,6 +1,8 @@
-#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
+
+#include <assert.h>
+
 #include <stufflib/context/context.h>
 #include <stufflib/hash/hash.h>
 #include <stufflib/hashmap/hashmap.h>

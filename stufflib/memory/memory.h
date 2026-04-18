@@ -2,6 +2,7 @@
 #define SL_MEMORY_H_INCLUDED
 
 #include <stddef.h>
+
 #include <stufflib/context/context.h>
 
 void sl_memset_explicit(size_t size, unsigned char data[const size], unsigned char value);

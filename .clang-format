@@ -22,3 +22,16 @@ DerivePointerAlignment: false
 PointerAlignment: Left
 IntegerLiteralSeparator:
   Decimal: 3
+IncludeCategories:
+  - Regex: <(std.*|string|unistd|inttypes|limits|math|time|errno|signal)\.h>
+    Priority: 0
+  - Regex: <(assert|(sys|arpa|netinet)/.*|netdb)\.h>
+    Priority: 1
+  - Regex: <stufflib.*>
+    Priority: 2
+  - Regex: '"stufflib.*"'
+    Priority: 3
+  - Regex: '"\./.*"'
+    Priority: 4
+  - Regex: .*
+    Priority: 5

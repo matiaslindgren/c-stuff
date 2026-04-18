@@ -1,6 +1,8 @@
-#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
+
+#include <assert.h>
+
 #include <stufflib/iterator/iterator.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/span/span.h>

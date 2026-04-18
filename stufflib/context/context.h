@@ -3,6 +3,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+
 #include <stufflib/error/error.h>
 
 struct sl_context {

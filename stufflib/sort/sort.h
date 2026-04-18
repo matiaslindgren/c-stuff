@@ -2,6 +2,7 @@
 #define SL_SORT_H_INCLUDED
 
 #include <stddef.h>
+
 #include <stufflib/context/context.h>
 
 typedef int sl_sort_compare(const void*, const void*);

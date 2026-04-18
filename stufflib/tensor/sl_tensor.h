@@ -51,7 +51,9 @@
                                                                           \
   size_t sl_tensor##DIM##_count(const struct NAME t[restrict static 1]) { \
     size_t n = 1;                                                         \
-    for (size_t d = 0; d < DIM; d++) n *= t->length[d];                   \
+    for (size_t d = 0; d < DIM; d++) {                                    \
+      n *= t->length[d];                                                  \
+    }                                                                     \
     return n;                                                             \
   }                                                                       \
                                                                           \

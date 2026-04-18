@@ -2,6 +2,7 @@
 #define SL_TOKENIZER_H_INCLUDED
 
 #include <stddef.h>
+
 #include <stufflib/iterator/iterator.h>
 #include <stufflib/span/span.h>
 

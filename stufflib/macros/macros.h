@@ -1,9 +1,10 @@
 #ifndef SL_MACROS_H_INCLUDED
 #define SL_MACROS_H_INCLUDED
 
-#include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
+
+#include <assert.h>
 
 #define SL_NOOP(...) \
   do {               \

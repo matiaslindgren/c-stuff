@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 #include <stufflib/testing/testing.h>
 
 #define SL_LA_FLOAT_EQ_TOL 1e-6

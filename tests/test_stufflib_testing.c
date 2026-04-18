@@ -1,4 +1,5 @@
 #include <string.h>
+
 #include <stufflib/testing/testing.h>
 
 static struct sl_testing_test* sl_testing_find(const char name[const static 1]) {
