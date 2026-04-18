@@ -1,0 +1,83 @@
+#include <stufflib/matrix/sl_matrix_f64.h>
+#include <stufflib/testing/testing.h>
+
+SL_TEST(test_matrix_wipe) {
+  (void)ctx;
+  (void)verbose;
+  struct sl_matrix_f64 m = {
+      .data     = (double[]){1.0},
+      .length   = {1, 1},
+      .capacity = {1, 1},
+  };
+  sl_matrix_f64_wipe(&m);
+  SL_ASSERT_TRUE(m.data == nullptr);
+  SL_ASSERT_TRUE(m.length[0] == 0);
+  SL_ASSERT_TRUE(m.length[1] == 0);
+  SL_ASSERT_TRUE(m.capacity[0] == 0);
+  SL_ASSERT_TRUE(m.capacity[1] == 0);
+  return true;
+}
+
+SL_TEST(test_matrix_clear) {
+  (void)ctx;
+  (void)verbose;
+  double buf[]           = {1.0, 2.0, 3.0, 4.0};
+  struct sl_matrix_f64 m = {
+      .data     = buf,
+      .length   = {2, 2},
+      .capacity = {2, 2}
+  };
+  sl_matrix_f64_clear(&m);
+  SL_ASSERT_TRUE(m.data == buf);
+  SL_ASSERT_TRUE(m.length[0] == 0);
+  SL_ASSERT_TRUE(m.length[1] == 0);
+  SL_ASSERT_TRUE(m.capacity[0] == 2);
+  SL_ASSERT_TRUE(m.capacity[1] == 2);
+  return true;
+}
+
+SL_TEST(test_matrix_count) {
+  (void)ctx;
+  (void)verbose;
+  double buf[]           = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+  struct sl_matrix_f64 m = {
+      .data     = buf,
+      .length   = {2, 3},
+      .capacity = {2, 3}
+  };
+  SL_ASSERT_EQ_LL(sl_matrix_f64_count(&m), 6);
+  return true;
+}
+
+SL_TEST(test_matrix_get_set) {
+  (void)ctx;
+  (void)verbose;
+  double buf[]           = {0.0, 0.0, 0.0, 0.0};
+  struct sl_matrix_f64 m = {
+      .data     = buf,
+      .length   = {2, 2},
+      .capacity = {2, 2}
+  };
+  sl_matrix_f64_set(&m, 1, 0, 7.0);
+  SL_ASSERT_EQ_DOUBLE(*sl_matrix_f64_get(&m, 1, 0), 7.0, 1e-15);
+  SL_ASSERT_EQ_DOUBLE(buf[2], 7.0, 1e-15);
+  return true;
+}
+
+SL_TEST(test_matrix_offset) {
+  (void)ctx;
+  (void)verbose;
+  double buf[]           = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+  struct sl_matrix_f64 m = {
+      .data     = buf,
+      .length   = {2, 3},
+      .capacity = {2, 3}
+  };
+  SL_ASSERT_EQ_LL(sl_matrix_f64_offset(&m, 0, 0), 0);
+  SL_ASSERT_EQ_LL(sl_matrix_f64_offset(&m, 0, 1), 1);
+  SL_ASSERT_EQ_LL(sl_matrix_f64_offset(&m, 1, 0), 3);
+  SL_ASSERT_EQ_LL(sl_matrix_f64_offset(&m, 1, 2), 5);
+  return true;
+}
+
+SL_TEST_MAIN()
