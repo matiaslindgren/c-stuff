@@ -71,18 +71,9 @@ bool spambase(
   }
 
   struct sl_ml_svm svm = {
-      .w
-      = {.data     = (float[SL_DATASET_SPAMBASE_FEATURES]){0},
-         .length   = {SL_DATASET_SPAMBASE_FEATURES},
-         .capacity = {SL_DATASET_SPAMBASE_FEATURES}},
-      .s
-      = {.data     = (float[SL_DATASET_SPAMBASE_FEATURES]){0},
-         .length   = {SL_DATASET_SPAMBASE_FEATURES},
-         .capacity = {SL_DATASET_SPAMBASE_FEATURES}},
-      .x
-      = {.data     = (float[SL_DATASET_SPAMBASE_FEATURES]){0},
-         .length   = {SL_DATASET_SPAMBASE_FEATURES},
-         .capacity = {SL_DATASET_SPAMBASE_FEATURES}},
+      .w              = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_SPAMBASE_FEATURES),
+      .s              = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_SPAMBASE_FEATURES),
+      .x              = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_SPAMBASE_FEATURES),
       .shuffle_buffer = (size_t[SL_DATASET_SPAMBASE_SAMPLES]){0},
       .batch_size     = 1,
       .n_epochs       = 2,
@@ -340,18 +331,9 @@ bool rcv1(
   }
 
   struct sl_ml_svm svm = {
-      .w
-      = {.data     = (float[SL_DATASET_RCV1_FEATURES]){0},
-         .length   = {SL_DATASET_RCV1_FEATURES},
-         .capacity = {SL_DATASET_RCV1_FEATURES}},
-      .s
-      = {.data     = (float[SL_DATASET_RCV1_FEATURES]){0},
-         .length   = {SL_DATASET_RCV1_FEATURES},
-         .capacity = {SL_DATASET_RCV1_FEATURES}},
-      .x
-      = {.data     = (float[SL_DATASET_RCV1_FEATURES]){0},
-         .length   = {SL_DATASET_RCV1_FEATURES},
-         .capacity = {SL_DATASET_RCV1_FEATURES}},
+      .w              = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_RCV1_FEATURES),
+      .s              = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_RCV1_FEATURES),
+      .x              = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_RCV1_FEATURES),
       .shuffle_buffer = (size_t[SL_SVM_RCV1_BUFFER_LEN]){0},
       .batch_size     = 100,
       .n_epochs       = 1,

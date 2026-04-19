@@ -236,9 +236,9 @@ SL_TEST(test_svm_linear_fit) {
         uint16_t classes[4] = {0, 0, 1, 1};
 
         struct sl_ml_svm svm = {
-            .w              = {.data = (float[3]){0}, .length = {3}, .capacity = {3}},
-            .s              = {.data = (float[3]){0}, .length = {3}, .capacity = {3}},
-            .x              = {.data = (float[3]){0}, .length = {3}, .capacity = {3}},
+            .w              = SL_LA_VECTOR_CREATE_INLINE(3),
+            .s              = SL_LA_VECTOR_CREATE_INLINE(3),
+            .x              = SL_LA_VECTOR_CREATE_INLINE(3),
             .shuffle_buffer = (size_t[4]){0},
             .batch_size     = batch_size,
             .n_epochs       = n_epochs,

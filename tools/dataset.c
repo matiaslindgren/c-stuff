@@ -406,11 +406,7 @@ bool rcv1(struct sl_context ctx[static 1], const struct sl_args args[const stati
   struct sl_rcv1_metadata* metadata
       = sl_alloc(ctx, max_document_id + 1, sizeof(struct sl_rcv1_metadata));
 
-  struct sl_vector_f32 batch = {
-      .data     = (float[SL_DATASET_RCV1_FEATURES]){0},
-      .length   = {SL_DATASET_RCV1_FEATURES},
-      .capacity = {SL_DATASET_RCV1_FEATURES},
-  };
+  struct sl_vector_f32 batch = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_RCV1_FEATURES);
 
   struct sl_record train_record           = {0};
   struct sl_file train_record_file        = {0};

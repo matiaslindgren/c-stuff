@@ -82,24 +82,12 @@ void sl_ml_svm_linear_fit(
     const uint16_t classes[const static 1]
 );
 
-#define SL_ML_MINMAX_SCALER_CREATE_INLINE(n_features) \
-  (struct sl_ml_minmax_scaler) {                      \
-    .lo                                               \
-        = {.data     = (float[(n_features)]){0},      \
-           .length   = {(n_features)},                \
-           .capacity = {(n_features)}},               \
-        .hi                                           \
-        = {.data     = (float[(n_features)]){0},      \
-           .length   = {(n_features)},                \
-           .capacity = {(n_features)}},               \
-        .scale                                        \
-        = {.data     = (float[(n_features)]){0},      \
-           .length   = {(n_features)},                \
-           .capacity = {(n_features)}},               \
-        .offset                                       \
-        = {.data     = (float[(n_features)]){0},      \
-           .length   = {(n_features)},                \
-           .capacity = {(n_features)}},               \
+#define SL_ML_MINMAX_SCALER_CREATE_INLINE(n_features)   \
+  (struct sl_ml_minmax_scaler) {                        \
+    .lo     = SL_LA_VECTOR_CREATE_INLINE((n_features)), \
+    .hi     = SL_LA_VECTOR_CREATE_INLINE((n_features)), \
+    .scale  = SL_LA_VECTOR_CREATE_INLINE((n_features)), \
+    .offset = SL_LA_VECTOR_CREATE_INLINE((n_features)), \
   }
 
 #define SL_ML_MINMAX_RESCALE(n_features, dataset, a, b)                                            \

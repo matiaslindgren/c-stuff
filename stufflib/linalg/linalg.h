@@ -9,6 +9,11 @@
 #include <stufflib/matrix/sl_matrix_f32.h>
 #include <stufflib/vector/sl_vector_f32.h>
 
+#define SL_LA_VECTOR_CREATE_INLINE(n)                            \
+  (struct sl_vector_f32) {                                       \
+    .data = (float[(n)]){0}, .length = {(n)}, .capacity = {(n)}, \
+  }
+
 #ifndef SL_LA_FLOAT_EQ_TOL
   #define SL_LA_FLOAT_EQ_TOL 1e-12
 #endif
