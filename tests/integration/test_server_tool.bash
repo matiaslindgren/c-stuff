@@ -69,9 +69,15 @@ function cleanup {
 }
 trap cleanup EXIT
 
-while [ ! -s server.out ]; do
-  sleep 1
-done
+# wait until server is bound to the port
+cmd__wait_until_socket_is_bound="\
+  until $cmd__socket_in_use; do \
+    sleep 1; \
+  done"
+if ! timeout 30s bash -c "$cmd__wait_until_socket_is_bound"; then
+  printf "timed out waiting for server to bind to port %s\n" "$listen_port"
+  exit 1
+fi
 
 function check_no_server_errors {
   if jq .level server.out | grep --quiet error; then
