@@ -17,3 +17,4 @@ or at least some of them
 - [GNU Make papers (November 2014), Paul D. Smith](https://make.mad-scientist.net/papers/)
 - [The GNU Make Book (April 2015), John Graham-Cumming](https://nostarch.com/gnumake)
 - [Unit Tests in C with the constructor attribute](https://gcher.com/posts/2016-09-02-c-unit-tests-constructor-attribute/)
+- [git Makefile](https://github.com/git/git/blob/e8955061076952cc5eab0300424fc48b601fe12d/Makefile)
