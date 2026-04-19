@@ -34,8 +34,16 @@ bool spambase(
   uint16_t classes[SL_DATASET_SPAMBASE_SAMPLES] = {0};
 
   struct sl_record samples_record;
-  struct sl_matrix_f32 samples
-      = sl_la_matrix_create(ctx, SL_DATASET_SPAMBASE_SAMPLES, SL_DATASET_SPAMBASE_FEATURES);
+  struct sl_matrix_f32 samples = {0};
+  if (!sl_la_matrix_create(
+          ctx,
+          SL_DATASET_SPAMBASE_SAMPLES,
+          SL_DATASET_SPAMBASE_FEATURES,
+          &samples
+      )) {
+    SL_LOG_ERROR("failed allocating samples matrix");
+    goto done;
+  }
 
   if (!sl_record_read_metadata(ctx, &classes_record, dataset_dir, "spambase_classes")) {
     SL_LOG_ERROR("failed reading metadata of spambase classes");
@@ -178,8 +186,11 @@ bool rcv1(
   struct sl_record test_classes_record = {0};
   uint8_t* test_classes                = nullptr;
 
-  struct sl_matrix_f32 samples_batch
-      = sl_la_matrix_create(ctx, SL_SVM_RCV1_BUFFER_LEN, SL_DATASET_RCV1_FEATURES);
+  struct sl_matrix_f32 samples_batch = {0};
+  if (!sl_la_matrix_create(ctx, SL_SVM_RCV1_BUFFER_LEN, SL_DATASET_RCV1_FEATURES, &samples_batch)) {
+    SL_LOG_ERROR("failed allocating samples batch matrix");
+    goto done;
+  }
   struct sl_span read_buffer
       = sl_span_view(sizeof(float) * sl_matrix_f32_size(&samples_batch), (void*)samples_batch.data);
 

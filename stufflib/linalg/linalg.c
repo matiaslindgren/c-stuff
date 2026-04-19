@@ -28,13 +28,22 @@
   #error "no BLAS support available for this platform"
 #endif
 
-struct sl_vector_f32 sl_la_vector_create(struct sl_context ctx[static 1], const size_t size) {
+bool sl_la_vector_create(
+    struct sl_context ctx[static 1],
+    const size_t size,
+    struct sl_vector_f32 out[static 1]
+) {
   assert(size > 0);
-  return (struct sl_vector_f32){
-      .data     = sl_alloc(ctx, size, sizeof(float)),
+  float* data = sl_alloc(ctx, size, sizeof(float));
+  if (!data) {
+    return false;
+  }
+  *out = (struct sl_vector_f32){
+      .data     = data,
       .length   = {size},
       .capacity = {size},
   };
+  return true;
 }
 
 void sl_la_vector_destroy(struct sl_vector_f32 v[const static 1]) {
@@ -42,14 +51,23 @@ void sl_la_vector_destroy(struct sl_vector_f32 v[const static 1]) {
   *v = (struct sl_vector_f32){0};
 }
 
-struct sl_matrix_f32
-sl_la_matrix_create(struct sl_context ctx[static 1], const size_t rows, const size_t cols) {
+bool sl_la_matrix_create(
+    struct sl_context ctx[static 1],
+    const size_t rows,
+    const size_t cols,
+    struct sl_matrix_f32 out[static 1]
+) {
   assert(rows > 0 && cols > 0);
-  return (struct sl_matrix_f32){
-      .data     = sl_alloc(ctx, rows * cols, sizeof(float)),
+  float* data = sl_alloc(ctx, rows * cols, sizeof(float));
+  if (!data) {
+    return false;
+  }
+  *out = (struct sl_matrix_f32){
+      .data     = data,
       .length   = {rows, cols},
       .capacity = {rows, cols},
   };
+  return true;
 }
 
 void sl_la_matrix_destroy(struct sl_matrix_f32 a[const static 1]) {

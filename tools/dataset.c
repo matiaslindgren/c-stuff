@@ -193,8 +193,11 @@ bool spambase(struct sl_context ctx[static 1], const struct sl_args args[const s
     );
   }
 
-  struct sl_matrix_f32 data
-      = sl_la_matrix_create(ctx, SL_DATASET_SPAMBASE_SAMPLES, SL_DATASET_SPAMBASE_FEATURES);
+  struct sl_matrix_f32 data = {0};
+  if (!sl_la_matrix_create(ctx, SL_DATASET_SPAMBASE_SAMPLES, SL_DATASET_SPAMBASE_FEATURES, &data)) {
+    SL_LOG_ERROR("failed allocating data matrix");
+    goto done;
+  }
   uint16_t classes[SL_DATASET_SPAMBASE_SAMPLES] = {0};
 
   {

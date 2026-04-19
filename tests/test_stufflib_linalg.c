@@ -146,23 +146,38 @@ SL_TEST(test_matrix_equal) {
 SL_TEST(test_matrix_create) {
   (void)verbose;
   {
-    struct sl_matrix_f32 a = sl_la_matrix_create(ctx, 1, 1);
+    struct sl_matrix_f32 a = {0};
+    if (!sl_la_matrix_create(ctx, 1, 1, &a)) {
+      return false;
+    }
     sl_la_matrix_destroy(&a);
   }
   {
-    struct sl_matrix_f32 a = sl_la_matrix_create(ctx, 1, 10);
+    struct sl_matrix_f32 a = {0};
+    if (!sl_la_matrix_create(ctx, 1, 10, &a)) {
+      return false;
+    }
     sl_la_matrix_destroy(&a);
   }
   {
-    struct sl_matrix_f32 a = sl_la_matrix_create(ctx, 10, 1);
+    struct sl_matrix_f32 a = {0};
+    if (!sl_la_matrix_create(ctx, 10, 1, &a)) {
+      return false;
+    }
     sl_la_matrix_destroy(&a);
   }
   {
-    struct sl_matrix_f32 a = sl_la_matrix_create(ctx, 1024, 4096);
+    struct sl_matrix_f32 a = {0};
+    if (!sl_la_matrix_create(ctx, 1024, 4096, &a)) {
+      return false;
+    }
     sl_la_matrix_destroy(&a);
   }
   {
-    struct sl_matrix_f32 a = sl_la_matrix_create(ctx, 65536, 256);
+    struct sl_matrix_f32 a = {0};
+    if (!sl_la_matrix_create(ctx, 65536, 256, &a)) {
+      return false;
+    }
     sl_la_matrix_destroy(&a);
   }
   return true;

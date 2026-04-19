@@ -17,9 +17,18 @@
   #define SL_LA_FLOAT_FORMAT "%+15.12e"
 #endif
 
-struct sl_vector_f32 sl_la_vector_create(struct sl_context ctx[static 1], size_t size);
+bool sl_la_vector_create(
+    struct sl_context ctx[static 1],
+    size_t size,
+    struct sl_vector_f32 out[static 1]
+);
 void sl_la_vector_destroy(struct sl_vector_f32 v[const static 1]);
-struct sl_matrix_f32 sl_la_matrix_create(struct sl_context ctx[static 1], size_t rows, size_t cols);
+bool sl_la_matrix_create(
+    struct sl_context ctx[static 1],
+    size_t rows,
+    size_t cols,
+    struct sl_matrix_f32 out[static 1]
+);
 void sl_la_matrix_destroy(struct sl_matrix_f32 a[const static 1]);
 struct sl_vector_f32 sl_la_matrix_row_view(struct sl_matrix_f32 a[const static 1], size_t row);
 void sl_la_vec_add(size_t count, float lhs[restrict count], const float rhs[restrict count]);
