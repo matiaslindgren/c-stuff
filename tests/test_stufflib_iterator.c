@@ -12,7 +12,6 @@
 
 SL_TEST(test_data) {
   (void)ctx;
-  (void)verbose;
   struct sl_span data = {
       .size = 5,
       .data = (unsigned char[5]){0, 1, 2, 3, 4},
@@ -50,7 +49,6 @@ struct sl_iterator sl_cstr_iter(char str[const static 1]) {
 
 SL_TEST(test_cstr) {
   (void)ctx;
-  (void)verbose;
   char* strings[] = {
       "",
       " ",

@@ -8,6 +8,7 @@
 #include <stufflib/dataset/dataset.h>
 #include <stufflib/io/io.h>
 #include <stufflib/linalg/linalg.h>
+#include <stufflib/logging/logging.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/memory/memory.h>
 #include <stufflib/ml/ml.h>
@@ -24,11 +25,8 @@ bool spambase(
   bool all_ok = false;
 
   const char* const dataset_dir = sl_args_get_positional(args, 1);
-  const bool verbose            = sl_args_parse_flag(args, "-v");
 
-  if (verbose) {
-    SL_LOG_INFO("training linear SVM on spambase dataset from '%s'", dataset_dir);
-  }
+  SL_LOG_INFO("training linear SVM on spambase dataset from '%s'", dataset_dir);
 
   struct sl_record classes_record;
   uint16_t classes[SL_DATASET_SPAMBASE_SAMPLES] = {0};
@@ -150,12 +148,9 @@ bool rcv1(
   bool all_ok = false;
 
   const char* const dataset_dir = sl_args_get_positional(args, 1);
-  const bool verbose            = sl_args_parse_flag(args, "-v");
   const bool flip_train_test    = sl_args_parse_flag(args, "--flip-train-test");
 
-  if (verbose) {
-    SL_LOG_INFO("RCV1: training linear SVM, reading dataset from '%s'", dataset_dir);
-  }
+  SL_LOG_INFO("RCV1: training linear SVM, reading dataset from '%s'", dataset_dir);
 
   struct sl_record train_samples_record        = {0};
   struct sl_file train_record_file             = {0};
@@ -185,9 +180,7 @@ bool rcv1(
   struct sl_span read_buffer
       = sl_span_view(sizeof(float) * sl_matrix_f32_size(&samples_batch), (void*)samples_batch.data);
 
-  if (verbose) {
-    SL_LOG_INFO("RCV1: reading metadata records");
-  }
+  SL_LOG_INFO("RCV1: reading metadata records");
 
   if (!sl_record_read_metadata(
           ctx,
@@ -232,9 +225,7 @@ bool rcv1(
   train_classes = sl_alloc(ctx, train_classes_record.size, class_size);
   test_classes  = sl_alloc(ctx, test_classes_record.size, class_size);
 
-  if (verbose) {
-    SL_LOG_INFO("RCV1: reading classes records");
-  }
+  SL_LOG_INFO("RCV1: reading classes records");
 
   if (!sl_record_read_all(
           ctx,
@@ -273,17 +264,13 @@ bool rcv1(
     goto done;
   }
 
-  if (verbose) {
-    SL_LOG_INFO("RCV1: fitting minmax scaler on training set");
-  }
+  SL_LOG_INFO("RCV1: fitting minmax scaler on training set");
 
   struct sl_ml_minmax_scaler minmax_scaler
       = SL_ML_MINMAX_SCALER_CREATE_INLINE(SL_DATASET_RCV1_FEATURES);
 
   for (size_t batch_idx = 0; !sl_record_reader_is_done(ctx, &train_samples_reader); ++batch_idx) {
-    if (verbose) {
-      SL_LOG_INFO("RCV1 train batch %zu minmax: read batch", batch_idx);
-    }
+    SL_LOG_INFO("RCV1 train batch %zu minmax: read batch", batch_idx);
     sl_span_clear(&read_buffer);
     if (!sl_record_reader_read(ctx, &train_samples_reader, &read_buffer)) {
       SL_LOG_ERROR("RCV1 train batch %zu minmax: failed reading samples batch", batch_idx);
@@ -303,9 +290,7 @@ bool rcv1(
         }
       }
     }
-    if (verbose) {
-      SL_LOG_INFO("RCV1 train batch %zu minmax: fit", batch_idx);
-    }
+    SL_LOG_INFO("RCV1 train batch %zu minmax: fit", batch_idx);
     sl_ml_minmax_fit(&minmax_scaler, &samples_batch);
   }
 
@@ -326,9 +311,7 @@ bool rcv1(
     goto done;
   }
 
-  if (verbose) {
-    SL_LOG_INFO("RCV1: fitting linear SVM on training set");
-  }
+  SL_LOG_INFO("RCV1: fitting linear SVM on training set");
 
   struct sl_ml_svm svm = {
       .w              = SL_LA_VECTOR_CREATE_INLINE(SL_DATASET_RCV1_FEATURES),
@@ -343,31 +326,23 @@ bool rcv1(
 
   uint16_t classes_buffer[SL_SVM_RCV1_BUFFER_LEN] = {0};
   for (size_t batch_idx = 0; !sl_record_reader_is_done(ctx, &train_samples_reader); ++batch_idx) {
-    if (verbose) {
-      SL_LOG_INFO("RCV1 train batch %zu: reading buffer", batch_idx);
-    }
+    SL_LOG_INFO("RCV1 train batch %zu: reading buffer", batch_idx);
     sl_span_clear(&read_buffer);
     if (!sl_record_reader_read(ctx, &train_samples_reader, &read_buffer)) {
       SL_LOG_ERROR("failed reading RCV1 training set samples batch during svm fit");
       goto done;
     }
 
-    if (verbose) {
-      SL_LOG_INFO("RCV1 train batch %zu: apply minmax", batch_idx);
-    }
+    SL_LOG_INFO("RCV1 train batch %zu: apply minmax", batch_idx);
     sl_ml_minmax_apply(&minmax_scaler, &samples_batch, -1, 1);
 
-    if (verbose) {
-      SL_LOG_INFO("RCV1 train batch %zu: copy classes", batch_idx);
-    }
+    SL_LOG_INFO("RCV1 train batch %zu: copy classes", batch_idx);
     for (size_t i = 0; i < SL_SVM_RCV1_BUFFER_LEN; ++i) {
       const size_t class_idx = (sl_matrix_f32_num_rows(&samples_batch) * batch_idx) + i;
       classes_buffer[i]      = class_idx < train_classes_record.size ? train_classes[class_idx] : 0;
     }
 
-    if (verbose) {
-      SL_LOG_INFO("RCV1 train batch %zu: fit svm", batch_idx);
-    }
+    SL_LOG_INFO("RCV1 train batch %zu: fit svm", batch_idx);
     sl_ml_svm_linear_fit(prng, &svm, &samples_batch, classes_buffer);
 
     if (!sl_la_vector_is_finite(&(svm.w))) {
@@ -375,9 +350,7 @@ bool rcv1(
       goto done;
     }
 
-    if (verbose) {
-      SL_LOG_INFO("RCV1 train batch %zu: results", batch_idx);
-    }
+    SL_LOG_INFO("RCV1 train batch %zu: results", batch_idx);
     struct sl_ml_classification report = {0};
     for (size_t i = 0; i < SL_SVM_RCV1_BUFFER_LEN; ++i) {
       struct sl_vector_f32 x = sl_la_matrix_row_view(&samples_batch, i);
@@ -387,9 +360,7 @@ bool rcv1(
   }
 
   for (size_t batch_idx = 0; !sl_record_reader_is_done(ctx, &test_samples_reader); ++batch_idx) {
-    if (verbose) {
-      SL_LOG_INFO("RCV1 test batch %zu: reading buffer", batch_idx);
-    }
+    SL_LOG_INFO("RCV1 test batch %zu: reading buffer", batch_idx);
     sl_span_clear(&read_buffer);
     if (!sl_record_reader_read(ctx, &test_samples_reader, &read_buffer)) {
       SL_LOG_ERROR(
@@ -399,22 +370,16 @@ bool rcv1(
       goto done;
     }
 
-    if (verbose) {
-      SL_LOG_INFO("RCV1 test batch %zu: apply minmax", batch_idx);
-    }
+    SL_LOG_INFO("RCV1 test batch %zu: apply minmax", batch_idx);
     sl_ml_minmax_apply(&minmax_scaler, &samples_batch, -1, 1);
 
-    if (verbose) {
-      SL_LOG_INFO("RCV1 test batch %zu: copy classes", batch_idx);
-    }
+    SL_LOG_INFO("RCV1 test batch %zu: copy classes", batch_idx);
     for (size_t i = 0; i < SL_SVM_RCV1_BUFFER_LEN; ++i) {
       const size_t class_idx = (sl_matrix_f32_num_rows(&samples_batch) * batch_idx) + i;
       classes_buffer[i]      = class_idx < test_classes_record.size ? test_classes[class_idx] : 0;
     }
 
-    if (verbose) {
-      SL_LOG_INFO("RCV1 test batch %zu: results", batch_idx);
-    }
+    SL_LOG_INFO("RCV1 test batch %zu: results", batch_idx);
     struct sl_ml_classification report = {0};
     for (size_t i = 0; i < SL_SVM_RCV1_BUFFER_LEN; ++i) {
       struct sl_vector_f32 x = sl_la_matrix_row_view(&samples_batch, i);
@@ -434,7 +399,7 @@ done:
 }
 
 void print_usage(const struct sl_args args[const static 1]) {
-  SL_LOG_ERROR("usage: %s experiment dataset_dir [-v]", args->argv[0]);
+  SL_LOG_ERROR("usage: %s experiment dataset_dir", args->argv[0]);
 }
 
 int main(int argc, char* const argv[argc + 1]) {

@@ -11,6 +11,7 @@
 #include <stufflib/io/io.h>
 #include <stufflib/iterator/iterator.h>
 #include <stufflib/linalg/linalg.h>
+#include <stufflib/logging/logging.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/memory/memory.h>
 #include <stufflib/misc/misc.h>
@@ -38,24 +39,19 @@ cifar_to_png(struct sl_context ctx[static 1], const struct sl_args args[const st
 
   const char* const dataset_dir = sl_args_get_positional(args, 1);
   const char* const output_dir  = sl_args_get_positional(args, 2);
-  const bool verbose            = sl_args_parse_flag(args, "-v");
 
-  if (verbose) {
-    SL_LOG_INFO(
-        "reading CIFAR batches from '%s', writing PNG data into '%s'",
-        dataset_dir,
-        output_dir
-    );
-  }
+  SL_LOG_INFO(
+      "reading CIFAR batches from '%s', writing PNG data into '%s'",
+      dataset_dir,
+      output_dir
+  );
 
   char labels[10][256] = {0};
 
   {
     char filename[256] = {0};
     snprintf(filename, SL_ARRAY_LEN(filename), "%s/batches.meta.txt", dataset_dir);
-    if (verbose) {
-      SL_LOG_INFO("reading metadata '%s'", filename);
-    }
+    SL_LOG_INFO("reading metadata '%s'", filename);
     struct sl_string data                 = sl_fs_read_file_utf8(ctx, filename, &reader_buffer);
     // TODO create iterlines util
     struct sl_span newline                = sl_span_view(1, (unsigned char[]){'\n'});
@@ -74,9 +70,7 @@ cifar_to_png(struct sl_context ctx[static 1], const struct sl_args args[const st
         goto done;
       }
       sl_string_copy_ascii(labels[lineno], &line);
-      if (verbose) {
-        printf("label %zu: %s\n", lineno, labels[lineno]);
-      }
+      SL_LOG_INFO("label %zu: %s", lineno, labels[lineno]);
       ++lineno;
       sl_string_destroy(&line);
     }
@@ -97,9 +91,7 @@ cifar_to_png(struct sl_context ctx[static 1], const struct sl_args args[const st
     char filename[256] = {0};
     snprintf(filename, SL_ARRAY_LEN(filename), "%s/%s", dataset_dir, batch_names[batch_num]);
     struct sl_span data = sl_fs_read_file(ctx, filename, &reader_buffer);
-    if (verbose) {
-      SL_LOG_INFO("batch '%s' contains '%zu' bytes", filename, data.size);
-    }
+    SL_LOG_INFO("batch '%s' contains '%zu' bytes", filename, data.size);
     if (data.size != cifar_batch_size) {
       SL_LOG_ERROR(
           "all CIFAR batches should contain exactly %zu bytes but batch '%s' "
@@ -143,9 +135,7 @@ cifar_to_png(struct sl_context ctx[static 1], const struct sl_args args[const st
           sample_num,
           labels[label]
       );
-      if (verbose) {
-        SL_LOG_INFO("writing sample %s", outname);
-      }
+      SL_LOG_INFO("writing sample %s", outname);
       if (!sl_png_write_image(ctx, img, outname)) {
         goto invalid_sample;
       }
@@ -183,15 +173,12 @@ bool spambase(struct sl_context ctx[static 1], const struct sl_args args[const s
 
   const char* const dataset_dir = sl_args_get_positional(args, 1);
   const char* const output_dir  = sl_args_get_positional(args, 2);
-  const bool verbose            = sl_args_parse_flag(args, "-v");
 
-  if (verbose) {
-    SL_LOG_INFO(
-        "reading spambase dataset from '%s', writing dataset to '%s'",
-        dataset_dir,
-        output_dir
-    );
-  }
+  SL_LOG_INFO(
+      "reading spambase dataset from '%s', writing dataset to '%s'",
+      dataset_dir,
+      output_dir
+  );
 
   struct sl_matrix_f32 data = {0};
   if (!sl_la_matrix_create(ctx, SL_DATASET_SPAMBASE_SAMPLES, SL_DATASET_SPAMBASE_FEATURES, &data)) {
@@ -208,9 +195,7 @@ bool spambase(struct sl_context ctx[static 1], const struct sl_args args[const s
       goto done;
     }
 
-    if (verbose) {
-      SL_LOG_INFO("reading csv file '%s'", path);
-    }
+    SL_LOG_INFO("reading csv file '%s'", path);
 
     struct sl_string content              = sl_fs_read_file_utf8(ctx, path, &reader_buffer);
     // TODO create iterlines util
@@ -379,18 +364,15 @@ bool rcv1(struct sl_context ctx[static 1], const struct sl_args args[const stati
 
   const char* const dataset_dir = sl_args_get_positional(args, 1);
   const char* const output_dir  = sl_args_get_positional(args, 2);
-  const bool verbose            = sl_args_parse_flag(args, "-v");
 
-  if (verbose) {
-    SL_LOG_INFO(
-        "reading RCV1 dataset with dimensions %d x %d from '%s', writing "
-        "dataset to '%s'",
-        SL_DATASET_RCV1_SAMPLES,
-        SL_DATASET_RCV1_FEATURES,
-        dataset_dir,
-        output_dir
-    );
-  }
+  SL_LOG_INFO(
+      "reading RCV1 dataset with dimensions %d x %d from '%s', writing "
+      "dataset to '%s'",
+      SL_DATASET_RCV1_SAMPLES,
+      SL_DATASET_RCV1_FEATURES,
+      dataset_dir,
+      output_dir
+  );
 
   struct sl_rcv1_metadata {
     size_t index;
@@ -430,9 +412,7 @@ bool rcv1(struct sl_context ctx[static 1], const struct sl_args args[const stati
       goto done;
     }
 
-    if (verbose) {
-      SL_LOG_INFO("reading RCV1 document IDs from '%s'", path);
-    }
+    SL_LOG_INFO("reading RCV1 document IDs from '%s'", path);
 
     for (size_t id = 0, idx = 0; EOF != fscanf(fp, "%zu ", &id); ++idx) {
       if (id >= max_document_id) {
@@ -467,9 +447,7 @@ bool rcv1(struct sl_context ctx[static 1], const struct sl_args args[const stati
       goto done;
     }
 
-    if (verbose) {
-      SL_LOG_INFO("reading RCV1 topics from '%s'", path);
-    }
+    SL_LOG_INFO("reading RCV1 topics from '%s'", path);
 
     {
       char category[16] = {0};
@@ -560,9 +538,7 @@ bool rcv1(struct sl_context ctx[static 1], const struct sl_args args[const stati
       goto done;
     }
 
-    if (verbose) {
-      SL_LOG_INFO("reading RCV1 vectors from '%s'", path);
-    }
+    SL_LOG_INFO("reading RCV1 vectors from '%s'", path);
 
     size_t lineno = 0;
 
@@ -590,7 +566,7 @@ bool rcv1(struct sl_context ctx[static 1], const struct sl_args args[const stati
 
       metadata[id].in_trainset = SL_STR_EQ(batch_name, "lyrl2004_vectors_train");
 
-      if (verbose && lineno % 10'000 == 0) {
+      if (lineno % 10'000 == 0) {
         SL_LOG_INFO(
             "RCV1 file '%s' lineno %zu: document ID %zu sample index %zu",
             path,
@@ -785,9 +761,9 @@ done:
 void print_usage(const struct sl_args args[const static 1]) {
   fprintf(
       stderr,
-      ("usage: %s cifar_to_png dataset_path output_path [-v]\n"
-       "usage: %s spambase dataset_path output_path [-v]\n"
-       "usage: %s rcv1 dataset_path output_path [-v]\n"),
+      ("usage: %s cifar_to_png dataset_path output_path\n"
+       "usage: %s spambase dataset_path output_path\n"
+       "usage: %s rcv1 dataset_path output_path\n"),
       args->argv[0],
       args->argv[0],
       args->argv[0]

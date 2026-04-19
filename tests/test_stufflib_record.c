@@ -65,7 +65,6 @@ bool contains_str(
 }
 
 SL_TEST(test_write_metadata) {
-  (void)verbose;
   {
     struct sl_record record = {
         .layout   = "dense",
@@ -144,7 +143,6 @@ SL_TEST(test_write_metadata) {
 }
 
 SL_TEST(test_read_metadata) {
-  (void)verbose;
   {
     struct sl_record record;
     SL_ASSERT_TRUE(sl_record_read_metadata(ctx, &record, "./test-data/record", "small1"));
@@ -227,7 +225,6 @@ SL_TEST(test_read_metadata) {
 }
 
 SL_TEST(test_dense_data_reader) {
-  (void)verbose;
   struct sl_record record = {0};
   SL_ASSERT_TRUE(sl_record_read_metadata(ctx, &record, "./test-data/record", "large3"));
 
@@ -285,7 +282,6 @@ SL_TEST(test_dense_data_reader) {
 }
 
 SL_TEST(test_sparse_data_reader) {
-  (void)verbose;
   int64_t nonzero_index[100]  = {0};
   int64_t nonzero_values[100] = {0};
   const size_t nonzero_count  = SL_ARRAY_LEN(nonzero_index);
@@ -365,7 +361,6 @@ SL_TEST(test_sparse_data_reader) {
 }
 
 SL_TEST(test_read_data) {
-  (void)verbose;
   {
     struct sl_record record = {
         .layout   = "dense",
@@ -402,7 +397,6 @@ SL_TEST(test_read_data) {
 }
 
 SL_TEST(test_dense_data_writer) {
-  (void)verbose;
   struct sl_record record = {
       .layout   = "dense",
       .type     = "float32",
@@ -465,7 +459,6 @@ SL_TEST(test_dense_data_writer) {
 }
 
 SL_TEST(test_sparse_data_writer) {
-  (void)verbose;
   size_t nonzero_index[]     = {0, 1, 2, 100, 105, 9'012, 12'303, 12'304, 25'000, 90'123};
   int32_t nonzero_values[]   = {-5, -3, -2, 10, 100, 12'345, -2'003, 12'345, -20, 1'093};
   const size_t nonzero_count = SL_ARRAY_LEN(nonzero_index);
@@ -542,7 +535,6 @@ SL_TEST(test_sparse_data_writer) {
 }
 
 SL_TEST(test_write_data) {
-  (void)verbose;
   {
     struct sl_record record = {
         .layout   = "dense",
@@ -607,7 +599,6 @@ SL_TEST(test_write_data) {
 }
 
 SL_TEST(test_sparse_write_and_read) {
-  (void)verbose;
   {
     struct sl_record record = {
         .layout   = "sparse",
@@ -664,7 +655,6 @@ SL_TEST(test_sparse_write_and_read) {
 }
 
 SL_TEST(test_sparse_batch_write_and_read) {
-  (void)verbose;
   struct sl_record record = {
       .layout   = "sparse",
       .type     = "float32",

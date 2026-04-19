@@ -57,7 +57,6 @@ bool sl_file_open(
     const char path[const static 1],
     const char mode[const static 1]
 ) {
-  SL_LOG_TRACE("fopen %s in mode %s", path, mode);
   f->file = fopen(path, mode);
   if (!f->file) {
     SL_ERROR(ctx, "cannot open '%s'", path);

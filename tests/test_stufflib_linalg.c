@@ -12,30 +12,40 @@ bool fequal(const double a, const double b) {
 }
 
 bool check_vector_equal(
+    struct sl_context ctx[static 1],
     struct sl_vector_f32 a[const static 1],
     struct sl_vector_f32 b[const static 1]
 ) {
   if (!sl_la_vector_equal(a, b)) {
     fprintf(stderr, "!expected vectors a and b to be equal\n");
     fprintf(stderr, "a:\n");
-    sl_la_vector_print(stderr, a);
+    if (!sl_la_vector_print(ctx, stderr, a)) {
+      return false;
+    }
     fprintf(stderr, "b:\n");
-    sl_la_vector_print(stderr, b);
+    if (!sl_la_vector_print(ctx, stderr, b)) {
+      return false;
+    }
     return false;
   }
   return true;
 }
 
 bool check_matrix_equal(
+    struct sl_context ctx[static 1],
     struct sl_matrix_f32 a[const static 1],
     struct sl_matrix_f32 b[const static 1]
 ) {
   if (!sl_la_matrix_equal(a, b)) {
     fprintf(stderr, "!expected matrices a and b to be equal\n");
     fprintf(stderr, "a:\n");
-    sl_la_matrix_print(stderr, a);
+    if (!sl_la_matrix_print(ctx, stderr, a)) {
+      return false;
+    }
     fprintf(stderr, "b:\n");
-    sl_la_matrix_print(stderr, b);
+    if (!sl_la_matrix_print(ctx, stderr, b)) {
+      return false;
+    }
     return false;
   }
   return true;
@@ -43,7 +53,6 @@ bool check_matrix_equal(
 
 SL_TEST(test_matrix_get) {
   (void)ctx;
-  (void)verbose;
   struct sl_matrix_f32 a = {
       .length   = {3, 3},
       .capacity = {3, 3},
@@ -61,7 +70,6 @@ SL_TEST(test_matrix_get) {
 
 SL_TEST(test_matrix_equal) {
   (void)ctx;
-  (void)verbose;
   {
     struct sl_matrix_f32 a = {
         .length   = {1, 1},
@@ -144,7 +152,6 @@ SL_TEST(test_matrix_equal) {
 }
 
 SL_TEST(test_matrix_create) {
-  (void)verbose;
   {
     struct sl_matrix_f32 a = {0};
     if (!sl_la_matrix_create(ctx, 1, 1, &a)) {
@@ -185,7 +192,6 @@ SL_TEST(test_matrix_create) {
 
 SL_TEST(test_matrix_trace) {
   (void)ctx;
-  (void)verbose;
   struct sl_matrix_f32 a = {
       .length   = {3, 3},
       .capacity = {3, 3},
@@ -202,7 +208,6 @@ SL_TEST(test_matrix_trace) {
 
 SL_TEST(test_matrix_add_axis0) {
   (void)ctx;
-  (void)verbose;
   {
     struct sl_matrix_f32 a1 = {
         .length   = {4, 3},
@@ -220,7 +225,7 @@ SL_TEST(test_matrix_add_axis0) {
         .data     = (float[]){1, 0, -2},
     };
     sl_la_matrix_add_axis0(&a1, &v);
-    if (!check_matrix_equal(&a1, &a2)) {
+    if (!check_matrix_equal(ctx, &a1, &a2)) {
       return false;
     }
   }
@@ -229,7 +234,6 @@ SL_TEST(test_matrix_add_axis0) {
 
 SL_TEST(test_matrix_sub_axis0) {
   (void)ctx;
-  (void)verbose;
   {
     struct sl_matrix_f32 a1 = {
         .length   = {4, 3},
@@ -247,7 +251,7 @@ SL_TEST(test_matrix_sub_axis0) {
         .data     = (float[]){1, 0, -2},
     };
     sl_la_matrix_sub_axis0(&a1, &v);
-    if (!check_matrix_equal(&a1, &a2)) {
+    if (!check_matrix_equal(ctx, &a1, &a2)) {
       return false;
     }
   }
@@ -256,7 +260,6 @@ SL_TEST(test_matrix_sub_axis0) {
 
 SL_TEST(test_matrix_mul_axis0) {
   (void)ctx;
-  (void)verbose;
   {
     struct sl_matrix_f32 a1 = {
         .length   = {4, 3},
@@ -274,7 +277,7 @@ SL_TEST(test_matrix_mul_axis0) {
         .data     = (float[]){1, 0, -2},
     };
     sl_la_matrix_mul_axis0(&a1, &v);
-    if (!check_matrix_equal(&a1, &a2)) {
+    if (!check_matrix_equal(ctx, &a1, &a2)) {
       return false;
     }
   }
@@ -283,7 +286,6 @@ SL_TEST(test_matrix_mul_axis0) {
 
 SL_TEST(test_matrix_diffdiv_axis0) {
   (void)ctx;
-  (void)verbose;
   {
     struct sl_matrix_f32 a1 = {
         .length   = {4, 3},
@@ -313,7 +315,7 @@ SL_TEST(test_matrix_diffdiv_axis0) {
         .data     = (float[]){3, 2, 12},
     };
     sl_la_matrix_diffdiv_axis0(&a1, &lhs, &rhs);
-    if (!check_matrix_equal(&a1, &a2)) {
+    if (!check_matrix_equal(ctx, &a1, &a2)) {
       return false;
     }
   }
@@ -322,7 +324,6 @@ SL_TEST(test_matrix_diffdiv_axis0) {
 
 SL_TEST(test_matrix_multiply_square) {
   (void)ctx;
-  (void)verbose;
   struct sl_matrix_f32 a = {
       .length   = {3, 3},
       .capacity = {3, 3},
@@ -339,12 +340,11 @@ SL_TEST(test_matrix_multiply_square) {
       .capacity = {sl_matrix_f32_num_rows(&a), sl_matrix_f32_num_cols(&a)},
       .data     = (float[]){15, 18, 21, 42, 54, 66, 69, 90, 111}
   };
-  return check_matrix_equal(&result, &expected);
+  return check_matrix_equal(ctx, &result, &expected);
 }
 
 SL_TEST(test_matrix_multiply_zeros) {
   (void)ctx;
-  (void)verbose;
   struct sl_matrix_f32 a = {
       .length   = {3, 3},
       .capacity = {3, 3},
@@ -358,12 +358,11 @@ SL_TEST(test_matrix_multiply_zeros) {
   struct sl_matrix_f32 result   = b;
   struct sl_matrix_f32 expected = b;
   sl_la_matrix_multiply(&a, &b, &result);
-  return check_matrix_equal(&result, &expected);
+  return check_matrix_equal(ctx, &result, &expected);
 }
 
 SL_TEST(test_matrix_multiply) {
   (void)ctx;
-  (void)verbose;
   struct sl_matrix_f32 a = {
       .length   = {4, 3},
       .capacity = {4, 3},
@@ -385,12 +384,11 @@ SL_TEST(test_matrix_multiply) {
       .capacity = {sl_matrix_f32_num_rows(&a), sl_matrix_f32_num_cols(&b)},
       .data     = (float[]){11, 17, 20, 44, 29, 71, 38, 98}
   };
-  return check_matrix_equal(&result, &expected);
+  return check_matrix_equal(ctx, &result, &expected);
 }
 
 SL_TEST(test_matrix_frobenius_norm) {
   (void)ctx;
-  (void)verbose;
   struct sl_matrix_f32 a = {
       .length   = {4, 3},
       .capacity = {4, 3},
@@ -407,7 +405,6 @@ SL_TEST(test_matrix_frobenius_norm) {
 
 SL_TEST(test_vector_scale) {
   (void)ctx;
-  (void)verbose;
   for (int alpha = -10; alpha <= 10; ++alpha) {
     struct sl_vector_f32 v = {
         .length   = {9},
@@ -424,7 +421,6 @@ SL_TEST(test_vector_scale) {
 
 SL_TEST(test_vector_equal) {
   (void)ctx;
-  (void)verbose;
   {
     struct sl_vector_f32 v1 = {
         .length   = {5},
@@ -443,7 +439,6 @@ SL_TEST(test_vector_equal) {
 
 SL_TEST(test_vector_dot) {
   (void)ctx;
-  (void)verbose;
   {
     struct sl_vector_f32 v1 = {
         .length   = {5},
@@ -475,7 +470,6 @@ SL_TEST(test_vector_dot) {
 
 SL_TEST(test_vector_add) {
   (void)ctx;
-  (void)verbose;
   {
     struct sl_vector_f32 v1 = {
         .length   = {5},
@@ -498,10 +492,10 @@ SL_TEST(test_vector_add) {
         .data     = (float[]){1, 1, 1, 1, 1},
     };
     sl_la_vector_add(&v1, &w1);
-    if (!check_vector_equal(&v1, &v2)) {
+    if (!check_vector_equal(ctx, &v1, &v2)) {
       return false;
     }
-    if (!check_vector_equal(&w1, &w2)) {
+    if (!check_vector_equal(ctx, &w1, &w2)) {
       return false;
     }
   }
@@ -510,7 +504,6 @@ SL_TEST(test_vector_add) {
 
 SL_TEST(test_vector_sub) {
   (void)ctx;
-  (void)verbose;
   {
     struct sl_vector_f32 v1 = {
         .length   = {5},
@@ -533,10 +526,10 @@ SL_TEST(test_vector_sub) {
         .data     = (float[]){1, 1, 1, 1, 1},
     };
     sl_la_vector_sub(&v1, &w1);
-    if (!check_vector_equal(&v1, &v2)) {
+    if (!check_vector_equal(ctx, &v1, &v2)) {
       return false;
     }
-    if (!check_vector_equal(&w1, &w2)) {
+    if (!check_vector_equal(ctx, &w1, &w2)) {
       return false;
     }
   }

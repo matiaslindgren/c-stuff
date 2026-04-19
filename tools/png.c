@@ -5,7 +5,7 @@
 #include <stufflib/args/args.h>
 #include <stufflib/context/context.h>
 #include <stufflib/img/img.h>
-#include <stufflib/macros/macros.h>
+#include <stufflib/logging/logging.h>
 #include <stufflib/png/png.h>
 
 bool segment(struct sl_context ctx[static 1], const struct sl_args args[const static 1]) {
@@ -22,24 +22,17 @@ bool segment(struct sl_context ctx[static 1], const struct sl_args args[const st
   const char* const png_src_path = sl_args_get_positional(args, 1);
   const char* const png_dst_path = sl_args_get_positional(args, 2);
   const size_t threshold_percent = sl_args_parse_ull(args, "--threshold-percent", 10);
-  const bool verbose             = sl_args_parse_flag(args, "-v");
 
-  if (verbose) {
-    printf("read %s\n", png_src_path);
-  }
+  SL_LOG_INFO("read %s", png_src_path);
   src = sl_png_read_image(ctx, png_src_path);
   if (!src.data.size) {
     SL_LOG_ERROR("failed reading PNG image %s", png_src_path);
     goto done;
   }
-  if (verbose) {
-    printf("segmenting, threshold %zu%%\n", threshold_percent);
-  }
+  SL_LOG_INFO("segmenting, threshold %zu%%", threshold_percent);
   sl_img_segment_rgb(ctx, &dst, &src, threshold_percent);
 
-  if (verbose) {
-    printf("write %s\n", png_dst_path);
-  }
+  SL_LOG_INFO("write %s", png_dst_path);
   if (!sl_png_write_image(ctx, dst, png_dst_path)) {
     SL_LOG_ERROR("failed writing PNG image %s", png_dst_path);
     goto done;
@@ -138,7 +131,7 @@ void print_usage(const struct sl_args args[const static 1]) {
        "\n"
        "   %s dump_raw png_path block_type [block_types...]"
        "\n"
-       "   %s segment png_src_path png_dst_path [--threshold-percent=N] [-v]"
+       "   %s segment png_src_path png_dst_path [--threshold-percent=N]"
        "\n"),
       args->argv[0],
       args->argv[0],

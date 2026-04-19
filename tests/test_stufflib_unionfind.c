@@ -4,7 +4,7 @@
 
 #include <stufflib/args/args.h>
 #include <stufflib/context/context.h>
-#include <stufflib/macros/macros.h>
+#include <stufflib/logging/logging.h>
 #include <stufflib/testing/testing.h>
 #include <stufflib/unionfind/unionfind.h>
 
@@ -19,7 +19,6 @@ int sl_uf_assert_roots_ok(const struct sl_unionfind uf, size_t expected_roots[st
 }
 
 SL_TEST(test_union_until_single_set) {
-  (void)verbose;
   struct sl_unionfind uf = {0};
   if (!sl_unionfind_init(ctx, &uf, 10)) {
     SL_LOG_ERROR("unable to allocate union find structure");
@@ -85,7 +84,6 @@ SL_TEST(test_union_until_single_set) {
 }
 
 SL_TEST(test_union_self) {
-  (void)verbose;
   struct sl_unionfind uf = {0};
   if (!sl_unionfind_init(ctx, &uf, 3)) {
     SL_LOG_ERROR("unable to allocate union find structure");

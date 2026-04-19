@@ -15,30 +15,40 @@
 #include <stufflib/random/random.h>
 
 bool check_vector_equal(
+    struct sl_context ctx[static 1],
     struct sl_vector_f32 a[const static 1],
     struct sl_vector_f32 b[const static 1]
 ) {
   if (!sl_la_vector_equal(a, b)) {
     fprintf(stderr, "!expected vectors a and b to be equal\n");
     fprintf(stderr, "a:\n");
-    sl_la_vector_print(stderr, a);
+    if (!sl_la_vector_print(ctx, stderr, a)) {
+      return false;
+    }
     fprintf(stderr, "b:\n");
-    sl_la_vector_print(stderr, b);
+    if (!sl_la_vector_print(ctx, stderr, b)) {
+      return false;
+    }
     return false;
   }
   return true;
 }
 
 bool check_matrix_equal(
+    struct sl_context ctx[static 1],
     struct sl_matrix_f32 a[const static 1],
     struct sl_matrix_f32 b[const static 1]
 ) {
   if (!sl_la_matrix_equal(a, b)) {
     fprintf(stderr, "!expected matrices a and b to be equal\n");
     fprintf(stderr, "a:\n");
-    sl_la_matrix_print(stderr, a);
+    if (!sl_la_matrix_print(ctx, stderr, a)) {
+      return false;
+    }
     fprintf(stderr, "b:\n");
-    sl_la_matrix_print(stderr, b);
+    if (!sl_la_matrix_print(ctx, stderr, b)) {
+      return false;
+    }
     return false;
   }
   return true;
@@ -46,7 +56,6 @@ bool check_matrix_equal(
 
 SL_TEST(test_minmax_normalization) {
   (void)ctx;
-  (void)verbose;
   {
     struct sl_matrix_f32 a = {
         .length   = {4, 3},
@@ -85,7 +94,7 @@ SL_TEST(test_minmax_normalization) {
     struct sl_ml_minmax_scaler scaler = SL_ML_MINMAX_SCALER_CREATE_INLINE(3);
     sl_ml_minmax_fit(&scaler, &a1);
     sl_ml_minmax_apply(&scaler, &a1, -1, 1);
-    if (!check_matrix_equal(&a1, &a2)) {
+    if (!check_matrix_equal(ctx, &a1, &a2)) {
       return false;
     }
   }
@@ -110,7 +119,7 @@ SL_TEST(test_minmax_normalization) {
                      -0.55555556f},
     };
     SL_ML_MINMAX_RESCALE(3, &a1, -1, 1);
-    if (!check_matrix_equal(&a1, &a2)) {
+    if (!check_matrix_equal(ctx, &a1, &a2)) {
       return false;
     }
   }
@@ -134,7 +143,7 @@ SL_TEST(test_minmax_normalization) {
     struct sl_ml_minmax_scaler scaler = SL_ML_MINMAX_SCALER_CREATE_INLINE(3);
     sl_ml_minmax_fit(&scaler, &a1);
     sl_ml_minmax_apply(&scaler, &a1, 0, 1);
-    if (!check_matrix_equal(&a1, &a2)) {
+    if (!check_matrix_equal(ctx, &a1, &a2)) {
       return false;
     }
   }
@@ -158,7 +167,7 @@ SL_TEST(test_minmax_normalization) {
     struct sl_ml_minmax_scaler scaler = SL_ML_MINMAX_SCALER_CREATE_INLINE(3);
     sl_ml_minmax_fit(&scaler, &a1);
     sl_ml_minmax_apply(&scaler, &a1, 1, 10);
-    if (!check_matrix_equal(&a1, &a2)) {
+    if (!check_matrix_equal(ctx, &a1, &a2)) {
       return false;
     }
   }
@@ -166,7 +175,6 @@ SL_TEST(test_minmax_normalization) {
 }
 
 SL_TEST(test_random_train_test_split) {
-  (void)verbose;
   uint64_t prng = 0;
   sl_random_pcg32_init(&prng, 0);
   for (int iter = 0; iter < 1000; ++iter) {
@@ -222,7 +230,6 @@ SL_TEST(test_random_train_test_split) {
 
 SL_TEST(test_svm_linear_fit) {
   (void)ctx;
-  (void)verbose;
   uint64_t prng = 0;
   sl_random_pcg32_init(&prng, 0);
   for (int iter = 0; iter < 1000; ++iter) {

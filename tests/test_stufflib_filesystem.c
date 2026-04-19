@@ -18,9 +18,6 @@ SL_TEST(test_read_file) {
   struct sl_span buffer  = sl_span_view(SL_ARRAY_LEN(buf), buf);
 
   for (size_t i = 0; i < SL_ARRAY_LEN(sl_test_data_file_paths); ++i) {
-    if (verbose) {
-      printf("reading test file '%s'\n", sl_test_data_file_paths[i]);
-    }
     struct sl_span data = sl_fs_read_file(ctx, sl_test_data_file_paths[i], &buffer);
     SL_ASSERT_TRUE(data.owned);
     SL_ASSERT_EQ_LL(data.size, sl_test_data_file_sizes[i]);
@@ -49,9 +46,6 @@ SL_TEST(test_read_file_utf8) {
         "./test-data/txt/wikipedia/water_%s.txt",
         languages[i]
     );
-    if (verbose) {
-      printf("%s\n", input_path);
-    }
 
     char length_path[200] = {0};
     snprintf(
@@ -104,12 +98,6 @@ SL_TEST(test_read_lines) {
          sl_tokenizer_iter_advance(&iter)) {
       struct sl_string line = {0};
       SL_ASSERT_TRUE(sl_string_from_utf8(ctx, sl_tokenizer_iter_get(&iter), &line));
-      if (verbose) {
-        printf("line %zu:", lineno);
-        bool print_ok = sl_string_fprint(stdout, &line);
-        printf("\n");
-        SL_ASSERT_TRUE(print_ok);
-      }
       SL_ASSERT_TRUE(lineno < SL_ARRAY_LEN(expected));
       const size_t line_len = strlen((const char*)expected[lineno]);
       SL_ASSERT_TRUE(

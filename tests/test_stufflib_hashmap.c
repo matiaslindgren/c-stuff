@@ -9,7 +9,6 @@
 #include <stufflib/testing/testing.h>
 
 SL_TEST(test_empty) {
-  (void)verbose;
   struct sl_hashmap map = sl_hashmap_create(ctx, 2);
   SL_ASSERT_EQ_LL(map.size, 0);
   SL_ASSERT_EQ_LL(map.capacity, 2);
@@ -34,7 +33,6 @@ SL_TEST(test_empty) {
 }
 
 SL_TEST(test_insert_single_int) {
-  (void)verbose;
   for (int64_t value = -10; value <= 10; ++value) {
     struct sl_hashmap map    = sl_hashmap_create(ctx, 2);
     struct sl_span key_hello = {0};
@@ -87,7 +85,6 @@ SL_TEST(test_insert_single_int) {
 }
 
 SL_TEST(test_insert_single_pointer) {
-  (void)verbose;
   struct sl_hashmap map = sl_hashmap_create(ctx, 2);
   struct sl_span key    = {0};
   struct sl_span value  = {0};
@@ -118,7 +115,6 @@ SL_TEST(test_insert_single_pointer) {
 }
 
 SL_TEST(test_insert_two_elements_resizes) {
-  (void)verbose;
   struct sl_hashmap map    = sl_hashmap_create(ctx, 2);
   struct sl_span key_hello = {0};
   struct sl_span key_there = {0};
@@ -144,7 +140,6 @@ SL_TEST(test_insert_two_elements_resizes) {
 }
 
 SL_TEST(test_update_single_element) {
-  (void)verbose;
   struct sl_hashmap map = sl_hashmap_create(ctx, 2);
   struct sl_span key    = {0};
   SL_ASSERT_TRUE(sl_span_from_str(ctx, "hello", &key));
@@ -173,7 +168,6 @@ SL_TEST(test_update_single_element) {
 }
 
 SL_TEST(test_multiple_resizes_retain_slots) {
-  (void)verbose;
   struct sl_hashmap map = sl_hashmap_create(ctx, 2);
   const char* keys[]    = {
       "ten",
@@ -239,7 +233,6 @@ SL_TEST(test_multiple_resizes_retain_slots) {
 }
 
 SL_TEST(test_slot_iterator) {
-  (void)verbose;
   struct sl_hashmap map = sl_hashmap_create(ctx, 2);
   const char* keys[]    = {
       "ten",

@@ -9,7 +9,6 @@
 
 SL_TEST(test_parse_positional) {
   (void)ctx;
-  (void)verbose;
   char* const argv[] = {
       "bin/path",
       "arg1",
@@ -33,7 +32,6 @@ SL_TEST(test_parse_positional) {
 
 SL_TEST(test_parse_one_flag) {
   (void)ctx;
-  (void)verbose;
   char* const argv[] = {
       "bin/path",
       "-x",
@@ -71,7 +69,6 @@ SL_TEST(test_parse_one_flag) {
 
 SL_TEST(test_parse_positional_after_optional) {
   (void)ctx;
-  (void)verbose;
   char* const argv[] = {
       "bin/path",
       "-v",
@@ -98,7 +95,6 @@ SL_TEST(test_parse_positional_after_optional) {
 
 SL_TEST(test_parse_two_flags) {
   (void)ctx;
-  (void)verbose;
   char* const argv[] = {
       "bin/path",
       "-w",
@@ -143,7 +139,6 @@ SL_TEST(test_parse_two_flags) {
 
 SL_TEST(test_parse_optional_ints) {
   (void)ctx;
-  (void)verbose;
   char* const argv[] = {
       "bin/path",
       "-w=1",

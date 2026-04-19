@@ -12,7 +12,6 @@
 
 SL_TEST(test_single_byte) {
   (void)ctx;
-  (void)verbose;
   for (uint8_t i = 0; i < 10; ++i) {
     unsigned char data[] = {
         i,
@@ -37,7 +36,6 @@ SL_TEST(test_single_byte) {
 
 SL_TEST(test_two_bytes_big_endian) {
   (void)ctx;
-  (void)verbose;
   for (uint16_t i = 0x100; i < 0x100 + 10; ++i) {
     unsigned char data[] = {
         (i & 0xff00) >> 8,
@@ -63,7 +61,6 @@ SL_TEST(test_two_bytes_big_endian) {
 
 SL_TEST(test_small_strings) {
   (void)ctx;
-  (void)verbose;
   const char* inputs[] = {
       "",
       "0",

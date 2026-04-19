@@ -4,7 +4,6 @@
 
 SL_TEST(test_vector_f64_wipe) {
   (void)ctx;
-  (void)verbose;
   struct sl_vector_f64 v = {.data = (double[]){1.0}, .length = {1}, .capacity = {1}};
   sl_vector_f64_wipe(&v);
   SL_ASSERT_TRUE(v.data == nullptr);
@@ -15,7 +14,6 @@ SL_TEST(test_vector_f64_wipe) {
 
 SL_TEST(test_vector_f64_clear) {
   (void)ctx;
-  (void)verbose;
   double buf[]           = {1.0, 2.0, 3.0};
   struct sl_vector_f64 v = {.data = buf, .length = {3}, .capacity = {3}};
   sl_vector_f64_clear(&v);
@@ -27,7 +25,6 @@ SL_TEST(test_vector_f64_clear) {
 
 SL_TEST(test_vector_f64_size) {
   (void)ctx;
-  (void)verbose;
   double buf[]           = {0.0, 0.0, 0.0};
   struct sl_vector_f64 v = {.data = buf, .length = {3}, .capacity = {3}};
   SL_ASSERT_EQ_LL(sl_vector_f64_size(&v), 3);
@@ -36,7 +33,6 @@ SL_TEST(test_vector_f64_size) {
 
 SL_TEST(test_vector_f64_get_set) {
   (void)ctx;
-  (void)verbose;
   double buf[]           = {0.0, 0.0, 0.0};
   struct sl_vector_f64 v = {.data = buf, .length = {3}, .capacity = {3}};
   sl_vector_f64_set(&v, 1, 2.5);
@@ -47,7 +43,6 @@ SL_TEST(test_vector_f64_get_set) {
 
 SL_TEST(test_vector_f64_offset) {
   (void)ctx;
-  (void)verbose;
   double buf[]           = {0.0, 0.0, 0.0};
   struct sl_vector_f64 v = {.data = buf, .length = {3}, .capacity = {3}};
   SL_ASSERT_EQ_LL(sl_vector_f64_offset(&v, 0), 0);
@@ -58,7 +53,6 @@ SL_TEST(test_vector_f64_offset) {
 
 SL_TEST(test_vector_f32_wipe) {
   (void)ctx;
-  (void)verbose;
   struct sl_vector_f32 v = {.data = (float[]){1.0f}, .length = {1}, .capacity = {1}};
   sl_vector_f32_wipe(&v);
   SL_ASSERT_TRUE(v.data == nullptr);
@@ -69,7 +63,6 @@ SL_TEST(test_vector_f32_wipe) {
 
 SL_TEST(test_vector_f32_clear) {
   (void)ctx;
-  (void)verbose;
   float buf[]            = {1.0f, 2.0f, 3.0f};
   struct sl_vector_f32 v = {.data = buf, .length = {3}, .capacity = {3}};
   sl_vector_f32_clear(&v);
@@ -81,7 +74,6 @@ SL_TEST(test_vector_f32_clear) {
 
 SL_TEST(test_vector_f32_size) {
   (void)ctx;
-  (void)verbose;
   float buf[]            = {0.0f, 0.0f, 0.0f};
   struct sl_vector_f32 v = {.data = buf, .length = {3}, .capacity = {3}};
   SL_ASSERT_EQ_LL(sl_vector_f32_size(&v), 3);
@@ -90,7 +82,6 @@ SL_TEST(test_vector_f32_size) {
 
 SL_TEST(test_vector_f32_get_set) {
   (void)ctx;
-  (void)verbose;
   float buf[]            = {0.0f, 0.0f, 0.0f};
   struct sl_vector_f32 v = {.data = buf, .length = {3}, .capacity = {3}};
   sl_vector_f32_set(&v, 1, 2.5f);
@@ -101,7 +92,6 @@ SL_TEST(test_vector_f32_get_set) {
 
 SL_TEST(test_vector_f32_offset) {
   (void)ctx;
-  (void)verbose;
   float buf[]            = {0.0f, 0.0f, 0.0f};
   struct sl_vector_f32 v = {.data = buf, .length = {3}, .capacity = {3}};
   SL_ASSERT_EQ_LL(sl_vector_f32_offset(&v, 0), 0);

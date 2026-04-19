@@ -10,7 +10,6 @@
 
 SL_TEST(test_empty_stack) {
   (void)ctx;
-  (void)verbose;
   struct sl_error_stack s = {0};
 
   SL_ASSERT_TRUE(sl_error_depth(&s) == 0);
@@ -25,7 +24,6 @@ SL_TEST(test_empty_stack) {
 
 SL_TEST(test_push_single) {
   (void)ctx;
-  (void)verbose;
   struct sl_error_stack s = {0};
 
   sl_error_push(&s, "file.c", 42, "something went wrong");
@@ -44,7 +42,6 @@ SL_TEST(test_push_single) {
 
 SL_TEST(test_pop_single) {
   (void)ctx;
-  (void)verbose;
   struct sl_error_stack s = {0};
 
   sl_error_push(&s, "file.c", 7, "pop me");
@@ -64,7 +61,6 @@ SL_TEST(test_pop_single) {
 
 SL_TEST(test_lifo_order) {
   (void)ctx;
-  (void)verbose;
   struct sl_error_stack s = {0};
 
   sl_error_push(&s, "a.c", 1, "first");
@@ -98,7 +94,6 @@ SL_TEST(test_lifo_order) {
 
 SL_TEST(test_peek_does_not_pop) {
   (void)ctx;
-  (void)verbose;
   struct sl_error_stack s = {0};
 
   sl_error_push(&s, "x.c", 99, "persistent");
@@ -115,7 +110,6 @@ SL_TEST(test_peek_does_not_pop) {
 
 SL_TEST(test_clear) {
   (void)ctx;
-  (void)verbose;
   struct sl_error_stack s = {0};
 
   sl_error_push(&s, "a.c", 1, "one");
@@ -136,7 +130,6 @@ SL_TEST(test_clear) {
 
 SL_TEST(test_depth_tracking) {
   (void)ctx;
-  (void)verbose;
   struct sl_error_stack s = {0};
 
   const size_t n = SL_ERROR_STACK_DEPTH - 1;
@@ -158,7 +151,6 @@ SL_TEST(test_depth_tracking) {
 
 SL_TEST(test_msg_truncation) {
   (void)ctx;
-  (void)verbose;
   struct sl_error_stack s = {0};
 
   char long_msg[SL_ERROR_MSG_LEN + 64];
@@ -176,7 +168,6 @@ SL_TEST(test_msg_truncation) {
 
 SL_TEST(test_clear_then_reuse) {
   (void)ctx;
-  (void)verbose;
   struct sl_error_stack s = {0};
 
   sl_error_push(&s, "a.c", 1, "before clear");

@@ -8,7 +8,6 @@
 
 SL_TEST(test_fresh_ctx_has_no_errors) {
   (void)ctx;
-  (void)verbose;
   struct sl_context c = {0};
 
   SL_ASSERT_TRUE(!sl_error_occurred(&c.errors));
@@ -19,7 +18,6 @@ SL_TEST(test_fresh_ctx_has_no_errors) {
 
 SL_TEST(test_sl_error_macro_no_format_args) {
   (void)ctx;
-  (void)verbose;
   struct sl_context c = {0};
 
   SL_ERROR(&c, "something failed");
@@ -36,7 +34,6 @@ SL_TEST(test_sl_error_macro_no_format_args) {
 
 SL_TEST(test_sl_error_macro_formats_message) {
   (void)ctx;
-  (void)verbose;
   struct sl_context c = {0};
 
   SL_ERROR(&c, "value is %d and str is %s", 42, "hello");
@@ -50,7 +47,6 @@ SL_TEST(test_sl_error_macro_formats_message) {
 
 SL_TEST(test_sl_error_macro_captures_file) {
   (void)ctx;
-  (void)verbose;
   struct sl_context c = {0};
 
   SL_ERROR(&c, "check file");
@@ -64,7 +60,6 @@ SL_TEST(test_sl_error_macro_captures_file) {
 
 SL_TEST(test_sl_error_macro_captures_line) {
   (void)ctx;
-  (void)verbose;
   struct sl_context c = {0};
 
   const int line_before = __LINE__;
@@ -79,7 +74,6 @@ SL_TEST(test_sl_error_macro_captures_line) {
 
 SL_TEST(test_sl_error_macro_accumulates) {
   (void)ctx;
-  (void)verbose;
   struct sl_context c = {0};
 
   SL_ERROR(&c, "first");
@@ -97,7 +91,6 @@ SL_TEST(test_sl_error_macro_accumulates) {
 
 SL_TEST(test_sl_error_macro_msg_truncation) {
   (void)ctx;
-  (void)verbose;
   struct sl_context c = {0};
 
   // Format a message that would exceed SL_ERROR_MSG_LEN before truncation
@@ -119,7 +112,6 @@ SL_TEST(test_sl_error_macro_msg_truncation) {
 
 SL_TEST(test_unwind_empties_stack) {
   (void)ctx;
-  (void)verbose;
   struct sl_context c = {0};
 
   SL_ERROR(&c, "first");
@@ -150,7 +142,6 @@ SL_TEST(test_unwind_empties_stack) {
 
 SL_TEST(test_unwind_output_format) {
   (void)ctx;
-  (void)verbose;
   struct sl_context c = {0};
 
   SL_ERROR(&c, "boom");
@@ -174,7 +165,6 @@ SL_TEST(test_unwind_output_format) {
 
 SL_TEST(test_unwind_empty_stack_is_noop) {
   (void)ctx;
-  (void)verbose;
   struct sl_context c = {0};
 
   char* buf   = nullptr;

@@ -15,7 +15,7 @@
 
 bool sl_terminal_use_colors(void);
 
-typedef bool sl_testing_function(struct sl_context* const, bool);
+typedef bool sl_testing_function(struct sl_context* const);
 
 struct sl_testing_test {
   struct sl_testing_test* next;
@@ -61,11 +61,11 @@ static inline void sl_testing_register_test_instance(
   sl_testing_tests = test;
 }
 
-static inline int sl_testing_run(struct sl_context ctx[static const 1], bool verbose) {
+static inline int sl_testing_run(struct sl_context ctx[static const 1]) {
   int n_failures = 0;
   for (struct sl_testing_test* test = sl_testing_tests; test != nullptr; test = test->next) {
     fprintf(stderr, "%s:%s: ", test->file, test->name);
-    if (test->func(ctx, verbose)) {
+    if (test->func(ctx)) {
       fprintf(stderr, SL_ANSI_COLOR(SL_ANSI_GREEN, " PASS\n"));
     } else if (sl_context_error_occurred(ctx)) {
       fprintf(stderr, SL_ANSI_COLOR(SL_ANSI_RED, " ERROR\n"));
@@ -178,29 +178,29 @@ static inline int sl_testing_run(struct sl_context ctx[static const 1], bool ver
 #define SL_ASSERT_EQ_DOUBLE(...)        SL_ASSERT_DOUBLE_ALMOST(__VA_ARGS__)
 
 #define SL_TEST(name)                                                         \
-  static bool name(struct sl_context ctx[const static 1], bool verbose);      \
+  static bool name(struct sl_context ctx[const static 1]);                    \
   __attribute__((constructor)) static void sl_testing_register_##name(void) { \
     sl_testing_register_test_instance(#name, __FILE__, name);                 \
   }                                                                           \
-  static bool name(struct sl_context ctx[const static 1], bool verbose)
+  static bool name(struct sl_context ctx[const static 1])
 
-#define SL_TEST_MAIN()                                       \
-  int main(int argc, char* const argv[argc + 1]) {           \
-    struct sl_args args   = {.argc = argc, .argv = argv};    \
-    const bool verbose    = sl_args_parse_flag(&args, "-v"); \
-    struct sl_context ctx = {0};                             \
-    bool pass             = true;                            \
-    int n_failures        = sl_testing_run(&ctx, verbose);   \
-    if (n_failures > 0) {                                    \
-      pass = false;                                          \
-    }                                                        \
-    if (sl_context_error_occurred(&ctx)) {                   \
-      pass = false;                                          \
-    }                                                        \
-    if (!sl_context_unwind_errors(&ctx, stderr)) {           \
-      pass = false;                                          \
-    }                                                        \
-    return pass ? EXIT_SUCCESS : EXIT_FAILURE;               \
+#define SL_TEST_MAIN()                             \
+  int main(int argc, char* const argv[argc + 1]) { \
+    (void)argc;                                    \
+    (void)argv;                                    \
+    struct sl_context ctx = {0};                   \
+    bool pass             = true;                  \
+    int n_failures        = sl_testing_run(&ctx);  \
+    if (n_failures > 0) {                          \
+      pass = false;                                \
+    }                                              \
+    if (sl_context_error_occurred(&ctx)) {         \
+      pass = false;                                \
+    }                                              \
+    if (!sl_context_unwind_errors(&ctx, stderr)) { \
+      pass = false;                                \
+    }                                              \
+    return pass ? EXIT_SUCCESS : EXIT_FAILURE;     \
   }
 
 #endif  // SL_TESTING_H_INCLUDED

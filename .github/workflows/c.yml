@@ -17,22 +17,22 @@ jobs:
           - ubuntu-24.04
           - macos-26
         build:
-          - { optimize: O1, sanitize: none,      trace: 1 }
-          - { optimize: O2, sanitize: address,   trace: 0 }
-          - { optimize: O2, sanitize: undefined, trace: 0 }
-          - { optimize: O3, sanitize: none,      trace: 0 }
+          - { optimize: O1, sanitize: none,      loglevel: trace }
+          - { optimize: O2, sanitize: address,   loglevel: error }
+          - { optimize: O2, sanitize: undefined, loglevel: error }
+          - { optimize: O2, sanitize: none,      loglevel: error }
+          - { optimize: O3, sanitize: none,      loglevel: error }
         include:
           - llvm: 21
             platform: ubuntu-24.04
-            build: { optimize: O2, sanitize: memory, trace: 0 }
+            build: { optimize: O2, sanitize: memory, loglevel: error }
 
-    name: "${{ matrix.platform }} optimize=${{ matrix.build.optimize }} sanitize=${{ matrix.build.sanitize }} trace=${{ matrix.build.trace }}"
+    name: "${{ matrix.platform }} optimize=${{ matrix.build.optimize }} sanitize=${{ matrix.build.sanitize }}"
     runs-on: ${{ matrix.platform }}
     env:
       OPTIMIZE: ${{ matrix.build.optimize }}
       SANITIZE: ${{ matrix.build.sanitize }}
-      TRACE: ${{ matrix.build.trace }}
-      STUFFLIB_TEST_VERBOSE: ${{ matrix.build.trace }}
+      SL_LOGGING_LEVEL: ${{ matrix.build.loglevel }}
 
     steps:
     - name: checkout

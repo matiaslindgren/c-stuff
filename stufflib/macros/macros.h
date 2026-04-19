@@ -1,59 +1,14 @@
 #ifndef SL_MACROS_H_INCLUDED
 #define SL_MACROS_H_INCLUDED
 
-#include <stdbool.h>
 #include <stdlib.h>
-
-#include <assert.h>
-
-#define SL_NOOP(...) \
-  do {               \
-  } while (false)
+#include <string.h>
 
 #define SL_MIN(x, y) ((x) < (y) ? (x) : (y))
 #define SL_MAX(x, y) ((x) < (y) ? (y) : (x))
 
 #define SL_ARRAY_LEN(a) (sizeof(a) / sizeof((a)[0]))
 #define SL_STR_EQ(a, b) (strcmp((a), (b)) == 0)
-
-#define SL_LOG(level, ...)                             \
-  do {                                                 \
-    const char* const sl_log_fname    = __FILE__;      \
-    const unsigned long sl_log_lineno = __LINE__;      \
-    fprintf(stderr, "{\"level\":\"%s\"", level);       \
-    fprintf(stderr, ",\"file\":\"%s\"", sl_log_fname); \
-    fprintf(stderr, ",\"line\":%lu", sl_log_lineno);   \
-    fprintf(stderr, ",\"msg\":\"");                    \
-    fprintf(stderr, __VA_ARGS__);                      \
-    fprintf(stderr, "\"}\n");                          \
-  } while (false)
-
-// SL_VERBOSITY
-// 0: none
-// 1: error
-// 2: info
-// 3: trace
-#ifndef SL_VERBOSITY
-  #define SL_VERBOSITY 2
-#endif
-
-#if SL_VERBOSITY > 2
-  #define SL_LOG_TRACE(...) SL_LOG("trace", __VA_ARGS__)
-#else
-  #define SL_LOG_TRACE(...) SL_NOOP(__VA_ARGS__)
-#endif
-
-#if SL_VERBOSITY > 1
-  #define SL_LOG_INFO(...) SL_LOG("info", __VA_ARGS__)
-#else
-  #define SL_LOG_INFO(...) SL_NOOP(__VA_ARGS__)
-#endif
-
-#if SL_VERBOSITY > 0
-  #define SL_LOG_ERROR(...) SL_LOG("error", __VA_ARGS__)
-#else
-  #define SL_LOG_ERROR(...) SL_NOOP(__VA_ARGS__)
-#endif
 
 #define SL_REPEAT_1(x)  x
 #define SL_REPEAT_2(x)  SL_REPEAT_1(x) x

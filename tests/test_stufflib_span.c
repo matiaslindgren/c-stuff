@@ -12,7 +12,6 @@
 
 SL_TEST(test_data_view_one) {
   (void)ctx;
-  (void)verbose;
   unsigned char x     = 1;
   struct sl_span data = sl_span_view(1, &x);
   SL_ASSERT_TRUE(data.size == 1);
@@ -25,7 +24,6 @@ SL_TEST(test_data_view_one) {
 
 SL_TEST(test_data_view_array) {
   (void)ctx;
-  (void)verbose;
   unsigned char x[]   = {1, 2, 3, 4};
   const size_t n      = SL_ARRAY_LEN(x);
   struct sl_span data = sl_span_view(n, x);
@@ -41,7 +39,6 @@ SL_TEST(test_data_view_array) {
 }
 
 SL_TEST(test_data_create) {
-  (void)verbose;
   const size_t n      = 10;
   struct sl_span data = {0};
   SL_ASSERT_TRUE(sl_span_create(ctx, n, &data));
@@ -57,7 +54,6 @@ SL_TEST(test_data_create) {
 }
 
 SL_TEST(test_data_create_empty) {
-  (void)verbose;
   struct sl_span data = {0};
   SL_ASSERT_TRUE(sl_span_create(ctx, 0, &data));
   SL_ASSERT_TRUE(data.size == 0);
@@ -69,7 +65,6 @@ SL_TEST(test_data_create_empty) {
 }
 
 SL_TEST(test_data_create_from_cstr) {
-  (void)verbose;
   const char* strings[] = {
       "000",
       "0",
@@ -105,7 +100,6 @@ SL_TEST(test_data_create_from_cstr) {
 }
 
 SL_TEST(test_data_create_from_hexadecimal_cstr) {
-  (void)verbose;
   const char* strings[] = {
       "0x00",
       "0x1",
@@ -168,7 +162,6 @@ SL_TEST(test_data_create_from_hexadecimal_cstr) {
 }
 
 SL_TEST(test_data_copy_view) {
-  (void)verbose;
   unsigned char x[]    = {1, 2, 3, 4};
   const size_t n       = SL_ARRAY_LEN(x);
   struct sl_span data1 = sl_span_view(n, x);
@@ -189,7 +182,6 @@ SL_TEST(test_data_copy_view) {
 }
 
 SL_TEST(test_data_concat_views) {
-  (void)verbose;
   unsigned char x1[]   = {1, 2, 3, 4};
   unsigned char x2[]   = {6, 7, 8, 9, 10, 11};
   const size_t n1      = SL_ARRAY_LEN(x1);
@@ -220,7 +212,6 @@ SL_TEST(test_data_concat_views) {
 }
 
 SL_TEST(test_data_concat_empty) {
-  (void)verbose;
   unsigned char x1[]   = {1, 2, 3, 4};
   const size_t n1      = SL_ARRAY_LEN(x1);
   struct sl_span data1 = sl_span_view(n1, x1);
@@ -246,7 +237,6 @@ SL_TEST(test_data_concat_empty) {
 
 SL_TEST(test_data_slice) {
   (void)ctx;
-  (void)verbose;
   unsigned char x[]   = {1, 2, 3, 4, 5, 6};
   const size_t n      = SL_ARRAY_LEN(x);
   struct sl_span data = sl_span_view(n, x);
@@ -268,7 +258,6 @@ SL_TEST(test_data_slice) {
 
 SL_TEST(test_data_slice_past_end) {
   (void)ctx;
-  (void)verbose;
   unsigned char x[]    = {1, 2, 3, 4, 5, 6};
   const size_t n       = SL_ARRAY_LEN(x);
   struct sl_span data  = sl_span_view(n, x);
@@ -283,7 +272,6 @@ SL_TEST(test_data_slice_past_end) {
 
 SL_TEST(test_data_find) {
   (void)ctx;
-  (void)verbose;
   unsigned char x1[]   = {1, 2, 3, 1, 2, 3};
   unsigned char x2[]   = {2, 3};
   const size_t n1      = SL_ARRAY_LEN(x1);
@@ -302,7 +290,6 @@ SL_TEST(test_data_find) {
 
 SL_TEST(test_data_iter) {
   (void)ctx;
-  (void)verbose;
   unsigned char x[]       = {1, 2, 3, 4, 5, 6};
   const size_t n          = SL_ARRAY_LEN(x);
   struct sl_span data     = sl_span_view(n, x);

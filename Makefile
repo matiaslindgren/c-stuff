@@ -24,10 +24,9 @@ help:
 	@echo "  macro-expand-%         run preprocessor on % and print result"
 	@echo ""
 	@echo "Variables:"
-	@echo "  OPTIMIZE=O0|O1|O2|O3                    (default: O2)"
-	@echo "  SANITIZE=none|address|undefined|memory  (default: none)"
-	@echo "  TRACE=0|1                               (default: 0)"
-	@echo "  STUFFLIB_TEST_VERBOSE=0|1               (default: 0)"
+	@echo "  OPTIMIZE=O0|O1|O2|O3                     (default: O2)"
+	@echo "  SANITIZE=none|address|undefined|memory   (default: none)"
+	@echo "  LOG_LEVEL_DEFAULT=none|error|info|trace  (default: error)"
 
 # disable builtin suffix rules: we use custom explicit pattern rules
 .SUFFIXES:
@@ -130,12 +129,18 @@ else
 endif
 
 
-TRACE ?= 0
+LOG_LEVEL_DEFAULT ?= error
 
-ifeq ($(TRACE), 1)
-	CFLAGS += -DSL_VERBOSITY=3
+ifeq ($(LOG_LEVEL_DEFAULT), none)
+	CFLAGS += -DSL_LOGGING_LEVEL_DEFAULT=none
+else ifeq ($(LOG_LEVEL_DEFAULT), error)
+	CFLAGS += -DSL_LOGGING_LEVEL_DEFAULT=error
+else ifeq ($(LOG_LEVEL_DEFAULT), info)
+	CFLAGS += -DSL_LOGGING_LEVEL_DEFAULT=info
+else ifeq ($(LOG_LEVEL_DEFAULT), trace)
+	CFLAGS += -DSL_LOGGING_LEVEL_DEFAULT=trace
 else
-	CFLAGS += -DSL_VERBOSITY=2
+	$(error Unknown LOG_LEVEL_DEFAULT: $(LOG_LEVEL_DEFAULT). Use none, error, info, or trace)
 endif
 
 
@@ -201,11 +206,6 @@ $(BUILD_DIR) $(BUILD_DIRS) $(COMPILE_COMMANDS_DIR):
 .PHONY: objects
 objects: $(OBJECT_PATHS)
 
-TEST_ARGS :=
-ifeq (${STUFFLIB_TEST_VERBOSE}, 1)
-	TEST_ARGS += -v
-endif
-
 make_tmp_dir = $(shell mktemp --directory)
 
 RUN_TESTS := $(addprefix run_,$(notdir $(TEST_PATHS)))
@@ -215,8 +215,7 @@ test: $(RUN_TESTS)
 .PHONY: $(RUN_TESTS)
 $(RUN_TESTS): run_%: $(BUILD_DIR)/tests/%
 	@export SL_TEMP_DIR=$(call make_tmp_dir); \
-		trap "rm -rf $$SL_TEMP_DIR" EXIT SIGINT; \
-		$< $(TEST_ARGS)
+		trap "rm -rf $$SL_TEMP_DIR" EXIT SIGINT; $<
 
 TIMEOUT_CMD := $(shell which timeout)
 ifeq ($(TIMEOUT_CMD),)
@@ -231,7 +230,7 @@ integration_test: $(RUN_INTEGRATION_TESTS)
 
 .PHONY: $(RUN_INTEGRATION_TESTS)
 $(RUN_INTEGRATION_TESTS): integration_test_%: ./tests/integration/test_%_tool.bash $(BUILD_DIR)/tools/%
-	$(TIMEOUT_CMD) $^ $(TEST_ARGS)
+	$(TIMEOUT_CMD) $^
 
 -include $(wildcard DEPEND_PATHS)
 

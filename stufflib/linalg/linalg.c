@@ -168,39 +168,50 @@ void sl_la_vector_copy(
   cblas_scopy((int)sl_vector_f32_size(src), src->data, 1, dst->data, 1);
 }
 
-void sl_la_vector_print(FILE stream[const static 1], const struct sl_vector_f32 v[const static 1]) {
+bool sl_la_vector_print(
+    struct sl_context ctx[static 1],
+    FILE stream[const static 1],
+    const struct sl_vector_f32 v[const static 1]
+) {
   for (size_t i = 0; i < sl_vector_f32_size(v); ++i) {
     const double value = (double)v->data[i];
     if (fprintf(stream, (SL_LA_FLOAT_FORMAT " "), value) < 0) {
-      SL_LOG_ERROR(("failed printing vector value at (%zu): " SL_LA_FLOAT_FORMAT), i, value);
-      return;
+      SL_ERROR(ctx, "failed printing vector value at (%zu): " SL_LA_FLOAT_FORMAT, i, value);
+      return false;
     }
   }
   if (fprintf(stream, "\n") < 0) {
-    SL_LOG_ERROR("failed printing newline");
-    return;
+    SL_ERROR(ctx, "failed printing newline");
+    return false;
   }
+  return true;
 }
 
-void sl_la_matrix_print(FILE stream[const static 1], struct sl_matrix_f32 a[const static 1]) {
+bool sl_la_matrix_print(
+    struct sl_context ctx[static 1],
+    FILE stream[const static 1],
+    struct sl_matrix_f32 a[const static 1]
+) {
   for (size_t row = 0; row < sl_matrix_f32_num_rows(a); ++row) {
     for (size_t col = 0; col < sl_matrix_f32_num_cols(a); ++col) {
       const double value = (double)*sl_matrix_f32_get(a, row, col);
       if (fprintf(stream, (SL_LA_FLOAT_FORMAT " "), value) < 0) {
-        SL_LOG_ERROR(
-            ("failed printing matrix value at (%zu, %zu): " SL_LA_FLOAT_FORMAT),
+        SL_ERROR(
+            ctx,
+            "failed printing matrix value at (%zu, %zu): " SL_LA_FLOAT_FORMAT,
             row,
             col,
             value
         );
-        return;
+        return false;
       }
     }
     if (fprintf(stream, "\n") < 0) {
-      SL_LOG_ERROR("failed printing newline after row %zu", row);
-      return;
+      SL_ERROR(ctx, "failed printing newline after row %zu", row);
+      return false;
     }
   }
+  return true;
 }
 
 void sl_la_matrix_multiply(

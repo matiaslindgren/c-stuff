@@ -5,21 +5,20 @@
 
 #include <stufflib/args/args.h>
 #include <stufflib/context/context.h>
+#include <stufflib/logging/logging.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/math/math.h>
 #include <stufflib/memory/memory.h>
 #include <stufflib/random/random.h>
 #include <stufflib/testing/testing.h>
 
-#define SL_ASSERT_FACTORIZATION_OK(verbose, x, factors)              \
-  do {                                                               \
-    SL_ASSERT_TRUE((factors));                                       \
-    if ((verbose)) {                                                 \
-      printf("%zu factors:\n", (x));                                 \
-      for (size_t f_index = 0; (factors)[f_index] != 0; ++f_index) { \
-        printf("  %zu: %zu\n", f_index, (factors)[f_index]);         \
-      }                                                              \
-    }                                                                \
+#define SL_ASSERT_FACTORIZATION_OK(x, factors)                     \
+  do {                                                             \
+    SL_ASSERT_TRUE((factors));                                     \
+    SL_LOG_INFO("%zu factors:", (x));                              \
+    for (size_t f_index = 0; (factors)[f_index] != 0; ++f_index) { \
+      SL_LOG_INFO("  %zu: %zu", f_index, (factors)[f_index]);      \
+    }                                                              \
   } while (false)
 
 static const size_t SL_TEST_PRIMES[] = {
@@ -33,7 +32,6 @@ static const size_t SL_TEST_PRIMES[] = {
 
 SL_TEST(test_is_prime) {
   (void)ctx;
-  (void)verbose;
   for (size_t x = 0, i = 0; i < SL_ARRAY_LEN(SL_TEST_PRIMES); ++x) {
     if (x < SL_TEST_PRIMES[i]) {
       SL_ASSERT_FALSE(sl_math_is_prime(x));  // TODO abort on fail is too harsh
@@ -49,7 +47,7 @@ SL_TEST(test_factorize_primes) {
   for (size_t i = 0; i < SL_ARRAY_LEN(SL_TEST_PRIMES); ++i) {
     size_t* f = nullptr;
     SL_ASSERT_TRUE(sl_math_factorize(ctx, SL_TEST_PRIMES[i], &f));
-    SL_ASSERT_FACTORIZATION_OK(verbose, SL_TEST_PRIMES[i], f);
+    SL_ASSERT_FACTORIZATION_OK(SL_TEST_PRIMES[i], f);
     SL_ASSERT_TRUE(f[0] == SL_TEST_PRIMES[i]);
     SL_ASSERT_TRUE(f[1] == 0);
     sl_free(f);
@@ -61,7 +59,7 @@ SL_TEST(test_factorize_4) {
   const size_t n = 4;
   size_t* f      = nullptr;
   SL_ASSERT_TRUE(sl_math_factorize(ctx, n, &f));
-  SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
+  SL_ASSERT_FACTORIZATION_OK(n, f);
   SL_ASSERT_TRUE(f[0] == 2);
   SL_ASSERT_TRUE(f[1] == 2);
   SL_ASSERT_TRUE(f[2] == 0);
@@ -73,7 +71,7 @@ SL_TEST(test_factorize_25) {
   const size_t n = 25;
   size_t* f      = nullptr;
   SL_ASSERT_TRUE(sl_math_factorize(ctx, n, &f));
-  SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
+  SL_ASSERT_FACTORIZATION_OK(n, f);
   SL_ASSERT_TRUE(f[0] == 5);
   SL_ASSERT_TRUE(f[1] == 5);
   SL_ASSERT_TRUE(f[2] == 0);
@@ -85,7 +83,7 @@ SL_TEST(test_factorize_30) {
   const size_t n = 30;
   size_t* f      = nullptr;
   SL_ASSERT_TRUE(sl_math_factorize(ctx, n, &f));
-  SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
+  SL_ASSERT_FACTORIZATION_OK(n, f);
   SL_ASSERT_TRUE(f[0] == 2);
   SL_ASSERT_TRUE(f[1] == 3);
   SL_ASSERT_TRUE(f[2] == 5);
@@ -98,7 +96,7 @@ SL_TEST(test_factorize_864) {
   const size_t n = 864;
   size_t* f      = nullptr;
   SL_ASSERT_TRUE(sl_math_factorize(ctx, n, &f));
-  SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
+  SL_ASSERT_FACTORIZATION_OK(n, f);
   SL_ASSERT_TRUE(f[0] == 2);
   SL_ASSERT_TRUE(f[1] == 2);
   SL_ASSERT_TRUE(f[2] == 2);
@@ -116,7 +114,7 @@ SL_TEST(test_factorize_2022) {
   const size_t n = 2022;
   size_t* f      = nullptr;
   SL_ASSERT_TRUE(sl_math_factorize(ctx, n, &f));
-  SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
+  SL_ASSERT_FACTORIZATION_OK(n, f);
   SL_ASSERT_TRUE(f[0] == 2);
   SL_ASSERT_TRUE(f[1] == 3);
   SL_ASSERT_TRUE(f[2] == 337);
@@ -129,7 +127,7 @@ SL_TEST(test_factorize_202212) {
   const size_t n = 202212;
   size_t* f      = nullptr;
   SL_ASSERT_TRUE(sl_math_factorize(ctx, n, &f));
-  SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
+  SL_ASSERT_FACTORIZATION_OK(n, f);
   SL_ASSERT_TRUE(f[0] == 2);
   SL_ASSERT_TRUE(f[1] == 2);
   SL_ASSERT_TRUE(f[2] == 3);
@@ -145,7 +143,7 @@ SL_TEST(test_factorize_20221210) {
   const size_t n = 20221210;
   size_t* f      = nullptr;
   SL_ASSERT_TRUE(sl_math_factorize(ctx, n, &f));
-  SL_ASSERT_FACTORIZATION_OK(verbose, n, f);
+  SL_ASSERT_FACTORIZATION_OK(n, f);
   SL_ASSERT_TRUE(f[0] == 2);
   SL_ASSERT_TRUE(f[1] == 5);
   SL_ASSERT_TRUE(f[2] == 101);
@@ -157,7 +155,6 @@ SL_TEST(test_factorize_20221210) {
 
 SL_TEST(test_linalg) {
   (void)ctx;
-  (void)verbose;
   const double cmp_eps = 1e-16;
 
   const double v1[] = {1, 2, 3, 4};
@@ -193,38 +190,23 @@ SL_TEST(test_numerical_diff) {
   sl_random_fill_double(&prng, n, x, 10);
   sl_random_set_zero_double(&prng, n, x, 0.01);
 
-  if (verbose) {
-    printf(
-        "%4s %8s %8s %8s %9s %9s %9s %9s\n",
-        "i",
-        "x[i]",
-        "cos(x)",
-        "sin(x)",
-        "2x",
-        "cos'(x)",
-        "sin'(x)",
-        "pow2'(x)"
-    );
-  }
   for (size_t i = 0; i < n; ++i) {
     double cos_x    = cos(x[i]);
     double sin_x    = sin(x[i]);
     double d_cos_x  = sl_math_diff(cos, x[i]);
     double d_sin_x  = sl_math_diff(sin, x[i]);
     double d_pow2_x = sl_math_diff(pow2, x[i]);
-    if (verbose) {
-      printf(
-          "%4zu %8.1g %8.3g %8.3g %9.3g %9.3g %9.3g %9.3f\n",
-          i,
-          x[i],
-          cos_x,
-          sin_x,
-          2 * x[i],
-          d_cos_x,
-          d_sin_x,
-          d_pow2_x
-      );
-    }
+    SL_LOG_INFO(
+        "%4zu %8.1g %8.3g %8.3g %9.3g %9.3g %9.3g %9.3f",
+        i,
+        x[i],
+        cos_x,
+        sin_x,
+        2 * x[i],
+        d_cos_x,
+        d_sin_x,
+        d_pow2_x
+    );
     SL_ASSERT_TRUE(sl_math_double_almost(d_cos_x, -sin_x, 1e-3));
     SL_ASSERT_TRUE(sl_math_double_almost(d_sin_x, cos_x, 1e-3));
     SL_ASSERT_TRUE(sl_math_double_almost(d_pow2_x, 2 * x[i], 1e-3));
@@ -235,7 +217,6 @@ SL_TEST(test_numerical_diff) {
 
 SL_TEST(test_double_almost) {
   (void)ctx;
-  (void)verbose;
   if (!sl_math_double_almost(1, 1.5, 1)) {
     return false;
   }
@@ -247,7 +228,6 @@ SL_TEST(test_double_almost) {
 
 SL_TEST(test_round_up_pow2) {
   (void)ctx;
-  (void)verbose;
   SL_ASSERT_TRUE(sl_math_next_power_of_two(0) == 1);
   SL_ASSERT_TRUE(sl_math_next_power_of_two(1) == 2);
   SL_ASSERT_TRUE(sl_math_next_power_of_two(2) == 4);
@@ -273,7 +253,6 @@ SL_TEST(test_round_up_pow2) {
 
 SL_TEST(test_is_finite) {
   (void)ctx;
-  (void)verbose;
   SL_ASSERT_TRUE(sl_math_is_finite(1, (float[]){0}));
   SL_ASSERT_TRUE(sl_math_is_finite(1, (float[]){1}));
   SL_ASSERT_TRUE(sl_math_is_finite(1, (float[]){-1}));

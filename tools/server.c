@@ -12,6 +12,7 @@
 #include <sys/types.h>
 
 #include <stufflib/args/args.h>
+#include <stufflib/logging/logging.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/misc/misc.h>
 

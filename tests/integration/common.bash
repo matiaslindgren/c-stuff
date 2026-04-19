@@ -6,14 +6,6 @@ set -o errtrace
 trap 'echo error:$? line:$LINENO cmd:$BASH_COMMAND' ERR
 
 
-if [ $# -gt 0 ]; then
-  for arg in $@; do
-    if [ "$arg" == "-v" ]; then
-      set -x
-    fi
-  done
-fi
-
 required_commands=(
   'python3'
   'sort'

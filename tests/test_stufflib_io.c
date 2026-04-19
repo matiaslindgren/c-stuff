@@ -14,7 +14,6 @@
 
 SL_TEST(test_format_path) {
   (void)ctx;
-  (void)verbose;
   char buffer[1024]    = {0};
   const size_t bufsize = SL_ARRAY_LEN(buffer);
 
@@ -33,7 +32,6 @@ SL_TEST(test_format_path) {
 }
 
 SL_TEST(test_open_file) {
-  (void)verbose;
   const char* files[] = {
       "./test-data/txt/empty",
       "./test-data/txt/hello.txt",
@@ -57,7 +55,6 @@ SL_TEST(test_open_file) {
 }
 
 SL_TEST(test_read_single_char) {
-  (void)verbose;
   struct sl_file file = {0};
   SL_ASSERT_TRUE(sl_file_open(ctx, &file, "./test-data/txt/one.txt", "rb"));
   SL_ASSERT_TRUE(sl_file_can_read(&file));
@@ -78,7 +75,6 @@ SL_TEST(test_read_single_char) {
 }
 
 SL_TEST(test_read_empty_file) {
-  (void)verbose;
   struct sl_file file = {0};
   SL_ASSERT_TRUE(sl_file_open(ctx, &file, "./test-data/txt/empty", "rb"));
   SL_ASSERT_TRUE(!ferror(file.file));
@@ -94,7 +90,6 @@ SL_TEST(test_read_empty_file) {
 }
 
 SL_TEST(test_read_entire_file) {
-  (void)verbose;
   unsigned char buf[1024] = {0};
   struct sl_span buffer   = sl_span_view(SL_ARRAY_LEN(buf), buf);
 
@@ -116,7 +111,6 @@ SL_TEST(test_read_entire_file) {
 }
 
 SL_TEST(test_parse_numbers) {
-  (void)verbose;
   struct sl_file file = {0};
   SL_ASSERT_TRUE(sl_file_open(ctx, &file, "./test-data/txt/numbers.txt", "rb"));
   SL_ASSERT_TRUE(sl_file_can_read(&file));
@@ -133,7 +127,6 @@ SL_TEST(test_parse_numbers) {
 }
 
 SL_TEST(test_io_read_one_byte) {
-  (void)verbose;
   unsigned char buf[1] = {0};
   SL_ASSERT_TRUE(sl_io_read(ctx, "./test-data/txt/one.txt", buf, 1));
   SL_ASSERT_TRUE(!sl_error_occurred(&ctx->errors));
@@ -142,7 +135,6 @@ SL_TEST(test_io_read_one_byte) {
 }
 
 SL_TEST(test_io_read_file) {
-  (void)verbose;
   uint64_t buf = 0;
   SL_ASSERT_TRUE(sl_io_read(ctx, "./test-data/txt/8bytes.txt", (unsigned char*)&buf, 8));
   SL_ASSERT_TRUE(!sl_error_occurred(&ctx->errors));
@@ -152,7 +144,6 @@ SL_TEST(test_io_read_file) {
 }
 
 SL_TEST(test_io_read_missing_file) {
-  (void)verbose;
   unsigned char buf[1] = {0};
   sl_io_read(ctx, "./test-data/txt/does_not_exist", buf, 1);
   SL_ASSERT_TRUE(sl_error_occurred(&ctx->errors));
@@ -161,7 +152,6 @@ SL_TEST(test_io_read_missing_file) {
 }
 
 SL_TEST(test_io_read_too_many_bytes) {
-  (void)verbose;
   unsigned char buf[8] = {0};
   sl_io_read(ctx, "./test-data/txt/one.txt", buf, sizeof(buf));
   SL_ASSERT_TRUE(sl_error_occurred(&ctx->errors));

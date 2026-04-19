@@ -3,7 +3,6 @@
 
 SL_TEST(test_tensor3_wipe) {
   (void)ctx;
-  (void)verbose;
   struct sl_tensor3_f64 t = {
       .data     = (double[]){1.0},
       .length   = {1, 1, 1},
@@ -22,7 +21,6 @@ SL_TEST(test_tensor3_wipe) {
 
 SL_TEST(test_tensor3_clear) {
   (void)ctx;
-  (void)verbose;
   double buf[]            = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0};
   struct sl_tensor3_f64 t = {
       .data     = buf,
@@ -42,7 +40,6 @@ SL_TEST(test_tensor3_clear) {
 
 SL_TEST(test_tensor3_size) {
   (void)ctx;
-  (void)verbose;
   double buf[24]          = {0};
   struct sl_tensor3_f64 t = {
       .data     = buf,
@@ -55,7 +52,6 @@ SL_TEST(test_tensor3_size) {
 
 SL_TEST(test_tensor3_get_set) {
   (void)ctx;
-  (void)verbose;
   double buf[8]           = {0};
   struct sl_tensor3_f64 t = {
       .data     = buf,
@@ -70,7 +66,6 @@ SL_TEST(test_tensor3_get_set) {
 
 SL_TEST(test_tensor3_offset) {
   (void)ctx;
-  (void)verbose;
   double buf[24]          = {0};
   struct sl_tensor3_f64 t = {
       .data     = buf,

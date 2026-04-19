@@ -64,8 +64,16 @@ void sl_la_vector_copy(
     struct sl_vector_f32 dst[const static 1],
     struct sl_vector_f32 src[const static 1]
 );
-void sl_la_vector_print(FILE stream[const static 1], const struct sl_vector_f32 v[const static 1]);
-void sl_la_matrix_print(FILE stream[const static 1], struct sl_matrix_f32 a[const static 1]);
+bool sl_la_vector_print(
+    struct sl_context ctx[static 1],
+    FILE stream[const static 1],
+    const struct sl_vector_f32 v[const static 1]
+);
+bool sl_la_matrix_print(
+    struct sl_context ctx[static 1],
+    FILE stream[const static 1],
+    struct sl_matrix_f32 a[const static 1]
+);
 void sl_la_matrix_multiply(
     const struct sl_matrix_f32 a[const static 1],
     const struct sl_matrix_f32 b[const static 1],

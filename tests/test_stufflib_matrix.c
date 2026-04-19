@@ -4,7 +4,6 @@
 
 SL_TEST(test_matrix_f64_wipe) {
   (void)ctx;
-  (void)verbose;
   struct sl_matrix_f64 m = {
       .data     = (double[]){1.0},
       .length   = {1, 1},
@@ -21,7 +20,6 @@ SL_TEST(test_matrix_f64_wipe) {
 
 SL_TEST(test_matrix_f64_clear) {
   (void)ctx;
-  (void)verbose;
   double buf[]           = {1.0, 2.0, 3.0, 4.0};
   struct sl_matrix_f64 m = {
       .data     = buf,
@@ -39,7 +37,6 @@ SL_TEST(test_matrix_f64_clear) {
 
 SL_TEST(test_matrix_f64_size) {
   (void)ctx;
-  (void)verbose;
   double buf[]           = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
   struct sl_matrix_f64 m = {
       .data     = buf,
@@ -52,7 +49,6 @@ SL_TEST(test_matrix_f64_size) {
 
 SL_TEST(test_matrix_f64_get_set) {
   (void)ctx;
-  (void)verbose;
   double buf[]           = {0.0, 0.0, 0.0, 0.0};
   struct sl_matrix_f64 m = {
       .data     = buf,
@@ -67,7 +63,6 @@ SL_TEST(test_matrix_f64_get_set) {
 
 SL_TEST(test_matrix_f64_offset) {
   (void)ctx;
-  (void)verbose;
   double buf[]           = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
   struct sl_matrix_f64 m = {
       .data     = buf,
@@ -83,7 +78,6 @@ SL_TEST(test_matrix_f64_offset) {
 
 SL_TEST(test_matrix_f32_wipe) {
   (void)ctx;
-  (void)verbose;
   struct sl_matrix_f32 m = {
       .data     = (float[]){1.0f},
       .length   = {1, 1},
@@ -100,7 +94,6 @@ SL_TEST(test_matrix_f32_wipe) {
 
 SL_TEST(test_matrix_f32_clear) {
   (void)ctx;
-  (void)verbose;
   float buf[]            = {1.0f, 2.0f, 3.0f, 4.0f};
   struct sl_matrix_f32 m = {
       .data     = buf,
@@ -118,7 +111,6 @@ SL_TEST(test_matrix_f32_clear) {
 
 SL_TEST(test_matrix_f32_size) {
   (void)ctx;
-  (void)verbose;
   float buf[]            = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
   struct sl_matrix_f32 m = {
       .data     = buf,
@@ -131,7 +123,6 @@ SL_TEST(test_matrix_f32_size) {
 
 SL_TEST(test_matrix_f32_get_set) {
   (void)ctx;
-  (void)verbose;
   float buf[]            = {0.0f, 0.0f, 0.0f, 0.0f};
   struct sl_matrix_f32 m = {
       .data     = buf,
@@ -146,7 +137,6 @@ SL_TEST(test_matrix_f32_get_set) {
 
 SL_TEST(test_matrix_f32_offset) {
   (void)ctx;
-  (void)verbose;
   float buf[]            = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
   struct sl_matrix_f32 m = {
       .data     = buf,

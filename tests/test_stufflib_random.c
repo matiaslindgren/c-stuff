@@ -11,7 +11,6 @@
 
 SL_TEST(test_random_fill) {
   (void)ctx;
-  (void)verbose;
   uint64_t prng = 0;
   sl_random_pcg32_init(&prng, 0);
   const size_t n = 1000;
@@ -33,7 +32,6 @@ SL_TEST(test_random_fill) {
 
 SL_TEST(test_random_set_zero) {
   (void)ctx;
-  (void)verbose;
   uint64_t prng = 0;
   sl_random_pcg32_init(&prng, 0);
   const size_t n = 1000;
@@ -58,7 +56,6 @@ SL_TEST(test_random_set_zero) {
 
 SL_TEST(test_randomint) {
   (void)ctx;
-  (void)verbose;
   uint64_t prng = 0;
   sl_random_pcg32_init(&prng, 0);
   SL_ASSERT_TRUE(sl_random_int(&prng, 0, 0) == 0);
@@ -101,25 +98,11 @@ SL_TEST(test_random_shuffle) {
       unsigned char buf[16] = {0};
       memcpy(buf, v, n);
       sl_random_shuffle(&prng, buf, 1, n);
-      if (verbose) {
-        printf("shuffle %02d: ", iter);
-        for (size_t i = 0; i < n; ++i) {
-          printf("%d ", buf[i]);
-        }
-        printf("\n");
-      }
       for (size_t i = 0; i < n; ++i) {
         freq_unshuffled[i] += buf[i] == v[i];
       }
     }
 
-    if (verbose) {
-      printf("seen counts\n");
-      for (size_t i = 0; i < n; ++i) {
-        printf("  %d: %d\n", v[i], freq_unshuffled[i]);
-      }
-      printf("\n");
-    }
     for (size_t i = 0; i < n; ++i) {
       SL_ASSERT_TRUE(freq_unshuffled[i] < 50);
     }
@@ -140,13 +123,6 @@ SL_TEST(test_random_shuffle_together) {
       v2[i] = (char)i;
     }
     sl_random_shuffle_together(&prng, v1, v2, sizeof(size_t), 1, n);
-    if (verbose) {
-      printf("shuffle %02d: ", iter);
-      for (size_t i = 0; i < n; ++i) {
-        printf("%zu,%d ", v1[i], v2[i]);
-      }
-      printf("\n");
-    }
     for (size_t i = 0; i < n; ++i) {
       SL_ASSERT_TRUE(v1[i] == (size_t)v2[i]);
     }

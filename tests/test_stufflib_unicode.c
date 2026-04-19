@@ -7,6 +7,7 @@
 #include <stufflib/args/args.h>
 #include <stufflib/context/context.h>
 #include <stufflib/iterator/iterator.h>
+#include <stufflib/logging/logging.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/span/span.h>
 #include <stufflib/testing/testing.h>
@@ -16,7 +17,6 @@
 
 SL_TEST(test_validate_utf8) {
   (void)ctx;
-  (void)verbose;
   struct sl_span invalid_utf8[] = {
       {.size = 1, .data = (unsigned char[]){0x80}                  },
       {.size = 2, .data = (unsigned char[]){0xc0, 0x80}            },
@@ -37,7 +37,6 @@ SL_TEST(test_validate_utf8) {
 
 SL_TEST(test_decode_codepoints) {
   (void)ctx;
-  (void)verbose;
   size_t codepoint_pos = 0;
   for (size_t i_str = 0; i_str < SL_ARRAY_LEN(sl_test_data_hello_utf8); ++i_str) {
     struct sl_span utf8_data = sl_test_data_hello_utf8[i_str];
@@ -62,7 +61,6 @@ SL_TEST(test_decode_codepoints) {
 
 SL_TEST(test_unicode_iterator) {
   (void)ctx;
-  (void)verbose;
   size_t codepoint_pos = 0;
   for (size_t i_str = 0; i_str < SL_ARRAY_LEN(sl_test_data_hello_utf8); ++i_str) {
     struct sl_span utf8_data = sl_test_data_hello_utf8[i_str];
@@ -89,7 +87,6 @@ SL_TEST(test_unicode_iterator) {
 
 SL_TEST(test_unicode_length) {
   (void)ctx;
-  (void)verbose;
   for (size_t i_str = 0; i_str < SL_ARRAY_LEN(sl_test_data_hello_utf8); ++i_str) {
     const size_t str_len = sl_unicode_length(sl_test_data_hello_utf8 + i_str);
     SL_ASSERT_TRUE(str_len == sl_test_data_decoded_lengths[i_str]);
@@ -117,9 +114,7 @@ SL_TEST(test_decode_utf8_files) {
           "./test-data/txt/wikipedia/water_%s.txt",
           languages[i]
       );
-      if (verbose) {
-        printf("%s\n", input_path);
-      }
+      SL_LOG_INFO("%s", input_path);
       FILE* fp = fopen(input_path, "rb");
       if (!fp) {
         SL_LOG_ERROR("cannot open %s", input_path);
@@ -127,9 +122,7 @@ SL_TEST(test_decode_utf8_files) {
       }
       utf8_data.size = fread(utf8_data.data, 1, 20000, fp);
       fclose(fp);
-      if (verbose) {
-        printf("read %zu bytes\n", utf8_data.size);
-      }
+      SL_LOG_INFO("read %zu bytes", utf8_data.size);
       SL_ASSERT_TRUE(utf8_data.size > 0);
     }
 

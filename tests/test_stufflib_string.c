@@ -15,7 +15,6 @@
 #include "./test_data.h"
 
 SL_TEST(test_string_init) {
-  (void)verbose;
   for (size_t i = 0; i < SL_ARRAY_LEN(sl_test_data_hello_utf8); ++i) {
     struct sl_string str = {0};
     SL_ASSERT_TRUE(sl_string_from_utf8(ctx, sl_test_data_hello_utf8 + i, &str));
@@ -32,7 +31,6 @@ SL_TEST(test_string_init) {
 }
 
 SL_TEST(test_string_utf8_view) {
-  (void)verbose;
   struct sl_string empty_str = {0};
   SL_ASSERT_TRUE(sl_string_from_utf8(ctx, &(struct sl_span){0}, &empty_str));
   SL_ASSERT_TRUE(empty_str.length == 0);
@@ -56,7 +54,6 @@ SL_TEST(test_string_utf8_view) {
 }
 
 SL_TEST(test_string_slice) {
-  (void)verbose;
   size_t decoded_pos = 0;
   for (size_t i = 0; i < SL_ARRAY_LEN(sl_test_data_hello_utf8); ++i) {
     struct sl_string str = {0};
@@ -83,7 +80,6 @@ SL_TEST(test_string_slice) {
 }
 
 SL_TEST(test_string_is_ascii) {
-  (void)verbose;
   {
     struct sl_span hello = (struct sl_span){.size = 12, .data = (unsigned char*)u8"hello there!"};
     struct sl_string str = {0};
@@ -102,7 +98,6 @@ SL_TEST(test_string_is_ascii) {
 }
 
 SL_TEST(test_string_copy_ascii) {
-  (void)verbose;
   struct sl_span hello = (struct sl_span){.size = 12, .data = (unsigned char*)u8"hello there!"};
   struct sl_string str = {0};
   SL_ASSERT_TRUE(sl_string_from_utf8(ctx, &hello, &str));

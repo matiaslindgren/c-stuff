@@ -4,6 +4,7 @@
 
 #include <stufflib/args/args.h>
 #include <stufflib/context/context.h>
+#include <stufflib/logging/logging.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/misc/misc.h>
 #include <stufflib/png/png.h>
@@ -16,9 +17,7 @@ SL_TEST(test_read_single_pixel_chunks) {
         "./test-data/png/00ff00-1x1-rgb-nocomp.png",
         "./test-data/png/0000ff-1x1-rgb-nocomp.png",
     }[i];
-    if (verbose) {
-      printf("%s\n", png_path);
-    }
+    SL_LOG_INFO("%s", png_path);
     struct sl_png_chunks chunks = sl_png_read_chunks(ctx, png_path);
     SL_ASSERT_TRUE(chunks.count == 3);
     SL_ASSERT_TRUE(chunks.chunks[0].type == sl_png_IHDR);
@@ -34,9 +33,7 @@ SL_TEST(test_read_single_pixel_chunks) {
 
 SL_TEST(test_read_large_image_with_many_chunks) {
   const char* png_path = "./test-data/png/asan.png";
-  if (verbose) {
-    printf("%s\n", png_path);
-  }
+  SL_LOG_INFO("%s", png_path);
   struct sl_png_chunks chunks = sl_png_read_chunks(ctx, png_path);
   SL_ASSERT_TRUE(chunks.count == 6);
   SL_ASSERT_TRUE(chunks.chunks[0].type == sl_png_IHDR);
@@ -61,15 +58,10 @@ SL_TEST(test_read_single_pixel_header) {
         "./test-data/png/00ff00-1x1-rgb-nocomp.png",
         "./test-data/png/0000ff-1x1-rgb-nocomp.png",
     }[i];
-    if (verbose) {
-      printf("%s\n", png_path);
-    }
+    SL_LOG_INFO("%s", png_path);
     struct sl_png_header pixel = sl_png_read_header(ctx, png_path);
     if (!pixel.width) {
       return false;
-    }
-    if (verbose) {
-      sl_png_dump_header(stdout, pixel);
     }
     SL_ASSERT_TRUE(pixel.width == 1);
     SL_ASSERT_TRUE(pixel.height == 1);
@@ -82,15 +74,10 @@ SL_TEST(test_read_single_pixel_header) {
 SL_TEST(test_read_img_header) {
   {
     const char* png_path = "./test-data/png/white-square-rgba-dynamic.png";
-    if (verbose) {
-      printf("%s\n", png_path);
-    }
+    SL_LOG_INFO("%s", png_path);
     struct sl_png_header white_square = sl_png_read_header(ctx, png_path);
     if (!white_square.width) {
       return false;
-    }
-    if (verbose) {
-      sl_png_dump_header(stdout, white_square);
     }
     SL_ASSERT_TRUE(white_square.width == 26);
     SL_ASSERT_TRUE(white_square.height == 28);
@@ -100,15 +87,10 @@ SL_TEST(test_read_img_header) {
 
   {
     const char* png_path = "./test-data/png/github-squares-rgb-dynamic.png";
-    if (verbose) {
-      printf("%s\n", png_path);
-    }
+    SL_LOG_INFO("%s", png_path);
     struct sl_png_header github_squares = sl_png_read_header(ctx, png_path);
     if (!github_squares.width) {
       return false;
-    }
-    if (verbose) {
-      sl_png_dump_header(stdout, github_squares);
     }
     SL_ASSERT_TRUE(github_squares.width == 81);
     SL_ASSERT_TRUE(github_squares.height == 77);
@@ -118,15 +100,10 @@ SL_TEST(test_read_img_header) {
 
   {
     const char* png_path = "./test-data/png/github-profile-rgb-dynamic.png";
-    if (verbose) {
-      printf("%s\n", png_path);
-    }
+    SL_LOG_INFO("%s", png_path);
     struct sl_png_header github_profile = sl_png_read_header(ctx, png_path);
     if (!github_profile.width) {
       return false;
-    }
-    if (verbose) {
-      sl_png_dump_header(stdout, github_profile);
     }
     SL_ASSERT_TRUE(github_profile.width == 420);
     SL_ASSERT_TRUE(github_profile.height == 420);
@@ -136,15 +113,10 @@ SL_TEST(test_read_img_header) {
 
   {
     const char* png_path = "./test-data/png/asan.png";
-    if (verbose) {
-      printf("%s\n", png_path);
-    }
+    SL_LOG_INFO("%s", png_path);
     struct sl_png_header asan = sl_png_read_header(ctx, png_path);
     if (!asan.width) {
       return false;
-    }
-    if (verbose) {
-      sl_png_dump_header(stdout, asan);
     }
     SL_ASSERT_TRUE(asan.width == 958);
     SL_ASSERT_TRUE(asan.height == 458);
@@ -158,19 +130,13 @@ SL_TEST(test_read_img_header) {
 static inline int test_read_single_pixel(
     struct sl_context ctx[static 1],
     const char* png_path,
-    const size_t on_index,
-    const bool verbose
+    const size_t on_index
 ) {
-  if (verbose) {
-    printf("%s\n", png_path);
-  }
+  SL_LOG_INFO("%s", png_path);
   struct sl_png_image pixel = sl_png_read_image(ctx, png_path);
   if (!pixel.data.size) {
     SL_LOG_ERROR("failed reading PNG image %s", png_path);
     return false;
-  }
-  if (verbose) {
-    sl_png_dump_img_meta(stdout, pixel);
   }
   SL_ASSERT_TRUE(pixel.header.width == 1);
   SL_ASSERT_TRUE(pixel.header.height == 1);
@@ -195,7 +161,7 @@ SL_TEST(test_read_single_pixel_no_compression) {
         "./test-data/png/00ff00-1x1-rgb-nocomp.png",
         "./test-data/png/0000ff-1x1-rgb-nocomp.png",
     }[on_pixel];
-    if (!test_read_single_pixel(ctx, png_path, on_pixel, verbose)) {
+    if (!test_read_single_pixel(ctx, png_path, on_pixel)) {
       return false;
     }
   }
@@ -209,7 +175,7 @@ SL_TEST(test_read_single_pixel_with_fixed_compression) {
         "./test-data/png/00ff00-1x1-rgb-fixed.png",
         "./test-data/png/0000ff-1x1-rgb-fixed.png",
     }[on_pixel];
-    if (!test_read_single_pixel(ctx, png_path, on_pixel, verbose)) {
+    if (!test_read_single_pixel(ctx, png_path, on_pixel)) {
       return false;
     }
   }
@@ -218,15 +184,10 @@ SL_TEST(test_read_single_pixel_with_fixed_compression) {
 
 SL_TEST(test_read_rgba_image_with_dynamic_compression) {
   const char* png_path = "./test-data/png/white-square-rgba-dynamic.png";
-  if (verbose) {
-    printf("%s\n", png_path);
-  }
+  SL_LOG_INFO("%s", png_path);
   struct sl_png_image white_square = sl_png_read_image(ctx, png_path);
   if (!white_square.data.size) {
     return false;
-  }
-  if (verbose) {
-    sl_png_dump_img_meta(stdout, white_square);
   }
   const size_t width  = 26;
   const size_t height = 28;
@@ -260,16 +221,11 @@ SL_TEST(test_read_small_images_with_dynamic_compression) {
         0xcc1177,
         0xffaa55,
     }[i];
-    if (verbose) {
-      printf("%s\n", png_path);
-    }
+    SL_LOG_INFO("%s", png_path);
     struct sl_png_image img = sl_png_read_image(ctx, png_path);
     if (!img.data.size) {
       SL_LOG_ERROR("failed reading PNG image %s", png_path);
       return false;
-    }
-    if (verbose) {
-      sl_png_dump_img_meta(stdout, img);
     }
     const size_t width  = 80;
     const size_t height = 160;
@@ -294,16 +250,11 @@ SL_TEST(test_read_small_images_with_dynamic_compression) {
 SL_TEST(test_read_large_images_with_dynamic_compression) {
   {
     const char* png_path = "./test-data/png/aabbcc-1600x1600-rgb-dynamic.png";
-    if (verbose) {
-      printf("%s\n", png_path);
-    }
+    SL_LOG_INFO("%s", png_path);
     struct sl_png_image square = sl_png_read_image(ctx, png_path);
     if (!square.data.size) {
       SL_LOG_ERROR("failed reading PNG image %s", png_path);
       return false;
-    }
-    if (verbose) {
-      sl_png_dump_img_meta(stdout, square);
     }
     const size_t size = 1600;
     SL_ASSERT_TRUE(square.header.width == size);
@@ -324,16 +275,11 @@ SL_TEST(test_read_large_images_with_dynamic_compression) {
 
   {
     const char* png_path = "./test-data/png/asan.png";
-    if (verbose) {
-      printf("%s\n", png_path);
-    }
+    SL_LOG_INFO("%s", png_path);
     struct sl_png_image asan = sl_png_read_image(ctx, png_path);
     if (!asan.data.size) {
       SL_LOG_ERROR("failed reading PNG image %s", png_path);
       return false;
-    }
-    if (verbose) {
-      sl_png_dump_img_meta(stdout, asan);
     }
     const size_t width  = 958;
     const size_t height = 458;
@@ -348,21 +294,12 @@ SL_TEST(test_read_large_images_with_dynamic_compression) {
   return true;
 }
 
-int test_read_write_read(
-    struct sl_context ctx[static 1],
-    const bool verbose,
-    const char* img0_path
-) {
-  if (verbose) {
-    printf("%s\n", img0_path);
-  }
+int test_read_write_read(struct sl_context ctx[static 1], const char* img0_path) {
+  SL_LOG_INFO("%s", img0_path);
   struct sl_png_image img0 = sl_png_read_image(ctx, img0_path);
   if (!img0.data.size) {
     SL_LOG_ERROR("failed reading PNG image %s", img0_path);
     return false;
-  }
-  if (verbose) {
-    sl_png_dump_img_meta(stdout, img0);
   }
 
   char img1_path[200] = {0};
@@ -384,9 +321,6 @@ int test_read_write_read(
     );
     return false;
   }
-  if (verbose) {
-    sl_png_dump_img_meta(stdout, img1);
-  }
   sl_png_image_destroy(img1);
   sl_png_image_destroy(img0);
   return true;
@@ -399,8 +333,7 @@ SL_TEST(test_read_write_read_single_pixel) {
       "./test-data/png/0000ff-1x1-rgb-nocomp.png",
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(paths); ++i) {
-    const char* png_path = paths[i];
-    if (!test_read_write_read(ctx, verbose, png_path)) {
+    if (!test_read_write_read(ctx, paths[i])) {
       return false;
     }
   }
@@ -414,8 +347,7 @@ SL_TEST(test_read_write_read_small) {
       "./test-data/png/ffaa55-80x160-rgb-dynamic.png",
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(paths); ++i) {
-    const char* png_path = paths[i];
-    if (!test_read_write_read(ctx, verbose, png_path)) {
+    if (!test_read_write_read(ctx, paths[i])) {
       return false;
     }
   }
@@ -429,8 +361,7 @@ SL_TEST(test_read_write_read_large) {
       "./test-data/png/asan.png",
   };
   for (size_t i = 0; i < SL_ARRAY_LEN(paths); ++i) {
-    const char* png_path = paths[i];
-    if (!test_read_write_read(ctx, verbose, png_path)) {
+    if (!test_read_write_read(ctx, paths[i])) {
       return false;
     }
   }

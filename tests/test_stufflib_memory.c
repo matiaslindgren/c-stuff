@@ -8,7 +8,6 @@
 #include <stufflib/testing/testing.h>
 
 SL_TEST(test_alloc_empty) {
-  (void)verbose;
   for (size_t num = 0; num < 2; ++num) {
     for (size_t size = 0; size < 2; ++size) {
       if (num == 0 || size == 0) {
