@@ -95,7 +95,7 @@ size_t sl_file_parse_int64(
 ) {
   size_t pos = 0;
   for (; pos < count && sl_file_can_read(f); ++pos) {
-    if (EOF == fscanf(f->file, " %" PRId64, buffer + pos)) {
+    if (1 != fscanf(f->file, " %" PRId64, buffer + pos)) {
       SL_ERROR(ctx, "failed parsing int64 at index %zu from '%s'", pos, f->path);
       goto done;
     }

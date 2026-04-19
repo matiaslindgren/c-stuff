@@ -96,8 +96,8 @@ bool sl_record_read_metadata(
   strncpy(record->name, name, sizeof(record->name) - 1);
   record->name[sizeof(record->name) - 1] = '\0';
 
-  if (EOF
-          == fscanf(
+  if (5
+          != fscanf(
               file.file,
               "name: %s\ntype: %s\nlayout: %s\nsize: %zu\ndims: %d\n",
               record->name,
@@ -112,7 +112,7 @@ bool sl_record_read_metadata(
   }
 
   for (int d = 0; d < record->n_dims; ++d) {
-    if (EOF == fscanf(file.file, "dim%*d: %zu\n", record->dim_size + d)) {
+    if (1 != fscanf(file.file, "dim%*d: %zu\n", record->dim_size + d)) {
       SL_ERROR(ctx, "failed reading dimension %d from %s", d, file.path);
       goto done;
     }

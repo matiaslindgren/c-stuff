@@ -117,9 +117,9 @@ cifar_to_png(struct sl_context ctx[static 1], const struct sl_args args[const st
         for (size_t col = 0; col < img.header.width; ++col) {
           const size_t j     = (row * img.header.width) + col;
           unsigned char px[] = {
-              data.data[sample_begin + 1 + (0 * 1024) + j],
-              data.data[sample_begin + 1 + (1 * 1024) + j],
-              data.data[sample_begin + 1 + (2 * 1024) + j],
+              data.data[sample_begin + 1 + (size_t)(0 * 1024) + j],
+              data.data[sample_begin + 1 + (size_t)(1 * 1024) + j],
+              data.data[sample_begin + 1 + (size_t)(2 * 1024) + j],
           };
           sl_png_image_set_pixel(&img, row + 1, col + 1, px);
         }
@@ -214,8 +214,8 @@ bool spambase(struct sl_context ctx[static 1], const struct sl_args args[const s
 
       int label = 0;
       // TODO maybe strof on char file reader buffer
-      if (EOF
-          == sscanf(
+      if (58
+          != sscanf(
               (const char*)line->data,
               ("%f" SL_REPEAT_56(",%f") ",%d"),
               sl_matrix_f32_get(&data, (size_t)lineno, 0),
@@ -414,7 +414,7 @@ bool rcv1(struct sl_context ctx[static 1], const struct sl_args args[const stati
 
     SL_LOG_INFO("reading RCV1 document IDs from '%s'", path);
 
-    for (size_t id = 0, idx = 0; EOF != fscanf(fp, "%zu ", &id); ++idx) {
+    for (size_t id = 0, idx = 0; 1 == fscanf(fp, "%zu ", &id); ++idx) {
       if (id >= max_document_id) {
         SL_LOG_ERROR("unexpectedly large RCV1 document ID %zu at index %zu", id, idx);
         goto done;

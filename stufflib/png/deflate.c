@@ -18,9 +18,9 @@ struct sl_deflate_length_codes sl_deflate_make_length_codes(void) {
   struct sl_deflate_length_codes codes = {0};
   codes.lengths[0]                     = 3;
   for (size_t i = 1; i < SL_ARRAY_LEN(codes.lengths); ++i) {
-    const int extra_bits = (SL_MAX(1, (i - 1) / 4) - 1) % 6;
+    const int extra_bits = (int)((SL_MAX(1, (i - 1) / 4) - 1) % 6);
     codes.extra[i - 1]   = extra_bits;
-    codes.lengths[i]     = codes.lengths[i - 1] + (1 << extra_bits);
+    codes.lengths[i]     = codes.lengths[i - 1] + ((size_t)1 << extra_bits);
   }
   codes.lengths[28] = 258;
   return codes;
@@ -292,7 +292,7 @@ size_t sl_inflate(struct sl_context ctx[static 1], struct sl_span dst, const str
       .dst        = dst,
       .src        = src,
       .dst_pos    = 0,
-      .src_bit    = 2 * CHAR_BIT,
+      .src_bit    = (size_t)2 * CHAR_BIT,
   };
 
   for (bool is_final_block = false; !is_final_block;) {

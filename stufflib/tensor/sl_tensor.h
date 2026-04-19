@@ -8,8 +8,8 @@
                                                                                  \
   struct NAME {                                                                  \
     T* restrict data;                                                            \
-    size_t length[DIM];                                                          \
-    size_t capacity[DIM];                                                        \
+    size_t length[(DIM)];                                                        \
+    size_t capacity[(DIM)];                                                      \
   };                                                                             \
                                                                                  \
   void sl_tensor##DIM##_##NAME##_wipe(struct NAME t[restrict static 1]);         \
@@ -18,15 +18,15 @@
   size_t sl_tensor##DIM##_##NAME##_size(const struct NAME t[restrict static 1]); \
   size_t sl_tensor##DIM##_##NAME##_offset(                                       \
       const struct NAME t[restrict static 1],                                    \
-      const size_t idx[restrict static DIM]                                      \
+      const size_t idx[restrict static(DIM)]                                     \
   );                                                                             \
   T* sl_tensor##DIM##_##NAME##_get(                                              \
       struct NAME t[restrict static 1],                                          \
-      const size_t idx[restrict static DIM]                                      \
+      const size_t idx[restrict static(DIM)]                                     \
   );                                                                             \
   void sl_tensor##DIM##_##NAME##_set(                                            \
       struct NAME t[restrict static 1],                                          \
-      const size_t idx[restrict static DIM],                                     \
+      const size_t idx[restrict static(DIM)],                                    \
       T val                                                                      \
   );
 
@@ -44,14 +44,14 @@
   }                                                                               \
                                                                                   \
   void sl_tensor##DIM##_##NAME##_clear(struct NAME t[restrict static 1]) {        \
-    for (size_t d = 0; d < DIM; d++) {                                            \
+    for (size_t d = 0; d < (DIM); d++) {                                          \
       t->length[d] = 0;                                                           \
     }                                                                             \
   }                                                                               \
                                                                                   \
   size_t sl_tensor##DIM##_##NAME##_size(const struct NAME t[restrict static 1]) { \
     size_t n = 1;                                                                 \
-    for (size_t d = 0; d < DIM; d++) {                                            \
+    for (size_t d = 0; d < (DIM); d++) {                                          \
       n *= t->length[d];                                                          \
     }                                                                             \
     return n;                                                                     \
@@ -59,10 +59,10 @@
                                                                                   \
   size_t sl_tensor##DIM##_##NAME##_offset(                                        \
       const struct NAME t[restrict static 1],                                     \
-      const size_t idx[restrict static DIM]                                       \
+      const size_t idx[restrict static(DIM)]                                      \
   ) {                                                                             \
     size_t offset = 0;                                                            \
-    for (size_t d = 0; d < DIM; d++) {                                            \
+    for (size_t d = 0; d < (DIM); d++) {                                          \
       offset *= t->capacity[d];                                                   \
       offset += idx[d];                                                           \
     }                                                                             \
@@ -71,14 +71,14 @@
                                                                                   \
   T* sl_tensor##DIM##_##NAME##_get(                                               \
       struct NAME t[restrict static 1],                                           \
-      const size_t idx[restrict static DIM]                                       \
+      const size_t idx[restrict static(DIM)]                                      \
   ) {                                                                             \
     return &t->data[sl_tensor##DIM##_##NAME##_offset(t, idx)];                    \
   }                                                                               \
                                                                                   \
   void sl_tensor##DIM##_##NAME##_set(                                             \
       struct NAME t[restrict static 1],                                           \
-      const size_t idx[restrict static DIM],                                      \
+      const size_t idx[restrict static(DIM)],                                     \
       T val                                                                       \
   ) {                                                                             \
     t->data[sl_tensor##DIM##_##NAME##_offset(t, idx)] = val;                      \

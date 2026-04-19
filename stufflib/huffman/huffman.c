@@ -70,7 +70,7 @@ void sl_huffman_init(
     }
   }
 
-  symbols = sl_alloc(ctx, max_code_len, sizeof(size_t*));
+  symbols = (size_t**)sl_alloc(ctx, max_code_len, sizeof(size_t*));
   if (!symbols) {
     goto error;
   }
@@ -106,7 +106,7 @@ error:
   sl_free(next_code);
   sl_free(code_length_count);
   sl_free(max_codes);
-  sl_free(symbols);
+  sl_free((void*)symbols);
   *tree = (struct sl_huffman_tree){0};
 }
 
@@ -116,7 +116,7 @@ void sl_huffman_destroy(struct sl_huffman_tree tree[const static 1]) {
       sl_free(tree->symbols[code_len - 1]);
     }
     sl_free(tree->max_codes);
-    sl_free(tree->symbols);
+    sl_free((void*)tree->symbols);
   }
   *tree = (struct sl_huffman_tree){0};
 }

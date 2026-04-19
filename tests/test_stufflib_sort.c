@@ -223,13 +223,13 @@ static bool test_sort_named_vec3(
 ) {
   (void)ctx;
   struct sl_test_named_vec3 items[] = {
-      {-1, 0, 0,   "f" },
-      {-1, 0, 1,   "e" },
-      {0,  0, 0,   "d" },
-      {1,  0, 1e9, "c" },
-      {1,  1, 0,   "b" },
-      {0,  0, 0,   "a" },
-      {0,  0, 0,   " a"},
+      {-1, 0, 0,              "f" },
+      {-1, 0, 1,              "e" },
+      {0,  0, 0,              "d" },
+      {1,  0, 1'000'000'000L, "c" },
+      {1,  1, 0,              "b" },
+      {0,  0, 0,              "a" },
+      {0,  0, 0,              " a"},
   };
   struct sl_test_named_vec3 sorted_items[] = {
       items[0],

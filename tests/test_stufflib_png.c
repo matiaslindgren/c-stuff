@@ -143,9 +143,9 @@ static inline int test_read_single_pixel(
   SL_ASSERT_TRUE(pixel.header.bit_depth == 8);
   SL_ASSERT_TRUE(pixel.header.color_type == sl_png_rgb);
 
-  SL_ASSERT_TRUE(pixel.data.size == 9 * 3);
-  unsigned char expected_data[9 * 3] = {0};
-  expected_data[4 * 3 + on_index]    = 255;
+  SL_ASSERT_TRUE(pixel.data.size == (size_t)(9 * 3));
+  unsigned char expected_data[9 * 3]        = {0};
+  expected_data[(size_t)(4 * 3) + on_index] = 255;
   for (size_t i = 0; i < SL_ARRAY_LEN(expected_data); ++i) {
     SL_ASSERT_TRUE(pixel.data.data[i] == expected_data[i]);
   }

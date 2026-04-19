@@ -583,7 +583,11 @@ bool sl_png_chunk_fwrite_header(
     return false;
   }
   unsigned char ihdr_data[4 + 13] = {0};
-  memcpy(ihdr_data, "IHDR", 4);
+  memcpy(
+      ihdr_data,
+      "IHDR",
+      4
+  );  // NOLINT(bugprone-not-null-terminated-result): binary chunk, not a C string
   const unsigned char* width = sl_misc_encode_big_endian(4, (unsigned char[4]){0}, header.width);
   memcpy(ihdr_data + 4, width, 4);
   const unsigned char* height = sl_misc_encode_big_endian(4, (unsigned char[4]){0}, header.height);

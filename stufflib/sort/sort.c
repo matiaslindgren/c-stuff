@@ -222,24 +222,24 @@ sl_sort_mergesort_double(struct sl_context ctx[static 1], const size_t count, do
 }
 
 int sl_sort_compare_str(const void* lhs_data, const void* rhs_data) {
-  const char* const* lhs = lhs_data;
-  const char* const* rhs = rhs_data;
+  const char* const* lhs = (const char* const*)lhs_data;
+  const char* const* rhs = (const char* const*)rhs_data;
   return strcmp(lhs[0], rhs[0]);
 }
 
 char**
 sl_sort_insertsort_str(struct sl_context ctx[static 1], const size_t count, char* src[count]) {
-  return sl_sort_insertsort(ctx, src, count, sizeof(char*), sl_sort_compare_str);
+  return sl_sort_insertsort(ctx, (void*)src, count, sizeof(char*), sl_sort_compare_str);
 }
 
 char**
 sl_sort_quicksort_str(struct sl_context ctx[static 1], const size_t count, char* src[count]) {
-  return sl_sort_quicksort(ctx, src, count, sizeof(char*), sl_sort_compare_str);
+  return sl_sort_quicksort(ctx, (void*)src, count, sizeof(char*), sl_sort_compare_str);
 }
 
 char**
 sl_sort_mergesort_str(struct sl_context ctx[static 1], const size_t count, char* src[count]) {
-  return sl_sort_mergesort(ctx, src, count, sizeof(char*), sl_sort_compare_str);
+  return sl_sort_mergesort(ctx, (void*)src, count, sizeof(char*), sl_sort_compare_str);
 }
 
 #undef SL_INSERTSORT_THRESHOLD
