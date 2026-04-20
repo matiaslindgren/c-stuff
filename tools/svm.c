@@ -10,12 +10,14 @@
 #include <stufflib/linalg/linalg.h>
 #include <stufflib/logging/logging.h>
 #include <stufflib/macros/macros.h>
+#include <stufflib/matrix/sl_matrix_f32.h>
 #include <stufflib/memory/memory.h>
 #include <stufflib/ml/ml.h>
 #include <stufflib/random/random.h>
 #include <stufflib/record/reader.h>
 #include <stufflib/record/record.h>
 #include <stufflib/span/span.h>
+#include <stufflib/vector/sl_vector_f32.h>
 
 bool spambase(
     struct sl_context ctx[static 1],

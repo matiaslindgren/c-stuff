@@ -1,7 +1,6 @@
 #ifndef SL_MACROS_H_INCLUDED
 #define SL_MACROS_H_INCLUDED
 
-#include <stdlib.h>
 #include <string.h>
 
 #define SL_MIN(x, y) ((x) < (y) ? (x) : (y))

@@ -7,6 +7,8 @@
 
 #include <stufflib/context/context.h>
 #include <stufflib/linalg/linalg.h>
+#include <stufflib/matrix/sl_matrix_f32.h>
+#include <stufflib/vector/sl_vector_f32.h>
 
 // https://en.wikipedia.org/wiki/Feature_scaling#Rescaling_(min-max_normalization)
 // 2024-06-16

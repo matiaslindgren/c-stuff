@@ -12,6 +12,7 @@
 #include <stufflib/misc/misc.h>
 #include <stufflib/png/deflate.h>
 #include <stufflib/png/png.h>
+#include <stufflib/span/span.h>
 
 const char* sl_png_chunk_types[] = {
     [sl_png_IHDR] = "IHDR", [sl_png_PLTE] = "PLTE", [sl_png_IDAT] = "IDAT", [sl_png_IEND] = "IEND",
@@ -366,14 +367,14 @@ sl_png_read_header(struct sl_context ctx[static 1], const char filename[const st
 
 size_t sl_png_data_size(struct sl_png_header header) {
   size_t bytes_per_px = sl_png_bytes_per_pixel[header.color_type];
-  return header.height + bytes_per_px * header.width * header.height;
+  return header.height + (bytes_per_px * header.width * header.height);
 }
 
 size_t sl_png_idat_max_size(struct sl_png_header header) {
   size_t header_size   = 6;
   size_t checksum_size = 4;
   size_t data_size     = sl_png_data_size(header);
-  return header_size + 2 * data_size + checksum_size;
+  return header_size + (2 * data_size) + checksum_size;
 }
 
 struct sl_span
@@ -389,10 +390,10 @@ sl_png_pack_image_data(struct sl_context ctx[static 1], struct sl_png_image imag
   }
 
   for (size_t row = 0; row < height; ++row) {
-    size_t filter_idx       = bytes_per_px * row * width + row;
+    size_t filter_idx       = (bytes_per_px * row * width) + row;
     packed.data[filter_idx] = sl_png_filter_none;
     for (size_t col = 0; col < width; ++col) {
-      size_t dst_idx = bytes_per_px * (width * row + col) + 1 + row;
+      size_t dst_idx = (bytes_per_px * (width * row + col)) + 1 + row;
       size_t src_idx = bytes_per_px * ((width + 2) * (row + 1) + (col + 1));
       memcpy(packed.data + dst_idx, image->data.data + src_idx, bytes_per_px);
     }
@@ -421,12 +422,13 @@ void sl_png_unpack_and_pad_image_data(
   }
 
   for (size_t row = 0; row < height; ++row) {
-    size_t idx_col0_raw = row * bytes_per_px * width + row;
+    size_t idx_col0_raw = (row * bytes_per_px * width) + row;
     filter.data[row]    = image->data.data[idx_col0_raw];
     for (size_t col = 0; col < width; ++col) {
       for (size_t byte = 0; byte < bytes_per_px; ++byte) {
-        size_t idx_raw = idx_col0_raw + 1 + col * bytes_per_px + byte;
-        size_t idx_pad = (row + 1) * (width + 2) * bytes_per_px + (col + 1) * bytes_per_px + byte;
+        size_t idx_raw = idx_col0_raw + 1 + (col * bytes_per_px) + byte;
+        size_t idx_pad
+            = ((row + 1) * (width + 2) * bytes_per_px) + ((col + 1) * bytes_per_px) + byte;
         padded.data[idx_pad] = image->data.data[idx_raw];
       }
     }
@@ -605,10 +607,7 @@ bool sl_png_chunk_fwrite_header(
       (unsigned char[4]){0},
       sl_hash_crc32_bytes(SL_ARRAY_LEN(ihdr_data), ihdr_data)
   );
-  if (fwrite(crc32, 1, 4, stream) != 4) {
-    return false;
-  }
-  return true;
+  return (fwrite(crc32, 1, 4, stream) == 4);
 }
 
 bool sl_png_chunk_fwrite(

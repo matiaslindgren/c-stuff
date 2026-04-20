@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <stufflib/args/args.h>
 #include <stufflib/context/context.h>
 #include <stufflib/logging/logging.h>
 #include <stufflib/macros/macros.h>
@@ -199,7 +198,7 @@ SL_TEST(test_read_rgba_image_with_dynamic_compression) {
   SL_ASSERT_TRUE(white_square.data.size == bpp * (width + 2) * (height + 2));
   for (size_t y = 1; y < height + 1; ++y) {
     for (size_t x = 1; x < width + 1; ++x) {
-      const unsigned char* px = white_square.data.data + bpp * (y * (width + 2) + x);
+      const unsigned char* px = white_square.data.data + (bpp * (y * (width + 2) + x));
       for (size_t byte = 0; byte < bpp; ++byte) {
         SL_ASSERT_TRUE(px[byte] == 0xff);
       }
@@ -236,7 +235,7 @@ SL_TEST(test_read_small_images_with_dynamic_compression) {
     SL_ASSERT_TRUE(img.data.size == 3 * (width + 2) * (height + 2));
     for (size_t y = 1; y < height + 1; ++y) {
       for (size_t x = 1; x < width + 1; ++x) {
-        const unsigned char* px = img.data.data + 3 * (y * (width + 2) + x);
+        const unsigned char* px = img.data.data + (3 * (y * (width + 2) + x));
         SL_ASSERT_TRUE(px[0] == ((rgb & 0xff0000) >> 16));
         SL_ASSERT_TRUE(px[1] == ((rgb & 0x00ff00) >> 8));
         SL_ASSERT_TRUE(px[2] == ((rgb & 0x0000ff) >> 0));
@@ -264,7 +263,7 @@ SL_TEST(test_read_large_images_with_dynamic_compression) {
     SL_ASSERT_TRUE(square.data.size == 3 * (size + 2) * (size + 2));
     for (size_t y = 1; y < size + 1; ++y) {
       for (size_t x = 1; x < size + 1; ++x) {
-        const unsigned char* px = square.data.data + 3 * (y * (size + 2) + x);
+        const unsigned char* px = square.data.data + (3 * (y * (size + 2) + x));
         SL_ASSERT_TRUE(px[0] == 0xaa);
         SL_ASSERT_TRUE(px[1] == 0xbb);
         SL_ASSERT_TRUE(px[2] == 0xcc);

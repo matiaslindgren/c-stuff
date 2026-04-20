@@ -1,18 +1,19 @@
 #include <math.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <stufflib/macros/macros.h>
 #include <stufflib/testing/testing.h>
 
 #define SL_LA_FLOAT_EQ_TOL 1e-6
 
-#include <stufflib/args/args.h>
-#include <stufflib/context/context.h>
 #include <stufflib/linalg/linalg.h>
-#include <stufflib/macros/macros.h>
 #include <stufflib/math/math.h>
+#include <stufflib/matrix/sl_matrix_f32.h>
 #include <stufflib/ml/ml.h>
 #include <stufflib/random/random.h>
+#include <stufflib/vector/sl_vector_f32.h>
 
 bool check_vector_equal(
     struct sl_context ctx[static 1],

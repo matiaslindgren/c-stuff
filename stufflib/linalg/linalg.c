@@ -9,7 +9,9 @@
 #include <stufflib/linalg/linalg.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/math/math.h>
+#include <stufflib/matrix/sl_matrix_f32.h>
 #include <stufflib/memory/memory.h>
+#include <stufflib/vector/sl_vector_f32.h>
 
 #ifdef __APPLE__
   #if __has_include(<Accelerate/Accelerate.h>)

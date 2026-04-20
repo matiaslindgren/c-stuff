@@ -6,8 +6,10 @@
 
 #include <stufflib/context/context.h>
 #include <stufflib/linalg/linalg.h>
+#include <stufflib/matrix/sl_matrix_f32.h>
 #include <stufflib/ml/ml.h>
 #include <stufflib/random/random.h>
+#include <stufflib/vector/sl_vector_f32.h>
 
 void sl_ml_random_train_test_split(
     struct sl_context ctx[static 1],

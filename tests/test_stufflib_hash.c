@@ -1,13 +1,7 @@
 #include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
-#include <stufflib/args/args.h>
-#include <stufflib/context/context.h>
 #include <stufflib/hash/hash.h>
 #include <stufflib/macros/macros.h>
-#include <stufflib/misc/misc.h>
 #include <stufflib/testing/testing.h>
 
 SL_TEST(test_single_byte) {

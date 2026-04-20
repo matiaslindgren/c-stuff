@@ -2,13 +2,12 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-#include <stufflib/args/args.h>
-#include <stufflib/context/context.h>
 #include <stufflib/io/io.h>
-#include <stufflib/linalg/linalg.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/math/math.h>
+#include <stufflib/matrix/sl_matrix_f32.h>
 #include <stufflib/memory/memory.h>
 #include <stufflib/misc/misc.h>
 #include <stufflib/record/reader.h>
@@ -40,11 +39,11 @@ bool contains(
   bool yes = false;
 
   for (size_t i = 0; i < (count + buffer.size - 1) / buffer.size; ++i) {
-    const size_t n_left = SL_MIN(buffer.size, count - i * buffer.size);
+    const size_t n_left = SL_MIN(buffer.size, count - (i * buffer.size));
     if (n_left) {
       const size_t n_read = fread(buffer.data, 1, n_left, fp);
       if (n_left != n_read || ferror(fp) != 0
-          || memcmp(buffer.data, expected + i * buffer.size, n_read) != 0) {
+          || memcmp(buffer.data, expected + (i * buffer.size), n_read) != 0) {
         goto done;
       }
     }
@@ -266,7 +265,7 @@ SL_TEST(test_dense_data_reader) {
 
     for (size_t j = 0; j < rows; ++j) {
       for (size_t k = 0; k < cols; ++k) {
-        const size_t idx      = i * rows * cols + j * cols + k;
+        const size_t idx      = (i * rows * cols) + (j * cols) + k;
         const double expected = sqrt((double)idx + 1);
         const double result   = (double)*sl_matrix_f32_get(&batch, j, k);
         SL_ASSERT_EQ_DOUBLE(result, expected, 1e-5);
@@ -341,7 +340,7 @@ SL_TEST(test_sparse_data_reader) {
     SL_ASSERT_EQ_PTR(buffer.data, batch);
 
     for (size_t j = 0; j < batch_size; ++j) {
-      const int64_t idx = (int64_t)(i * batch_size + j);
+      const int64_t idx = (int64_t)((i * batch_size) + j);
       if (seen_items < nonzero_count && idx == nonzero_index[seen_items]) {
         SL_ASSERT_EQ_LL(batch[j], nonzero_values[seen_items]);
         ++seen_items;
@@ -437,7 +436,7 @@ SL_TEST(test_dense_data_writer) {
   for (size_t i = 0; i < rows / batch_size; ++i) {
     for (size_t j = 0; j < batch_size; ++j) {
       for (size_t k = 0; k < cols; ++k) {
-        batch.data[j * cols + k] = dataset[(i * batch_size + j) * cols + k];
+        batch.data[(j * cols) + k] = dataset[((i * batch_size + j) * cols) + k];
       }
     }
     SL_ASSERT_TRUE(sl_record_writer_write(ctx, &writer, &buffer));
@@ -488,7 +487,7 @@ SL_TEST(test_sparse_data_writer) {
     size_t seen_items     = 0;
     for (size_t i = 0; i < (record.dim_size[0] + buf_size - 1) / buf_size; ++i) {
       for (size_t j = 0; j < buf_size; ++j) {
-        size_t idx = i * buf_size + j;
+        size_t idx = (i * buf_size) + j;
         if (seen_items < nonzero_count && idx == nonzero_index[seen_items]) {
           buffer[j] = nonzero_values[seen_items];
           ++seen_items;
@@ -693,7 +692,7 @@ SL_TEST(test_sparse_batch_write_and_read) {
           &writer,
           &((struct sl_span){
               .size = sizeof(float) * buffer_size,
-              .data = (void*)(data1.data + batch_idx * buffer_size),
+              .data = (void*)(data1.data + (batch_idx * buffer_size)),
           })
       ));
     }
@@ -715,7 +714,7 @@ SL_TEST(test_sparse_batch_write_and_read) {
           &reader,
           &((struct sl_span){
               .size = sizeof(float) * buffer_size,
-              .data = (void*)(data2 + batch_idx * buffer_size),
+              .data = (void*)(data2 + (batch_idx * buffer_size)),
           })
       ));
     }

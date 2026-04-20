@@ -1,10 +1,9 @@
 #include <math.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <stufflib/args/args.h>
-#include <stufflib/context/context.h>
 #include <stufflib/logging/logging.h>
 #include <stufflib/macros/macros.h>
 #include <stufflib/math/math.h>

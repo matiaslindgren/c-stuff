@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <stufflib/context/context.h>
 #include <stufflib/json/json.h>
 #include <stufflib/logging/logging.h>
 #include <stufflib/testing/testing.h>

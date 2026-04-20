@@ -13,6 +13,7 @@
 #include <stufflib/linalg/linalg.h>
 #include <stufflib/logging/logging.h>
 #include <stufflib/macros/macros.h>
+#include <stufflib/matrix/sl_matrix_f32.h>
 #include <stufflib/memory/memory.h>
 #include <stufflib/misc/misc.h>
 #include <stufflib/png/png.h>
@@ -21,6 +22,7 @@
 #include <stufflib/span/span.h>
 #include <stufflib/string/string.h>
 #include <stufflib/tokenizer/tokenizer.h>
+#include <stufflib/vector/sl_vector_f32.h>
 
 static unsigned char reader_buffer_data[1024 << 6] = {0};
 static struct sl_span reader_buffer                = {0};

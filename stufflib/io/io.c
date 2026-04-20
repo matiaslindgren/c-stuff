@@ -1,10 +1,9 @@
+#include <errno.h>
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include <sys/errno.h>
 
 #include <stufflib/context/context.h>
 #include <stufflib/io/io.h>
@@ -45,10 +44,7 @@ bool sl_file_format_path(
     const char suffix[const static 1]
 ) {
   memset(buffer, 0, bufsize);
-  if (path[0] && name[0] && 3 <= snprintf(buffer, bufsize, "%s/%s%s", path, name, suffix)) {
-    return true;
-  }
-  return false;
+  return (path[0] && name[0] && 3 <= snprintf(buffer, bufsize, "%s/%s%s", path, name, suffix));
 }
 
 bool sl_file_open(

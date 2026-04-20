@@ -1,6 +1,5 @@
 #include <stddef.h>
 
-#include <stufflib/context/context.h>
 #include <stufflib/json/json.h>
 #include <stufflib/testing/testing.h>
 

@@ -30,6 +30,8 @@ Checks:
   - '-readability-named-parameter'
   # false positives on struct zero init, e.g. struct my_type s = {0};
   - '-readability-implicit-bool-conversion'
+  # flags `SL_LOGGING_LEVEL_error` etc.
+  - '-readability-identifier-naming'
 WarningsAsErrors: '*'
 FormatStyle: file
 HeaderFilterRegex: '.*'

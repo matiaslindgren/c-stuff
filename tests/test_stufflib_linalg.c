@@ -1,11 +1,10 @@
 #include <stdio.h>
 
-#include <stufflib/args/args.h>
-#include <stufflib/context/context.h>
 #include <stufflib/linalg/linalg.h>
-#include <stufflib/macros/macros.h>
 #include <stufflib/math/math.h>
+#include <stufflib/matrix/sl_matrix_f32.h>
 #include <stufflib/testing/testing.h>
+#include <stufflib/vector/sl_vector_f32.h>
 
 bool fequal(const double a, const double b) {
   return sl_math_double_almost(a, b, 1e-9);
@@ -61,7 +60,7 @@ SL_TEST(test_matrix_get) {
   for (size_t row = 0; row < sl_matrix_f32_num_rows(&a); ++row) {
     for (size_t col = 0; col < sl_matrix_f32_num_cols(&a); ++col) {
       SL_ASSERT_TRUE(
-          a.data + row * sl_matrix_f32_num_cols(&a) + col == sl_matrix_f32_get(&a, row, col)
+          a.data + (row * sl_matrix_f32_num_cols(&a)) + col == sl_matrix_f32_get(&a, row, col)
       );
     }
   }

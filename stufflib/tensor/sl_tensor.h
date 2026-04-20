@@ -2,7 +2,7 @@
 #define SL_TENSOR_H_INCLUDED
 
 #include <stddef.h>
-#include <stdlib.h>
+#include <stdlib.h>  // NOLINT(misc-include-cleaner)
 
 #define SL_TENSOR_DECLARE(T, NAME, DIM)                                          \
                                                                                  \
