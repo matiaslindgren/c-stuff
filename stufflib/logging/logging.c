@@ -32,20 +32,100 @@ __attribute__((constructor)) static void sl_logging_init(void) {
   }
 }
 
-void sl_logging_write(
+__attribute__((format(printf, 5, 0))) static void sl_logging_vwritef(
+    FILE* stream,
+    const char* level,
+    const char* file,
+    unsigned long line,
+    const char* fmt,
+    va_list args
+) {
+  // TODO json writer
+  fprintf(stream, "{\"level\":\"%s\"", level);
+  fprintf(stream, ",\"file\":\"%s\"", file);
+  fprintf(stream, ",\"line\":%lu", line);
+  fprintf(stream, ",\"msg\":\"");
+  static char msg[SL_LOGGING_MAX_LENGTH];
+  vsnprintf(msg, sizeof(msg), fmt, args);
+  for (const char* p = msg; *p; ++p) {
+    switch (*p) {
+      case '"': {
+        fprintf(stream, "\\\"");
+        break;
+      }
+      case '\\': {
+        fprintf(stream, "\\\\");
+        break;
+      }
+      case '\n': {
+        fprintf(stream, "\\n");
+        break;
+      }
+      case '\r': {
+        fprintf(stream, "\\r");
+        break;
+      }
+      case '\t': {
+        fprintf(stream, "\\t");
+        break;
+      }
+      case '\b': {
+        fprintf(stream, "\\b");
+        break;
+      }
+      case '\f': {
+        fprintf(stream, "\\f");
+        break;
+      }
+      case 0x00:
+      case 0x01:
+      case 0x02:
+      case 0x03:
+      case 0x04:
+      case 0x05:
+      case 0x06:
+      case 0x07:
+      case 0x0b:
+      case 0x0e:
+      case 0x0f:
+      case 0x10:
+      case 0x11:
+      case 0x12:
+      case 0x13:
+      case 0x14:
+      case 0x15:
+      case 0x16:
+      case 0x17:
+      case 0x18:
+      case 0x19:
+      case 0x1a:
+      case 0x1b:
+      case 0x1c:
+      case 0x1d:
+      case 0x1e:
+      case 0x1f: {
+        fprintf(stream, "\\u%04x", (unsigned char)*p);
+        break;
+      }
+      default: {
+        fputc(*p, stream);
+        break;
+      }
+    }
+  }
+  fprintf(stream, "\"}\n");
+}
+
+void sl_logging_writef(
+    FILE* stream,
     const char* level,
     const char* file,
     unsigned long line,
     const char* fmt,
     ...
 ) {
-  fprintf(stderr, "{\"level\":\"%s\"", level);
-  fprintf(stderr, ",\"file\":\"%s\"", file);
-  fprintf(stderr, ",\"line\":%lu", line);
-  fprintf(stderr, ",\"msg\":\"");
   va_list args;
   va_start(args, fmt);
-  vfprintf(stderr, fmt, args);
+  sl_logging_vwritef(stream, level, file, line, fmt, args);
   va_end(args);
-  fprintf(stderr, "\"}\n");
 }
