@@ -26,6 +26,6 @@ if [ $ok -eq 0 ]; then
   exit 1
 fi
 
-root_dir=$(dirname $0)/../../
+root_dir=$(readlink -f $(dirname $0)/../..)
 test_dir=$(mktemp --directory)
 trap "rm -rf $test_dir" EXIT

@@ -28,16 +28,14 @@ expect=${test_dir}/concat_output.txt
 
 for lhs in ${wikifiles[*]}; do
   for rhs in ${wikifiles[*]}; do
-    lhs_path=${root_dir}/${lhs}
-    rhs_path=${root_dir}/${rhs}
-    $txt_tool concat $lhs_path $rhs_path > $output
-    cat $lhs_path $rhs_path > $expect
+    $txt_tool concat $lhs $rhs > $output
+    cat $lhs $rhs > $expect
     if ! cmp $output $expect; then
       printf "'%s' failed to concatenate 2 files\n" $txt_tool
       exit 1
     fi
-    $txt_tool concat $lhs_path $rhs_path $lhs_path > $output
-    cat $lhs_path $rhs_path $lhs_path > $expect
+    $txt_tool concat $lhs $rhs $lhs > $output
+    cat $lhs $rhs $lhs > $expect
     if ! cmp $output $expect; then
       printf "'%s' failed to concatenate 3 files\n" $txt_tool
       exit 1
