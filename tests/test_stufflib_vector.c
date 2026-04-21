@@ -100,4 +100,24 @@ SL_TEST(test_vector_f32_offset) {
   return true;
 }
 
+SL_TEST(test_vector_f64_create_zero_length) {
+  struct sl_vector_f64 v = {0};
+  SL_ASSERT_FALSE(sl_vector_f64_create(ctx, &v, 0));
+  SL_ASSERT_EQ_LL(sl_error_depth(&ctx->errors), 1);
+  struct sl_error_msg err = {0};
+  SL_ASSERT_TRUE(sl_error_pop(&ctx->errors, &err));
+  SL_ASSERT_EQ_STR(err.msg, "will not allocate sl_vector_f64 of length 0");
+  return true;
+}
+
+SL_TEST(test_vector_f64_create) {
+  struct sl_vector_f64 v = {0};
+  SL_ASSERT_TRUE(sl_vector_f64_create(ctx, &v, 3));
+  SL_ASSERT_TRUE(v.data != nullptr);
+  SL_ASSERT_EQ_LL(sl_vector_f64_size(&v), 3);
+  SL_ASSERT_EQ_LL(v.capacity[0], 3);
+  sl_vector_f64_destroy(&v);
+  return true;
+}
+
 SL_TEST_MAIN()

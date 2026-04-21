@@ -150,4 +150,25 @@ SL_TEST(test_matrix_f32_offset) {
   return true;
 }
 
+SL_TEST(test_matrix_f64_create_zero_length) {
+  struct sl_matrix_f64 m = {0};
+  SL_ASSERT_FALSE(sl_matrix_f64_create(ctx, &m, 0, 3));
+  SL_ASSERT_EQ_LL(sl_error_depth(&ctx->errors), 1);
+  struct sl_error_msg err = {0};
+  SL_ASSERT_TRUE(sl_error_pop(&ctx->errors, &err));
+  SL_ASSERT_EQ_STR(err.msg, "will not allocate sl_matrix_f64 of length 0");
+  return true;
+}
+
+SL_TEST(test_matrix_f64_create) {
+  struct sl_matrix_f64 m = {0};
+  SL_ASSERT_TRUE(sl_matrix_f64_create(ctx, &m, 2, 3));
+  SL_ASSERT_TRUE(m.data != nullptr);
+  SL_ASSERT_EQ_LL(sl_matrix_f64_size(&m), 6);
+  SL_ASSERT_EQ_LL(sl_matrix_f64_num_rows(&m), 2);
+  SL_ASSERT_EQ_LL(sl_matrix_f64_num_cols(&m), 3);
+  sl_matrix_f64_destroy(&m);
+  return true;
+}
+
 SL_TEST_MAIN()

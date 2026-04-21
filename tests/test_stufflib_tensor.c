@@ -80,4 +80,26 @@ SL_TEST(test_tensor3_offset) {
   return true;
 }
 
+SL_TEST(test_tensor3_f64_create_zero_length) {
+  struct sl_tensor3_f64 t = {0};
+  SL_ASSERT_FALSE(sl_tensor3_f64_create(ctx, &t, 0, 2, 3));
+  SL_ASSERT_EQ_LL(sl_error_depth(&ctx->errors), 1);
+  struct sl_error_msg err = {0};
+  SL_ASSERT_TRUE(sl_error_pop(&ctx->errors, &err));
+  SL_ASSERT_EQ_STR(err.msg, "will not allocate sl_tensor3_f64 of length 0");
+  return true;
+}
+
+SL_TEST(test_tensor3_f64_create) {
+  struct sl_tensor3_f64 t = {0};
+  SL_ASSERT_TRUE(sl_tensor3_f64_create(ctx, &t, 2, 3, 4));
+  SL_ASSERT_TRUE(t.data != nullptr);
+  SL_ASSERT_EQ_LL(sl_tensor3_f64_size(&t), 24);
+  SL_ASSERT_EQ_LL(t.capacity[0], 2);
+  SL_ASSERT_EQ_LL(t.capacity[1], 3);
+  SL_ASSERT_EQ_LL(t.capacity[2], 4);
+  sl_tensor3_f64_destroy(&t);
+  return true;
+}
+
 SL_TEST_MAIN()
