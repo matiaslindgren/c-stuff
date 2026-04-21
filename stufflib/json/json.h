@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-// TODO proper parser
+bool sl_json_parse(size_t len, const char json[const static len]);
 
 bool sl_json_str(
     const char json[const restrict static 1],
