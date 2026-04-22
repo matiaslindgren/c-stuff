@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -6,9 +7,7 @@
 
 #include <stufflib/json/json.h>
 
-#ifndef SL_JSON_PARSE_MAX_DEPTH
-  #define SL_JSON_PARSE_MAX_DEPTH 4096
-#endif
+SL_VECTOR_IMPLEMENT(struct sl_json_node, sl_json_nodes)
 
 static inline bool sl_json_is_ws(char ch) {
   return ch == ' ' || ch == '\n' || ch == '\r' || ch == '\t';
@@ -18,449 +17,525 @@ static inline bool sl_json_is_hex(char ch) {
   return ('0' <= ch && ch <= '9') || ('a' <= ch && ch <= 'f') || ('A' <= ch && ch <= 'F');
 }
 
-bool sl_json_parse(size_t len, const char json[const static len]) {
-  enum sl_json_parse_state {
-    // json: begin
-    element,
-    // value: object
-    object,
-    // value: array
-    array,
-    // value: string
-    string_body,
-    string_escape,
-    string_u1,
-    string_u2,
-    string_u3,
-    string_u4,
-    // value: number
-    number_minus,
-    number_zero,
-    number_one_nine,
-    number_frac_first,
-    number_frac_digits,
-    number_exp_sign,
-    number_exp_first,
-    number_exp_digits,
-    // value: literal true
-    lit_true_r,
-    lit_true_u,
-    lit_true_e,
-    // value: literal false
-    lit_false_a,
-    lit_false_l,
-    lit_false_s,
-    lit_false_e,
-    // value: literal null
-    lit_null_u,
-    lit_null_l1,
-    lit_null_l2,
-    // intermediate tokens
-    member,
-    colon,
-    after_value,
-    // end
-    done,
-    error,
-  };
-  enum sl_json_parse_container {
-    container_object,
-    container_array,
-  };
-
-  enum sl_json_parse_state state = element;
-  enum sl_json_parse_container stack[SL_JSON_PARSE_MAX_DEPTH];
-  bool string_is_key = false;
-  size_t pos         = 0;
-  size_t depth       = 0;
-  for (; state != error && pos <= len && depth < SL_JSON_PARSE_MAX_DEPTH;) {
-    char ch                          = (char)(pos < len ? json[pos] : 0);
-    enum sl_json_parse_state current = state;
-    state                            = error;
-    switch (current) {
-      case element: {
-        if (sl_json_is_ws(ch)) {
-          state = element;
-          break;
-        }
-        switch (ch) {
-          case '{': {
-            stack[depth++] = container_object;
-            state          = object;
-          } break;
-          case '[': {
-            stack[depth++] = container_array;
-            state          = array;
-          } break;
-          case '"': {
-            string_is_key = false;
-            state         = string_body;
-          } break;
-          case 't': {
-            state = lit_true_r;
-          } break;
-          case 'f': {
-            state = lit_false_a;
-          } break;
-          case 'n': {
-            state = lit_null_u;
-          } break;
-          case '-': {
-            state = number_minus;
-          } break;
-          case '0': {
-            state = number_zero;
-          } break;
-          case '1':
-          case '2':
-          case '3':
-          case '4':
-          case '5':
-          case '6':
-          case '7':
-          case '8':
-          case '9': {
-            state = number_one_nine;
-          } break;
-          default: {
-            state = error;
-          }
-        }
-      } break;
-
-      case object: {
-        if (sl_json_is_ws(ch)) {
-          state = object;
-        } else if (ch == '}') {
-          assert(depth);
-          --depth;
-          state = after_value;
-        } else if (ch == '"') {
-          string_is_key = true;
-          state         = string_body;
-        }
-      } break;
-
-      case member: {
-        if (sl_json_is_ws(ch)) {
-          state = member;
-        } else if (ch == '"') {
-          string_is_key = true;
-          state         = string_body;
-        }
-      } break;
-
-      case colon: {
-        if (sl_json_is_ws(ch)) {
-          state = colon;
-        } else if (ch == ':') {
-          state = element;
-        }
-      } break;
-
-      case array: {
-        if (sl_json_is_ws(ch)) {
-          state = array;
-        } else if (ch == ']') {
-          assert(depth);
-          --depth;
-          state = after_value;
-        } else {
-          assert(pos);
-          --pos;
-          state = element;
-        }
-      } break;
-
-      case string_body: {
-        if (ch == '"') {
-          state = string_is_key ? colon : after_value;
-        } else if (ch == '\\') {
-          state = string_escape;
-        } else if ((unsigned char)ch >= 0x20) {
-          state = string_body;
-        }
-      } break;
-
-      case string_escape: {
-        switch (ch) {
-          case '"':
-          case '\\':
-          case '/':
-          case 'b':
-          case 'f':
-          case 'n':
-          case 'r':
-          case 't': {
-            state = string_body;
-          } break;
-          case 'u': {
-            state = string_u1;
-          } break;
-          default: {
-          } break;
-        }
-      } break;
-
-      case string_u1: {
-        if (sl_json_is_hex(ch)) {
-          state = string_u2;
-        }
-      } break;
-      case string_u2: {
-        if (sl_json_is_hex(ch)) {
-          state = string_u3;
-        }
-      } break;
-      case string_u3: {
-        if (sl_json_is_hex(ch)) {
-          state = string_u4;
-        }
-      } break;
-      case string_u4: {
-        if (sl_json_is_hex(ch)) {
-          state = string_body;
-        }
-      } break;
-
-      case number_minus: {
-        if (ch == '0') {
-          state = number_zero;
-        } else if ('1' <= ch && ch <= '9') {
-          state = number_one_nine;
-        }
-      } break;
-
-      case number_zero: {
-        if (ch == '.') {
-          state = number_frac_first;
-        } else if (ch == 'e' || ch == 'E') {
-          state = number_exp_sign;
-        } else {
-          assert(pos);
-          --pos;
-          state = after_value;
-        }
-      } break;
-
-      case number_one_nine: {
-        if ('0' <= ch && ch <= '9') {
-          state = number_one_nine;
-        } else if (ch == '.') {
-          state = number_frac_first;
-        } else if (ch == 'e' || ch == 'E') {
-          state = number_exp_sign;
-        } else {
-          assert(pos);
-          --pos;
-          state = after_value;
-        }
-      } break;
-
-      case number_frac_first: {
-        if ('0' <= ch && ch <= '9') {
-          state = number_frac_digits;
-        }
-      } break;
-
-      case number_frac_digits: {
-        if ('0' <= ch && ch <= '9') {
-          state = number_frac_digits;
-        } else if (ch == 'e' || ch == 'E') {
-          state = number_exp_sign;
-        } else {
-          assert(pos);
-          --pos;
-          state = after_value;
-        }
-      } break;
-
-      case number_exp_sign: {
-        if (ch == '+' || ch == '-') {
-          state = number_exp_first;
-        } else if ('0' <= ch && ch <= '9') {
-          state = number_exp_digits;
-        }
-      } break;
-
-      case number_exp_first: {
-        if ('0' <= ch && ch <= '9') {
-          state = number_exp_digits;
-        }
-      } break;
-
-      case number_exp_digits: {
-        if ('0' <= ch && ch <= '9') {
-          state = number_exp_digits;
-        } else {
-          assert(pos);
-          --pos;
-          state = after_value;
-        }
-      } break;
-
-      case lit_true_r: {
-        if (ch == 'r') {
-          state = lit_true_u;
-        }
-      } break;
-      case lit_true_u: {
-        if (ch == 'u') {
-          state = lit_true_e;
-        }
-      } break;
-      case lit_true_e: {
-        if (ch == 'e') {
-          state = after_value;
-        }
-      } break;
-
-      case lit_false_a: {
-        if (ch == 'a') {
-          state = lit_false_l;
-        }
-      } break;
-      case lit_false_l: {
-        if (ch == 'l') {
-          state = lit_false_s;
-        }
-      } break;
-      case lit_false_s: {
-        if (ch == 's') {
-          state = lit_false_e;
-        }
-      } break;
-      case lit_false_e: {
-        if (ch == 'e') {
-          state = after_value;
-        }
-      } break;
-      case lit_null_u: {
-        if (ch == 'u') {
-          state = lit_null_l1;
-        }
-      } break;
-      case lit_null_l1: {
-        if (ch == 'l') {
-          state = lit_null_l2;
-        }
-      } break;
-      case lit_null_l2: {
-        if (ch == 'l') {
-          state = after_value;
-        }
-      } break;
-
-      case after_value: {
-        if (sl_json_is_ws(ch)) {
-          state = after_value;
-        } else if (depth == 0 && pos == len) {
-          state = done;
-        } else if (depth && stack[depth - 1] == container_object) {
-          if (ch == ',') {
-            state = member;
-          } else if (ch == '}') {
-            assert(depth);
-            --depth;
-            state = after_value;
-          }
-        } else if (depth && stack[depth - 1] == container_array) {
-          if (ch == ',') {
-            state = element;
-          } else if (ch == ']') {
-            assert(depth);
-            --depth;
-            state = after_value;
-          }
-        }
-      } break;
-
-      case done:
-      case error: {
-      } break;
-    }
-    ++pos;
-  }
-
-  return state == done;
-}
-
-static inline const char* sl_json_find_value(
-    const char json[const restrict static 1],
-    const char key[const restrict static 1]
-) {
-  enum sl_json_find_state {
-    seek_open_quote,
-    match_key,
-    no_match,
-    seek_colon,
-    found,
-  };
-  enum sl_json_find_state state = seek_open_quote;
-
-  size_t key_len  = strlen(key);
-  const char* pos = json;
-  for (size_t key_pos = 0; *pos && state != found && key_pos <= key_len; ++pos) {
-    const char ch                   = *pos;
-    enum sl_json_find_state current = state;
-    state                           = seek_open_quote;
-    switch (current) {
-      case seek_open_quote: {
-        if (ch == '"') {
-          key_pos = 0;
-          state   = match_key;
-        } else {
-          state = seek_open_quote;
-        }
-      } break;
-      case match_key: {
-        if (ch == '"') {
-          state = seek_colon;
-        } else if (key_pos < key_len && ch == key[key_pos]) {
-          key_pos++;
-          state = match_key;
-        } else {
-          state = no_match;
-        }
-      } break;
-      case no_match: {
-        if (ch == '"') {
-          state = seek_open_quote;
-        } else {
-          state = no_match;
-        }
-      } break;
-      case seek_colon: {
-        if (ch == ':') {
-          state = found;
-        } else if (sl_json_is_ws(ch)) {
-          state = seek_colon;
-        }
-      } break;
-      case found: {
-      } break;
-    }
-  }
-
-  if (state != found) {
-    return nullptr;
-  }
-  return pos;
-}
-
-bool sl_json_str(
-    const char json[const restrict static 1],
-    const char key[const restrict static 1],
+static inline bool sl_json_parse_step(
+    struct sl_json_parser p[static 1],
     size_t len,
-    char out[const restrict static len]
+    const char json[const static len]
 ) {
-  const char* pos = sl_json_find_value(json, key);
-  if (!pos) {
+  enum sl_json_parse_state init_state = p->state;
+
+  char ch  = (char)(p->pos < len ? json[p->pos] : 0);
+  p->state = sl_json_error;
+  p->event = sl_json_NO_EVENT;
+
+  switch (init_state) {
+    case sl_json_element: {
+      if (sl_json_is_ws(ch)) {
+        p->state = sl_json_element;
+        break;
+      }
+      switch (ch) {
+        case '{': {
+          p->value_begin       = p->pos;
+          p->stack[p->depth++] = sl_json_container_object;
+          p->state             = sl_json_object;
+          p->event             = sl_json_begin_object;
+        } break;
+        case '[': {
+          p->value_begin       = p->pos;
+          p->stack[p->depth++] = sl_json_container_array;
+          p->state             = sl_json_array;
+          p->event             = sl_json_begin_array;
+        } break;
+        case '"': {
+          p->value_begin   = p->pos;
+          p->string_begin  = p->pos;
+          p->string_is_key = false;
+          p->state         = sl_json_string_body;
+        } break;
+        case 't': {
+          p->value_begin = p->pos;
+          p->state       = sl_json_lit_true_r;
+        } break;
+        case 'f': {
+          p->value_begin = p->pos;
+          p->state       = sl_json_lit_false_a;
+        } break;
+        case 'n': {
+          p->value_begin = p->pos;
+          p->state       = sl_json_lit_null_u;
+        } break;
+        case '-': {
+          p->value_begin = p->pos;
+          p->state       = sl_json_number_minus;
+        } break;
+        case '0': {
+          p->value_begin = p->pos;
+          p->state       = sl_json_number_zero;
+        } break;
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9': {
+          p->value_begin = p->pos;
+          p->state       = sl_json_number_one_nine;
+        } break;
+        default: {
+          p->state = sl_json_error;
+        }
+      }
+    } break;
+
+    case sl_json_object: {
+      if (sl_json_is_ws(ch)) {
+        p->state = sl_json_object;
+      } else if (ch == '}') {
+        assert(p->depth);
+        --(p->depth);
+        p->state = sl_json_after_value;
+        p->event = sl_json_end_object;
+      } else if (ch == '"') {
+        p->string_begin  = p->pos;
+        p->string_is_key = true;
+        p->state         = sl_json_string_body;
+      }
+    } break;
+
+    case sl_json_member: {
+      if (sl_json_is_ws(ch)) {
+        p->state = sl_json_member;
+      } else if (ch == '"') {
+        p->string_begin  = p->pos;
+        p->string_is_key = true;
+        p->state         = sl_json_string_body;
+      }
+    } break;
+
+    case sl_json_colon: {
+      if (sl_json_is_ws(ch)) {
+        p->state = sl_json_colon;
+      } else if (ch == ':') {
+        p->state = sl_json_element;
+      }
+    } break;
+
+    case sl_json_array: {
+      if (sl_json_is_ws(ch)) {
+        p->state = sl_json_array;
+      } else if (ch == ']') {
+        assert(p->depth);
+        --(p->depth);
+        p->state = sl_json_after_value;
+        p->event = sl_json_end_array;
+      } else {
+        assert(p->pos);
+        --(p->pos);
+        p->state = sl_json_element;
+      }
+    } break;
+
+    case sl_json_string_body: {
+      if (ch == '"') {
+        if (p->string_is_key) {
+          p->pending_key_pos = p->string_begin + 1;
+          p->pending_key_len = p->pos - p->string_begin - 1;
+          p->has_pending_key = true;
+          p->state           = sl_json_colon;
+        } else {
+          p->state = sl_json_after_value;
+          p->event = sl_json_value_string;
+        }
+      } else if (ch == '\\') {
+        p->state = sl_json_string_escape;
+      } else if ((unsigned char)ch >= 0x20) {
+        p->state = sl_json_string_body;
+      }
+    } break;
+
+    case sl_json_string_escape: {
+      switch (ch) {
+        case '"':
+        case '\\':
+        case '/':
+        case 'b':
+        case 'f':
+        case 'n':
+        case 'r':
+        case 't': {
+          p->state = sl_json_string_body;
+        } break;
+        case 'u': {
+          p->state = sl_json_string_u1;
+        } break;
+        default: {
+        } break;
+      }
+    } break;
+
+    case sl_json_string_u1: {
+      if (sl_json_is_hex(ch)) {
+        p->state = sl_json_string_u2;
+      }
+    } break;
+    case sl_json_string_u2: {
+      if (sl_json_is_hex(ch)) {
+        p->state = sl_json_string_u3;
+      }
+    } break;
+    case sl_json_string_u3: {
+      if (sl_json_is_hex(ch)) {
+        p->state = sl_json_string_u4;
+      }
+    } break;
+    case sl_json_string_u4: {
+      if (sl_json_is_hex(ch)) {
+        p->state = sl_json_string_body;
+      }
+    } break;
+
+    case sl_json_number_minus: {
+      if (ch == '0') {
+        p->state = sl_json_number_zero;
+      } else if ('1' <= ch && ch <= '9') {
+        p->state = sl_json_number_one_nine;
+      }
+    } break;
+
+    case sl_json_number_zero: {
+      if (ch == '.') {
+        p->state = sl_json_number_frac_first;
+      } else if (ch == 'e' || ch == 'E') {
+        p->state = sl_json_number_exp_sign;
+      } else {
+        assert(p->pos);
+        --(p->pos);
+        p->state = sl_json_after_value;
+        p->event = sl_json_value_number;
+      }
+    } break;
+
+    case sl_json_number_one_nine: {
+      if ('0' <= ch && ch <= '9') {
+        p->state = sl_json_number_one_nine;
+      } else if (ch == '.') {
+        p->state = sl_json_number_frac_first;
+      } else if (ch == 'e' || ch == 'E') {
+        p->state = sl_json_number_exp_sign;
+      } else {
+        assert(p->pos);
+        --(p->pos);
+        p->state = sl_json_after_value;
+        p->event = sl_json_value_number;
+      }
+    } break;
+
+    case sl_json_number_frac_first: {
+      if ('0' <= ch && ch <= '9') {
+        p->state = sl_json_number_frac_digits;
+      }
+    } break;
+
+    case sl_json_number_frac_digits: {
+      if ('0' <= ch && ch <= '9') {
+        p->state = sl_json_number_frac_digits;
+      } else if (ch == 'e' || ch == 'E') {
+        p->state = sl_json_number_exp_sign;
+      } else {
+        assert(p->pos);
+        --(p->pos);
+        p->state = sl_json_after_value;
+        p->event = sl_json_value_number;
+      }
+    } break;
+
+    case sl_json_number_exp_sign: {
+      if (ch == '+' || ch == '-') {
+        p->state = sl_json_number_exp_first;
+      } else if ('0' <= ch && ch <= '9') {
+        p->state = sl_json_number_exp_digits;
+      }
+    } break;
+
+    case sl_json_number_exp_first: {
+      if ('0' <= ch && ch <= '9') {
+        p->state = sl_json_number_exp_digits;
+      }
+    } break;
+
+    case sl_json_number_exp_digits: {
+      if ('0' <= ch && ch <= '9') {
+        p->state = sl_json_number_exp_digits;
+      } else {
+        assert(p->pos);
+        --(p->pos);
+        p->state = sl_json_after_value;
+        p->event = sl_json_value_number;
+      }
+    } break;
+
+    case sl_json_lit_true_r: {
+      if (ch == 'r') {
+        p->state = sl_json_lit_true_u;
+      }
+    } break;
+    case sl_json_lit_true_u: {
+      if (ch == 'u') {
+        p->state = sl_json_lit_true_e;
+      }
+    } break;
+    case sl_json_lit_true_e: {
+      if (ch == 'e') {
+        p->state = sl_json_after_value;
+        p->event = sl_json_value_lit_true;
+      }
+    } break;
+
+    case sl_json_lit_false_a: {
+      if (ch == 'a') {
+        p->state = sl_json_lit_false_l;
+      }
+    } break;
+    case sl_json_lit_false_l: {
+      if (ch == 'l') {
+        p->state = sl_json_lit_false_s;
+      }
+    } break;
+    case sl_json_lit_false_s: {
+      if (ch == 's') {
+        p->state = sl_json_lit_false_e;
+      }
+    } break;
+    case sl_json_lit_false_e: {
+      if (ch == 'e') {
+        p->state = sl_json_after_value;
+        p->event = sl_json_value_lit_false;
+      }
+    } break;
+
+    case sl_json_lit_null_u: {
+      if (ch == 'u') {
+        p->state = sl_json_lit_null_l1;
+      }
+    } break;
+    case sl_json_lit_null_l1: {
+      if (ch == 'l') {
+        p->state = sl_json_lit_null_l2;
+      }
+    } break;
+    case sl_json_lit_null_l2: {
+      if (ch == 'l') {
+        p->state = sl_json_after_value;
+        p->event = sl_json_value_lit_null;
+      }
+    } break;
+
+    case sl_json_after_value: {
+      if (sl_json_is_ws(ch)) {
+        p->state = sl_json_after_value;
+      } else if (p->depth == 0 && p->pos == len) {
+        p->state = sl_json_done;
+      } else if (p->depth && p->stack[p->depth - 1] == sl_json_container_object) {
+        if (ch == ',') {
+          p->state = sl_json_member;
+        } else if (ch == '}') {
+          assert(p->depth);
+          --(p->depth);
+          p->state = sl_json_after_value;
+          p->event = sl_json_end_object;
+        }
+      } else if (p->depth && p->stack[p->depth - 1] == sl_json_container_array) {
+        if (ch == ',') {
+          p->state = sl_json_element;
+        } else if (ch == ']') {
+          assert(p->depth);
+          --(p->depth);
+          p->state = sl_json_after_value;
+          p->event = sl_json_end_array;
+        }
+      }
+    } break;
+
+    case sl_json_done:
+    case sl_json_error: {
+    } break;
+  }
+
+  ++(p->pos);
+
+  return p->state != sl_json_error && p->pos <= len && p->depth < SL_JSON_PARSE_MAX_DEPTH;
+}
+
+size_t sl_json_count_nodes(size_t len, const char json[const static len]) {
+  struct sl_json_parser p = {.state = sl_json_element};
+  size_t count            = 0;
+  while (sl_json_parse_step(&p, len, json)) {
+    switch (p.event) {
+      case sl_json_NO_EVENT:
+      case sl_json_end_object:
+      case sl_json_end_array: {
+      } break;
+      case sl_json_begin_object:
+      case sl_json_begin_array:
+      case sl_json_value_string:
+      case sl_json_value_number:
+      case sl_json_value_lit_true:
+      case sl_json_value_lit_false:
+      case sl_json_value_lit_null: {
+        ++count;
+      } break;
+    }
+  }
+  return p.state == sl_json_done ? count : 0;
+}
+
+bool sl_json_is_valid(size_t len, const char json[const static len]) {
+  return sl_json_count_nodes(len, json) > 0;
+}
+
+bool sl_json_read(
+    struct sl_context ctx[static 1],
+    size_t len,
+    const char json[const static len],
+    struct sl_json_doc doc[static 1]
+) {
+  size_t count = sl_json_count_nodes(len, json);
+  if (!count) {
+    SL_ERROR(ctx, "invalid or empty JSON");
+    return false;
+  }
+  if (!sl_json_nodes_create(ctx, &doc->nodes, count)) {
+    SL_ERROR(ctx, "failed creating %zu JSON nodes", count);
+    return false;
+  }
+
+  // container_at[d]: node index of the open container at depth d
+  // prev_sibling[d]: node index of the previous sibling emitted at depth d (SIZE_MAX = none)
+  size_t container_at[SL_JSON_PARSE_MAX_DEPTH];
+  size_t prev_sibling[SL_JSON_PARSE_MAX_DEPTH];
+  prev_sibling[0] = SIZE_MAX;
+
+  struct sl_json_parser p = {.state = sl_json_element};
+  size_t reader_depth     = 0;
+  size_t emit_index       = 0;
+
+  while (sl_json_parse_step(&p, len, json)) {
+    switch (p.event) {
+      case sl_json_NO_EVENT: {
+      } break;
+
+      case sl_json_end_object:
+      case sl_json_end_array: {
+        --reader_depth;
+      } break;
+
+      case sl_json_begin_object:
+      case sl_json_begin_array:
+      case sl_json_value_string:
+      case sl_json_value_number:
+      case sl_json_value_lit_true:
+      case sl_json_value_lit_false:
+      case sl_json_value_lit_null: {
+        static const enum sl_json_type event_type[] = {
+            [sl_json_begin_object]    = sl_json_type_object,
+            [sl_json_begin_array]     = sl_json_type_array,
+            [sl_json_value_string]    = sl_json_type_string,
+            [sl_json_value_number]    = sl_json_type_number,
+            [sl_json_value_lit_true]  = sl_json_type_lit_true,
+            [sl_json_value_lit_false] = sl_json_type_lit_false,
+            [sl_json_value_lit_null]  = sl_json_type_lit_null,
+        };
+        size_t idx               = emit_index++;
+        struct sl_json_node node = {
+            .type         = event_type[p.event],
+            .value_pos    = p.value_begin,
+            .next_sibling = SIZE_MAX,
+            .num_children = 0,
+        };
+        if (p.has_pending_key) {
+          node.key_pos      = p.pending_key_pos;
+          node.key_len      = p.pending_key_len;
+          p.has_pending_key = false;
+        }
+        // link to previous sibling at this depth
+        if (prev_sibling[reader_depth] != SIZE_MAX) {
+          sl_json_nodes_get(&doc->nodes, prev_sibling[reader_depth])->next_sibling = idx;
+        }
+        prev_sibling[reader_depth] = idx;
+        // increment parent's child count
+        if (reader_depth > 0) {
+          sl_json_nodes_get(&doc->nodes, container_at[reader_depth - 1])->num_children++;
+        }
+        sl_json_nodes_set(&doc->nodes, idx, node);
+        // push container frame
+        if (node.type == sl_json_type_object || node.type == sl_json_type_array) {
+          container_at[reader_depth] = idx;
+          ++reader_depth;
+          prev_sibling[reader_depth] = SIZE_MAX;
+        }
+      } break;
+    }
+  }
+
+  return true;
+}
+
+void sl_json_doc_destroy(struct sl_json_doc doc[static 1]) {
+  sl_json_nodes_destroy(&doc->nodes);
+  *doc = (struct sl_json_doc){0};
+}
+
+static const struct sl_json_node* sl_json_find_key(
+    struct sl_json_doc doc[restrict static 1],
+    const char json[restrict static 1],
+    const char key[restrict static 1],
+    enum sl_json_type type
+) {
+  size_t key_len = strlen(key);
+  size_t count   = sl_json_nodes_size(&doc->nodes);
+  for (size_t i = 0; i < count; i++) {
+    const struct sl_json_node* node = sl_json_nodes_get(&doc->nodes, i);
+    if (node->type == type && node->key_len == key_len
+        && memcmp(json + node->key_pos, key, key_len) == 0) {
+      return node;
+    }
+  }
+  return nullptr;
+}
+
+bool sl_json_is_str(
+    struct sl_json_doc doc[restrict static 1],
+    const char json[restrict static 1],
+    const char key[restrict static 1]
+) {
+  return sl_json_find_key(doc, json, key, sl_json_type_string) != nullptr;
+}
+
+bool sl_json_is_int(
+    struct sl_json_doc doc[restrict static 1],
+    const char json[restrict static 1],
+    const char key[restrict static 1]
+) {
+  return sl_json_find_key(doc, json, key, sl_json_type_number) != nullptr;
+}
+
+bool sl_json_get_str(
+    struct sl_json_doc doc[restrict static 1],
+    const char json[restrict static 1],
+    const char key[restrict static 1],
+    size_t out_len,
+    char out[restrict static out_len]
+) {
+  const struct sl_json_node* node = sl_json_find_key(doc, json, key, sl_json_type_string);
+  if (!node) {
     return false;
   }
 
   enum sl_json_str_state {
-    start,
     normal,
     escape,
     unicode_1,
@@ -470,21 +545,18 @@ bool sl_json_str(
     done,
     error,
   };
-  enum sl_json_str_state state = start;
+  enum sl_json_str_state state = normal;
 
+  // value_pos points at the opening '"'; start decoding after it
+  const char* pos = json + node->value_pos + 1;
   char hex_buf[5] = {0};
   size_t i_out    = 0;
 
-  while (*pos && i_out < len && state != done && state != error) {
+  while (*pos && i_out < out_len && state != done && state != error) {
     char ch                        = *pos++;
     enum sl_json_str_state current = state;
     state                          = error;
     switch (current) {
-      case start: {
-        if (ch == '"') {
-          state = normal;
-        }
-      } break;
       case normal: {
         switch (ch) {
           case '"': {
@@ -498,8 +570,7 @@ bool sl_json_str(
             state        = normal;
           } break;
         }
-        break;
-      }
+      } break;
       case escape: {
         switch (ch) {
           case '"': {
@@ -568,24 +639,24 @@ bool sl_json_str(
     }
   }
 
-  if (i_out >= len || state != done) {
+  if (i_out >= out_len || state != done) {
     return false;
   }
-
   out[i_out] = 0;
   return true;
 }
 
-bool sl_json_int(
-    const char json[const restrict static 1],
-    const char key[const restrict static 1],
-    long long out[const restrict static 1]
+bool sl_json_get_int(
+    struct sl_json_doc doc[restrict static 1],
+    const char json[restrict static 1],
+    const char key[restrict static 1],
+    long long out[restrict static 1]
 ) {
-  const char* pos = sl_json_find_value(json, key);
-  if (!pos) {
+  const struct sl_json_node* node = sl_json_find_key(doc, json, key, sl_json_type_number);
+  if (!node) {
     return false;
   }
   char* end = nullptr;
-  *out      = strtoll(pos, &end, 10);
-  return end != pos;
+  *out      = strtoll(json + node->value_pos, &end, 10);
+  return end != json + node->value_pos;
 }

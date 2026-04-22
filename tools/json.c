@@ -40,7 +40,7 @@ int main(int argc, char* const argv[argc + 1]) {
       goto done;
     }
 
-    ok = sl_json_parse(data.size, (const char*)data.data);
+    ok = sl_json_is_valid(data.size, (const char*)data.data);
   } else {
     ok = true;
   }

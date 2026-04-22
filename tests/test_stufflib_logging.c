@@ -7,7 +7,6 @@
 #include <stufflib/testing/testing.h>
 
 SL_TEST(test_log_json_format) {
-  (void)ctx;
   char* buf   = nullptr;
   size_t size = 0;
   FILE* mem   = open_memstream(&buf, &size);
@@ -16,122 +15,147 @@ SL_TEST(test_log_json_format) {
   sl_logging_writef(mem, "info", "myfile.c", 42, "hello %s", "world");
   fclose(mem);
 
+  struct sl_json_doc doc = {0};
+  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(buf), buf, &doc));
+
   char val[SL_LOGGING_MAX_LENGTH];
   long long line = 0;
-  SL_ASSERT_TRUE(sl_json_str(buf, "level", sizeof(val), val));
+  SL_ASSERT_TRUE(sl_json_get_str(&doc, buf, "level", sizeof(val), val));
   SL_ASSERT_EQ_STR(val, "info");
-  SL_ASSERT_TRUE(sl_json_str(buf, "file", sizeof(val), val));
+  SL_ASSERT_TRUE(sl_json_get_str(&doc, buf, "file", sizeof(val), val));
   SL_ASSERT_EQ_STR(val, "myfile.c");
-  SL_ASSERT_TRUE(sl_json_int(buf, "line", &line));
+  SL_ASSERT_TRUE(sl_json_get_int(&doc, buf, "line", &line));
   SL_ASSERT_EQ_LL(line, 42);
-  SL_ASSERT_TRUE(sl_json_str(buf, "msg", sizeof(val), val));
+  SL_ASSERT_TRUE(sl_json_get_str(&doc, buf, "msg", sizeof(val), val));
   SL_ASSERT_EQ_STR(val, "hello world");
 
+  sl_json_doc_destroy(&doc);
   free(buf);
   return true;
 }
 
 SL_TEST(test_log_escape_quote) {
-  (void)ctx;
   char* buf   = nullptr;
   size_t size = 0;
   FILE* mem   = open_memstream(&buf, &size);
   SL_ASSERT_TRUE(mem != nullptr);
   sl_logging_writef(mem, "info", "f.c", 1, "%c", '"');
   fclose(mem);
+
+  struct sl_json_doc doc = {0};
+  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(buf), buf, &doc));
   char msg[64];
-  SL_ASSERT_TRUE(sl_json_str(buf, "msg", sizeof(msg), msg));
+  SL_ASSERT_TRUE(sl_json_get_str(&doc, buf, "msg", sizeof(msg), msg));
   SL_ASSERT_EQ_STR(msg, "\"");
+  sl_json_doc_destroy(&doc);
   free(buf);
   return true;
 }
 
 SL_TEST(test_log_escape_backslash) {
-  (void)ctx;
   char* buf   = nullptr;
   size_t size = 0;
   FILE* mem   = open_memstream(&buf, &size);
   SL_ASSERT_TRUE(mem != nullptr);
   sl_logging_writef(mem, "info", "f.c", 1, "%c", '\\');
   fclose(mem);
+
+  struct sl_json_doc doc = {0};
+  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(buf), buf, &doc));
   char msg[64];
-  SL_ASSERT_TRUE(sl_json_str(buf, "msg", sizeof(msg), msg));
+  SL_ASSERT_TRUE(sl_json_get_str(&doc, buf, "msg", sizeof(msg), msg));
   SL_ASSERT_EQ_STR(msg, "\\");
+  sl_json_doc_destroy(&doc);
   free(buf);
   return true;
 }
 
 SL_TEST(test_log_escape_newline) {
-  (void)ctx;
   char* buf   = nullptr;
   size_t size = 0;
   FILE* mem   = open_memstream(&buf, &size);
   SL_ASSERT_TRUE(mem != nullptr);
   sl_logging_writef(mem, "info", "f.c", 1, "%c", '\n');
   fclose(mem);
+
+  struct sl_json_doc doc = {0};
+  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(buf), buf, &doc));
   char msg[64];
-  SL_ASSERT_TRUE(sl_json_str(buf, "msg", sizeof(msg), msg));
+  SL_ASSERT_TRUE(sl_json_get_str(&doc, buf, "msg", sizeof(msg), msg));
   SL_ASSERT_EQ_STR(msg, "\n");
+  sl_json_doc_destroy(&doc);
   free(buf);
   return true;
 }
 
 SL_TEST(test_log_escape_carriage_return) {
-  (void)ctx;
   char* buf   = nullptr;
   size_t size = 0;
   FILE* mem   = open_memstream(&buf, &size);
   SL_ASSERT_TRUE(mem != nullptr);
   sl_logging_writef(mem, "info", "f.c", 1, "%c", '\r');
   fclose(mem);
+
+  struct sl_json_doc doc = {0};
+  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(buf), buf, &doc));
   char msg[64];
-  SL_ASSERT_TRUE(sl_json_str(buf, "msg", sizeof(msg), msg));
+  SL_ASSERT_TRUE(sl_json_get_str(&doc, buf, "msg", sizeof(msg), msg));
   SL_ASSERT_EQ_STR(msg, "\r");
+  sl_json_doc_destroy(&doc);
   free(buf);
   return true;
 }
 
 SL_TEST(test_log_escape_tab) {
-  (void)ctx;
   char* buf   = nullptr;
   size_t size = 0;
   FILE* mem   = open_memstream(&buf, &size);
   SL_ASSERT_TRUE(mem != nullptr);
   sl_logging_writef(mem, "info", "f.c", 1, "%c", '\t');
   fclose(mem);
+
+  struct sl_json_doc doc = {0};
+  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(buf), buf, &doc));
   char msg[64];
-  SL_ASSERT_TRUE(sl_json_str(buf, "msg", sizeof(msg), msg));
+  SL_ASSERT_TRUE(sl_json_get_str(&doc, buf, "msg", sizeof(msg), msg));
   SL_ASSERT_EQ_STR(msg, "\t");
+  sl_json_doc_destroy(&doc);
   free(buf);
   return true;
 }
 
 SL_TEST(test_log_escape_backspace) {
-  (void)ctx;
   char* buf   = nullptr;
   size_t size = 0;
   FILE* mem   = open_memstream(&buf, &size);
   SL_ASSERT_TRUE(mem != nullptr);
   sl_logging_writef(mem, "info", "f.c", 1, "%c", '\b');
   fclose(mem);
+
+  struct sl_json_doc doc = {0};
+  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(buf), buf, &doc));
   char msg[64];
-  SL_ASSERT_TRUE(sl_json_str(buf, "msg", sizeof(msg), msg));
+  SL_ASSERT_TRUE(sl_json_get_str(&doc, buf, "msg", sizeof(msg), msg));
   SL_ASSERT_EQ_STR(msg, "\b");
+  sl_json_doc_destroy(&doc);
   free(buf);
   return true;
 }
 
 SL_TEST(test_log_escape_form_feed) {
-  (void)ctx;
   char* buf   = nullptr;
   size_t size = 0;
   FILE* mem   = open_memstream(&buf, &size);
   SL_ASSERT_TRUE(mem != nullptr);
   sl_logging_writef(mem, "info", "f.c", 1, "%c", '\f');
   fclose(mem);
+
+  struct sl_json_doc doc = {0};
+  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(buf), buf, &doc));
   char msg[64];
-  SL_ASSERT_TRUE(sl_json_str(buf, "msg", sizeof(msg), msg));
+  SL_ASSERT_TRUE(sl_json_get_str(&doc, buf, "msg", sizeof(msg), msg));
   SL_ASSERT_EQ_STR(msg, "\f");
+  sl_json_doc_destroy(&doc);
   free(buf);
   return true;
 }
@@ -146,10 +170,14 @@ SL_TEST(test_log_escape_control) {
     SL_ASSERT_TRUE(mem != nullptr);
     sl_logging_writef(mem, "info", "f.c", 1, "%c", (char)controls[i]);
     fclose(mem);
+
+    struct sl_json_doc doc = {0};
+    SL_ASSERT_TRUE(sl_json_read(ctx, strlen(buf), buf, &doc));
     char msg[64];
-    SL_ASSERT_TRUE(sl_json_str(buf, "msg", sizeof(msg), msg));
+    SL_ASSERT_TRUE(sl_json_get_str(&doc, buf, "msg", sizeof(msg), msg));
     SL_ASSERT_EQ_LL((unsigned char)msg[0], controls[i]);
     SL_ASSERT_EQ_LL(msg[1], '\0');
+    sl_json_doc_destroy(&doc);
     free(buf);
   }
   return true;
