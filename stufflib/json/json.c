@@ -17,10 +17,40 @@ static inline bool sl_json_is_hex(char ch) {
   return ('0' <= ch && ch <= '9') || ('a' <= ch && ch <= 'f') || ('A' <= ch && ch <= 'F');
 }
 
-static inline bool sl_json_parse_step(
-    struct sl_json_parser p[static 1],
+static inline bool sl_json_consume_literal(
+    struct sl_json_parser p[restrict static 1],
     size_t len,
-    const char json[const static len]
+    const char json[const restrict static len],
+    const char pattern[const restrict static 1]
+) {
+  size_t i = 0;
+  for (; pattern[i]; ++i) {
+    if (p->pos + i >= len || json[p->pos + i] != pattern[i]) {
+      return false;
+    }
+  }
+  p->pos += i - 1;
+  return true;
+}
+
+static inline bool sl_json_consume_hex_escape(
+    struct sl_json_parser p[restrict static 1],
+    size_t len,
+    const char json[const restrict static len]
+) {
+  for (size_t i = 1; i <= 4; ++i) {
+    if (p->pos + i >= len || !sl_json_is_hex(json[p->pos + i])) {
+      return false;
+    }
+  }
+  p->pos += 4;
+  return true;
+}
+
+static inline bool sl_json_parse_advance(
+    struct sl_json_parser p[restrict static 1],
+    size_t len,
+    const char json[const restrict static len]
 ) {
   enum sl_json_parse_state init_state = p->state;
 
@@ -55,15 +85,24 @@ static inline bool sl_json_parse_step(
         } break;
         case 't': {
           p->value_begin = p->pos;
-          p->state       = sl_json_lit_true_r;
+          if (sl_json_consume_literal(p, len, json, "true")) {
+            p->state = sl_json_after_value;
+            p->event = sl_json_value_lit_true;
+          }
         } break;
         case 'f': {
           p->value_begin = p->pos;
-          p->state       = sl_json_lit_false_a;
+          if (sl_json_consume_literal(p, len, json, "false")) {
+            p->state = sl_json_after_value;
+            p->event = sl_json_value_lit_false;
+          }
         } break;
         case 'n': {
           p->value_begin = p->pos;
-          p->state       = sl_json_lit_null_u;
+          if (sl_json_consume_literal(p, len, json, "null")) {
+            p->state = sl_json_after_value;
+            p->event = sl_json_value_lit_null;
+          }
         } break;
         case '-': {
           p->value_begin = p->pos;
@@ -170,31 +209,12 @@ static inline bool sl_json_parse_step(
           p->state = sl_json_string_body;
         } break;
         case 'u': {
-          p->state = sl_json_string_u1;
+          if (sl_json_consume_hex_escape(p, len, json)) {
+            p->state = sl_json_string_body;
+          }
         } break;
         default: {
         } break;
-      }
-    } break;
-
-    case sl_json_string_u1: {
-      if (sl_json_is_hex(ch)) {
-        p->state = sl_json_string_u2;
-      }
-    } break;
-    case sl_json_string_u2: {
-      if (sl_json_is_hex(ch)) {
-        p->state = sl_json_string_u3;
-      }
-    } break;
-    case sl_json_string_u3: {
-      if (sl_json_is_hex(ch)) {
-        p->state = sl_json_string_u4;
-      }
-    } break;
-    case sl_json_string_u4: {
-      if (sl_json_is_hex(ch)) {
-        p->state = sl_json_string_body;
       }
     } break;
 
@@ -278,62 +298,6 @@ static inline bool sl_json_parse_step(
       }
     } break;
 
-    case sl_json_lit_true_r: {
-      if (ch == 'r') {
-        p->state = sl_json_lit_true_u;
-      }
-    } break;
-    case sl_json_lit_true_u: {
-      if (ch == 'u') {
-        p->state = sl_json_lit_true_e;
-      }
-    } break;
-    case sl_json_lit_true_e: {
-      if (ch == 'e') {
-        p->state = sl_json_after_value;
-        p->event = sl_json_value_lit_true;
-      }
-    } break;
-
-    case sl_json_lit_false_a: {
-      if (ch == 'a') {
-        p->state = sl_json_lit_false_l;
-      }
-    } break;
-    case sl_json_lit_false_l: {
-      if (ch == 'l') {
-        p->state = sl_json_lit_false_s;
-      }
-    } break;
-    case sl_json_lit_false_s: {
-      if (ch == 's') {
-        p->state = sl_json_lit_false_e;
-      }
-    } break;
-    case sl_json_lit_false_e: {
-      if (ch == 'e') {
-        p->state = sl_json_after_value;
-        p->event = sl_json_value_lit_false;
-      }
-    } break;
-
-    case sl_json_lit_null_u: {
-      if (ch == 'u') {
-        p->state = sl_json_lit_null_l1;
-      }
-    } break;
-    case sl_json_lit_null_l1: {
-      if (ch == 'l') {
-        p->state = sl_json_lit_null_l2;
-      }
-    } break;
-    case sl_json_lit_null_l2: {
-      if (ch == 'l') {
-        p->state = sl_json_after_value;
-        p->event = sl_json_value_lit_null;
-      }
-    } break;
-
     case sl_json_after_value: {
       if (sl_json_is_ws(ch)) {
         p->state = sl_json_after_value;
@@ -373,7 +337,7 @@ static inline bool sl_json_parse_step(
 size_t sl_json_count_nodes(size_t len, const char json[const static len]) {
   struct sl_json_parser p = {.state = sl_json_element};
   size_t count            = 0;
-  while (sl_json_parse_step(&p, len, json)) {
+  while (sl_json_parse_advance(&p, len, json)) {
     switch (p.event) {
       case sl_json_NO_EVENT:
       case sl_json_end_object:
@@ -423,7 +387,7 @@ bool sl_json_read(
   size_t reader_depth     = 0;
   size_t emit_index       = 0;
 
-  while (sl_json_parse_step(&p, len, json)) {
+  while (sl_json_parse_advance(&p, len, json)) {
     switch (p.event) {
       case sl_json_NO_EVENT: {
       } break;
@@ -431,6 +395,8 @@ bool sl_json_read(
       case sl_json_end_object:
       case sl_json_end_array: {
         --reader_depth;
+        sl_json_nodes_get(&doc->nodes, container_at[reader_depth])->value_len
+            = p.pos - sl_json_nodes_get(&doc->nodes, container_at[reader_depth])->value_pos;
       } break;
 
       case sl_json_begin_object:
@@ -453,6 +419,7 @@ bool sl_json_read(
         struct sl_json_node node = {
             .type         = event_type[p.event],
             .value_pos    = p.value_begin,
+            .value_len    = p.pos - p.value_begin,
             .next_sibling = SIZE_MAX,
             .num_children = 0,
         };
@@ -535,114 +502,60 @@ bool sl_json_get_str(
     return false;
   }
 
-  enum sl_json_str_state {
-    normal,
-    escape,
-    unicode_1,
-    unicode_2,
-    unicode_3,
-    unicode_4,
-    done,
-    error,
-  };
-  enum sl_json_str_state state = normal;
+  // value_pos points at the opening '"', value_len covers both quotes
+  const char* src     = json + node->value_pos + 1;
+  const char* src_end = json + node->value_pos + node->value_len - 1;
+  size_t i_out        = 0;
 
-  // value_pos points at the opening '"'; start decoding after it
-  const char* pos = json + node->value_pos + 1;
-  char hex_buf[5] = {0};
-  size_t i_out    = 0;
-
-  while (*pos && i_out < out_len && state != done && state != error) {
-    char ch                        = *pos++;
-    enum sl_json_str_state current = state;
-    state                          = error;
-    switch (current) {
-      case normal: {
-        switch (ch) {
-          case '"': {
-            state = done;
-          } break;
-          case '\\': {
-            state = escape;
-          } break;
-          default: {
-            out[i_out++] = ch;
-            state        = normal;
-          } break;
+  while (src < src_end && i_out < out_len) {
+    char ch = *src++;
+    if (ch != '\\') {
+      out[i_out++] = ch;
+      continue;
+    }
+    assert(src < src_end);
+    switch ((ch = *src++)) {
+      case '"': {
+        out[i_out++] = '"';
+      } break;
+      case '\\': {
+        out[i_out++] = '\\';
+      } break;
+      case 'n': {
+        out[i_out++] = '\n';
+      } break;
+      case 'r': {
+        out[i_out++] = '\r';
+      } break;
+      case 't': {
+        out[i_out++] = '\t';
+      } break;
+      case 'b': {
+        out[i_out++] = '\b';
+      } break;
+      case 'f': {
+        out[i_out++] = '\f';
+      } break;
+      case 'u': {
+        if (src + 4 > src_end) {
+          return false;
         }
+        char hex_buf[5] = {src[0], src[1], src[2], src[3], 0};
+        out[i_out++]    = (char)strtoul(hex_buf, nullptr, 16);
+        src += 4;
       } break;
-      case escape: {
-        switch (ch) {
-          case '"': {
-            out[i_out++] = '"';
-            state        = normal;
-          } break;
-          case '\\': {
-            out[i_out++] = '\\';
-            state        = normal;
-          } break;
-          case 'n': {
-            out[i_out++] = '\n';
-            state        = normal;
-          } break;
-          case 'r': {
-            out[i_out++] = '\r';
-            state        = normal;
-          } break;
-          case 't': {
-            out[i_out++] = '\t';
-            state        = normal;
-          } break;
-          case 'b': {
-            out[i_out++] = '\b';
-            state        = normal;
-          } break;
-          case 'f': {
-            out[i_out++] = '\f';
-            state        = normal;
-          } break;
-          case 'u': {
-            state = unicode_1;
-          } break;
-          default: {
-          } break;
-        }
-      } break;
-      case unicode_1: {
-        if (sl_json_is_hex(ch)) {
-          hex_buf[0] = ch;
-          state      = unicode_2;
-        }
-      } break;
-      case unicode_2: {
-        if (sl_json_is_hex(ch)) {
-          hex_buf[1] = ch;
-          state      = unicode_3;
-        }
-      } break;
-      case unicode_3: {
-        if (sl_json_is_hex(ch)) {
-          hex_buf[2] = ch;
-          state      = unicode_4;
-        }
-      } break;
-      case unicode_4: {
-        if (sl_json_is_hex(ch)) {
-          hex_buf[3]   = ch;
-          out[i_out++] = (char)strtoul(hex_buf, nullptr, 16);
-          state        = normal;
-        }
-      } break;
-      case done:
-      case error: {
-      } break;
+      default: {
+        __builtin_unreachable();
+      }
     }
   }
 
-  if (i_out >= out_len || state != done) {
+  if (i_out >= out_len) {
     return false;
   }
   out[i_out] = 0;
+
+  assert(src == src_end);
   return true;
 }
 

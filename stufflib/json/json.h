@@ -27,6 +27,7 @@ struct sl_json_node {
   size_t key_pos;       // byte offset of first char inside key quotes (0 if no key)
   size_t key_len;       // raw byte length of key between quotes (0 if no key)
   size_t value_pos;     // byte offset of value start in JSON string
+  size_t value_len;     // byte length of value in JSON string
   size_t next_sibling;  // absolute index of next sibling (SIZE_MAX = none)
   size_t num_children;  // number of direct children (0 for leaves and empty containers)
 };
@@ -43,10 +44,6 @@ enum sl_json_parse_state {
   // value: string
   sl_json_string_body,
   sl_json_string_escape,
-  sl_json_string_u1,
-  sl_json_string_u2,
-  sl_json_string_u3,
-  sl_json_string_u4,
   // value: number
   sl_json_number_minus,
   sl_json_number_zero,
@@ -56,19 +53,6 @@ enum sl_json_parse_state {
   sl_json_number_exp_sign,
   sl_json_number_exp_first,
   sl_json_number_exp_digits,
-  // value: literal true
-  sl_json_lit_true_r,
-  sl_json_lit_true_u,
-  sl_json_lit_true_e,
-  // value: literal false
-  sl_json_lit_false_a,
-  sl_json_lit_false_l,
-  sl_json_lit_false_s,
-  sl_json_lit_false_e,
-  // value: literal null
-  sl_json_lit_null_u,
-  sl_json_lit_null_l1,
-  sl_json_lit_null_l2,
   // intermediate tokens
   sl_json_member,
   sl_json_colon,
@@ -100,13 +84,13 @@ struct sl_json_parser {
   enum sl_json_parse_state state;
   enum sl_json_container stack[SL_JSON_PARSE_MAX_DEPTH];
   enum sl_json_parse_event event;
-  bool string_is_key;
   size_t pos;
   size_t depth;
   size_t value_begin;
   size_t string_begin;
   size_t pending_key_pos;
   size_t pending_key_len;
+  bool string_is_key;
   bool has_pending_key;
 };
 

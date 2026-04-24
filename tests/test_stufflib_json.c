@@ -8,8 +8,6 @@
 #define SL_JSON_VALID(s)   SL_ASSERT_TRUE(sl_json_is_valid(strlen(s), s))
 #define SL_JSON_INVALID(s) SL_ASSERT_FALSE(sl_json_is_valid(strlen(s), s))
 
-// sl_json_is_valid: valid inputs
-
 SL_TEST(test_parse_null) {
   (void)ctx;
   SL_JSON_VALID("null");
@@ -143,8 +141,6 @@ SL_TEST(test_parse_whitespace_around_value) {
   return true;
 }
 
-// sl_json_is_valid: invalid inputs
-
 SL_TEST(test_parse_reject_empty) {
   (void)ctx;
   SL_JSON_INVALID("");
@@ -224,8 +220,6 @@ SL_TEST(test_parse_reject_control_char_in_string) {
   SL_JSON_INVALID("\"\t\"");
   return true;
 }
-
-// sl_json_is_str / sl_json_is_int / sl_json_get_str / sl_json_get_int
 
 #define SL_JSON_SETUP(json_literal)        \
   const char* json       = (json_literal); \
@@ -381,8 +375,6 @@ SL_TEST(test_json_get_int_not_found) {
   return true;
 }
 
-// sl_json_count_nodes
-
 SL_TEST(test_json_count_invalid) {
   (void)ctx;
   SL_ASSERT_EQ_LL(sl_json_count_nodes(strlen(""), ""), 0);
@@ -414,8 +406,6 @@ SL_TEST(test_json_count_containers) {
   );
   return true;
 }
-
-// sl_json_read
 
 SL_TEST(test_read_invalid) {
   struct sl_json_doc doc = {0};
@@ -626,6 +616,70 @@ SL_TEST(test_read_value_pos) {
   SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 3)->value_pos, 11);  // false
   SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 4)->value_pos, 17);  // 42
   SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 5)->value_pos, 20);  // "hi"
+
+  sl_json_doc_destroy(&doc);
+  return true;
+}
+
+SL_TEST(test_json_get_int_negative) {
+  SL_JSON_SETUP("{\"n\":-42}");
+  long long val = 0;
+  SL_ASSERT_TRUE(sl_json_get_int(&doc, json, "n", &val));
+  SL_ASSERT_EQ_LL(val, -42);
+  SL_JSON_TEARDOWN();
+  return true;
+}
+
+SL_TEST(test_json_get_int_zero) {
+  SL_JSON_SETUP("{\"n\":0}");
+  long long val = -1;
+  SL_ASSERT_TRUE(sl_json_get_int(&doc, json, "n", &val));
+  SL_ASSERT_EQ_LL(val, 0);
+  SL_JSON_TEARDOWN();
+  return true;
+}
+
+SL_TEST(test_json_get_str_buffer_too_small) {
+  SL_JSON_SETUP("{\"key\":\"hello\"}");
+  char val[3];
+  SL_ASSERT_FALSE(sl_json_get_str(&doc, json, "key", sizeof(val), val));
+  SL_JSON_TEARDOWN();
+  return true;
+}
+
+SL_TEST(test_json_get_str_exact_fit) {
+  SL_JSON_SETUP("{\"key\":\"hi\"}");
+  char val[3];  // 'h','i','\0'
+  SL_ASSERT_TRUE(sl_json_get_str(&doc, json, "key", sizeof(val), val));
+  SL_ASSERT_EQ_STR(val, "hi");
+  SL_JSON_TEARDOWN();
+  return true;
+}
+
+SL_TEST(test_json_get_str_empty) {
+  SL_JSON_SETUP("{\"key\":\"\"}");
+  char val[8];
+  SL_ASSERT_TRUE(sl_json_get_str(&doc, json, "key", sizeof(val), val));
+  SL_ASSERT_EQ_STR(val, "");
+  SL_JSON_TEARDOWN();
+  return true;
+}
+
+SL_TEST(test_read_value_len) {
+  // [null,true,false,42,"hi",{},[1]]
+  //  0    5    10    16  19  24 27
+  const char* json       = "[null,true,false,42,\"hi\",{},[1]]";
+  struct sl_json_doc doc = {0};
+  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(json), json, &doc));
+
+  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 0)->value_len, strlen(json));  // outer array
+  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 1)->value_len, 4);             // null
+  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 2)->value_len, 4);             // true
+  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 3)->value_len, 5);             // false
+  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 4)->value_len, 2);             // 42
+  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 5)->value_len, 4);             // "hi"
+  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 6)->value_len, 2);             // {}
+  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 7)->value_len, 3);             // [1]
 
   sl_json_doc_destroy(&doc);
   return true;
