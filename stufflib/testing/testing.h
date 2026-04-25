@@ -64,14 +64,15 @@ static inline int sl_testing_run(struct sl_context ctx[static const 1]) {
   int n_failures = 0;
   for (struct sl_testing_test* test = sl_testing_tests; test != nullptr; test = test->next) {
     fprintf(stderr, "%s:%s: ", test->file, test->name);
-    if (test->func(ctx)) {
-      fprintf(stderr, SL_ANSI_COLOR(SL_ANSI_GREEN, " PASS\n"));
-    } else if (sl_context_error_occurred(ctx)) {
+    bool passed = test->func(ctx);
+    if (sl_context_error_occurred(ctx)) {
       fprintf(stderr, SL_ANSI_COLOR(SL_ANSI_RED, " ERROR\n"));
       sl_context_unwind_errors(ctx, stderr);
       ++n_failures;
+    } else if (passed) {
+      fprintf(stderr, SL_ANSI_COLOR(SL_ANSI_GREEN, " PASSED\n"));
     } else {
-      fprintf(stderr, SL_ANSI_COLOR(SL_ANSI_RED, " FAIL\n"));
+      fprintf(stderr, SL_ANSI_COLOR(SL_ANSI_RED, " FAILED\n"));
       ++n_failures;
     }
   }
