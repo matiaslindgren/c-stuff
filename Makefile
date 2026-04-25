@@ -232,7 +232,7 @@ integration_test: $(RUN_INTEGRATION_TESTS)
 $(RUN_INTEGRATION_TESTS): integration_test_%: ./tests/integration/test_%_tool.bash $(BUILD_DIR)/tools/%
 	$(TIMEOUT_CMD) $^
 
--include $(wildcard DEPEND_PATHS)
+-include $(wildcard $(DEPEND_PATHS))
 
 $(OBJECT_PATHS): $(BUILD_DIR)/%.o: %.c | $(BUILD_DIRS) $(COMPILE_COMMANDS_DIR)
 	$(CC) $(CFLAGS) $(INCLUDES) -MMD -MP -MF $(subst .o,.d,$@) -MJ $(COMPILE_COMMANDS_DIR)/$(subst /,-,$@).json -c -o $@ $<
