@@ -15,21 +15,26 @@ SL_TEST(test_log_json_format) {
   sl_logging_writef(mem, "info", "myfile.c", 42, "hello %s", "world");
   fclose(mem);
 
-  struct sl_json_doc doc = {0};
-  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(buf), buf, &doc));
-
+  struct sl_json_result r = {0};
   char val[SL_LOGGING_MAX_LENGTH];
   long long line = 0;
-  SL_ASSERT_TRUE(sl_json_get_str(&doc, buf, "level", sizeof(val), val));
+
+  SL_ASSERT_TRUE(sl_json_find(ctx, size, buf, strlen(".level"), ".level", &r));
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, buf, sizeof(val), val));
   SL_ASSERT_EQ_STR(val, "info");
-  SL_ASSERT_TRUE(sl_json_get_str(&doc, buf, "file", sizeof(val), val));
+
+  SL_ASSERT_TRUE(sl_json_find(ctx, size, buf, strlen(".file"), ".file", &r));
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, buf, sizeof(val), val));
   SL_ASSERT_EQ_STR(val, "myfile.c");
-  SL_ASSERT_TRUE(sl_json_get_int(&doc, buf, "line", &line));
+
+  SL_ASSERT_TRUE(sl_json_find(ctx, size, buf, strlen(".line"), ".line", &r));
+  SL_ASSERT_TRUE(sl_json_get_int(&r, buf, &line));
   SL_ASSERT_EQ_LL(line, 42);
-  SL_ASSERT_TRUE(sl_json_get_str(&doc, buf, "msg", sizeof(val), val));
+
+  SL_ASSERT_TRUE(sl_json_find(ctx, size, buf, strlen(".msg"), ".msg", &r));
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, buf, sizeof(val), val));
   SL_ASSERT_EQ_STR(val, "hello world");
 
-  sl_json_doc_destroy(&doc);
   free(buf);
   return true;
 }
@@ -42,12 +47,11 @@ SL_TEST(test_log_escape_quote) {
   sl_logging_writef(mem, "info", "f.c", 1, "%c", '"');
   fclose(mem);
 
-  struct sl_json_doc doc = {0};
-  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(buf), buf, &doc));
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, size, buf, strlen(".msg"), ".msg", &r));
   char msg[64];
-  SL_ASSERT_TRUE(sl_json_get_str(&doc, buf, "msg", sizeof(msg), msg));
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, buf, sizeof(msg), msg));
   SL_ASSERT_EQ_STR(msg, "\"");
-  sl_json_doc_destroy(&doc);
   free(buf);
   return true;
 }
@@ -60,12 +64,11 @@ SL_TEST(test_log_escape_backslash) {
   sl_logging_writef(mem, "info", "f.c", 1, "%c", '\\');
   fclose(mem);
 
-  struct sl_json_doc doc = {0};
-  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(buf), buf, &doc));
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, size, buf, strlen(".msg"), ".msg", &r));
   char msg[64];
-  SL_ASSERT_TRUE(sl_json_get_str(&doc, buf, "msg", sizeof(msg), msg));
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, buf, sizeof(msg), msg));
   SL_ASSERT_EQ_STR(msg, "\\");
-  sl_json_doc_destroy(&doc);
   free(buf);
   return true;
 }
@@ -78,12 +81,11 @@ SL_TEST(test_log_escape_newline) {
   sl_logging_writef(mem, "info", "f.c", 1, "%c", '\n');
   fclose(mem);
 
-  struct sl_json_doc doc = {0};
-  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(buf), buf, &doc));
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, size, buf, strlen(".msg"), ".msg", &r));
   char msg[64];
-  SL_ASSERT_TRUE(sl_json_get_str(&doc, buf, "msg", sizeof(msg), msg));
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, buf, sizeof(msg), msg));
   SL_ASSERT_EQ_STR(msg, "\n");
-  sl_json_doc_destroy(&doc);
   free(buf);
   return true;
 }
@@ -96,12 +98,11 @@ SL_TEST(test_log_escape_carriage_return) {
   sl_logging_writef(mem, "info", "f.c", 1, "%c", '\r');
   fclose(mem);
 
-  struct sl_json_doc doc = {0};
-  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(buf), buf, &doc));
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, size, buf, strlen(".msg"), ".msg", &r));
   char msg[64];
-  SL_ASSERT_TRUE(sl_json_get_str(&doc, buf, "msg", sizeof(msg), msg));
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, buf, sizeof(msg), msg));
   SL_ASSERT_EQ_STR(msg, "\r");
-  sl_json_doc_destroy(&doc);
   free(buf);
   return true;
 }
@@ -114,12 +115,11 @@ SL_TEST(test_log_escape_tab) {
   sl_logging_writef(mem, "info", "f.c", 1, "%c", '\t');
   fclose(mem);
 
-  struct sl_json_doc doc = {0};
-  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(buf), buf, &doc));
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, size, buf, strlen(".msg"), ".msg", &r));
   char msg[64];
-  SL_ASSERT_TRUE(sl_json_get_str(&doc, buf, "msg", sizeof(msg), msg));
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, buf, sizeof(msg), msg));
   SL_ASSERT_EQ_STR(msg, "\t");
-  sl_json_doc_destroy(&doc);
   free(buf);
   return true;
 }
@@ -132,12 +132,11 @@ SL_TEST(test_log_escape_backspace) {
   sl_logging_writef(mem, "info", "f.c", 1, "%c", '\b');
   fclose(mem);
 
-  struct sl_json_doc doc = {0};
-  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(buf), buf, &doc));
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, size, buf, strlen(".msg"), ".msg", &r));
   char msg[64];
-  SL_ASSERT_TRUE(sl_json_get_str(&doc, buf, "msg", sizeof(msg), msg));
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, buf, sizeof(msg), msg));
   SL_ASSERT_EQ_STR(msg, "\b");
-  sl_json_doc_destroy(&doc);
   free(buf);
   return true;
 }
@@ -150,12 +149,11 @@ SL_TEST(test_log_escape_form_feed) {
   sl_logging_writef(mem, "info", "f.c", 1, "%c", '\f');
   fclose(mem);
 
-  struct sl_json_doc doc = {0};
-  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(buf), buf, &doc));
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, size, buf, strlen(".msg"), ".msg", &r));
   char msg[64];
-  SL_ASSERT_TRUE(sl_json_get_str(&doc, buf, "msg", sizeof(msg), msg));
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, buf, sizeof(msg), msg));
   SL_ASSERT_EQ_STR(msg, "\f");
-  sl_json_doc_destroy(&doc);
   free(buf);
   return true;
 }
@@ -171,13 +169,12 @@ SL_TEST(test_log_escape_control) {
     sl_logging_writef(mem, "info", "f.c", 1, "%c", (char)controls[i]);
     fclose(mem);
 
-    struct sl_json_doc doc = {0};
-    SL_ASSERT_TRUE(sl_json_read(ctx, strlen(buf), buf, &doc));
+    struct sl_json_result r = {0};
+    SL_ASSERT_TRUE(sl_json_find(ctx, size, buf, strlen(".msg"), ".msg", &r));
     char msg[64];
-    SL_ASSERT_TRUE(sl_json_get_str(&doc, buf, "msg", sizeof(msg), msg));
+    SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, buf, sizeof(msg), msg));
     SL_ASSERT_EQ_LL((unsigned char)msg[0], controls[i]);
     SL_ASSERT_EQ_LL(msg[1], '\0');
-    sl_json_doc_destroy(&doc);
     free(buf);
   }
   return true;
