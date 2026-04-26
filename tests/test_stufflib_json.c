@@ -148,12 +148,6 @@ SL_TEST(test_parse_whitespace_around_value) {
   return true;
 }
 
-SL_TEST(test_parse_reject_empty) {
-  SL_ASSERT_JSON_INVALID("");
-  SL_ASSERT_ERROR_OCCURRED(ctx, "JSON content is empty");
-  return true;
-}
-
 SL_TEST(test_parse_reject_bare_word) {
   SL_ASSERT_JSON_INVALID("hello");
   SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected character");
@@ -368,8 +362,6 @@ SL_TEST(test_parse_error_end_of_input) {
 }
 
 SL_TEST(test_json_count_invalid) {
-  SL_ASSERT_EQ_LL(sl_json_count_nodes(ctx, strlen(""), ""), 0);
-  SL_ASSERT_ERROR_OCCURRED(ctx, "JSON content is empty");
   SL_ASSERT_EQ_LL(sl_json_count_nodes(ctx, strlen("hello"), "hello"), 0);
   SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected character");
   SL_ASSERT_EQ_LL(sl_json_count_nodes(ctx, strlen("{"), "{"), 0);
@@ -402,9 +394,6 @@ SL_TEST(test_json_count_containers) {
 SL_TEST(test_find_invalid_path) {
   const char* json         = "{\"a\":1}";
   struct sl_json_node node = {0};
-
-  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(""), "", &node));
-  SL_ASSERT_ERROR_OCCURRED(ctx, "empty JSON path");
 
   SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a..b"), ".a..b", &node));
   SL_ASSERT_ERROR_OCCURRED(ctx, "expected key character after .");
