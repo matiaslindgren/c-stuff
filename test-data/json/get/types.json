@@ -1,0 +1,13 @@
+{
+  "null_val": null,
+  "true_val": true,
+  "false_val": false,
+  "neg": -42,
+  "float": 1.5,
+  "exp": 2e3,
+  "empty_obj": {},
+  "empty_arr": [],
+  "escaped": "line1\nline2",
+  "unicode": "\u0041BC",
+  "nested": {"x": 0, "arr": [10, 20]}
+}

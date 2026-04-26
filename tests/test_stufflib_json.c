@@ -5,373 +5,244 @@
 #include <stufflib/json/json.h>
 #include <stufflib/testing/testing.h>
 
-#define SL_JSON_VALID(s)   SL_ASSERT_TRUE(sl_json_is_valid(strlen(s), s))
-#define SL_JSON_INVALID(s) SL_ASSERT_FALSE(sl_json_is_valid(strlen(s), s))
+#define SL_ASSERT_JSON_VALID(s)   SL_ASSERT_TRUE(sl_json_is_valid(strlen(s), s))
+#define SL_ASSERT_JSON_INVALID(s) SL_ASSERT_FALSE(sl_json_is_valid(strlen(s), s))
 
 SL_TEST(test_parse_null) {
   (void)ctx;
-  SL_JSON_VALID("null");
+  SL_ASSERT_JSON_VALID("null");
   return true;
 }
 
 SL_TEST(test_parse_true) {
   (void)ctx;
-  SL_JSON_VALID("true");
+  SL_ASSERT_JSON_VALID("true");
   return true;
 }
 
 SL_TEST(test_parse_false) {
   (void)ctx;
-  SL_JSON_VALID("false");
+  SL_ASSERT_JSON_VALID("false");
   return true;
 }
 
 SL_TEST(test_parse_integer) {
   (void)ctx;
-  SL_JSON_VALID("0");
-  SL_JSON_VALID("1");
-  SL_JSON_VALID("42");
-  SL_JSON_VALID("-0");
-  SL_JSON_VALID("-1");
-  SL_JSON_VALID("-123");
+  SL_ASSERT_JSON_VALID("0");
+  SL_ASSERT_JSON_VALID("1");
+  SL_ASSERT_JSON_VALID("42");
+  SL_ASSERT_JSON_VALID("-0");
+  SL_ASSERT_JSON_VALID("-1");
+  SL_ASSERT_JSON_VALID("-123");
+  return true;
+}
+
+SL_TEST(test_parse_large_integer) {
+  (void)ctx;
+  SL_ASSERT_JSON_VALID("2147483647");
+  SL_ASSERT_JSON_VALID("-2147483648");
+  SL_ASSERT_JSON_VALID("9223372036854775807");
+  SL_ASSERT_JSON_VALID("-9223372036854775808");
   return true;
 }
 
 SL_TEST(test_parse_fraction) {
   (void)ctx;
-  SL_JSON_VALID("0.0");
-  SL_JSON_VALID("3.14");
-  SL_JSON_VALID("-0.5");
+  SL_ASSERT_JSON_VALID("0.0");
+  SL_ASSERT_JSON_VALID("3.14");
+  SL_ASSERT_JSON_VALID("-0.5");
   return true;
 }
 
 SL_TEST(test_parse_exponent) {
   (void)ctx;
-  SL_JSON_VALID("1e10");
-  SL_JSON_VALID("1E10");
-  SL_JSON_VALID("1e+10");
-  SL_JSON_VALID("1e-10");
-  SL_JSON_VALID("2.5e3");
-  SL_JSON_VALID("-3.14E+2");
+  SL_ASSERT_JSON_VALID("1e10");
+  SL_ASSERT_JSON_VALID("1E10");
+  SL_ASSERT_JSON_VALID("1e+10");
+  SL_ASSERT_JSON_VALID("1e-10");
+  SL_ASSERT_JSON_VALID("2.5e3");
+  SL_ASSERT_JSON_VALID("-3.14E+2");
   return true;
 }
 
 SL_TEST(test_parse_string_empty) {
   (void)ctx;
-  SL_JSON_VALID("\"\"");
+  SL_ASSERT_JSON_VALID("\"\"");
   return true;
 }
 
 SL_TEST(test_parse_string_simple) {
   (void)ctx;
-  SL_JSON_VALID("\"hello\"");
+  SL_ASSERT_JSON_VALID("\"hello\"");
+  SL_ASSERT_JSON_VALID("\"123\"");
+  SL_ASSERT_JSON_VALID("\" \"");
+  SL_ASSERT_JSON_VALID("\"ö\"");
+  return true;
+}
+
+SL_TEST(test_parse_string_long) {
+  (void)ctx;
+  SL_ASSERT_JSON_VALID(
+      "\"Vesi (kemiallinen kaava H2O, kemiallisena yhdisteenä voidaan käyttää myös systemaattisia "
+      "nimiä; oksidaani, divetymonoksidi tai divetyoksidi) on huoneenlämmössä nesteenä esiintyvä "
+      "vedyn ja hapen muodostama epäorgaaninen kemiallinen yhdiste ja vedyn palamistuote."
+      "水（みず、（英: water、他言語呼称は「他言語での呼称」の項を参照）とは、化学式 H2O "
+      "で表される、水素と酸素の化合物である。日本語においては特に湯と対比して用いられ、液体ではある"
+      "が温度が低く、かつ凝固して氷にはなっていない物を言う。また、液状の物全般を指す。\""
+  );
   return true;
 }
 
 SL_TEST(test_parse_string_escapes) {
   (void)ctx;
-  SL_JSON_VALID("\"\\\"\"");
-  SL_JSON_VALID("\"\\\\\"");
-  SL_JSON_VALID("\"\\/\"");
-  SL_JSON_VALID("\"\\b\"");
-  SL_JSON_VALID("\"\\f\"");
-  SL_JSON_VALID("\"\\n\"");
-  SL_JSON_VALID("\"\\r\"");
-  SL_JSON_VALID("\"\\t\"");
-  SL_JSON_VALID("\"\\u0041\"");
-  SL_JSON_VALID("\"\\uFFFF\"");
+  SL_ASSERT_JSON_VALID("\"\\\"\"");
+  SL_ASSERT_JSON_VALID("\"\\\\\"");
+  SL_ASSERT_JSON_VALID("\"\\/\"");
+  SL_ASSERT_JSON_VALID("\"\\b\"");
+  SL_ASSERT_JSON_VALID("\"\\f\"");
+  SL_ASSERT_JSON_VALID("\"\\n\"");
+  SL_ASSERT_JSON_VALID("\"\\r\"");
+  SL_ASSERT_JSON_VALID("\"\\t\"");
+  SL_ASSERT_JSON_VALID("\"\\u0041\"");
+  SL_ASSERT_JSON_VALID("\"\\uFFFF\"");
   return true;
 }
 
 SL_TEST(test_parse_empty_object) {
   (void)ctx;
-  SL_JSON_VALID("{}");
-  SL_JSON_VALID("{ }");
-  SL_JSON_VALID("{  \n  }");
+  SL_ASSERT_JSON_VALID("{}");
+  SL_ASSERT_JSON_VALID("{ }");
+  SL_ASSERT_JSON_VALID("{  \n  }");
   return true;
 }
 
 SL_TEST(test_parse_object_one_member) {
   (void)ctx;
-  SL_JSON_VALID("{\"a\":1}");
-  SL_JSON_VALID("{ \"a\" : 1 }");
+  SL_ASSERT_JSON_VALID("{\"a\":1}");
+  SL_ASSERT_JSON_VALID("{ \"a\" : 1 }");
   return true;
 }
 
 SL_TEST(test_parse_object_multiple_members) {
   (void)ctx;
-  SL_JSON_VALID("{\"a\":1,\"b\":2,\"c\":3}");
-  SL_JSON_VALID("{ \"a\" : 1 , \"b\" : 2 }");
+  SL_ASSERT_JSON_VALID("{\"a\":1,\"b\":2,\"c\":3}");
+  SL_ASSERT_JSON_VALID("{ \"a\" : 1 , \"b\" : 2 }");
   return true;
 }
 
 SL_TEST(test_parse_empty_array) {
   (void)ctx;
-  SL_JSON_VALID("[]");
-  SL_JSON_VALID("[ ]");
-  SL_JSON_VALID("[  \t  ]");
+  SL_ASSERT_JSON_VALID("[]");
+  SL_ASSERT_JSON_VALID("[ ]");
+  SL_ASSERT_JSON_VALID("[  \t  ]");
   return true;
 }
 
 SL_TEST(test_parse_array_elements) {
   (void)ctx;
-  SL_JSON_VALID("[1]");
-  SL_JSON_VALID("[1,2,3]");
-  SL_JSON_VALID("[ 1 , 2 , 3 ]");
-  SL_JSON_VALID("[\"a\",\"b\"]");
-  SL_JSON_VALID("[true,false,null]");
+  SL_ASSERT_JSON_VALID("[1]");
+  SL_ASSERT_JSON_VALID("[1,2,3]");
+  SL_ASSERT_JSON_VALID("[ 1 , 2 , 3 ]");
+  SL_ASSERT_JSON_VALID("[\"a\",\"b\"]");
+  SL_ASSERT_JSON_VALID("[true,false,null]");
   return true;
 }
 
 SL_TEST(test_parse_nested) {
   (void)ctx;
-  SL_JSON_VALID("{\"a\":{\"b\":1}}");
-  SL_JSON_VALID("{\"a\":[1,2]}");
-  SL_JSON_VALID("[[1],[2]]");
-  SL_JSON_VALID("{\"a\":{\"b\":{\"c\":true}}}");
-  SL_JSON_VALID("[{\"a\":1},{\"b\":2}]");
+  SL_ASSERT_JSON_VALID("{\"a\":{\"b\":1}}");
+  SL_ASSERT_JSON_VALID("{\"a\":[1,2]}");
+  SL_ASSERT_JSON_VALID("[[1],[2]]");
+  SL_ASSERT_JSON_VALID("{\"a\":{\"b\":{\"c\":true}}}");
+  SL_ASSERT_JSON_VALID("[{\"a\":1},{\"b\":2}]");
   return true;
 }
 
 SL_TEST(test_parse_whitespace_around_value) {
   (void)ctx;
-  SL_JSON_VALID("  null  ");
-  SL_JSON_VALID("\n\ttrue\r\n");
-  SL_JSON_VALID("  { \"key\" : \"val\" }  ");
+  SL_ASSERT_JSON_VALID("  null  ");
+  SL_ASSERT_JSON_VALID("\n\ttrue\r\n");
+  SL_ASSERT_JSON_VALID("  { \"key\" : \"val\" }  ");
   return true;
 }
 
 SL_TEST(test_parse_reject_empty) {
   (void)ctx;
-  SL_JSON_INVALID("");
+  SL_ASSERT_JSON_INVALID("");
   return true;
 }
 
 SL_TEST(test_parse_reject_bare_word) {
   (void)ctx;
-  SL_JSON_INVALID("hello");
-  SL_JSON_INVALID("nul");
-  SL_JSON_INVALID("tru");
-  SL_JSON_INVALID("fals");
+  SL_ASSERT_JSON_INVALID("hello");
+  SL_ASSERT_JSON_INVALID("nul");
+  SL_ASSERT_JSON_INVALID("tru");
+  SL_ASSERT_JSON_INVALID("fals");
   return true;
 }
 
 SL_TEST(test_parse_reject_trailing_content) {
   (void)ctx;
-  SL_JSON_INVALID("true false");
-  SL_JSON_INVALID("1 2");
-  SL_JSON_INVALID("{}{}");
+  SL_ASSERT_JSON_INVALID("true false");
+  SL_ASSERT_JSON_INVALID("1 2");
+  SL_ASSERT_JSON_INVALID("{}{}");
   return true;
 }
 
 SL_TEST(test_parse_reject_leading_zero) {
   (void)ctx;
-  SL_JSON_INVALID("01");
-  SL_JSON_INVALID("00");
-  SL_JSON_INVALID("-01");
+  SL_ASSERT_JSON_INVALID("01");
+  SL_ASSERT_JSON_INVALID("00");
+  SL_ASSERT_JSON_INVALID("-01");
   return true;
 }
 
 SL_TEST(test_parse_reject_bad_number) {
   (void)ctx;
-  SL_JSON_INVALID("+1");
-  SL_JSON_INVALID(".5");
-  SL_JSON_INVALID("1.");
-  SL_JSON_INVALID("1e");
-  SL_JSON_INVALID("1e+");
-  SL_JSON_INVALID("-");
+  SL_ASSERT_JSON_INVALID("+1");
+  SL_ASSERT_JSON_INVALID(".5");
+  SL_ASSERT_JSON_INVALID("1.");
+  SL_ASSERT_JSON_INVALID("1e");
+  SL_ASSERT_JSON_INVALID("1e+");
+  SL_ASSERT_JSON_INVALID("-");
   return true;
 }
 
 SL_TEST(test_parse_reject_bad_string) {
   (void)ctx;
-  SL_JSON_INVALID("\"");
-  SL_JSON_INVALID("\"\\\"");
-  SL_JSON_INVALID("\"\\x\"");
-  SL_JSON_INVALID("\"\\u00G0\"");
-  SL_JSON_INVALID("\"\\u00\"");
+  SL_ASSERT_JSON_INVALID("\"");
+  SL_ASSERT_JSON_INVALID("\"\\\"");
+  SL_ASSERT_JSON_INVALID("\"\\x\"");
+  SL_ASSERT_JSON_INVALID("\"\\u00G0\"");
+  SL_ASSERT_JSON_INVALID("\"\\u00\"");
   return true;
 }
 
 SL_TEST(test_parse_reject_bad_object) {
   (void)ctx;
-  SL_JSON_INVALID("{");
-  SL_JSON_INVALID("{\"a\"}");
-  SL_JSON_INVALID("{\"a\":}");
-  SL_JSON_INVALID("{\"a\":1,}");
-  SL_JSON_INVALID("{:1}");
-  SL_JSON_INVALID("{1:2}");
+  SL_ASSERT_JSON_INVALID("{");
+  SL_ASSERT_JSON_INVALID("{\"a\"}");
+  SL_ASSERT_JSON_INVALID("{\"a\":}");
+  SL_ASSERT_JSON_INVALID("{\"a\":1,}");
+  SL_ASSERT_JSON_INVALID("{:1}");
+  SL_ASSERT_JSON_INVALID("{1:2}");
   return true;
 }
 
 SL_TEST(test_parse_reject_bad_array) {
   (void)ctx;
-  SL_JSON_INVALID("[");
-  SL_JSON_INVALID("[1,]");
-  SL_JSON_INVALID("[,1]");
-  SL_JSON_INVALID("[1,2,]");
+  SL_ASSERT_JSON_INVALID("[");
+  SL_ASSERT_JSON_INVALID("[1,]");
+  SL_ASSERT_JSON_INVALID("[,1]");
+  SL_ASSERT_JSON_INVALID("[1,2,]");
   return true;
 }
 
 SL_TEST(test_parse_reject_control_char_in_string) {
   (void)ctx;
-  SL_JSON_INVALID("\"\x01\"");
-  SL_JSON_INVALID("\"\n\"");
-  SL_JSON_INVALID("\"\t\"");
-  return true;
-}
-
-#define SL_JSON_SETUP(json_literal)        \
-  const char* json       = (json_literal); \
-  struct sl_json_doc doc = {0};            \
-  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(json), json, &doc))
-
-#define SL_JSON_TEARDOWN() sl_json_doc_destroy(&doc)
-
-SL_TEST(test_json_get_str) {
-  SL_JSON_SETUP("{\"key\":\"hello\"}");
-  char val[64];
-  SL_ASSERT_TRUE(sl_json_is_str(&doc, json, "key"));
-  SL_ASSERT_TRUE(sl_json_get_str(&doc, json, "key", sizeof(val), val));
-  SL_ASSERT_EQ_STR(val, "hello");
-  SL_JSON_TEARDOWN();
-  return true;
-}
-
-SL_TEST(test_json_get_str_escaped_quote) {
-  SL_JSON_SETUP("{\"key\":\"\\\"hello\\\"\"}");
-  char val[64];
-  SL_ASSERT_TRUE(sl_json_get_str(&doc, json, "key", sizeof(val), val));
-  SL_ASSERT_EQ_STR(val, "\"hello\"");
-  SL_JSON_TEARDOWN();
-  return true;
-}
-
-SL_TEST(test_json_get_str_escaped_backslash) {
-  SL_JSON_SETUP("{\"key\":\"\\\\\"}");
-  char val[64];
-  SL_ASSERT_TRUE(sl_json_get_str(&doc, json, "key", sizeof(val), val));
-  SL_ASSERT_EQ_STR(val, "\\");
-  SL_JSON_TEARDOWN();
-  return true;
-}
-
-SL_TEST(test_json_get_str_escaped_newline) {
-  SL_JSON_SETUP("{\"key\":\"\\n\"}");
-  char val[64];
-  SL_ASSERT_TRUE(sl_json_get_str(&doc, json, "key", sizeof(val), val));
-  SL_ASSERT_EQ_STR(val, "\n");
-  SL_JSON_TEARDOWN();
-  return true;
-}
-
-SL_TEST(test_json_get_str_escaped_carriage_return) {
-  SL_JSON_SETUP("{\"key\":\"\\r\"}");
-  char val[64];
-  SL_ASSERT_TRUE(sl_json_get_str(&doc, json, "key", sizeof(val), val));
-  SL_ASSERT_EQ_STR(val, "\r");
-  SL_JSON_TEARDOWN();
-  return true;
-}
-
-SL_TEST(test_json_get_str_escaped_tab) {
-  SL_JSON_SETUP("{\"key\":\"\\t\"}");
-  char val[64];
-  SL_ASSERT_TRUE(sl_json_get_str(&doc, json, "key", sizeof(val), val));
-  SL_ASSERT_EQ_STR(val, "\t");
-  SL_JSON_TEARDOWN();
-  return true;
-}
-
-SL_TEST(test_json_get_str_escaped_backspace) {
-  SL_JSON_SETUP("{\"key\":\"\\b\"}");
-  char val[64];
-  SL_ASSERT_TRUE(sl_json_get_str(&doc, json, "key", sizeof(val), val));
-  SL_ASSERT_EQ_STR(val, "\b");
-  SL_JSON_TEARDOWN();
-  return true;
-}
-
-SL_TEST(test_json_get_str_escaped_form_feed) {
-  SL_JSON_SETUP("{\"key\":\"\\f\"}");
-  char val[64];
-  SL_ASSERT_TRUE(sl_json_get_str(&doc, json, "key", sizeof(val), val));
-  SL_ASSERT_EQ_STR(val, "\f");
-  SL_JSON_TEARDOWN();
-  return true;
-}
-
-SL_TEST(test_json_get_str_escaped_unicode) {
-  SL_JSON_SETUP("{\"key\":\"\\u0001\"}");
-  char val[64];
-  SL_ASSERT_TRUE(sl_json_get_str(&doc, json, "key", sizeof(val), val));
-  SL_ASSERT_EQ_LL((unsigned char)val[0], 0x01);
-  SL_ASSERT_EQ_LL(val[1], '\0');
-  SL_JSON_TEARDOWN();
-  return true;
-}
-
-SL_TEST(test_json_get_str_middle_key) {
-  SL_JSON_SETUP("{\"a\":\"first\",\"b\":\"second\",\"c\":\"third\"}");
-  char val[64];
-  SL_ASSERT_TRUE(sl_json_get_str(&doc, json, "b", sizeof(val), val));
-  SL_ASSERT_EQ_STR(val, "second");
-  SL_JSON_TEARDOWN();
-  return true;
-}
-
-SL_TEST(test_json_get_str_last_key) {
-  SL_JSON_SETUP("{\"a\":\"first\",\"b\":\"second\",\"c\":\"third\"}");
-  char val[64];
-  SL_ASSERT_TRUE(sl_json_get_str(&doc, json, "c", sizeof(val), val));
-  SL_ASSERT_EQ_STR(val, "third");
-  SL_JSON_TEARDOWN();
-  return true;
-}
-
-SL_TEST(test_json_get_str_not_found) {
-  SL_JSON_SETUP("{\"key\":\"hello\"}");
-  char val[64];
-  SL_ASSERT_FALSE(sl_json_is_str(&doc, json, "other"));
-  SL_ASSERT_FALSE(sl_json_get_str(&doc, json, "other", sizeof(val), val));
-  SL_JSON_TEARDOWN();
-  return true;
-}
-
-SL_TEST(test_json_get_int) {
-  SL_JSON_SETUP("{\"line\":42}");
-  long long val = 0;
-  SL_ASSERT_TRUE(sl_json_is_int(&doc, json, "line"));
-  SL_ASSERT_TRUE(sl_json_get_int(&doc, json, "line", &val));
-  SL_ASSERT_EQ_LL(val, 42);
-  SL_JSON_TEARDOWN();
-  return true;
-}
-
-SL_TEST(test_json_get_int_middle_key) {
-  SL_JSON_SETUP("{\"a\":1,\"b\":2,\"c\":3}");
-  long long val = 0;
-  SL_ASSERT_TRUE(sl_json_get_int(&doc, json, "b", &val));
-  SL_ASSERT_EQ_LL(val, 2);
-  SL_JSON_TEARDOWN();
-  return true;
-}
-
-SL_TEST(test_json_get_int_last_key) {
-  SL_JSON_SETUP("{\"a\":1,\"b\":2,\"c\":3}");
-  long long val = 0;
-  SL_ASSERT_TRUE(sl_json_get_int(&doc, json, "c", &val));
-  SL_ASSERT_EQ_LL(val, 3);
-  SL_JSON_TEARDOWN();
-  return true;
-}
-
-SL_TEST(test_json_get_int_not_found) {
-  SL_JSON_SETUP("{\"line\":42}");
-  long long val = 0;
-  SL_ASSERT_FALSE(sl_json_is_int(&doc, json, "other"));
-  SL_ASSERT_FALSE(sl_json_get_int(&doc, json, "other", &val));
-  SL_JSON_TEARDOWN();
+  SL_ASSERT_JSON_INVALID("\"\x01\"");
+  SL_ASSERT_JSON_INVALID("\"\n\"");
+  SL_ASSERT_JSON_INVALID("\"\t\"");
   return true;
 }
 
@@ -407,281 +278,480 @@ SL_TEST(test_json_count_containers) {
   return true;
 }
 
-SL_TEST(test_read_invalid) {
-  struct sl_json_doc doc = {0};
-  SL_ASSERT_FALSE(sl_json_read(ctx, strlen(""), "", &doc));
-  sl_context_unwind_errors(ctx, stderr);
-  SL_ASSERT_FALSE(sl_json_read(ctx, strlen("{"), "{", &doc));
-  sl_context_unwind_errors(ctx, stderr);
+SL_TEST(test_find_invalid_path) {
+  const char* json        = "{\"a\":1}";
+  struct sl_json_result r = {0};
+  struct sl_error_msg err;
+
+  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(""), "", &r));
+  SL_ASSERT_EQ_LL(sl_error_depth(&ctx->errors), 1);
+  sl_error_pop(&ctx->errors, &err);
+  SL_ASSERT_EQ_STR(err.msg, "empty JSON path");
+
+  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a..b"), ".a..b", &r));
+  SL_ASSERT_EQ_LL(sl_error_depth(&ctx->errors), 1);
+  sl_error_pop(&ctx->errors, &err);
+  SL_ASSERT_STR_STARTS_WITH(err.msg, "expected key character after .");
+
+  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a[x]"), ".a[x]", &r));
+  SL_ASSERT_EQ_LL(sl_error_depth(&ctx->errors), 1);
+  sl_error_pop(&ctx->errors, &err);
+  SL_ASSERT_STR_STARTS_WITH(err.msg, "expected array index digit after '['");
+
+  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a[]"), ".a[]", &r));
+  SL_ASSERT_EQ_LL(sl_error_depth(&ctx->errors), 1);
+  sl_error_pop(&ctx->errors, &err);
+  SL_ASSERT_STR_STARTS_WITH(err.msg, "expected array index digit after '['");
+
   return true;
 }
 
-SL_TEST(test_read_null) {
-  const char* json       = "null";
-  struct sl_json_doc doc = {0};
-  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(json), json, &doc));
-  SL_ASSERT_EQ_LL(sl_json_nodes_size(&doc.nodes), 1);
-  struct sl_json_node* n = sl_json_nodes_get(&doc.nodes, 0);
-  SL_ASSERT_EQ_LL(n->type, sl_json_type_lit_null);
-  SL_ASSERT_EQ_LL(n->num_children, 0);
-  SL_ASSERT_TRUE(n->next_sibling == SIZE_MAX);
-  SL_ASSERT_EQ_LL(n->value_pos, 0);
-  sl_json_doc_destroy(&doc);
+SL_TEST(test_find_invalid_json) {
+  const char* json        = "{\"a\":";
+  struct sl_json_result r = {0};
+  struct sl_error_msg err;
+
+  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a"), ".a", &r));
+  SL_ASSERT_EQ_LL(sl_error_depth(&ctx->errors), 1);
+  sl_error_pop(&ctx->errors, &err);
+  SL_ASSERT_STR_STARTS_WITH(err.msg, "invalid JSON");
+
   return true;
 }
 
-SL_TEST(test_read_true) {
-  const char* json       = "true";
-  struct sl_json_doc doc = {0};
-  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(json), json, &doc));
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 0)->type, sl_json_type_lit_true);
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 0)->value_pos, 0);
-  sl_json_doc_destroy(&doc);
-  return true;
-}
-
-SL_TEST(test_read_number) {
-  const char* json       = "42";
-  struct sl_json_doc doc = {0};
-  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(json), json, &doc));
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 0)->type, sl_json_type_number);
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 0)->value_pos, 0);
-  sl_json_doc_destroy(&doc);
-  return true;
-}
-
-SL_TEST(test_read_string) {
-  const char* json       = "\"hello\"";
-  struct sl_json_doc doc = {0};
-  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(json), json, &doc));
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 0)->type, sl_json_type_string);
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 0)->value_pos, 0);
-  sl_json_doc_destroy(&doc);
-  return true;
-}
-
-SL_TEST(test_read_empty_object) {
-  const char* json       = "{}";
-  struct sl_json_doc doc = {0};
-  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(json), json, &doc));
-  SL_ASSERT_EQ_LL(sl_json_nodes_size(&doc.nodes), 1);
-  struct sl_json_node* n = sl_json_nodes_get(&doc.nodes, 0);
-  SL_ASSERT_EQ_LL(n->type, sl_json_type_object);
-  SL_ASSERT_EQ_LL(n->num_children, 0);
-  SL_ASSERT_TRUE(n->next_sibling == SIZE_MAX);
-  SL_ASSERT_EQ_LL(n->value_pos, 0);
-  sl_json_doc_destroy(&doc);
-  return true;
-}
-
-SL_TEST(test_read_empty_array) {
-  const char* json       = "[]";
-  struct sl_json_doc doc = {0};
-  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(json), json, &doc));
-  SL_ASSERT_EQ_LL(sl_json_nodes_size(&doc.nodes), 1);
-  struct sl_json_node* n = sl_json_nodes_get(&doc.nodes, 0);
-  SL_ASSERT_EQ_LL(n->type, sl_json_type_array);
-  SL_ASSERT_EQ_LL(n->num_children, 0);
-  SL_ASSERT_TRUE(n->next_sibling == SIZE_MAX);
-  sl_json_doc_destroy(&doc);
-  return true;
-}
-
-SL_TEST(test_read_flat_object) {
-  // {"a":1,"b":2}
-  // node 0: object, 2 children
-  // node 1: number "a", next_sibling=2
-  // node 2: number "b", next_sibling=SIZE_MAX
-  const char* json       = "{\"a\":1,\"b\":2}";
-  struct sl_json_doc doc = {0};
-  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(json), json, &doc));
-  SL_ASSERT_EQ_LL(sl_json_nodes_size(&doc.nodes), 3);
-
-  struct sl_json_node* obj = sl_json_nodes_get(&doc.nodes, 0);
-  SL_ASSERT_EQ_LL(obj->type, sl_json_type_object);
-  SL_ASSERT_EQ_LL(obj->num_children, 2);
-  SL_ASSERT_TRUE(obj->next_sibling == SIZE_MAX);
-  SL_ASSERT_EQ_LL(obj->value_pos, 0);
-
-  struct sl_json_node* a = sl_json_nodes_get(&doc.nodes, 1);
-  SL_ASSERT_EQ_LL(a->type, sl_json_type_number);
-  SL_ASSERT_EQ_LL(a->key_pos, 2);  // first char of "a"
-  SL_ASSERT_EQ_LL(a->key_len, 1);
-  SL_ASSERT_EQ_LL(a->next_sibling, 2);
-
-  struct sl_json_node* b = sl_json_nodes_get(&doc.nodes, 2);
-  SL_ASSERT_EQ_LL(b->type, sl_json_type_number);
-  SL_ASSERT_EQ_LL(b->key_pos, 8);  // first char of "b"
-  SL_ASSERT_EQ_LL(b->key_len, 1);
-  SL_ASSERT_TRUE(b->next_sibling == SIZE_MAX);
-
-  sl_json_doc_destroy(&doc);
-  return true;
-}
-
-SL_TEST(test_read_nested_object) {
-  // {"a":{"x":1},"b":2}
-  // node 0: object, 2 children
-  // node 1: object "a", 1 child, next_sibling=3
-  // node 2: number "x", next_sibling=SIZE_MAX
-  // node 3: number "b", next_sibling=SIZE_MAX
-  const char* json       = "{\"a\":{\"x\":1},\"b\":2}";
-  struct sl_json_doc doc = {0};
-  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(json), json, &doc));
-  SL_ASSERT_EQ_LL(sl_json_nodes_size(&doc.nodes), 4);
-
-  struct sl_json_node* outer = sl_json_nodes_get(&doc.nodes, 0);
-  SL_ASSERT_EQ_LL(outer->type, sl_json_type_object);
-  SL_ASSERT_EQ_LL(outer->num_children, 2);
-  SL_ASSERT_TRUE(outer->next_sibling == SIZE_MAX);
-
-  struct sl_json_node* inner = sl_json_nodes_get(&doc.nodes, 1);
-  SL_ASSERT_EQ_LL(inner->type, sl_json_type_object);
-  SL_ASSERT_EQ_LL(inner->key_len, 1);
-  SL_ASSERT_EQ_LL(inner->num_children, 1);
-  SL_ASSERT_EQ_LL(inner->next_sibling, 3);
-
-  struct sl_json_node* x = sl_json_nodes_get(&doc.nodes, 2);
-  SL_ASSERT_EQ_LL(x->type, sl_json_type_number);
-  SL_ASSERT_EQ_LL(x->key_len, 1);
-  SL_ASSERT_TRUE(x->next_sibling == SIZE_MAX);
-
-  struct sl_json_node* b = sl_json_nodes_get(&doc.nodes, 3);
-  SL_ASSERT_EQ_LL(b->type, sl_json_type_number);
-  SL_ASSERT_EQ_LL(b->key_len, 1);
-  SL_ASSERT_TRUE(b->next_sibling == SIZE_MAX);
-
-  sl_json_doc_destroy(&doc);
-  return true;
-}
-
-SL_TEST(test_read_array) {
-  // [1,2,3]
-  // node 0: array, 3 children
-  // node 1: number, next_sibling=2
-  // node 2: number, next_sibling=3
-  // node 3: number, next_sibling=SIZE_MAX
-  const char* json       = "[1,2,3]";
-  struct sl_json_doc doc = {0};
-  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(json), json, &doc));
-  SL_ASSERT_EQ_LL(sl_json_nodes_size(&doc.nodes), 4);
-
-  struct sl_json_node* arr = sl_json_nodes_get(&doc.nodes, 0);
-  SL_ASSERT_EQ_LL(arr->type, sl_json_type_array);
-  SL_ASSERT_EQ_LL(arr->num_children, 3);
-  SL_ASSERT_TRUE(arr->next_sibling == SIZE_MAX);
-
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 1)->next_sibling, 2);
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 2)->next_sibling, 3);
-  SL_ASSERT_TRUE(sl_json_nodes_get(&doc.nodes, 3)->next_sibling == SIZE_MAX);
-
-  sl_json_doc_destroy(&doc);
-  return true;
-}
-
-SL_TEST(test_read_array_of_objects) {
-  // [{"a":1},{"b":2}]
-  // node 0: array, 2 children
-  // node 1: object, 1 child, next_sibling=3
-  // node 2: number "a", next_sibling=SIZE_MAX
-  // node 3: object, 1 child, next_sibling=SIZE_MAX
-  // node 4: number "b", next_sibling=SIZE_MAX
-  const char* json       = "[{\"a\":1},{\"b\":2}]";
-  struct sl_json_doc doc = {0};
-  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(json), json, &doc));
-  SL_ASSERT_EQ_LL(sl_json_nodes_size(&doc.nodes), 5);
-
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 0)->num_children, 2);
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 1)->num_children, 1);
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 1)->next_sibling, 3);
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 3)->num_children, 1);
-  SL_ASSERT_TRUE(sl_json_nodes_get(&doc.nodes, 3)->next_sibling == SIZE_MAX);
-
-  sl_json_doc_destroy(&doc);
-  return true;
-}
-
-SL_TEST(test_read_value_pos) {
-  // Check value_pos for various types in an array
-  // [null,true,false,42,"hi"]
-  //  0    5    10    16  19
-  const char* json       = "[null,true,false,42,\"hi\"]";
-  struct sl_json_doc doc = {0};
-  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(json), json, &doc));
-  SL_ASSERT_EQ_LL(sl_json_nodes_size(&doc.nodes), 6);
-
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 0)->value_pos, 0);   // [
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 1)->value_pos, 1);   // null
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 2)->value_pos, 6);   // true
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 3)->value_pos, 11);  // false
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 4)->value_pos, 17);  // 42
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 5)->value_pos, 20);  // "hi"
-
-  sl_json_doc_destroy(&doc);
-  return true;
-}
-
-SL_TEST(test_json_get_int_negative) {
-  SL_JSON_SETUP("{\"n\":-42}");
+SL_TEST(test_find_top_level_int) {
+  const char* json        = "{\"a\":42}";
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".a"), ".a", &r));
+  SL_ASSERT_EQ_LL(r.type, sl_json_type_number);
   long long val = 0;
-  SL_ASSERT_TRUE(sl_json_get_int(&doc, json, "n", &val));
+  SL_ASSERT_TRUE(sl_json_get_int(&r, json, &val));
+  SL_ASSERT_EQ_LL(val, 42);
+  return true;
+}
+
+SL_TEST(test_find_top_level_negative_int) {
+  const char* json        = "{\"n\":-42}";
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".n"), ".n", &r));
+  long long val = 0;
+  SL_ASSERT_TRUE(sl_json_get_int(&r, json, &val));
   SL_ASSERT_EQ_LL(val, -42);
-  SL_JSON_TEARDOWN();
   return true;
 }
 
-SL_TEST(test_json_get_int_zero) {
-  SL_JSON_SETUP("{\"n\":0}");
+SL_TEST(test_find_top_level_zero) {
+  const char* json        = "{\"n\":0}";
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".n"), ".n", &r));
   long long val = -1;
-  SL_ASSERT_TRUE(sl_json_get_int(&doc, json, "n", &val));
+  SL_ASSERT_TRUE(sl_json_get_int(&r, json, &val));
   SL_ASSERT_EQ_LL(val, 0);
-  SL_JSON_TEARDOWN();
   return true;
 }
 
-SL_TEST(test_json_get_str_buffer_too_small) {
-  SL_JSON_SETUP("{\"key\":\"hello\"}");
+SL_TEST(test_find_top_level_str) {
+  const char* json        = "{\"key\":\"hello\"}";
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &r));
+  SL_ASSERT_EQ_LL(r.type, sl_json_type_string);
+  char val[64];
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, json, sizeof(val), val));
+  SL_ASSERT_EQ_STR(val, "hello");
+  return true;
+}
+
+SL_TEST(test_find_non_first_key) {
+  const char* json        = "{\"a\":1,\"b\":2,\"c\":3}";
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".b"), ".b", &r));
+  long long val = 0;
+  SL_ASSERT_TRUE(sl_json_get_int(&r, json, &val));
+  SL_ASSERT_EQ_LL(val, 2);
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".c"), ".c", &r));
+  SL_ASSERT_TRUE(sl_json_get_int(&r, json, &val));
+  SL_ASSERT_EQ_LL(val, 3);
+  return true;
+}
+
+SL_TEST(test_find_not_found_key) {
+  const char* json        = "{\"a\":1}";
+  struct sl_json_result r = {0};
+  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".z"), ".z", &r));
+  return true;
+}
+
+SL_TEST(test_find_empty_object) {
+  const char* json        = "{}";
+  struct sl_json_result r = {0};
+  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a"), ".a", &r));
+  return true;
+}
+
+SL_TEST(test_find_nested_key) {
+  const char* json        = "{\"a\":{\"b\":7}}";
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".a.b"), ".a.b", &r));
+  SL_ASSERT_EQ_LL(r.type, sl_json_type_number);
+  long long val = 0;
+  SL_ASSERT_TRUE(sl_json_get_int(&r, json, &val));
+  SL_ASSERT_EQ_LL(val, 7);
+  return true;
+}
+
+SL_TEST(test_find_array_element) {
+  const char* json        = "{\"a\":[10,20,30]}";
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".a[1]"), ".a[1]", &r));
+  SL_ASSERT_EQ_LL(r.type, sl_json_type_number);
+  long long val = 0;
+  SL_ASSERT_TRUE(sl_json_get_int(&r, json, &val));
+  SL_ASSERT_EQ_LL(val, 20);
+  return true;
+}
+
+SL_TEST(test_find_deep_path) {
+  const char* json        = "{\"b\":\"a\",\"a\":{\"c\":0,\"b\":[10,20,30]}}";
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".a.b[1]"), ".a.b[1]", &r));
+  SL_ASSERT_EQ_LL(r.type, sl_json_type_number);
+  long long val = 0;
+  SL_ASSERT_TRUE(sl_json_get_int(&r, json, &val));
+  SL_ASSERT_EQ_LL(val, 20);
+  return true;
+}
+
+SL_TEST(test_find_top_level_array_index) {
+  const char* json        = "[10,20,30]";
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen("[2]"), "[2]", &r));
+  SL_ASSERT_EQ_LL(r.type, sl_json_type_number);
+  long long val = 0;
+  SL_ASSERT_TRUE(sl_json_get_int(&r, json, &val));
+  SL_ASSERT_EQ_LL(val, 30);
+  return true;
+}
+
+SL_TEST(test_find_index_out_of_range) {
+  const char* json        = "{\"a\":[1,2]}";
+  struct sl_json_result r = {0};
+  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a[5]"), ".a[5]", &r));
+  return true;
+}
+
+SL_TEST(test_find_scalar_mid_path) {
+  const char* json        = "{\"a\":42}";
+  struct sl_json_result r = {0};
+  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a.b"), ".a.b", &r));
+  return true;
+}
+
+SL_TEST(test_find_skip_nested_object) {
+  const char* json        = "{\"a\":{\"x\":1},\"b\":2}";
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".b"), ".b", &r));
+  SL_ASSERT_EQ_LL(r.type, sl_json_type_number);
+  long long val = 0;
+  SL_ASSERT_TRUE(sl_json_get_int(&r, json, &val));
+  SL_ASSERT_EQ_LL(val, 2);
+  return true;
+}
+
+SL_TEST(test_find_skip_nested_array) {
+  const char* json        = "{\"a\":[1,2,3],\"b\":4}";
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".b"), ".b", &r));
+  SL_ASSERT_EQ_LL(r.type, sl_json_type_number);
+  long long val = 0;
+  SL_ASSERT_TRUE(sl_json_get_int(&r, json, &val));
+  SL_ASSERT_EQ_LL(val, 4);
+  return true;
+}
+
+SL_TEST(test_find_array_of_objects) {
+  const char* json        = "[{\"a\":1},{\"b\":2}]";
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen("[1].b"), "[1].b", &r));
+  SL_ASSERT_EQ_LL(r.type, sl_json_type_number);
+  long long val = 0;
+  SL_ASSERT_TRUE(sl_json_get_int(&r, json, &val));
+  SL_ASSERT_EQ_LL(val, 2);
+  return true;
+}
+
+SL_TEST(test_find_wrong_type_check) {
+  const char* json        = "{\"a\":1}";
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".a"), ".a", &r));
+  SL_ASSERT_EQ_LL(r.type, sl_json_type_number);
+  return true;
+}
+
+SL_TEST(test_find_str_escaped_quote) {
+  const char* json        = "{\"key\":\"\\\"hello\\\"\"}";
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &r));
+  char val[64];
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, json, sizeof(val), val));
+  SL_ASSERT_EQ_STR(val, "\"hello\"");
+  return true;
+}
+
+SL_TEST(test_find_str_escaped_backslash) {
+  const char* json        = "{\"key\":\"\\\\\"}";
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &r));
+  char val[64];
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, json, sizeof(val), val));
+  SL_ASSERT_EQ_STR(val, "\\");
+  return true;
+}
+
+SL_TEST(test_find_str_escaped_newline) {
+  const char* json        = "{\"key\":\"\\n\"}";
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &r));
+  char val[64];
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, json, sizeof(val), val));
+  SL_ASSERT_EQ_STR(val, "\n");
+  return true;
+}
+
+SL_TEST(test_find_str_escapes) {
+  const char* json        = "{\"key\":\"\\r\\t\\b\\f\"}";
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &r));
+  char val[64];
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, json, sizeof(val), val));
+  SL_ASSERT_EQ_STR(val, "\r\t\b\f");
+  return true;
+}
+
+SL_TEST(test_find_str_escaped_unicode) {
+  const char* json        = "{\"key\":\"\\u0001\"}";
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &r));
+  char val[64];
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, json, sizeof(val), val));
+  SL_ASSERT_EQ_LL((unsigned char)val[0], 0x01);
+  SL_ASSERT_EQ_LL(val[1], '\0');
+  return true;
+}
+
+SL_TEST(test_find_str_buffer_too_small) {
+  const char* json        = "{\"key\":\"hello\"}";
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &r));
   char val[3];
-  SL_ASSERT_FALSE(sl_json_get_str(&doc, json, "key", sizeof(val), val));
-  SL_JSON_TEARDOWN();
+  SL_ASSERT_FALSE(sl_json_get_str(ctx, &r, json, sizeof(val), val));
+  struct sl_error_msg err;
+  SL_ASSERT_EQ_LL(sl_error_depth(&ctx->errors), 1);
+  sl_error_pop(&ctx->errors, &err);
+  SL_ASSERT_EQ_STR(err.msg, "output buffer too small");
   return true;
 }
 
-SL_TEST(test_json_get_str_exact_fit) {
-  SL_JSON_SETUP("{\"key\":\"hi\"}");
+SL_TEST(test_find_str_exact_fit) {
+  const char* json        = "{\"key\":\"hi\"}";
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &r));
   char val[3];  // 'h','i','\0'
-  SL_ASSERT_TRUE(sl_json_get_str(&doc, json, "key", sizeof(val), val));
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, json, sizeof(val), val));
   SL_ASSERT_EQ_STR(val, "hi");
-  SL_JSON_TEARDOWN();
   return true;
 }
 
-SL_TEST(test_json_get_str_empty) {
-  SL_JSON_SETUP("{\"key\":\"\"}");
+SL_TEST(test_find_str_empty) {
+  const char* json        = "{\"key\":\"\"}";
+  struct sl_json_result r = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &r));
   char val[8];
-  SL_ASSERT_TRUE(sl_json_get_str(&doc, json, "key", sizeof(val), val));
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, json, sizeof(val), val));
   SL_ASSERT_EQ_STR(val, "");
-  SL_JSON_TEARDOWN();
   return true;
 }
 
-SL_TEST(test_read_value_len) {
-  // [null,true,false,42,"hi",{},[1]]
-  //  0    5    10    16  19  24 27
-  const char* json       = "[null,true,false,42,\"hi\",{},[1]]";
-  struct sl_json_doc doc = {0};
-  SL_ASSERT_TRUE(sl_json_read(ctx, strlen(json), json, &doc));
+// helpers for path step assertions
+#define SL_ASSERT_JSON_PATH_KEY(step, expected)                   \
+  do {                                                            \
+    SL_ASSERT_FALSE((step).is_index);                             \
+    SL_ASSERT_EQ_LL((step).key_len, strlen(expected));            \
+    SL_ASSERT_STRNCMP(0, (step).key, (expected), (step).key_len); \
+  } while (false)
 
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 0)->value_len, strlen(json));  // outer array
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 1)->value_len, 4);             // null
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 2)->value_len, 4);             // true
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 3)->value_len, 5);             // false
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 4)->value_len, 2);             // 42
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 5)->value_len, 4);             // "hi"
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 6)->value_len, 2);             // {}
-  SL_ASSERT_EQ_LL(sl_json_nodes_get(&doc.nodes, 7)->value_len, 3);             // [1]
+#define SL_ASSERT_JSON_PATH_IDX(step, expected) \
+  do {                                          \
+    SL_ASSERT_TRUE((step).is_index);            \
+    SL_ASSERT_EQ_LL((step).index, expected);    \
+  } while (false)
 
-  sl_json_doc_destroy(&doc);
+SL_TEST(test_parse_path_single_index) {
+  const char* path = "[0]";
+  struct sl_json_path_step steps[64];
+  size_t n = sl_json_parse_path(ctx, strlen(path), path, sizeof(steps), steps);
+  SL_ASSERT_EQ_LL(n, 1);
+  SL_ASSERT_JSON_PATH_IDX(steps[0], 0);
+  return true;
+}
+
+SL_TEST(test_parse_path_multi_digit_index) {
+  const char* path = "[123]";
+  struct sl_json_path_step steps[64];
+  size_t n = sl_json_parse_path(ctx, strlen(path), path, sizeof(steps), steps);
+  SL_ASSERT_EQ_LL(n, 1);
+  SL_ASSERT_JSON_PATH_IDX(steps[0], 123);
+  return true;
+}
+
+SL_TEST(test_parse_path_multiple_indices) {
+  const char* path = "[0][1][2]";
+  struct sl_json_path_step steps[64];
+  size_t n = sl_json_parse_path(ctx, strlen(path), path, sizeof(steps), steps);
+  SL_ASSERT_EQ_LL(n, 3);
+  SL_ASSERT_JSON_PATH_IDX(steps[0], 0);
+  SL_ASSERT_JSON_PATH_IDX(steps[1], 1);
+  SL_ASSERT_JSON_PATH_IDX(steps[2], 2);
+  return true;
+}
+
+SL_TEST(test_parse_path_single_key) {
+  const char* path = ".foo";
+  struct sl_json_path_step steps[64];
+  size_t n = sl_json_parse_path(ctx, strlen(path), path, sizeof(steps), steps);
+  SL_ASSERT_EQ_LL(n, 1);
+  SL_ASSERT_JSON_PATH_KEY(steps[0], "foo");
+  return true;
+}
+
+SL_TEST(test_parse_path_nested_keys) {
+  const char* path = ".a.b.c";
+  struct sl_json_path_step steps[64];
+  size_t n = sl_json_parse_path(ctx, strlen(path), path, sizeof(steps), steps);
+  SL_ASSERT_EQ_LL(n, 3);
+  SL_ASSERT_JSON_PATH_KEY(steps[0], "a");
+  SL_ASSERT_JSON_PATH_KEY(steps[1], "b");
+  SL_ASSERT_JSON_PATH_KEY(steps[2], "c");
+  return true;
+}
+
+SL_TEST(test_parse_path_key_then_index) {
+  const char* path = ".items[2]";
+  struct sl_json_path_step steps[64];
+  size_t n = sl_json_parse_path(ctx, strlen(path), path, sizeof(steps), steps);
+  SL_ASSERT_EQ_LL(n, 2);
+  SL_ASSERT_JSON_PATH_KEY(steps[0], "items");
+  SL_ASSERT_JSON_PATH_IDX(steps[1], 2);
+  return true;
+}
+
+SL_TEST(test_parse_path_index_then_key) {
+  const char* path = "[0].name";
+  struct sl_json_path_step steps[64];
+  size_t n = sl_json_parse_path(ctx, strlen(path), path, sizeof(steps), steps);
+  SL_ASSERT_EQ_LL(n, 2);
+  SL_ASSERT_JSON_PATH_IDX(steps[0], 0);
+  SL_ASSERT_JSON_PATH_KEY(steps[1], "name");
+  return true;
+}
+
+SL_TEST(test_parse_path_complex) {
+  const char* path = ".a.b[2].c";
+  struct sl_json_path_step steps[64];
+  size_t n = sl_json_parse_path(ctx, strlen(path), path, sizeof(steps), steps);
+  SL_ASSERT_EQ_LL(n, 4);
+  SL_ASSERT_JSON_PATH_KEY(steps[0], "a");
+  SL_ASSERT_JSON_PATH_KEY(steps[1], "b");
+  SL_ASSERT_JSON_PATH_IDX(steps[2], 2);
+  SL_ASSERT_JSON_PATH_KEY(steps[3], "c");
+  return true;
+}
+
+SL_TEST(test_parse_path_key_points_into_path) {
+  // step.key must point into the original path string, not a copy
+  const char* path = ".hello[0].world";
+  struct sl_json_path_step steps[64];
+  size_t n = sl_json_parse_path(ctx, strlen(path), path, sizeof(steps), steps);
+  SL_ASSERT_EQ_LL(n, 3);
+  SL_ASSERT_EQ_PTR(steps[0].key, path + 1);   // ".hello" -> 'h' at path[1]
+  SL_ASSERT_EQ_PTR(steps[2].key, path + 10);  // ".world" -> 'w' at path[10]
+  return true;
+}
+
+SL_TEST(test_parse_path_error_bare_key) {
+  const char* path = "foo";
+  struct sl_json_path_step steps[64];
+  SL_ASSERT_EQ_LL(sl_json_parse_path(ctx, strlen(path), path, sizeof(steps), steps), 0);
+  SL_ASSERT_TRUE(sl_context_error_occurred(ctx));
+  while (sl_context_error_occurred(ctx)) {
+    struct sl_error_msg e;
+    sl_error_pop(&ctx->errors, &e);
+  }
+  return true;
+}
+
+SL_TEST(test_parse_path_error_dot_only) {
+  const char* path = ".";
+  struct sl_error_msg err;
+  struct sl_json_path_step steps[64];
+  SL_ASSERT_EQ_LL(sl_json_parse_path(ctx, strlen(path), path, sizeof(steps), steps), 0);
+  SL_ASSERT_EQ_LL(sl_error_depth(&ctx->errors), 1);
+  sl_error_pop(&ctx->errors, &err);
+  SL_ASSERT_STR_STARTS_WITH(err.msg, "expected key character after .");
+  return true;
+}
+
+SL_TEST(test_parse_path_error_double_dot) {
+  const char* path = ".a..b";
+  struct sl_json_path_step steps[64];
+  SL_ASSERT_EQ_LL(sl_json_parse_path(ctx, strlen(path), path, sizeof(steps), steps), 0);
+  while (sl_context_error_occurred(ctx)) {
+    struct sl_error_msg e;
+    sl_error_pop(&ctx->errors, &e);
+  }
+  return true;
+}
+
+SL_TEST(test_parse_path_error_non_digit_in_brackets) {
+  const char* path = "[x]";
+  struct sl_json_path_step steps[64];
+  SL_ASSERT_EQ_LL(sl_json_parse_path(ctx, strlen(path), path, sizeof(steps), steps), 0);
+  while (sl_context_error_occurred(ctx)) {
+    struct sl_error_msg e;
+    sl_error_pop(&ctx->errors, &e);
+  }
+  return true;
+}
+
+SL_TEST(test_parse_path_error_empty_brackets) {
+  const char* path = "[]";
+  struct sl_json_path_step steps[64];
+  SL_ASSERT_EQ_LL(sl_json_parse_path(ctx, strlen(path), path, sizeof(steps), steps), 0);
+  while (sl_context_error_occurred(ctx)) {
+    struct sl_error_msg e;
+    sl_error_pop(&ctx->errors, &e);
+  }
+  return true;
+}
+
+SL_TEST(test_parse_path_error_leading_zero_in_index) {
+  const char* path = "[01]";
+  struct sl_json_path_step steps[64];
+  SL_ASSERT_EQ_LL(sl_json_parse_path(ctx, strlen(path), path, sizeof(steps), steps), 0);
+  while (sl_context_error_occurred(ctx)) {
+    struct sl_error_msg e;
+    sl_error_pop(&ctx->errors, &e);
+  }
+  return true;
+}
+
+SL_TEST(test_parse_path_error_unclosed_bracket) {
+  const char* path = ".a[1";
+  struct sl_json_path_step steps[64];
+  SL_ASSERT_EQ_LL(sl_json_parse_path(ctx, strlen(path), path, sizeof(steps), steps), 0);
+  while (sl_context_error_occurred(ctx)) {
+    struct sl_error_msg e;
+    sl_error_pop(&ctx->errors, &e);
+  }
   return true;
 }
 

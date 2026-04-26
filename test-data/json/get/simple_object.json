@@ -1,0 +1,25 @@
+{
+  "level": "info",
+  "line": 42,
+  "nested": {
+    "x": 1,
+    "y": {
+      "z": true
+    }
+  },
+  "tags": [
+    "a",
+    "b",
+    "c"
+  ],
+  "items": [
+    {
+      "id": 0,
+      "val": "zero"
+    },
+    {
+      "id": 1,
+      "val": "one"
+    }
+  ]
+}
