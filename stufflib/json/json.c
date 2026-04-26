@@ -92,6 +92,7 @@ static inline void sl_json_parse_emit_end_container(
 }
 
 static inline bool sl_json_parse_advance(
+    struct sl_context ctx[restrict static 1],
     struct sl_json_parser p[restrict static 1],
     size_t len,
     const char json[restrict static len]
@@ -147,6 +148,8 @@ static inline bool sl_json_parse_advance(
           p->value_begin = p->pos;
           if (sl_json_consume_literal(p, len, json, "true")) {
             sl_json_parse_emit_literal(p, sl_json_type_lit_true);
+          } else {
+            SL_ERROR(ctx, "invalid literal at offset %zu", p->pos);
           }
         } break;
 
@@ -154,6 +157,8 @@ static inline bool sl_json_parse_advance(
           p->value_begin = p->pos;
           if (sl_json_consume_literal(p, len, json, "false")) {
             sl_json_parse_emit_literal(p, sl_json_type_lit_false);
+          } else {
+            SL_ERROR(ctx, "invalid literal at offset %zu", p->pos);
           }
         } break;
 
@@ -161,6 +166,8 @@ static inline bool sl_json_parse_advance(
           p->value_begin = p->pos;
           if (sl_json_consume_literal(p, len, json, "null")) {
             sl_json_parse_emit_literal(p, sl_json_type_lit_null);
+          } else {
+            SL_ERROR(ctx, "invalid literal at offset %zu", p->pos);
           }
         } break;
 
@@ -187,8 +194,11 @@ static inline bool sl_json_parse_advance(
           p->value_begin = p->pos;
         } break;
 
+        case 0: {
+          p->state = sl_json_error_end_of_input;
+        } break;
         default: {
-          p->state = sl_json_error;
+          SL_ERROR(ctx, "unexpected character %#x at offset %zu", (unsigned char)ch, p->pos);
         }
       }
     } break;  // case sl_json_element
@@ -209,6 +219,15 @@ static inline bool sl_json_parse_advance(
       } else if (ch == '"') {
         sl_json_parse_unget(p);
         p->state = sl_json_member;
+      } else if (ch == 0) {
+        p->state = sl_json_error_end_of_input;
+      } else {
+        SL_ERROR(
+            ctx,
+            "expected } or \" in object at offset %zu, got %#x",
+            p->pos,
+            (unsigned char)ch
+        );
       }
     } break;
 
@@ -218,6 +237,15 @@ static inline bool sl_json_parse_advance(
       } else if (ch == '"') {
         p->state       = sl_json_string_key;
         p->value_begin = p->pos;
+      } else if (ch == 0) {
+        p->state = sl_json_error_end_of_input;
+      } else {
+        SL_ERROR(
+            ctx,
+            "expected \" for object key at offset %zu, got %#x",
+            p->pos,
+            (unsigned char)ch
+        );
       }
     } break;
 
@@ -226,6 +254,10 @@ static inline bool sl_json_parse_advance(
         p->state = sl_json_colon;
       } else if (ch == ':') {
         p->state = sl_json_element;
+      } else if (ch == 0) {
+        p->state = sl_json_error_end_of_input;
+      } else {
+        SL_ERROR(ctx, "expected : after key at offset %zu, got %#x", p->pos, (unsigned char)ch);
       }
     } break;
 
@@ -242,6 +274,8 @@ static inline bool sl_json_parse_advance(
             .node_depth = p->depth,
             .node_type  = sl_json_type_array,
         };
+      } else if (ch == 0) {
+        p->state = sl_json_error_end_of_input;
       } else {
         sl_json_parse_unget(p);
         p->state = sl_json_array_element;
@@ -251,6 +285,8 @@ static inline bool sl_json_parse_advance(
     case sl_json_array_element: {
       if (sl_json_is_ws(ch)) {
         p->state = sl_json_array_element;
+      } else if (ch == 0) {
+        p->state = sl_json_error_end_of_input;
       } else {
         assert(p->depth);
         sl_json_parse_unget(p);
@@ -272,6 +308,15 @@ static inline bool sl_json_parse_advance(
         p->state = sl_json_string_escape_value;
       } else if ((unsigned char)ch >= 0x20) {
         p->state = sl_json_string_value;
+      } else if (ch == 0) {
+        p->state = sl_json_error_end_of_input;
+      } else {
+        SL_ERROR(
+            ctx,
+            "invalid control character %#x in string at offset %zu",
+            (unsigned char)ch,
+            p->pos
+        );
       }
     } break;
 
@@ -290,6 +335,15 @@ static inline bool sl_json_parse_advance(
         p->state = sl_json_string_escape_key;
       } else if ((unsigned char)ch >= 0x20) {
         p->state = sl_json_string_key;
+      } else if (ch == 0) {
+        p->state = sl_json_error_end_of_input;
+      } else {
+        SL_ERROR(
+            ctx,
+            "invalid control character %#x in key at offset %zu",
+            (unsigned char)ch,
+            p->pos
+        );
       }
     } break;
 
@@ -312,9 +366,15 @@ static inline bool sl_json_parse_advance(
         case 'u': {
           if (sl_json_consume_hex_escape(p, len, json)) {
             p->state = body;
+          } else {
+            SL_ERROR(ctx, "invalid unicode escape at offset %zu", p->pos);
           }
         } break;
+        case 0: {
+          p->state = sl_json_error_end_of_input;
+        } break;
         default: {
+          SL_ERROR(ctx, "invalid escape character %#x at offset %zu", (unsigned char)ch, p->pos);
         } break;
       }
     } break;
@@ -324,6 +384,10 @@ static inline bool sl_json_parse_advance(
         p->state = sl_json_number_zero;
       } else if ('1' <= ch && ch <= '9') {
         p->state = sl_json_number_one_nine;
+      } else if (ch == 0) {
+        p->state = sl_json_error_end_of_input;
+      } else {
+        SL_ERROR(ctx, "expected digit after - at offset %zu, got %#x", p->pos, (unsigned char)ch);
       }
     } break;
 
@@ -352,6 +416,15 @@ static inline bool sl_json_parse_advance(
     case sl_json_number_frac_first: {
       if ('0' <= ch && ch <= '9') {
         p->state = sl_json_number_frac_digits;
+      } else if (ch == 0) {
+        p->state = sl_json_error_end_of_input;
+      } else {
+        SL_ERROR(
+            ctx,
+            "expected digit after decimal point at offset %zu, got %#x",
+            p->pos,
+            (unsigned char)ch
+        );
       }
     } break;
 
@@ -370,12 +443,30 @@ static inline bool sl_json_parse_advance(
         p->state = sl_json_number_exp_first;
       } else if ('0' <= ch && ch <= '9') {
         p->state = sl_json_number_exp_digits;
+      } else if (ch == 0) {
+        p->state = sl_json_error_end_of_input;
+      } else {
+        SL_ERROR(
+            ctx,
+            "expected digit or sign in exponent at offset %zu, got %#x",
+            p->pos,
+            (unsigned char)ch
+        );
       }
     } break;
 
     case sl_json_number_exp_first: {
       if ('0' <= ch && ch <= '9') {
         p->state = sl_json_number_exp_digits;
+      } else if (ch == 0) {
+        p->state = sl_json_error_end_of_input;
+      } else {
+        SL_ERROR(
+            ctx,
+            "expected digit in exponent at offset %zu, got %#x",
+            p->pos,
+            (unsigned char)ch
+        );
       }
     } break;
 
@@ -397,48 +488,75 @@ static inline bool sl_json_parse_advance(
           p->state = sl_json_member;
         } else if (ch == '}') {
           sl_json_parse_emit_end_container(p, sl_json_type_object);
+        } else if (ch == 0) {
+          p->state = sl_json_error_end_of_input;
+        } else {
+          SL_ERROR(
+              ctx,
+              "expected , or } in object at offset %zu, got %#x",
+              p->pos,
+              (unsigned char)ch
+          );
         }
       } else if (p->depth && p->stack[p->depth - 1] == sl_json_container_array) {
         if (ch == ',') {
           p->state = sl_json_array_element;
         } else if (ch == ']') {
           sl_json_parse_emit_end_container(p, sl_json_type_array);
+        } else if (ch == 0) {
+          p->state = sl_json_error_end_of_input;
+        } else {
+          SL_ERROR(
+              ctx,
+              "expected , or ] in array at offset %zu, got %#x",
+              p->pos,
+              (unsigned char)ch
+          );
         }
+      } else {
+        SL_ERROR(
+            ctx,
+            "unexpected character %#x after value at offset %zu",
+            (unsigned char)ch,
+            p->pos
+        );
       }
     } break;
 
     case sl_json_done:
-    case sl_json_error: {
+    case sl_json_error:
+    case sl_json_error_end_of_input: {
     } break;
   }
 
+  if (p->state == sl_json_error_end_of_input) {
+    SL_ERROR(ctx, "unexpected end of input at offset %zu", p->pos);
+    return false;
+  }
   return p->state != sl_json_error && ++(p->pos) <= len && p->depth < SL_JSON_PARSE_MAX_DEPTH;
 }
 
-size_t sl_json_count_nodes(size_t len, const char json[const static len]) {
+size_t sl_json_count_nodes(
+    struct sl_context ctx[restrict static 1],
+    size_t len,
+    const char json[const static len]
+) {
   struct sl_json_parser p = {.state = sl_json_element};
   size_t count            = 0;
-  while (sl_json_parse_advance(&p, len, json)) {
+  while (sl_json_parse_advance(ctx, &p, len, json)) {
     count += (int)(p.event.emitted
-                   && (p.event.type == sl_json_begin_node || p.event.type == sl_json_value));
+                   && (p.event.type == sl_json_end_node || p.event.type == sl_json_value));
   }
   return p.state == sl_json_done ? count : 0;
 }
 
-bool sl_json_is_valid(size_t len, const char json[const static len]) {
-  return sl_json_count_nodes(len, json) > 0;
+bool sl_json_is_valid(
+    struct sl_context ctx[restrict static 1],
+    size_t len,
+    const char json[const static len]
+) {
+  return sl_json_count_nodes(ctx, len, json) > 0;
 }
-
-enum sl_json_path_parse_state {
-  sl_json_path_step,
-  sl_json_path_key_begin,
-  sl_json_path_key,
-  sl_json_path_idx_begin,
-  sl_json_path_idx_digits,
-  sl_json_path_idx_end,
-  sl_json_path_done,
-  sl_json_path_error,
-};
 
 size_t sl_json_parse_path(
     struct sl_context ctx[restrict static 1],
@@ -590,7 +708,7 @@ bool sl_json_find_path(
 
   // PHASE 1: navigate to the target node
 
-  while (step_idx < n_steps && sl_json_parse_advance(&p, json_len, json)) {
+  while (step_idx < n_steps && sl_json_parse_advance(ctx, &p, json_len, json)) {
     if (!p.event.emitted) {
       // parsing in progress
       continue;
@@ -634,7 +752,7 @@ bool sl_json_find_path(
 
   if (p.event.type == sl_json_key) {
     // advance parser until value
-    while (sl_json_parse_advance(&p, json_len, json)
+    while (sl_json_parse_advance(ctx, &p, json_len, json)
            && (!p.event.emitted || p.event.type == sl_json_key)) {
     }
   }
@@ -658,7 +776,7 @@ bool sl_json_find_path(
   // on sl_json_begin_node, depth is one greater than the event node_depth
   // keep parsing below this depth until we return to it
   size_t target_depth = p.event.node_depth;
-  while (sl_json_parse_advance(&p, json_len, json)) {
+  while (sl_json_parse_advance(ctx, &p, json_len, json)) {
     if (p.event.emitted && p.event.type == sl_json_end_node && p.event.node_depth == target_depth) {
       // we found the container, store its full length
       node->value_len = p.pos - node->value_begin;
@@ -668,7 +786,7 @@ bool sl_json_find_path(
 
 not_found:
   *node = (struct sl_json_node){0};
-  if (p.state == sl_json_error) {
+  if (p.state == sl_json_error && !sl_context_error_occurred(ctx)) {
     SL_ERROR(ctx, "invalid JSON");
   }
   return false;

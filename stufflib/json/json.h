@@ -28,16 +28,6 @@ enum sl_json_type : signed char {
   sl_json_type_lit_null,
 };
 
-struct sl_json_path_step {
-  bool is_index;
-  // pointer to key chars (not null-terminated), valid when !is_index
-  const char* key;
-  // valid when !is_index
-  size_t key_len;
-  // array index, valid when is_index
-  size_t index;
-};
-
 struct sl_json_node {
   // valid only when sl_json_find returned true
   enum sl_json_type type;
@@ -73,6 +63,7 @@ enum sl_json_parse_state : signed char {
   // end
   sl_json_done,
   sl_json_error,
+  sl_json_error_end_of_input,
 };
 
 enum sl_json_container : signed char {
@@ -121,8 +112,37 @@ struct sl_json_parser {
   size_t array_pos[SL_JSON_PARSE_MAX_DEPTH];
 };
 
-bool sl_json_is_valid(size_t len, const char json[const static len]);
-size_t sl_json_count_nodes(size_t len, const char json[const static len]);
+bool sl_json_is_valid(
+    struct sl_context ctx[restrict static 1],
+    size_t len,
+    const char json[const static len]
+);
+size_t sl_json_count_nodes(
+    struct sl_context ctx[restrict static 1],
+    size_t len,
+    const char json[const static len]
+);
+
+enum sl_json_path_parse_state : signed char {
+  sl_json_path_step,
+  sl_json_path_key_begin,
+  sl_json_path_key,
+  sl_json_path_idx_begin,
+  sl_json_path_idx_digits,
+  sl_json_path_idx_end,
+  sl_json_path_done,
+  sl_json_path_error,
+};
+
+struct sl_json_path_step {
+  bool is_index;
+  // pointer to key chars (not null-terminated), valid when !is_index
+  const char* key;
+  // valid when !is_index
+  size_t key_len;
+  // array index, valid when is_index
+  size_t index;
+};
 
 size_t sl_json_parse_path(
     struct sl_context ctx[restrict static 1],

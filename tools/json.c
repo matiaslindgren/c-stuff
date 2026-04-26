@@ -14,7 +14,7 @@ void print_usage(const struct sl_args args[const static 1]) {
       stderr,
       ("usage:"
        "\n"
-       "  %s check path"
+       "  %s check [-v] path"
        "\n"
        "  %s count-nodes path"
        "\n"
@@ -36,6 +36,7 @@ bool sl_check(struct sl_context ctx[static 1], const struct sl_args args[const s
     }
   }
 
+  const bool verbose    = sl_args_parse_flag(args, "-v");
   struct sl_span buffer = {0};
   struct sl_span data   = {0};
   bool ok               = false;
@@ -52,7 +53,10 @@ bool sl_check(struct sl_context ctx[static 1], const struct sl_args args[const s
     goto done;
   }
 
-  ok = sl_json_is_valid(data.size, (const char*)data.data);
+  ok = sl_json_is_valid(ctx, data.size, (const char*)data.data);
+  if (!ok && !verbose) {
+    sl_error_clear(&ctx->errors);
+  }
 
 done:
   sl_span_destroy(&data);
@@ -86,7 +90,7 @@ bool sl_count_nodes(struct sl_context ctx[static 1], const struct sl_args args[c
     goto done;
   }
 
-  size_t n = sl_json_count_nodes(data.size, (const char*)data.data);
+  size_t n = sl_json_count_nodes(ctx, data.size, (const char*)data.data);
   if (printf("%zu\n", n) < 0) {
     goto done;
   }
