@@ -583,7 +583,7 @@ bool sl_json_find_path(
     const char json[restrict static json_len],
     size_t n_steps,
     const struct sl_json_path_step steps[restrict static n_steps],
-    struct sl_json_result result[restrict static 1]
+    struct sl_json_node node[restrict static 1]
 ) {
   struct sl_json_parser p = {0};
   size_t step_idx         = 0;
@@ -643,14 +643,14 @@ bool sl_json_find_path(
     goto not_found;
   }
 
-  *result = (struct sl_json_result){
+  *node = (struct sl_json_node){
       .type        = p.event.node_type,
       .value_begin = p.value_begin,
       .value_len   = 0,
   };
   if (p.event.type == sl_json_value) {
     // non-container value => the parser already knows the length
-    result->value_len = p.pos - p.value_begin;
+    node->value_len = p.pos - p.value_begin;
     return true;
   }
   // container value => we need to continue parsing until closing ] or }
@@ -661,13 +661,13 @@ bool sl_json_find_path(
   while (sl_json_parse_advance(&p, json_len, json)) {
     if (p.event.emitted && p.event.type == sl_json_end_node && p.event.node_depth == target_depth) {
       // we found the container, store its full length
-      result->value_len = p.pos - result->value_begin;
+      node->value_len = p.pos - node->value_begin;
       return true;
     }
   }
 
 not_found:
-  *result = (struct sl_json_result){0};
+  *node = (struct sl_json_node){0};
   if (p.state == sl_json_error) {
     SL_ERROR(ctx, "invalid JSON");
   }
@@ -680,31 +680,31 @@ bool sl_json_find(
     const char json[restrict static json_len],
     size_t path_len,
     const char path[restrict static path_len],
-    struct sl_json_result result[static 1]
+    struct sl_json_node node[static 1]
 ) {
   struct sl_json_path_step steps[SL_JSON_PARSE_MAX_DEPTH];
   size_t n_steps = sl_json_parse_path(ctx, path_len, path, sizeof(steps), steps);
   if (n_steps == 0) {
     return false;
   }
-  return sl_json_find_path(ctx, json_len, json, n_steps, steps, result);
+  return sl_json_find_path(ctx, json_len, json, n_steps, steps, node);
 }
 
 bool sl_json_get_str(
     struct sl_context ctx[static 1],
-    const struct sl_json_result result[static 1],
+    const struct sl_json_node node[static 1],
     const char json[static 1],
     size_t out_len,
     char out[static out_len]
 ) {
-  if (result->type != sl_json_type_string) {
-    SL_ERROR(ctx, "result is not a string");
+  if (node->type != sl_json_type_string) {
+    SL_ERROR(ctx, "node is not a string");
     return false;
   }
 
   // value_begin points at the opening '"', value_len covers both quotes
-  const char* src     = json + result->value_begin + 1;
-  const char* src_end = json + result->value_begin + result->value_len - 1;
+  const char* src     = json + node->value_begin + 1;
+  const char* src_end = json + node->value_begin + node->value_len - 1;
   size_t i_out        = 0;
 
   while (src < src_end && i_out < out_len) {
@@ -764,14 +764,14 @@ bool sl_json_get_str(
 }
 
 bool sl_json_get_int(
-    const struct sl_json_result result[static 1],
+    const struct sl_json_node node[static 1],
     const char json[static 1],
     long long out[static 1]
 ) {
-  if (result->type != sl_json_type_number) {
+  if (node->type != sl_json_type_number) {
     return false;
   }
   char* end = nullptr;
-  *out      = strtoll(json + result->value_begin, &end, 10);
-  return end != json + result->value_begin;
+  *out      = strtoll(json + node->value_begin, &end, 10);
+  return end != json + node->value_begin;
 }

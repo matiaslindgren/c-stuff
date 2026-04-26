@@ -279,26 +279,26 @@ SL_TEST(test_json_count_containers) {
 }
 
 SL_TEST(test_find_invalid_path) {
-  const char* json        = "{\"a\":1}";
-  struct sl_json_result r = {0};
+  const char* json         = "{\"a\":1}";
+  struct sl_json_node node = {0};
   struct sl_error_msg err;
 
-  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(""), "", &r));
+  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(""), "", &node));
   SL_ASSERT_EQ_LL(sl_error_depth(&ctx->errors), 1);
   sl_error_pop(&ctx->errors, &err);
   SL_ASSERT_EQ_STR(err.msg, "empty JSON path");
 
-  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a..b"), ".a..b", &r));
+  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a..b"), ".a..b", &node));
   SL_ASSERT_EQ_LL(sl_error_depth(&ctx->errors), 1);
   sl_error_pop(&ctx->errors, &err);
   SL_ASSERT_STR_STARTS_WITH(err.msg, "expected key character after .");
 
-  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a[x]"), ".a[x]", &r));
+  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a[x]"), ".a[x]", &node));
   SL_ASSERT_EQ_LL(sl_error_depth(&ctx->errors), 1);
   sl_error_pop(&ctx->errors, &err);
   SL_ASSERT_STR_STARTS_WITH(err.msg, "expected array index digit after '['");
 
-  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a[]"), ".a[]", &r));
+  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a[]"), ".a[]", &node));
   SL_ASSERT_EQ_LL(sl_error_depth(&ctx->errors), 1);
   sl_error_pop(&ctx->errors, &err);
   SL_ASSERT_STR_STARTS_WITH(err.msg, "expected array index digit after '['");
@@ -307,11 +307,11 @@ SL_TEST(test_find_invalid_path) {
 }
 
 SL_TEST(test_find_invalid_json) {
-  const char* json        = "{\"a\":";
-  struct sl_json_result r = {0};
+  const char* json         = "{\"a\":";
+  struct sl_json_node node = {0};
   struct sl_error_msg err;
 
-  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a"), ".a", &r));
+  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a"), ".a", &node));
   SL_ASSERT_EQ_LL(sl_error_depth(&ctx->errors), 1);
   sl_error_pop(&ctx->errors, &err);
   SL_ASSERT_STR_STARTS_WITH(err.msg, "invalid JSON");
@@ -320,230 +320,230 @@ SL_TEST(test_find_invalid_json) {
 }
 
 SL_TEST(test_find_top_level_int) {
-  const char* json        = "{\"a\":42}";
-  struct sl_json_result r = {0};
-  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".a"), ".a", &r));
-  SL_ASSERT_EQ_LL(r.type, sl_json_type_number);
+  const char* json         = "{\"a\":42}";
+  struct sl_json_node node = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".a"), ".a", &node));
+  SL_ASSERT_EQ_LL(node.type, sl_json_type_number);
   long long val = 0;
-  SL_ASSERT_TRUE(sl_json_get_int(&r, json, &val));
+  SL_ASSERT_TRUE(sl_json_get_int(&node, json, &val));
   SL_ASSERT_EQ_LL(val, 42);
   return true;
 }
 
 SL_TEST(test_find_top_level_negative_int) {
-  const char* json        = "{\"n\":-42}";
-  struct sl_json_result r = {0};
-  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".n"), ".n", &r));
+  const char* json         = "{\"n\":-42}";
+  struct sl_json_node node = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".n"), ".n", &node));
   long long val = 0;
-  SL_ASSERT_TRUE(sl_json_get_int(&r, json, &val));
+  SL_ASSERT_TRUE(sl_json_get_int(&node, json, &val));
   SL_ASSERT_EQ_LL(val, -42);
   return true;
 }
 
 SL_TEST(test_find_top_level_zero) {
-  const char* json        = "{\"n\":0}";
-  struct sl_json_result r = {0};
-  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".n"), ".n", &r));
+  const char* json         = "{\"n\":0}";
+  struct sl_json_node node = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".n"), ".n", &node));
   long long val = -1;
-  SL_ASSERT_TRUE(sl_json_get_int(&r, json, &val));
+  SL_ASSERT_TRUE(sl_json_get_int(&node, json, &val));
   SL_ASSERT_EQ_LL(val, 0);
   return true;
 }
 
 SL_TEST(test_find_top_level_str) {
-  const char* json        = "{\"key\":\"hello\"}";
-  struct sl_json_result r = {0};
-  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &r));
-  SL_ASSERT_EQ_LL(r.type, sl_json_type_string);
+  const char* json         = "{\"key\":\"hello\"}";
+  struct sl_json_node node = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &node));
+  SL_ASSERT_EQ_LL(node.type, sl_json_type_string);
   char val[64];
-  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, json, sizeof(val), val));
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &node, json, sizeof(val), val));
   SL_ASSERT_EQ_STR(val, "hello");
   return true;
 }
 
 SL_TEST(test_find_non_first_key) {
-  const char* json        = "{\"a\":1,\"b\":2,\"c\":3}";
-  struct sl_json_result r = {0};
-  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".b"), ".b", &r));
+  const char* json         = "{\"a\":1,\"b\":2,\"c\":3}";
+  struct sl_json_node node = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".b"), ".b", &node));
   long long val = 0;
-  SL_ASSERT_TRUE(sl_json_get_int(&r, json, &val));
+  SL_ASSERT_TRUE(sl_json_get_int(&node, json, &val));
   SL_ASSERT_EQ_LL(val, 2);
-  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".c"), ".c", &r));
-  SL_ASSERT_TRUE(sl_json_get_int(&r, json, &val));
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".c"), ".c", &node));
+  SL_ASSERT_TRUE(sl_json_get_int(&node, json, &val));
   SL_ASSERT_EQ_LL(val, 3);
   return true;
 }
 
 SL_TEST(test_find_not_found_key) {
-  const char* json        = "{\"a\":1}";
-  struct sl_json_result r = {0};
-  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".z"), ".z", &r));
+  const char* json         = "{\"a\":1}";
+  struct sl_json_node node = {0};
+  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".z"), ".z", &node));
   return true;
 }
 
 SL_TEST(test_find_empty_object) {
-  const char* json        = "{}";
-  struct sl_json_result r = {0};
-  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a"), ".a", &r));
+  const char* json         = "{}";
+  struct sl_json_node node = {0};
+  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a"), ".a", &node));
   return true;
 }
 
 SL_TEST(test_find_nested_key) {
-  const char* json        = "{\"a\":{\"b\":7}}";
-  struct sl_json_result r = {0};
-  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".a.b"), ".a.b", &r));
-  SL_ASSERT_EQ_LL(r.type, sl_json_type_number);
+  const char* json         = "{\"a\":{\"b\":7}}";
+  struct sl_json_node node = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".a.b"), ".a.b", &node));
+  SL_ASSERT_EQ_LL(node.type, sl_json_type_number);
   long long val = 0;
-  SL_ASSERT_TRUE(sl_json_get_int(&r, json, &val));
+  SL_ASSERT_TRUE(sl_json_get_int(&node, json, &val));
   SL_ASSERT_EQ_LL(val, 7);
   return true;
 }
 
 SL_TEST(test_find_array_element) {
-  const char* json        = "{\"a\":[10,20,30]}";
-  struct sl_json_result r = {0};
-  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".a[1]"), ".a[1]", &r));
-  SL_ASSERT_EQ_LL(r.type, sl_json_type_number);
+  const char* json         = "{\"a\":[10,20,30]}";
+  struct sl_json_node node = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".a[1]"), ".a[1]", &node));
+  SL_ASSERT_EQ_LL(node.type, sl_json_type_number);
   long long val = 0;
-  SL_ASSERT_TRUE(sl_json_get_int(&r, json, &val));
+  SL_ASSERT_TRUE(sl_json_get_int(&node, json, &val));
   SL_ASSERT_EQ_LL(val, 20);
   return true;
 }
 
 SL_TEST(test_find_deep_path) {
-  const char* json        = "{\"b\":\"a\",\"a\":{\"c\":0,\"b\":[10,20,30]}}";
-  struct sl_json_result r = {0};
-  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".a.b[1]"), ".a.b[1]", &r));
-  SL_ASSERT_EQ_LL(r.type, sl_json_type_number);
+  const char* json         = "{\"b\":\"a\",\"a\":{\"c\":0,\"b\":[10,20,30]}}";
+  struct sl_json_node node = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".a.b[1]"), ".a.b[1]", &node));
+  SL_ASSERT_EQ_LL(node.type, sl_json_type_number);
   long long val = 0;
-  SL_ASSERT_TRUE(sl_json_get_int(&r, json, &val));
+  SL_ASSERT_TRUE(sl_json_get_int(&node, json, &val));
   SL_ASSERT_EQ_LL(val, 20);
   return true;
 }
 
 SL_TEST(test_find_top_level_array_index) {
-  const char* json        = "[10,20,30]";
-  struct sl_json_result r = {0};
-  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen("[2]"), "[2]", &r));
-  SL_ASSERT_EQ_LL(r.type, sl_json_type_number);
+  const char* json         = "[10,20,30]";
+  struct sl_json_node node = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen("[2]"), "[2]", &node));
+  SL_ASSERT_EQ_LL(node.type, sl_json_type_number);
   long long val = 0;
-  SL_ASSERT_TRUE(sl_json_get_int(&r, json, &val));
+  SL_ASSERT_TRUE(sl_json_get_int(&node, json, &val));
   SL_ASSERT_EQ_LL(val, 30);
   return true;
 }
 
 SL_TEST(test_find_index_out_of_range) {
-  const char* json        = "{\"a\":[1,2]}";
-  struct sl_json_result r = {0};
-  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a[5]"), ".a[5]", &r));
+  const char* json         = "{\"a\":[1,2]}";
+  struct sl_json_node node = {0};
+  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a[5]"), ".a[5]", &node));
   return true;
 }
 
 SL_TEST(test_find_scalar_mid_path) {
-  const char* json        = "{\"a\":42}";
-  struct sl_json_result r = {0};
-  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a.b"), ".a.b", &r));
+  const char* json         = "{\"a\":42}";
+  struct sl_json_node node = {0};
+  SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a.b"), ".a.b", &node));
   return true;
 }
 
 SL_TEST(test_find_skip_nested_object) {
-  const char* json        = "{\"a\":{\"x\":1},\"b\":2}";
-  struct sl_json_result r = {0};
-  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".b"), ".b", &r));
-  SL_ASSERT_EQ_LL(r.type, sl_json_type_number);
+  const char* json         = "{\"a\":{\"x\":1},\"b\":2}";
+  struct sl_json_node node = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".b"), ".b", &node));
+  SL_ASSERT_EQ_LL(node.type, sl_json_type_number);
   long long val = 0;
-  SL_ASSERT_TRUE(sl_json_get_int(&r, json, &val));
+  SL_ASSERT_TRUE(sl_json_get_int(&node, json, &val));
   SL_ASSERT_EQ_LL(val, 2);
   return true;
 }
 
 SL_TEST(test_find_skip_nested_array) {
-  const char* json        = "{\"a\":[1,2,3],\"b\":4}";
-  struct sl_json_result r = {0};
-  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".b"), ".b", &r));
-  SL_ASSERT_EQ_LL(r.type, sl_json_type_number);
+  const char* json         = "{\"a\":[1,2,3],\"b\":4}";
+  struct sl_json_node node = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".b"), ".b", &node));
+  SL_ASSERT_EQ_LL(node.type, sl_json_type_number);
   long long val = 0;
-  SL_ASSERT_TRUE(sl_json_get_int(&r, json, &val));
+  SL_ASSERT_TRUE(sl_json_get_int(&node, json, &val));
   SL_ASSERT_EQ_LL(val, 4);
   return true;
 }
 
 SL_TEST(test_find_array_of_objects) {
-  const char* json        = "[{\"a\":1},{\"b\":2}]";
-  struct sl_json_result r = {0};
-  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen("[1].b"), "[1].b", &r));
-  SL_ASSERT_EQ_LL(r.type, sl_json_type_number);
+  const char* json         = "[{\"a\":1},{\"b\":2}]";
+  struct sl_json_node node = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen("[1].b"), "[1].b", &node));
+  SL_ASSERT_EQ_LL(node.type, sl_json_type_number);
   long long val = 0;
-  SL_ASSERT_TRUE(sl_json_get_int(&r, json, &val));
+  SL_ASSERT_TRUE(sl_json_get_int(&node, json, &val));
   SL_ASSERT_EQ_LL(val, 2);
   return true;
 }
 
 SL_TEST(test_find_wrong_type_check) {
-  const char* json        = "{\"a\":1}";
-  struct sl_json_result r = {0};
-  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".a"), ".a", &r));
-  SL_ASSERT_EQ_LL(r.type, sl_json_type_number);
+  const char* json         = "{\"a\":1}";
+  struct sl_json_node node = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".a"), ".a", &node));
+  SL_ASSERT_EQ_LL(node.type, sl_json_type_number);
   return true;
 }
 
 SL_TEST(test_find_str_escaped_quote) {
-  const char* json        = "{\"key\":\"\\\"hello\\\"\"}";
-  struct sl_json_result r = {0};
-  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &r));
+  const char* json         = "{\"key\":\"\\\"hello\\\"\"}";
+  struct sl_json_node node = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &node));
   char val[64];
-  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, json, sizeof(val), val));
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &node, json, sizeof(val), val));
   SL_ASSERT_EQ_STR(val, "\"hello\"");
   return true;
 }
 
 SL_TEST(test_find_str_escaped_backslash) {
-  const char* json        = "{\"key\":\"\\\\\"}";
-  struct sl_json_result r = {0};
-  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &r));
+  const char* json         = "{\"key\":\"\\\\\"}";
+  struct sl_json_node node = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &node));
   char val[64];
-  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, json, sizeof(val), val));
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &node, json, sizeof(val), val));
   SL_ASSERT_EQ_STR(val, "\\");
   return true;
 }
 
 SL_TEST(test_find_str_escaped_newline) {
-  const char* json        = "{\"key\":\"\\n\"}";
-  struct sl_json_result r = {0};
-  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &r));
+  const char* json         = "{\"key\":\"\\n\"}";
+  struct sl_json_node node = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &node));
   char val[64];
-  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, json, sizeof(val), val));
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &node, json, sizeof(val), val));
   SL_ASSERT_EQ_STR(val, "\n");
   return true;
 }
 
 SL_TEST(test_find_str_escapes) {
-  const char* json        = "{\"key\":\"\\r\\t\\b\\f\"}";
-  struct sl_json_result r = {0};
-  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &r));
+  const char* json         = "{\"key\":\"\\r\\t\\b\\f\"}";
+  struct sl_json_node node = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &node));
   char val[64];
-  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, json, sizeof(val), val));
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &node, json, sizeof(val), val));
   SL_ASSERT_EQ_STR(val, "\r\t\b\f");
   return true;
 }
 
 SL_TEST(test_find_str_escaped_unicode) {
-  const char* json        = "{\"key\":\"\\u0001\"}";
-  struct sl_json_result r = {0};
-  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &r));
+  const char* json         = "{\"key\":\"\\u0001\"}";
+  struct sl_json_node node = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &node));
   char val[64];
-  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, json, sizeof(val), val));
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &node, json, sizeof(val), val));
   SL_ASSERT_EQ_LL((unsigned char)val[0], 0x01);
   SL_ASSERT_EQ_LL(val[1], '\0');
   return true;
 }
 
 SL_TEST(test_find_str_buffer_too_small) {
-  const char* json        = "{\"key\":\"hello\"}";
-  struct sl_json_result r = {0};
-  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &r));
+  const char* json         = "{\"key\":\"hello\"}";
+  struct sl_json_node node = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &node));
   char val[3];
-  SL_ASSERT_FALSE(sl_json_get_str(ctx, &r, json, sizeof(val), val));
+  SL_ASSERT_FALSE(sl_json_get_str(ctx, &node, json, sizeof(val), val));
   struct sl_error_msg err;
   SL_ASSERT_EQ_LL(sl_error_depth(&ctx->errors), 1);
   sl_error_pop(&ctx->errors, &err);
@@ -552,21 +552,21 @@ SL_TEST(test_find_str_buffer_too_small) {
 }
 
 SL_TEST(test_find_str_exact_fit) {
-  const char* json        = "{\"key\":\"hi\"}";
-  struct sl_json_result r = {0};
-  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &r));
+  const char* json         = "{\"key\":\"hi\"}";
+  struct sl_json_node node = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &node));
   char val[3];  // 'h','i','\0'
-  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, json, sizeof(val), val));
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &node, json, sizeof(val), val));
   SL_ASSERT_EQ_STR(val, "hi");
   return true;
 }
 
 SL_TEST(test_find_str_empty) {
-  const char* json        = "{\"key\":\"\"}";
-  struct sl_json_result r = {0};
-  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &r));
+  const char* json         = "{\"key\":\"\"}";
+  struct sl_json_node node = {0};
+  SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &node));
   char val[8];
-  SL_ASSERT_TRUE(sl_json_get_str(ctx, &r, json, sizeof(val), val));
+  SL_ASSERT_TRUE(sl_json_get_str(ctx, &node, json, sizeof(val), val));
   SL_ASSERT_EQ_STR(val, "");
   return true;
 }

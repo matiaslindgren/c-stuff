@@ -38,7 +38,7 @@ struct sl_json_path_step {
   size_t index;
 };
 
-struct sl_json_result {
+struct sl_json_node {
   // valid only when sl_json_find returned true
   enum sl_json_type type;
   // byte offset of value start in JSON string
@@ -138,7 +138,7 @@ bool sl_json_find_path(
     const char json[restrict static json_len],
     size_t n_steps,
     const struct sl_json_path_step steps[restrict static n_steps],
-    struct sl_json_result result[restrict static 1]
+    struct sl_json_node node[restrict static 1]
 );
 
 bool sl_json_find(
@@ -147,19 +147,19 @@ bool sl_json_find(
     const char json[restrict static json_len],
     size_t path_len,
     const char path[restrict static path_len],
-    struct sl_json_result result[static 1]
+    struct sl_json_node node[static 1]
 );
 
 bool sl_json_get_str(
     struct sl_context ctx[static 1],
-    const struct sl_json_result result[static 1],
+    const struct sl_json_node node[static 1],
     const char json[static 1],
     size_t out_len,
     char out[static out_len]
 );
 
 bool sl_json_get_int(
-    const struct sl_json_result result[static 1],
+    const struct sl_json_node node[static 1],
     const char json[static 1],
     long long out[static 1]
 );

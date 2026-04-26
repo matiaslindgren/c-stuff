@@ -126,16 +126,16 @@ bool sl_get(struct sl_context ctx[static 1], const struct sl_args args[const sta
     goto done;
   }
 
-  const char* json             = (const char*)data.data;
-  struct sl_json_result result = {0};
-  if (!sl_json_find(ctx, data.size, json, strlen(json_path), json_path, &result)) {
+  const char* json         = (const char*)data.data;
+  struct sl_json_node node = {0};
+  if (!sl_json_find(ctx, data.size, json, strlen(json_path), json_path, &node)) {
     if (!sl_context_error_occurred(ctx)) {
       SL_ERROR(ctx, "'%s' not found in %s", json_path, path);
     }
     goto done;
   }
 
-  if (printf("%.*s\n", (int)result.value_len, json + result.value_begin) < 0) {
+  if (printf("%.*s\n", (int)node.value_len, json + node.value_begin) < 0) {
     goto done;
   }
 
