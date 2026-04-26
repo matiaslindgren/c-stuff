@@ -57,8 +57,7 @@ assert_get() {
   local json_path="$1"
   local expected="$2"
   local file="$3"
-  local actual
-  actual=$($json_tool get "$json_path" "$file")
+  local actual=$($json_tool get "$json_path" "$file")
   if [[ "$actual" != "$expected" ]]; then
     printf "'%s' get '%s': expected '%s', got '%s'\n" $json_tool "$json_path" "$expected" "$actual"
     exit 1
@@ -68,8 +67,17 @@ assert_get() {
 assert_get_fails() {
   local json_path="$1"
   local file="$2"
-  if $json_tool get "$json_path" "$file" 2>/dev/null; then
+  local stderr_output
+  local exit_code=0
+  stderr_output=$($json_tool get "$json_path" "$file" 2>&1 >/dev/null) || exit_code=$?
+  if [[ $exit_code -eq 0 ]]; then
     printf "'%s' get '%s' should have failed but succeeded\n" $json_tool "$json_path"
+    exit 1
+  fi
+  local level
+  level=$(echo "$stderr_output" | jq -r '.level' | head -1)
+  if [[ "$level" != "error" ]]; then
+    printf "'%s' get '%s' did not log with level=error, got level='%s', stderr='%s'\n" $json_tool "$json_path" "$level" "$stderr_output"
     exit 1
   fi
 }
