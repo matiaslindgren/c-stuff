@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 #include <stufflib/context/context.h>
+#include <stufflib/macros/macros.h>
 #include <stufflib/math/math.h>
 
 #define SL_ANSI_RED         "\033[31m"
@@ -97,7 +98,11 @@ static inline int sl_testing_run(struct sl_context ctx[static const 1]) {
       float: "%g",                \
       double: "%g",               \
       void*: "%p",                \
-      const void*: "%p"           \
+      const void*: "%p",          \
+      unsigned char*: "%p",       \
+      const unsigned char*: "%p", \
+      char*: "%p",                \
+      const char*: "%p"           \
   )
 
 #define SL_ASSERT_BINOP(binop, lhs_expr, rhs_expr, ...)                             \
@@ -125,25 +130,50 @@ static inline int sl_testing_run(struct sl_context ctx[static const 1]) {
     }                                                                               \
   } while (false)
 
-#define SL_ASSERT_STRCMP(expect, lhs, rhs, ...)                                       \
-  do {                                                                                \
-    const char* const sl_assert_lhs = (const char* const)(lhs);                       \
-    const char* const sl_assert_rhs = (const char* const)(rhs);                       \
-    if (!(strcmp(sl_assert_lhs, sl_assert_rhs) == expect)) {                          \
-      fprintf(                                                                        \
-          stderr,                                                                     \
-          "assertion failed: strcmp(" #lhs ", " #rhs ") == " #expect "\n  lhs: " #lhs \
-          " = \"%s\"\n  rhs: " #rhs                                                   \
-          " = \"%s\""                                                                 \
-          "\n  function: %s\n  file: %s\n  line: %d\n  msg: \"" __VA_ARGS__ "\"\n",   \
-          sl_assert_lhs,                                                              \
-          sl_assert_rhs,                                                              \
-          __func__,                                                                   \
-          __FILE__,                                                                   \
-          __LINE__                                                                    \
-      );                                                                              \
-      return false;                                                                   \
-    }                                                                                 \
+#define SL_ASSERT_STRNCMP(expect, lhs, rhs, len, ...)                               \
+  do {                                                                              \
+    const char* const sl_strncmp_lhs = (const char* const)(lhs);                    \
+    const char* const sl_strncmp_rhs = (const char* const)(rhs);                    \
+    const size_t sl_strncmp_len      = (size_t)(len);                               \
+    if (!(strncmp(sl_strncmp_lhs, sl_strncmp_rhs, sl_strncmp_len) == expect)) {     \
+      fprintf(                                                                      \
+          stderr,                                                                   \
+          "assertion failed: strncmp(" #lhs ", " #rhs ", " #len                     \
+          ")"                                                                       \
+          " == " #expect "\n  lhs: " #lhs " = \"%s\"\n  rhs: " #rhs                 \
+          " = \"%s\""                                                               \
+          "\n  function: %s\n  file: %s\n  line: %d\n  msg: \"" __VA_ARGS__ "\"\n", \
+          sl_strncmp_lhs,                                                           \
+          sl_strncmp_rhs,                                                           \
+          __func__,                                                                 \
+          __FILE__,                                                                 \
+          __LINE__                                                                  \
+      );                                                                            \
+      return false;                                                                 \
+    }                                                                               \
+  } while (false)
+
+#define SL_ASSERT_EQ_STR(lhs, rhs, ...)                      \
+  do {                                                       \
+    const char* const sl_eq_str_lhs = (lhs);                 \
+    const char* const sl_eq_str_rhs = (rhs);                 \
+    const size_t sl_eq_str_lhslen   = strlen(sl_eq_str_lhs); \
+    const size_t sl_eq_str_rhslen   = strlen(sl_eq_str_rhs); \
+    SL_ASSERT_STRNCMP(                                       \
+        0,                                                   \
+        sl_eq_str_lhs,                                       \
+        sl_eq_str_rhs,                                       \
+        SL_MAX(sl_eq_str_lhslen, sl_eq_str_rhslen),          \
+        __VA_ARGS__                                          \
+    );                                                       \
+  } while (false)
+
+#define SL_ASSERT_STR_STARTS_WITH(str, prefix, ...)                                          \
+  do {                                                                                       \
+    const char* const sl_assert_str    = (str);                                              \
+    const char* const sl_assert_prefix = (prefix);                                           \
+    const size_t sl_assert_prefixlen   = strlen(sl_assert_prefix);                           \
+    SL_ASSERT_STRNCMP(0, sl_assert_str, sl_assert_prefix, sl_assert_prefixlen, __VA_ARGS__); \
   } while (false)
 
 #define SL_ASSERT_DOUBLE_ALMOST(lhs, rhs, tolerance, ...)                           \
@@ -173,8 +203,7 @@ static inline int sl_testing_run(struct sl_context ctx[static const 1]) {
 #define SL_ASSERT_EQ_CHAR(lhs, rhs, ...) SL_ASSERT_BINOP(==, (char)(lhs), (char)(rhs), __VA_ARGS__)
 #define SL_ASSERT_EQ_LL(lhs, rhs, ...) \
   SL_ASSERT_BINOP(==, (long long)(lhs), (long long)(rhs), __VA_ARGS__)
-#define SL_ASSERT_EQ_PTR(lhs, rhs, ...) SL_ASSERT_BINOP(==, (void*)(lhs), (void*)(rhs), __VA_ARGS__)
-#define SL_ASSERT_EQ_STR(lhs, rhs, ...) SL_ASSERT_STRCMP(0, lhs, rhs, __VA_ARGS__)
+#define SL_ASSERT_EQ_PTR(lhs, rhs, ...) SL_ASSERT_BINOP(==, (lhs), (rhs), __VA_ARGS__)
 #define SL_ASSERT_EQ_DOUBLE(...)        SL_ASSERT_DOUBLE_ALMOST(__VA_ARGS__)
 
 #define SL_TEST(name)                                                         \

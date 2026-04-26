@@ -1,0 +1,38 @@
+path:
+  steps
+
+steps:
+  step
+  step steps
+
+step:
+  key
+  idx
+
+key:
+  '.' chars
+
+chars:
+  char
+  char chars
+
+char:
+  '21' . '7E' - '"' - '.' - '[' - ']'
+
+idx:
+  '[' integer ']'
+
+integer:
+  digit
+  onenine digits
+
+digits:
+  digit
+  digit digits
+
+digit:
+  '0'
+  onenine
+
+onenine
+  '1' . '9'
