@@ -21,7 +21,7 @@ done
 
 # test invalid json files
 for json_file in $(find ${root_dir}/test-data/json/invalid -name '*.json' -type f); do
-  if $json_tool check $json_file; then
+  if $json_tool check $json_file 2> /dev/null; then
     printf "'%s' failed to reject invalid json file '%s'\n" $json_tool $json_file
     exit 1
   fi

@@ -541,6 +541,10 @@ size_t sl_json_count_nodes(
     size_t len,
     const char json[const static len]
 ) {
+  if (len == 0) {
+    SL_ERROR(ctx, "JSON content is empty");
+    return 0;
+  }
   struct sl_json_parser p = {.state = sl_json_element};
   size_t count            = 0;
   while (sl_json_parse_advance(ctx, &p, len, json)) {
@@ -800,6 +804,10 @@ bool sl_json_find(
     const char path[restrict static path_len],
     struct sl_json_node node[static 1]
 ) {
+  if (path_len == 0) {
+    SL_ERROR(ctx, "empty JSON path");
+    return false;
+  }
   struct sl_json_path_step steps[SL_JSON_PARSE_MAX_DEPTH];
   size_t n_steps = sl_json_parse_path(ctx, path_len, path, sizeof(steps), steps);
   if (n_steps == 0) {

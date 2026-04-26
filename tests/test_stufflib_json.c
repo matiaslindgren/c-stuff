@@ -150,7 +150,7 @@ SL_TEST(test_parse_whitespace_around_value) {
 
 SL_TEST(test_parse_reject_empty) {
   SL_ASSERT_JSON_INVALID("");
-  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected end of input");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "JSON content is empty");
   return true;
 }
 
@@ -369,7 +369,7 @@ SL_TEST(test_parse_error_end_of_input) {
 
 SL_TEST(test_json_count_invalid) {
   SL_ASSERT_EQ_LL(sl_json_count_nodes(ctx, strlen(""), ""), 0);
-  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected end of input");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "JSON content is empty");
   SL_ASSERT_EQ_LL(sl_json_count_nodes(ctx, strlen("hello"), "hello"), 0);
   SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected character");
   SL_ASSERT_EQ_LL(sl_json_count_nodes(ctx, strlen("{"), "{"), 0);

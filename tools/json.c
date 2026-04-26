@@ -52,6 +52,10 @@ bool sl_check(struct sl_context ctx[static 1], const struct sl_args args[const s
     SL_ERROR(ctx, "failed reading %s", path);
     goto done;
   }
+  if (data.size == 0) {
+    SL_ERROR(ctx, "%s is empty", path);
+    goto done;
+  }
 
   ok = sl_json_is_valid(ctx, data.size, (const char*)data.data);
   if (!ok && !verbose) {
@@ -87,6 +91,10 @@ bool sl_count_nodes(struct sl_context ctx[static 1], const struct sl_args args[c
   data             = sl_fs_read_file(ctx, path, &buffer);
   if (sl_context_error_occurred(ctx)) {
     SL_ERROR(ctx, "failed reading %s", path);
+    goto done;
+  }
+  if (data.size == 0) {
+    SL_ERROR(ctx, "%s is empty", path);
     goto done;
   }
 
@@ -127,6 +135,10 @@ bool sl_get(struct sl_context ctx[static 1], const struct sl_args args[const sta
   data                  = sl_fs_read_file(ctx, path, &buffer);
   if (sl_context_error_occurred(ctx)) {
     SL_ERROR(ctx, "failed reading %s", path);
+    goto done;
+  }
+  if (data.size == 0) {
+    SL_ERROR(ctx, "%s is empty", path);
     goto done;
   }
 
