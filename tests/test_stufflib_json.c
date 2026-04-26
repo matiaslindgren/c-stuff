@@ -5,29 +5,25 @@
 #include <stufflib/json/json.h>
 #include <stufflib/testing/testing.h>
 
-#define SL_ASSERT_JSON_VALID(s)   SL_ASSERT_TRUE(sl_json_is_valid(strlen(s), s))
-#define SL_ASSERT_JSON_INVALID(s) SL_ASSERT_FALSE(sl_json_is_valid(strlen(s), s))
+#define SL_ASSERT_JSON_VALID(s)   SL_ASSERT_TRUE(sl_json_is_valid(ctx, strlen(s), s))
+#define SL_ASSERT_JSON_INVALID(s) SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen(s), s))
 
 SL_TEST(test_parse_null) {
-  (void)ctx;
   SL_ASSERT_JSON_VALID("null");
   return true;
 }
 
 SL_TEST(test_parse_true) {
-  (void)ctx;
   SL_ASSERT_JSON_VALID("true");
   return true;
 }
 
 SL_TEST(test_parse_false) {
-  (void)ctx;
   SL_ASSERT_JSON_VALID("false");
   return true;
 }
 
 SL_TEST(test_parse_integer) {
-  (void)ctx;
   SL_ASSERT_JSON_VALID("0");
   SL_ASSERT_JSON_VALID("1");
   SL_ASSERT_JSON_VALID("42");
@@ -38,7 +34,6 @@ SL_TEST(test_parse_integer) {
 }
 
 SL_TEST(test_parse_large_integer) {
-  (void)ctx;
   SL_ASSERT_JSON_VALID("2147483647");
   SL_ASSERT_JSON_VALID("-2147483648");
   SL_ASSERT_JSON_VALID("9223372036854775807");
@@ -47,7 +42,6 @@ SL_TEST(test_parse_large_integer) {
 }
 
 SL_TEST(test_parse_fraction) {
-  (void)ctx;
   SL_ASSERT_JSON_VALID("0.0");
   SL_ASSERT_JSON_VALID("3.14");
   SL_ASSERT_JSON_VALID("-0.5");
@@ -55,7 +49,6 @@ SL_TEST(test_parse_fraction) {
 }
 
 SL_TEST(test_parse_exponent) {
-  (void)ctx;
   SL_ASSERT_JSON_VALID("1e10");
   SL_ASSERT_JSON_VALID("1E10");
   SL_ASSERT_JSON_VALID("1e+10");
@@ -66,13 +59,11 @@ SL_TEST(test_parse_exponent) {
 }
 
 SL_TEST(test_parse_string_empty) {
-  (void)ctx;
   SL_ASSERT_JSON_VALID("\"\"");
   return true;
 }
 
 SL_TEST(test_parse_string_simple) {
-  (void)ctx;
   SL_ASSERT_JSON_VALID("\"hello\"");
   SL_ASSERT_JSON_VALID("\"123\"");
   SL_ASSERT_JSON_VALID("\" \"");
@@ -81,7 +72,6 @@ SL_TEST(test_parse_string_simple) {
 }
 
 SL_TEST(test_parse_string_long) {
-  (void)ctx;
   SL_ASSERT_JSON_VALID(
       "\"Vesi (kemiallinen kaava H2O, kemiallisena yhdisteenä voidaan käyttää myös systemaattisia "
       "nimiä; oksidaani, divetymonoksidi tai divetyoksidi) on huoneenlämmössä nesteenä esiintyvä "
@@ -94,7 +84,6 @@ SL_TEST(test_parse_string_long) {
 }
 
 SL_TEST(test_parse_string_escapes) {
-  (void)ctx;
   SL_ASSERT_JSON_VALID("\"\\\"\"");
   SL_ASSERT_JSON_VALID("\"\\\\\"");
   SL_ASSERT_JSON_VALID("\"\\/\"");
@@ -109,7 +98,6 @@ SL_TEST(test_parse_string_escapes) {
 }
 
 SL_TEST(test_parse_empty_object) {
-  (void)ctx;
   SL_ASSERT_JSON_VALID("{}");
   SL_ASSERT_JSON_VALID("{ }");
   SL_ASSERT_JSON_VALID("{  \n  }");
@@ -117,21 +105,18 @@ SL_TEST(test_parse_empty_object) {
 }
 
 SL_TEST(test_parse_object_one_member) {
-  (void)ctx;
   SL_ASSERT_JSON_VALID("{\"a\":1}");
   SL_ASSERT_JSON_VALID("{ \"a\" : 1 }");
   return true;
 }
 
 SL_TEST(test_parse_object_multiple_members) {
-  (void)ctx;
   SL_ASSERT_JSON_VALID("{\"a\":1,\"b\":2,\"c\":3}");
   SL_ASSERT_JSON_VALID("{ \"a\" : 1 , \"b\" : 2 }");
   return true;
 }
 
 SL_TEST(test_parse_empty_array) {
-  (void)ctx;
   SL_ASSERT_JSON_VALID("[]");
   SL_ASSERT_JSON_VALID("[ ]");
   SL_ASSERT_JSON_VALID("[  \t  ]");
@@ -139,7 +124,6 @@ SL_TEST(test_parse_empty_array) {
 }
 
 SL_TEST(test_parse_array_elements) {
-  (void)ctx;
   SL_ASSERT_JSON_VALID("[1]");
   SL_ASSERT_JSON_VALID("[1,2,3]");
   SL_ASSERT_JSON_VALID("[ 1 , 2 , 3 ]");
@@ -149,7 +133,6 @@ SL_TEST(test_parse_array_elements) {
 }
 
 SL_TEST(test_parse_nested) {
-  (void)ctx;
   SL_ASSERT_JSON_VALID("{\"a\":{\"b\":1}}");
   SL_ASSERT_JSON_VALID("{\"a\":[1,2]}");
   SL_ASSERT_JSON_VALID("[[1],[2]]");
@@ -159,7 +142,6 @@ SL_TEST(test_parse_nested) {
 }
 
 SL_TEST(test_parse_whitespace_around_value) {
-  (void)ctx;
   SL_ASSERT_JSON_VALID("  null  ");
   SL_ASSERT_JSON_VALID("\n\ttrue\r\n");
   SL_ASSERT_JSON_VALID("  { \"key\" : \"val\" }  ");
@@ -167,112 +149,251 @@ SL_TEST(test_parse_whitespace_around_value) {
 }
 
 SL_TEST(test_parse_reject_empty) {
-  (void)ctx;
   SL_ASSERT_JSON_INVALID("");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected end of input");
   return true;
 }
 
 SL_TEST(test_parse_reject_bare_word) {
-  (void)ctx;
   SL_ASSERT_JSON_INVALID("hello");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected character");
   SL_ASSERT_JSON_INVALID("nul");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "invalid literal");
   SL_ASSERT_JSON_INVALID("tru");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "invalid literal");
   SL_ASSERT_JSON_INVALID("fals");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "invalid literal");
   return true;
 }
 
 SL_TEST(test_parse_reject_trailing_content) {
-  (void)ctx;
   SL_ASSERT_JSON_INVALID("true false");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected character");
   SL_ASSERT_JSON_INVALID("1 2");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected character");
   SL_ASSERT_JSON_INVALID("{}{}");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected character");
   return true;
 }
 
 SL_TEST(test_parse_reject_leading_zero) {
-  (void)ctx;
   SL_ASSERT_JSON_INVALID("01");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected character");
   SL_ASSERT_JSON_INVALID("00");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected character");
   SL_ASSERT_JSON_INVALID("-01");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected character");
   return true;
 }
 
 SL_TEST(test_parse_reject_bad_number) {
-  (void)ctx;
   SL_ASSERT_JSON_INVALID("+1");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected character");
   SL_ASSERT_JSON_INVALID(".5");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected character");
   SL_ASSERT_JSON_INVALID("1.");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected end of input");
   SL_ASSERT_JSON_INVALID("1e");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected end of input");
   SL_ASSERT_JSON_INVALID("1e+");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected end of input");
   SL_ASSERT_JSON_INVALID("-");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected end of input");
   return true;
 }
 
 SL_TEST(test_parse_reject_bad_string) {
-  (void)ctx;
   SL_ASSERT_JSON_INVALID("\"");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected end of input");
   SL_ASSERT_JSON_INVALID("\"\\\"");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected end of input");
   SL_ASSERT_JSON_INVALID("\"\\x\"");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "invalid escape character");
   SL_ASSERT_JSON_INVALID("\"\\u00G0\"");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "invalid unicode escape");
   SL_ASSERT_JSON_INVALID("\"\\u00\"");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "invalid unicode escape");
   return true;
 }
 
 SL_TEST(test_parse_reject_bad_object) {
-  (void)ctx;
   SL_ASSERT_JSON_INVALID("{");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected end of input");
   SL_ASSERT_JSON_INVALID("{\"a\"}");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "expected : after key");
   SL_ASSERT_JSON_INVALID("{\"a\":}");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected character");
   SL_ASSERT_JSON_INVALID("{\"a\":1,}");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "expected \" for object key");
   SL_ASSERT_JSON_INVALID("{:1}");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "expected } or \"");
   SL_ASSERT_JSON_INVALID("{1:2}");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "expected } or \"");
   return true;
 }
 
 SL_TEST(test_parse_reject_bad_array) {
-  (void)ctx;
   SL_ASSERT_JSON_INVALID("[");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected end of input");
   SL_ASSERT_JSON_INVALID("[1,]");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected character");
   SL_ASSERT_JSON_INVALID("[,1]");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected character");
   SL_ASSERT_JSON_INVALID("[1,2,]");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected character");
   return true;
 }
 
 SL_TEST(test_parse_reject_control_char_in_string) {
-  (void)ctx;
   SL_ASSERT_JSON_INVALID("\"\x01\"");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "invalid control character");
   SL_ASSERT_JSON_INVALID("\"\n\"");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "invalid control character");
   SL_ASSERT_JSON_INVALID("\"\t\"");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "invalid control character");
+  return true;
+}
+
+SL_TEST(test_parse_error_unexpected_char) {
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("abc"), "abc"));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected character");
+
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("+1"), "+1"));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected character");
+
+  return true;
+}
+
+SL_TEST(test_parse_error_invalid_literal) {
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("tru"), "tru"));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "invalid literal");
+
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("nul"), "nul"));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "invalid literal");
+
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("fals"), "fals"));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "invalid literal");
+
+  return true;
+}
+
+SL_TEST(test_parse_error_object) {
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("{1:2}"), "{1:2}"));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "expected } or \"");
+
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("{\"a\":1,2}"), "{\"a\":1,2}"));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "expected \" for object key");
+
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("{\"a\"}"), "{\"a\"}"));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "expected : after key");
+
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("{\"a\":1 2}"), "{\"a\":1 2}"));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "expected , or } in object");
+
+  return true;
+}
+
+SL_TEST(test_parse_error_array) {
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("[1 2]"), "[1 2]"));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "expected , or ] in array");
+
+  return true;
+}
+
+SL_TEST(test_parse_error_string) {
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("\"\x01\""), "\"\x01\""));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "invalid control character");
+
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("{\"\x01\":1}"), "{\"\x01\":1}"));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "invalid control character");
+
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("\"\\x\""), "\"\\x\""));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "invalid escape character");
+
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("\"\\u00GG\""), "\"\\u00GG\""));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "invalid unicode escape");
+
+  return true;
+}
+
+SL_TEST(test_parse_error_number) {
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("-x"), "-x"));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "expected digit after -");
+
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("1.x"), "1.x"));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "expected digit after decimal point");
+
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("1ex"), "1ex"));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "expected digit or sign in exponent");
+
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("1e+x"), "1e+x"));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "expected digit in exponent");
+
+  return true;
+}
+
+SL_TEST(test_parse_error_after_value) {
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("1 2"), "1 2"));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected character");
+
+  return true;
+}
+
+SL_TEST(test_parse_error_end_of_input) {
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("{\"a\":"), "{\"a\":"));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected end of input");
+
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("{"), "{"));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected end of input");
+
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("["), "["));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected end of input");
+
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("\"abc"), "\"abc"));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected end of input");
+
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("-"), "-"));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected end of input");
+
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("1."), "1."));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected end of input");
+
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("{\"a\":1,"), "{\"a\":1,"));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected end of input");
+
+  SL_ASSERT_FALSE(sl_json_is_valid(ctx, strlen("[1,"), "[1,"));
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected end of input");
+
   return true;
 }
 
 SL_TEST(test_json_count_invalid) {
-  (void)ctx;
-  SL_ASSERT_EQ_LL(sl_json_count_nodes(strlen(""), ""), 0);
-  SL_ASSERT_EQ_LL(sl_json_count_nodes(strlen("hello"), "hello"), 0);
-  SL_ASSERT_EQ_LL(sl_json_count_nodes(strlen("{"), "{"), 0);
+  SL_ASSERT_EQ_LL(sl_json_count_nodes(ctx, strlen(""), ""), 0);
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected end of input");
+  SL_ASSERT_EQ_LL(sl_json_count_nodes(ctx, strlen("hello"), "hello"), 0);
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected character");
+  SL_ASSERT_EQ_LL(sl_json_count_nodes(ctx, strlen("{"), "{"), 0);
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected end of input");
   return true;
 }
 
 SL_TEST(test_json_count_scalars) {
-  (void)ctx;
-  SL_ASSERT_EQ_LL(sl_json_count_nodes(strlen("null"), "null"), 1);
-  SL_ASSERT_EQ_LL(sl_json_count_nodes(strlen("true"), "true"), 1);
-  SL_ASSERT_EQ_LL(sl_json_count_nodes(strlen("false"), "false"), 1);
-  SL_ASSERT_EQ_LL(sl_json_count_nodes(strlen("42"), "42"), 1);
-  SL_ASSERT_EQ_LL(sl_json_count_nodes(strlen("3.14"), "3.14"), 1);
-  SL_ASSERT_EQ_LL(sl_json_count_nodes(strlen("\"hello\""), "\"hello\""), 1);
+  SL_ASSERT_EQ_LL(sl_json_count_nodes(ctx, strlen("null"), "null"), 1);
+  SL_ASSERT_EQ_LL(sl_json_count_nodes(ctx, strlen("true"), "true"), 1);
+  SL_ASSERT_EQ_LL(sl_json_count_nodes(ctx, strlen("false"), "false"), 1);
+  SL_ASSERT_EQ_LL(sl_json_count_nodes(ctx, strlen("42"), "42"), 1);
+  SL_ASSERT_EQ_LL(sl_json_count_nodes(ctx, strlen("3.14"), "3.14"), 1);
+  SL_ASSERT_EQ_LL(sl_json_count_nodes(ctx, strlen("\"hello\""), "\"hello\""), 1);
   return true;
 }
 
 SL_TEST(test_json_count_containers) {
-  (void)ctx;
-  SL_ASSERT_EQ_LL(sl_json_count_nodes(strlen("{}"), "{}"), 1);
-  SL_ASSERT_EQ_LL(sl_json_count_nodes(strlen("[]"), "[]"), 1);
-  SL_ASSERT_EQ_LL(sl_json_count_nodes(strlen("{\"a\":1}"), "{\"a\":1}"), 2);
-  SL_ASSERT_EQ_LL(sl_json_count_nodes(strlen("[1,2,3]"), "[1,2,3]"), 4);
+  SL_ASSERT_EQ_LL(sl_json_count_nodes(ctx, strlen("{}"), "{}"), 1);
+  SL_ASSERT_EQ_LL(sl_json_count_nodes(ctx, strlen("[]"), "[]"), 1);
+  SL_ASSERT_EQ_LL(sl_json_count_nodes(ctx, strlen("{\"a\":1}"), "{\"a\":1}"), 2);
+  SL_ASSERT_EQ_LL(sl_json_count_nodes(ctx, strlen("[1,2,3]"), "[1,2,3]"), 4);
   SL_ASSERT_EQ_LL(
-      sl_json_count_nodes(strlen("{\"a\":{\"x\":1},\"d\":2}"), "{\"a\":{\"x\":1},\"d\":2}"),
+      sl_json_count_nodes(ctx, strlen("{\"a\":{\"x\":1},\"d\":2}"), "{\"a\":{\"x\":1},\"d\":2}"),
       4
   );
   return true;
@@ -281,27 +402,18 @@ SL_TEST(test_json_count_containers) {
 SL_TEST(test_find_invalid_path) {
   const char* json         = "{\"a\":1}";
   struct sl_json_node node = {0};
-  struct sl_error_msg err;
 
   SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(""), "", &node));
-  SL_ASSERT_EQ_LL(sl_error_depth(&ctx->errors), 1);
-  sl_error_pop(&ctx->errors, &err);
-  SL_ASSERT_EQ_STR(err.msg, "empty JSON path");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "empty JSON path");
 
   SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a..b"), ".a..b", &node));
-  SL_ASSERT_EQ_LL(sl_error_depth(&ctx->errors), 1);
-  sl_error_pop(&ctx->errors, &err);
-  SL_ASSERT_STR_STARTS_WITH(err.msg, "expected key character after .");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "expected key character after .");
 
   SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a[x]"), ".a[x]", &node));
-  SL_ASSERT_EQ_LL(sl_error_depth(&ctx->errors), 1);
-  sl_error_pop(&ctx->errors, &err);
-  SL_ASSERT_STR_STARTS_WITH(err.msg, "expected array index digit after '['");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "expected array index digit after '['");
 
   SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a[]"), ".a[]", &node));
-  SL_ASSERT_EQ_LL(sl_error_depth(&ctx->errors), 1);
-  sl_error_pop(&ctx->errors, &err);
-  SL_ASSERT_STR_STARTS_WITH(err.msg, "expected array index digit after '['");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "expected array index digit after '['");
 
   return true;
 }
@@ -309,12 +421,9 @@ SL_TEST(test_find_invalid_path) {
 SL_TEST(test_find_invalid_json) {
   const char* json         = "{\"a\":";
   struct sl_json_node node = {0};
-  struct sl_error_msg err;
 
   SL_ASSERT_FALSE(sl_json_find(ctx, strlen(json), json, strlen(".a"), ".a", &node));
-  SL_ASSERT_EQ_LL(sl_error_depth(&ctx->errors), 1);
-  sl_error_pop(&ctx->errors, &err);
-  SL_ASSERT_STR_STARTS_WITH(err.msg, "invalid JSON");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "unexpected end of input");
 
   return true;
 }
@@ -544,10 +653,7 @@ SL_TEST(test_find_str_buffer_too_small) {
   SL_ASSERT_TRUE(sl_json_find(ctx, strlen(json), json, strlen(".key"), ".key", &node));
   char val[3];
   SL_ASSERT_FALSE(sl_json_get_str(ctx, &node, json, sizeof(val), val));
-  struct sl_error_msg err;
-  SL_ASSERT_EQ_LL(sl_error_depth(&ctx->errors), 1);
-  sl_error_pop(&ctx->errors, &err);
-  SL_ASSERT_EQ_STR(err.msg, "output buffer too small");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "output buffer too small");
   return true;
 }
 
@@ -611,6 +717,19 @@ SL_TEST(test_parse_path_multiple_indices) {
   SL_ASSERT_JSON_PATH_IDX(steps[0], 0);
   SL_ASSERT_JSON_PATH_IDX(steps[1], 1);
   SL_ASSERT_JSON_PATH_IDX(steps[2], 2);
+  return true;
+}
+
+SL_TEST(test_parse_path_multiple_large_indices) {
+  const char* path = "[0][100][2000][30000][400000]";
+  struct sl_json_path_step steps[64];
+  size_t n = sl_json_parse_path(ctx, strlen(path), path, sizeof(steps), steps);
+  SL_ASSERT_EQ_LL(n, 5);
+  SL_ASSERT_JSON_PATH_IDX(steps[0], 0);
+  SL_ASSERT_JSON_PATH_IDX(steps[1], 100);
+  SL_ASSERT_JSON_PATH_IDX(steps[2], 2000);
+  SL_ASSERT_JSON_PATH_IDX(steps[3], 30000);
+  SL_ASSERT_JSON_PATH_IDX(steps[4], 400000);
   return true;
 }
 
@@ -681,22 +800,15 @@ SL_TEST(test_parse_path_error_bare_key) {
   const char* path = "foo";
   struct sl_json_path_step steps[64];
   SL_ASSERT_EQ_LL(sl_json_parse_path(ctx, strlen(path), path, sizeof(steps), steps), 0);
-  SL_ASSERT_TRUE(sl_context_error_occurred(ctx));
-  while (sl_context_error_occurred(ctx)) {
-    struct sl_error_msg e;
-    sl_error_pop(&ctx->errors, &e);
-  }
+  SL_ASSERT_ERROR_OCCURRED(ctx, "expected . or [");
   return true;
 }
 
 SL_TEST(test_parse_path_error_dot_only) {
   const char* path = ".";
-  struct sl_error_msg err;
   struct sl_json_path_step steps[64];
   SL_ASSERT_EQ_LL(sl_json_parse_path(ctx, strlen(path), path, sizeof(steps), steps), 0);
-  SL_ASSERT_EQ_LL(sl_error_depth(&ctx->errors), 1);
-  sl_error_pop(&ctx->errors, &err);
-  SL_ASSERT_STR_STARTS_WITH(err.msg, "expected key character after .");
+  SL_ASSERT_ERROR_OCCURRED(ctx, "expected key character after .");
   return true;
 }
 
@@ -704,10 +816,7 @@ SL_TEST(test_parse_path_error_double_dot) {
   const char* path = ".a..b";
   struct sl_json_path_step steps[64];
   SL_ASSERT_EQ_LL(sl_json_parse_path(ctx, strlen(path), path, sizeof(steps), steps), 0);
-  while (sl_context_error_occurred(ctx)) {
-    struct sl_error_msg e;
-    sl_error_pop(&ctx->errors, &e);
-  }
+  SL_ASSERT_ERROR_OCCURRED(ctx, "expected key character after .");
   return true;
 }
 
@@ -715,10 +824,7 @@ SL_TEST(test_parse_path_error_non_digit_in_brackets) {
   const char* path = "[x]";
   struct sl_json_path_step steps[64];
   SL_ASSERT_EQ_LL(sl_json_parse_path(ctx, strlen(path), path, sizeof(steps), steps), 0);
-  while (sl_context_error_occurred(ctx)) {
-    struct sl_error_msg e;
-    sl_error_pop(&ctx->errors, &e);
-  }
+  SL_ASSERT_ERROR_OCCURRED(ctx, "expected array index digit after '['");
   return true;
 }
 
@@ -726,10 +832,7 @@ SL_TEST(test_parse_path_error_empty_brackets) {
   const char* path = "[]";
   struct sl_json_path_step steps[64];
   SL_ASSERT_EQ_LL(sl_json_parse_path(ctx, strlen(path), path, sizeof(steps), steps), 0);
-  while (sl_context_error_occurred(ctx)) {
-    struct sl_error_msg e;
-    sl_error_pop(&ctx->errors, &e);
-  }
+  SL_ASSERT_ERROR_OCCURRED(ctx, "expected array index digit after '['");
   return true;
 }
 
@@ -737,10 +840,7 @@ SL_TEST(test_parse_path_error_leading_zero_in_index) {
   const char* path = "[01]";
   struct sl_json_path_step steps[64];
   SL_ASSERT_EQ_LL(sl_json_parse_path(ctx, strlen(path), path, sizeof(steps), steps), 0);
-  while (sl_context_error_occurred(ctx)) {
-    struct sl_error_msg e;
-    sl_error_pop(&ctx->errors, &e);
-  }
+  SL_ASSERT_ERROR_OCCURRED(ctx, "expected ] but got");
   return true;
 }
 
@@ -748,10 +848,7 @@ SL_TEST(test_parse_path_error_unclosed_bracket) {
   const char* path = ".a[1";
   struct sl_json_path_step steps[64];
   SL_ASSERT_EQ_LL(sl_json_parse_path(ctx, strlen(path), path, sizeof(steps), steps), 0);
-  while (sl_context_error_occurred(ctx)) {
-    struct sl_error_msg e;
-    sl_error_pop(&ctx->errors, &e);
-  }
+  SL_ASSERT_ERROR_OCCURRED(ctx, "expected ] but got");
   return true;
 }
 

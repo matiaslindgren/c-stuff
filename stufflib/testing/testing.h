@@ -206,6 +206,15 @@ static inline int sl_testing_run(struct sl_context ctx[static const 1]) {
 #define SL_ASSERT_EQ_PTR(lhs, rhs, ...) SL_ASSERT_BINOP(==, (lhs), (rhs), __VA_ARGS__)
 #define SL_ASSERT_EQ_DOUBLE(...)        SL_ASSERT_DOUBLE_ALMOST(__VA_ARGS__)
 
+#define SL_ASSERT_ERROR_OCCURRED(ctx, prefix, ...)                                   \
+  do {                                                                               \
+    struct sl_context* sl_assert_err_ctx = (ctx);                                    \
+    struct sl_error_msg sl_assert_err_msg;                                           \
+    SL_ASSERT_EQ_LL(sl_error_depth(&(sl_assert_err_ctx->errors)), 1 __VA_OPT__(, ) __VA_ARGS__); \
+    sl_error_pop(&(sl_assert_err_ctx->errors), &sl_assert_err_msg);                              \
+    SL_ASSERT_STR_STARTS_WITH(sl_assert_err_msg.msg, (prefix) __VA_OPT__(, ) __VA_ARGS__);       \
+  } while (false)
+
 #define SL_TEST(name)                                                         \
   static bool name(struct sl_context ctx[const static 1]);                    \
   __attribute__((constructor)) static void sl_testing_register_##name(void) { \
