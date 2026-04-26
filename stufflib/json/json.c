@@ -787,7 +787,7 @@ bool sl_json_find_path(
 not_found:
   *node = (struct sl_json_node){0};
   if (p.state == sl_json_error && !sl_context_error_occurred(ctx)) {
-    SL_ERROR(ctx, "invalid JSON");
+    SL_ERROR(ctx, "unknown JSON parse error");
   }
   return false;
 }
