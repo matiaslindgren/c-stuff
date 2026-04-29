@@ -115,6 +115,8 @@ struct sl_png_header
 sl_png_parse_header(struct sl_context ctx[static 1], struct sl_png_chunk chunk);
 uint32_t sl_png_chunk_compute_crc32(struct sl_png_chunk chunk[const static 1]);
 bool sl_png_has_signature(const unsigned char buf[const static 8]);
+struct sl_png_chunks
+sl_png_read_n_chunks_fp(struct sl_context ctx[static 1], FILE fp[const static 1], size_t count);
 struct sl_png_chunks sl_png_read_n_chunks(
     struct sl_context ctx[static 1],
     const char filename[const static 1],
@@ -134,6 +136,7 @@ void sl_png_unpack_and_pad_image_data(
 );
 enum sl_png_filter_type sl_png_parse_filter_type(unsigned filter);
 bool sl_png_unapply_filter(struct sl_context ctx[static 1], struct sl_png_image image[static 1]);
+struct sl_png_image sl_png_read_image_fp(struct sl_context ctx[static 1], FILE fp[const static 1]);
 struct sl_png_image
 sl_png_read_image(struct sl_context ctx[static 1], const char filename[const static 1]);
 bool sl_png_chunk_fwrite_header(

@@ -9,6 +9,7 @@ help:
 	@echo ""
 	@echo "Main targets:"
 	@echo "  all                    build all tools and tests"
+	@echo "  fuzzers                build fuzz tests"
 	@echo "  check                  run unit and integration tests"
 	@echo "  clean                  remove build artifacts"
 	@echo "  help                   print this (default)"
@@ -18,15 +19,16 @@ help:
 	@echo "  objects                build objects, partial compile commands, and dep files"
 	@echo "  test                   run only unit tests"
 	@echo "  integration_test       run only integration tests"
+	@echo "  fuzz                   run only fuzz tests"
 	@echo "  fmt                    format source files with clang-format"
 	@echo "  tidy                   lint with clang-tidy"
 	@echo "  printvars              print all make variables"
 	@echo "  macro-expand-%         run preprocessor on % and print result"
 	@echo ""
 	@echo "Variables:"
-	@echo "  OPTIMIZE=O0|O1|O2|O3                     (default: O2)"
-	@echo "  SANITIZE=none|address|undefined|memory   (default: none)"
-	@echo "  LOG_LEVEL_DEFAULT=none|error|info|trace  (default: error)"
+	@echo "  OPTIMIZE=O0|O1|O2|O3                         (default: O2)"
+	@echo "  SANITIZE=none|address|undefined|memory|fuzz  (default: none)"
+	@echo "  LOG_LEVEL_DEFAULT=none|error|info|trace      (default: error)"
 
 # disable builtin suffix rules: we use custom explicit pattern rules
 .SUFFIXES:
@@ -124,8 +126,12 @@ else ifeq ($(SANITIZE),undefined)
 else ifeq ($(SANITIZE),memory)
 	CFLAGS  += -fsanitize=memory
 	LDFLAGS += -fsanitize=memory
+else ifeq ($(SANITIZE),fuzz)
+	# -Wcast-qual warns when casting fuzzer input `const uint8_t*`
+	CFLAGS  += -fsanitize=fuzzer,address -Wno-cast-qual
+	LDFLAGS += -fsanitize=fuzzer,address
 else
-	$(error Unknown SANITIZE: $(SANITIZE). Use none, address, undefined, or memory)
+	$(error Unknown SANITIZE: $(SANITIZE). Use none, address, undefined, memory, or fuzz)
 endif
 
 
@@ -144,6 +150,8 @@ else
 endif
 
 
+FUZZER_TIMEOUT_SEC ?= 60
+
 # functions to find files in given list of dirs
 find_headers = $(foreach dir,$1,$(wildcard $(dir)/*.h))
 find_sources = $(foreach dir,$1,$(wildcard $(dir)/*.c))
@@ -153,7 +161,7 @@ MODULE_DIRS    := $(wildcard $(MODULE_DIR)/*)
 MODULE_HEADERS := $(patsubst ./%,%,$(call find_headers,$(MODULE_DIRS)))
 MODULE_SOURCES := $(patsubst ./%,%,$(call find_sources,$(MODULE_DIRS)))
 
-PROGRAM_DIRS    := tools tests
+PROGRAM_DIRS    := tools tests tests/fuzz
 PROGRAM_SOURCES := $(call find_sources,$(PROGRAM_DIRS))
 
 ALL_READABLE_FILES := $(MODULE_HEADERS) $(MODULE_SOURCES) $(PROGRAM_SOURCES)
@@ -164,6 +172,7 @@ PROGRAM_OBJECTS := $(patsubst %.c,$(BUILD_DIR)/%.o,$(PROGRAM_SOURCES))
 PROGRAM_PATHS   := $(patsubst %.o,%,$(PROGRAM_OBJECTS))
 
 TEST_PATHS := $(filter $(BUILD_DIR)/tests/test_%,$(PROGRAM_PATHS))
+FUZZ_PATHS := $(filter $(BUILD_DIR)/tests/fuzz/fuzz_%,$(PROGRAM_PATHS))
 TOOL_PATHS := $(filter $(BUILD_DIR)/tools/%,$(PROGRAM_PATHS))
 
 STUFFLIB     := $(BUILD_DIR)/libstufflib.a
@@ -175,7 +184,10 @@ COMPILE_COMMANDS_DIR := $(BUILD_DIR)/compile_commands
 
 
 .PHONY: all
-all: $(PROGRAM_PATHS)
+all: $(TEST_PATHS) $(TOOL_PATHS)
+
+.PHONY: fuzzers
+fuzzers: $(FUZZ_PATHS)
 
 .PHONY: clean
 clean:
@@ -216,6 +228,14 @@ test: $(RUN_TESTS)
 $(RUN_TESTS): run_%: $(BUILD_DIR)/tests/%
 	@export SL_TEMP_DIR=$(call make_tmp_dir); \
 		trap "rm -rf $$SL_TEMP_DIR" EXIT SIGINT; $<
+
+RUN_FUZZERS := $(addprefix run_,$(notdir $(FUZZ_PATHS)))
+.PHONY: fuzz
+fuzz: $(RUN_FUZZERS)
+
+.PHONY: $(RUN_FUZZERS)
+$(RUN_FUZZERS): run_%: ./tests/fuzz/%.bash $(BUILD_DIR)/tests/fuzz/%
+	env FUZZER_TIMEOUT_SEC=$(FUZZER_TIMEOUT_SEC) $^
 
 TIMEOUT_CMD := $(shell which timeout)
 ifeq ($(TIMEOUT_CMD),)

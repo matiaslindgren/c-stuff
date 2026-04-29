@@ -285,22 +285,12 @@ bool sl_png_has_signature(const unsigned char buf[const static 8]) {
          && buf[5] == 0x0a && buf[6] == 0x1a && buf[7] == 0x0a;
 }
 
-struct sl_png_chunks sl_png_read_n_chunks(
-    struct sl_context ctx[static 1],
-    const char filename[const static 1],
-    size_t count
-) {
+struct sl_png_chunks
+sl_png_read_n_chunks_fp(struct sl_context ctx[static 1], FILE fp[const static 1], size_t count) {
   bool is_done = false;
 
-  FILE* fp                    = nullptr;
   size_t read_count           = 0;
   struct sl_png_chunk* chunks = nullptr;
-
-  fp = fopen(filename, "r");
-  if (!fp) {
-    SL_ERROR(ctx, "cannot open %s", filename);
-    goto done;
-  }
 
   // check for 8 byte file header containing 'PNG' in ascii
   {
@@ -338,14 +328,26 @@ struct sl_png_chunks sl_png_read_n_chunks(
   is_done = true;
 
 done:
-  if (fp) {
-    fclose(fp);
-  }
   if (!is_done) {
     sl_free(chunks);
     return (struct sl_png_chunks){0};
   }
   return (struct sl_png_chunks){.count = read_count, .chunks = chunks};
+}
+
+struct sl_png_chunks sl_png_read_n_chunks(
+    struct sl_context ctx[static 1],
+    const char filename[const static 1],
+    size_t count
+) {
+  FILE* fp = fopen(filename, "r");
+  if (!fp) {
+    SL_ERROR(ctx, "cannot open %s", filename);
+    return (struct sl_png_chunks){0};
+  }
+  struct sl_png_chunks result = sl_png_read_n_chunks_fp(ctx, fp, count);
+  fclose(fp);
+  return result;
 }
 
 struct sl_png_chunks
@@ -508,12 +510,11 @@ bool sl_png_unapply_filter(struct sl_context ctx[static 1], struct sl_png_image 
   return true;
 }
 
-struct sl_png_image
-sl_png_read_image(struct sl_context ctx[static 1], const char filename[const static 1]) {
+struct sl_png_image sl_png_read_image_fp(struct sl_context ctx[static 1], FILE fp[const static 1]) {
   struct sl_png_image image = {0};
   struct sl_span idat       = {0};
 
-  struct sl_png_chunks chunks = sl_png_read_chunks(ctx, filename);
+  struct sl_png_chunks chunks = sl_png_read_n_chunks_fp(ctx, fp, SIZE_MAX);
   if (!chunks.count) {
     goto error;
   }
@@ -522,15 +523,13 @@ sl_png_read_image(struct sl_context ctx[static 1], const char filename[const sta
   if (!sl_png_is_supported(image.header)) {
     SL_ERROR(
         ctx,
-        ("unsupported PNG features in %s\n"
+        ("unsupported PNG features\n"
          "  image must be:\n"
          "    8-bit/color\n"
          "    RGB/A\n"
          "    non-interlaced\n"
          "    compression=0\n"
-         "    filter=0\n"
-         "  instead, header is:\n"),
-        filename
+         "    filter=0\n")
     );
     goto error;
   }
@@ -568,6 +567,18 @@ error:
   sl_span_destroy(&idat);
   sl_png_image_destroy(image);
   return (struct sl_png_image){0};
+}
+
+struct sl_png_image
+sl_png_read_image(struct sl_context ctx[static 1], const char filename[const static 1]) {
+  FILE* fp = fopen(filename, "r");
+  if (!fp) {
+    SL_ERROR(ctx, "cannot open %s", filename);
+    return (struct sl_png_image){0};
+  }
+  struct sl_png_image image = sl_png_read_image_fp(ctx, fp);
+  fclose(fp);
+  return image;
 }
 
 bool sl_png_chunk_fwrite_header(
