@@ -7,7 +7,7 @@ trap 'echo error:$? line:$LINENO cmd:$BASH_COMMAND' ERR
 
 
 self_dir=$(dirname "$0")
-source ${self_dir}/common.bash $@
+source ${self_dir}/../common.bash $@
 
 # TODO use ephemeral ports
 listen_port=8080

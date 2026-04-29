@@ -7,7 +7,7 @@ trap 'echo error:$? line:$LINENO cmd:$BASH_COMMAND' ERR
 
 
 self_dir=$(dirname "$0")
-source ${self_dir}/common.bash $@
+source ${self_dir}/../common.bash $@
 txt_dir=${root_dir}/test-data/txt
 
 txt_tool="$1"
