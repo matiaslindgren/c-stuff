@@ -5,6 +5,8 @@
 #include <stufflib/context/context.h>
 #include <stufflib/png/png.h>
 
+#pragma GCC diagnostic ignored "-Wcast-qual"
+
 int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   FILE* fp = fmemopen((void*)data, size, "r");
   if (!fp) {

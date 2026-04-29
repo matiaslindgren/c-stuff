@@ -127,8 +127,7 @@ else ifeq ($(SANITIZE),memory)
 	CFLAGS  += -fsanitize=memory
 	LDFLAGS += -fsanitize=memory
 else ifeq ($(SANITIZE),fuzz)
-	# -Wcast-qual warns when casting fuzzer input `const uint8_t*`
-	CFLAGS  += -fsanitize=fuzzer,address -Wno-cast-qual
+	CFLAGS  += -fsanitize=fuzzer,address
 	LDFLAGS += -fsanitize=fuzzer,address
 else
 	$(error Unknown SANITIZE: $(SANITIZE). Use none, address, undefined, memory, or fuzz)
