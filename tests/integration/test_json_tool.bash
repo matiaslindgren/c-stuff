@@ -14,11 +14,11 @@ json_tool="$1"
 valid_json_paths=$(find ${root_dir}/test-data/{png,json/valid} -name '*.json' -type f)
 invalid_json_paths=$(find ${root_dir}/test-data/json/invalid -name '*.json' -type f)
 
-if [[ $(printf '%s' $valid_json_paths | wc --words) -eq 0 ]]; then
+if [[ $(printf '%s' $valid_json_paths | wc -w) -eq 0 ]]; then
   printf 'did not find any valid json paths\n'
   exit 1
 fi
-if [[ $(printf '%s' $invalid_json_paths | wc --words) -eq 0 ]]; then
+if [[ $(printf '%s' $invalid_json_paths | wc -w) -eq 0 ]]; then
   printf 'did not find any invalid json paths\n'
   exit 1
 fi
