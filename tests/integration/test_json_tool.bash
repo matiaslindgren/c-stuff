@@ -11,8 +11,20 @@ source ${self_dir}/common.bash $@
 
 json_tool="$1"
 
+valid_json_paths=$(find ${root_dir}/test-data/{png,json/valid} -name '*.json' -type f)
+invalid_json_paths=$(find ${root_dir}/test-data/json/invalid -name '*.json' -type f)
+
+if [[ $(printf '%s' $valid_json_paths | wc --words) -eq 0 ]]; then
+  printf 'did not find any valid json paths\n'
+  exit 1
+fi
+if [[ $(printf '%s' $invalid_json_paths | wc --words) -eq 0 ]]; then
+  printf 'did not find any invalid json paths\n'
+  exit 1
+fi
+
 # test valid json files
-for json_file in $(find ${root_dir}/test-data/json/valid -name '*.json' -type f); do
+for json_file in $valid_json_paths; do
   if ! $json_tool check $json_file; then
     printf "'%s' failed to parse valid json file '%s'\n" $json_tool $json_file
     exit 1
@@ -20,7 +32,7 @@ for json_file in $(find ${root_dir}/test-data/json/valid -name '*.json' -type f)
 done
 
 # test invalid json files
-for json_file in $(find ${root_dir}/test-data/json/invalid -name '*.json' -type f); do
+for json_file in $invalid_json_paths; do
   if $json_tool check $json_file 2> /dev/null; then
     printf "'%s' failed to reject invalid json file '%s'\n" $json_tool $json_file
     exit 1
@@ -28,7 +40,7 @@ for json_file in $(find ${root_dir}/test-data/json/invalid -name '*.json' -type 
 done
 
 # count-nodes returns > 0 for valid files
-for json_file in $(find ${root_dir}/test-data/json/valid -name '*.json' -type f); do
+for json_file in $valid_json_paths; do
   count=$($json_tool count-nodes $json_file)
   if [[ "$count" -le 0 ]]; then
     printf "'%s' count-nodes returned %s for valid file '%s'\n" $json_tool "$count" $json_file
@@ -37,7 +49,7 @@ for json_file in $(find ${root_dir}/test-data/json/valid -name '*.json' -type f)
 done
 
 # count-nodes returns 0 for invalid files
-for json_file in $(find ${root_dir}/test-data/json/invalid -name '*.json' -type f); do
+for json_file in $invalid_json_paths; do
   count=$($json_tool count-nodes $json_file 2>/dev/null || true)
   if [[ "$count" != "0" && -n "$count" ]]; then
     printf "'%s' count-nodes returned %s for invalid file '%s'\n" $json_tool "$count" $json_file
